@@ -1,0 +1,28 @@
+version: '3'
+
+tasks:
+  clean-pyc: python scripts/clean_pyc.py
+
+  clean:
+    - task: clean-pyc
+    - python scripts/clean_build.py
+
+  test:
+    - cls
+    - pytest -v __tests 
+
+
+  dist: 
+    - task: clean ## builds source and wheel package
+    - python setup.py sdist
+    - python setup.py bdist_wheel
+
+  rel: 
+    - task: dist ## package and upload a release
+    - twine upload dist/* 
+
+  dev-ins: python setup.py develop
+
+  install: 
+    - task: clean ## install the package to the active Python's site-packages
+    - python setup.py install
