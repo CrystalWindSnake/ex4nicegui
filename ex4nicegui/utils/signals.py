@@ -1,6 +1,18 @@
-from signe import createSignal, effect, computed
+from signe import createSignal, effect, computed, on as signe_on
+from signe.core.signal import Signal, SignalOption
+from signe import utils as signe_utils
 from signe.types import TSetter, TGetter
-from typing import TypeVar, Generic, overload, Optional, Callable, cast, Union
+from typing import (
+    Any,
+    TypeVar,
+    Generic,
+    overload,
+    Optional,
+    Callable,
+    cast,
+    Union,
+    Sequence,
+)
 from nicegui import ui
 
 T = TypeVar("T")
@@ -14,11 +26,17 @@ class ReadonlyRef(Generic[T]):
     def value(self):
         return self.___getter()
 
+    # def __repr__(self) -> str:
+    #     return str(self.value)
+
 
 class Ref(ReadonlyRef[T]):
-    def __init__(self, getter: TGetter[T], setter: TSetter[T]) -> None:
+    def __init__(
+        self, getter: TGetter[T], setter: TSetter[T], signal: Optional[Signal] = None
+    ) -> None:
         super().__init__(getter)
         self.___setter = setter
+        self.___signal = signal
 
     @property
     def value(self):
@@ -27,6 +45,16 @@ class Ref(ReadonlyRef[T]):
     @value.setter
     def value(self, value: T):
         self.___setter(value)
+
+
+class DescReadonlyRef(ReadonlyRef[T]):
+    def __init__(self, getter: Callable[[], T], desc="") -> None:
+        super().__init__(getter)
+        self.__desc = desc
+
+    @property
+    def desc(self):
+        return self.__desc
 
 
 @overload
@@ -46,11 +74,18 @@ def ref_from_signal(getter: TGetter[T], setter: Optional[TSetter[T]] = None):
     return cast(Ref[T], Ref(getter, setter))
 
 
-_TMaybeRef = Union[T, Ref[T]]
+_TMaybeRef = Union[T, Union[Ref[T], ReadonlyRef[T]]]
 
 
 def is_ref(maybe_ref: _TMaybeRef):
     return isinstance(maybe_ref, ReadonlyRef)
+
+
+def to_value(maybe_ref: _TMaybeRef[T]) -> T:
+    if is_ref(maybe_ref):
+        return cast(ReadonlyRef, maybe_ref).value
+
+    return cast(T, maybe_ref)
 
 
 def to_ref(maybe_ref: _TMaybeRef[T]):
@@ -61,30 +96,95 @@ def to_ref(maybe_ref: _TMaybeRef[T]):
 
 
 def ref(value: T):
-    comp = False if isinstance(value, (list, dict)) else None
-    getter, setter = createSignal(value, comp)
-    return cast(Ref[T], Ref(getter, setter))
+    comp = (
+        False
+        if not isinstance(
+            value,
+            (
+                str,
+                int,
+                float,
+            ),
+        )
+        else None
+    )
+    # getter, setter = createSignal(value, comp)
+
+    s = Signal(signe_utils.exec, value, SignalOption(comp))
+
+    return cast(Ref[T], Ref(s.getValue, s.setValue, s))
 
 
-def ref_computed(fn: Callable[[], T]):
-    getter = computed(fn)
+def ref_computed(
+    fn: Callable[[], T],
+    desc="",
+    *,
+    debug_trigger: Optional[Callable[..., None]] = None,
+    priority_level: int = 1,
+) -> ReadonlyRef[T]:
+    getter = computed(fn, debug_trigger, priority_level)
+    return DescReadonlyRef(getter, desc)
 
-    return ReadonlyRef(getter)
+
+def ref_computed_with_opts(
+    desc="",
+    debug_trigger: Optional[Callable[..., None]] = None,
+    priority_level: int = 1,
+):
+    def wrap(fn: Callable[[], T]) -> ReadonlyRef[T]:
+        return ref_computed(
+            fn, desc, debug_trigger=debug_trigger, priority_level=priority_level
+        )
+
+    return wrap
 
 
-def effect_refreshable(func):
-    re_func = ui.refreshable(func)
+class effect_refreshable:
+    def __init__(
+        self, fn: Callable, refs: Union[ReadonlyRef, Sequence[ReadonlyRef]] = []
+    ) -> None:
+        self._fn = fn
+        self._refs = refs if isinstance(refs, Sequence) else [refs]
+        self()
 
-    first = True
+    @staticmethod
+    def on(refs: Union[ReadonlyRef, Sequence[ReadonlyRef]]):
+        def warp(
+            fn: Callable,
+        ):
+            return effect_refreshable(fn, refs)
 
-    @effect
-    def runner():
-        nonlocal first
-        if first:
-            re_func()
-            first = False
-            return
+        return warp
 
-        re_func.refresh()
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        re_func = ui.refreshable(self._fn)
 
-    return runner
+        first = True
+
+        def runner():
+            nonlocal first
+            if first:
+                re_func()
+                first = False
+                return
+
+            re_func.refresh()
+
+        if len(self._refs) == 0:
+            runner = effect(runner)
+        else:
+            runner = on(self._refs)(runner)
+
+        return runner
+
+
+def on(refs: Union[ReadonlyRef, Sequence[ReadonlyRef]]):
+    if not isinstance(refs, Sequence):
+        refs = [refs]
+
+    getters = [getattr(r, "_ReadonlyRef___getter") for r in refs]
+
+    def wrap(fn: Callable):
+        return signe_on(getters, fn)
+
+    return wrap

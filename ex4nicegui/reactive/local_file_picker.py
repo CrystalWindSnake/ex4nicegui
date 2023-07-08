@@ -5,7 +5,7 @@ from nicegui import ui, Tailwind
 from pathlib import Path
 
 from signe.types import TGetter
-from ex4nicegui.utils.signals import effect_refreshable, ReadonlyRef
+from ex4nicegui.utils.signals import Ref, effect_refreshable, ReadonlyRef
 
 
 SelectMode = Literal["dir", "file"]
@@ -18,6 +18,13 @@ class LocalFilePickerResult(ReadonlyRef[str]):
 
     def open(self):
         self.__open_fn()
+
+    def bind_ref(self, ref: Ref[str]):
+        @effect
+        def _():
+            ref.value = self.value
+
+        return self
 
 
 def local_file_picker(

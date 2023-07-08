@@ -1,11 +1,12 @@
 from typing import Any, Callable, Optional
 from dataclasses import dataclass
+from nicegui import ui
 from nicegui.helpers import KWONLY_SLOTS
 from nicegui.events import handle_event, EventArguments
 from nicegui.dependencies import register_component
 from nicegui.element import Element
-from signe import createSignal, effect
-
+from signe import createSignal, effect, batch
+from ex4nicegui.utils.signals import ref_from_signal
 
 register_component("UseDraggable", __file__, "UseDraggable.js")
 
@@ -23,29 +24,32 @@ class UseDraggableUpdateEventArguments(EventArguments):
     style: str
 
 
-def use_draggable(element: Element, auto_bind_style=True):
-    ud = UseDraggable(element)
+def use_draggable(element: Element, init_x=0.0, init_y=0.0, auto_bind_style=True):
+    ud = UseDraggable(element, init_x, init_y)
     if auto_bind_style:
-        element.style(replace="position:fixed")
+        element.style(add=f"position:fixed;left:{init_x}px;top:{init_y}px")
         ud.bind_style(element)
 
     return ud
 
 
 class UseDraggable(Element):
-    def __init__(self, element: Element) -> None:
+    def __init__(self, element: Element, init_x=0.0, init_y=0.0) -> None:
         super().__init__("UseDraggable")
         self._props["elementId"] = str(element.id)
+        self._props["options"] = {"initialValue": {"x": init_x, "y": init_y}}
 
         self.__style_getter, self.__style_setter = createSignal("")
-        self.__x_getter, self.__x_setter = createSignal(0.0)
-        self.__y_getter, self.__y_setter = createSignal(0.0)
+        self.__x_getter, self.__x_setter = createSignal(init_x)
+        self.__y_getter, self.__y_setter = createSignal(init_y)
         self.__isDragging_getter, self.__isDragging_setter = createSignal(False)
 
         def update(args: UseDraggableUpdateEventArguments):
-            self.__style_setter(args.style)
-            self.__x_setter(args.x)
-            self.__y_setter(args.y)
+            @batch
+            def _():
+                self.__style_setter(args.style)
+                self.__x_setter(args.x)
+                self.__y_setter(args.y)
 
         self.on_update(update)
 
@@ -57,19 +61,19 @@ class UseDraggable(Element):
 
     @property
     def x(self):
-        return self.__x_getter()
+        return ref_from_signal(self.__x_getter)
 
     @property
     def y(self):
-        return self.__y_getter()
+        return ref_from_signal(self.__y_getter)
 
     @property
     def style(self):
-        return self.__style_getter()
+        return ref_from_signal(self.__style_getter)
 
     @property
     def is_dragging(self):
-        return self.__isDragging_getter()
+        return ref_from_signal(self.__isDragging_getter)
 
     def bind_style(self, element: Element):
         @effect
