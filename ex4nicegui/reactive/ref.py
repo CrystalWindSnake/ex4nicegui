@@ -34,6 +34,7 @@ from nicegui.elements.mixins.color_elements import (
     TAILWIND_COLORS,
 )
 from nicegui.page_layout import Drawer
+from ex4nicegui.reactive.echarts.ECharts import echarts
 
 T = TypeVar("T")
 
@@ -171,6 +172,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         value_kws = _convert_kws_ref2value(kws)
 
         element = ui.select(**value_kws)
+        element.classes("min-w-[10rem]")
 
         super().__init__(value, element)
 
@@ -773,6 +775,29 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         return self
 
 
+class ColorPickerLazyBindableUi(ColorPickerBindableUi):
+    def __init__(
+        self,
+        color: TMaybeRef[str] = "",
+        *,
+        on_pick: Callable[..., Any] | None = None,
+        value: TMaybeRef[bool] = False,
+    ) -> None:
+        super().__init__(color, on_pick=on_pick, value=value)
+
+    def _ex_setup(self):
+        ele = self._element_picker
+
+        # @effect
+        # def _():
+        #     ele._props["modelValue"] = self.value
+
+        def onModelValueChanged(args):
+            self._ref.value = args["args"]  # type: ignore
+
+        ele.on("change", handler=onModelValueChanged)
+
+
 _TAggridValue = Dict
 
 
@@ -850,9 +875,33 @@ class TableBindableUi(BindableUi[ui.table]):
                 self.bind_prop(key, value)  # type: ignore
 
     @staticmethod
-    def from_pandas(df):
+    def from_pandas(df: TMaybeRef):
+        if is_ref(df):
+
+            @ref_computed
+            def cp_convert_df():
+                return utils_common.convert_dataframe(df.value)
+
+            @ref_computed
+            def cp_rows():
+                return cp_convert_df.value.to_dict("records")
+
+            @ref_computed
+            def cp_cols():
+                return [
+                    {
+                        "name": col,
+                        "label": col,
+                        "field": col,
+                    }
+                    for col in cp_convert_df.value.columns
+                ]
+
+            return TableBindableUi(cp_cols, cp_rows)
+
         df = utils_common.convert_dataframe(df)
         rows = df.to_dict("records")
+
         cols = [
             {
                 "name": col,
@@ -922,6 +971,133 @@ class TableBindableUi(BindableUi[ui.table]):
 class DrawerBindableUi(SingleValueBindableUi[bool, Drawer]):
     def __init__(self, value: bool, element: Drawer) -> None:
         super().__init__(value, element)
+
+    def __enter__(self):
+        self.element.__enter__()
+        return self
+
+    def __exit__(self, *_: Any):
+        self.element.__exit__(*_)
+
+
+class EChartsBindableUi(BindableUi[echarts]):
+    def __init__(
+        self,
+        options: TMaybeRef[Dict],
+    ) -> None:
+        kws = {
+            "options": options,
+        }
+
+        value_kws = _convert_kws_ref2value(kws)
+
+        element = echarts(**value_kws)
+
+        super().__init__(element)
+
+        for key, value in kws.items():
+            if is_ref(value):
+                self.bind_prop(key, value)  # type: ignore
+
+    @staticmethod
+    def _pyecharts2opts(chart):
+        import simplejson as json
+        from pyecharts.charts.chart import Base
+
+        if isinstance(chart, Base):
+            return json.loads(chart.dump_options())
+
+        return {}
+
+    @staticmethod
+    def from_pyecharts(chart: TMaybeRef):
+        if is_ref(chart):
+
+            @ref_computed
+            def chart_opt():
+                return EChartsBindableUi._pyecharts2opts(chart.value)
+
+            return EChartsBindableUi(chart_opt)
+
+        return EChartsBindableUi(EChartsBindableUi._pyecharts2opts(chart))
+
+    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+        if prop == "options":
+            return self.bind_options(ref_ui)
+
+        return super().bind_prop(prop, ref_ui)
+
+    def bind_options(self, ref_ui: ReadonlyRef[Dict]):
+        @effect
+        def _():
+            ele = self.element
+            ele.update_options(ref_ui.value)
+            ele.update()
+
+        return self
+
+
+class RowBindableUi(BindableUi[ui.row]):
+    def __init__(
+        self,
+    ) -> None:
+        element = ui.row()
+
+        super().__init__(element)
+
+    def __enter__(self):
+        self.element.__enter__()
+        return self
+
+    def __exit__(self, *_: Any):
+        self.element.__exit__(*_)
+
+
+class CardBindableUi(BindableUi[ui.card]):
+    def __init__(
+        self,
+    ) -> None:
+        element = ui.card()
+
+        super().__init__(element)
+
+    def __enter__(self):
+        self.element.__enter__()
+        return self
+
+    def __exit__(self, *_: Any):
+        self.element.__exit__(*_)
+
+    def tight(self):
+        """Removes padding and gaps between nested elements."""
+        self.element._classes.clear()
+        self.element._style.clear()
+        return self
+
+
+class CardSectionBindableUi(BindableUi[ui.card_section]):
+    def __init__(
+        self,
+    ) -> None:
+        element = ui.card_section()
+
+        super().__init__(element)
+
+    def __enter__(self):
+        self.element.__enter__()
+        return self
+
+    def __exit__(self, *_: Any):
+        self.element.__exit__(*_)
+
+
+class CardActionsBindableUi(BindableUi[ui.card_actions]):
+    def __init__(
+        self,
+    ) -> None:
+        element = ui.card_actions()
+
+        super().__init__(element)
 
     def __enter__(self):
         self.element.__enter__()

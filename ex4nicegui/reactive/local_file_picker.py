@@ -49,7 +49,7 @@ def local_file_picker(
     例子:
         ```python
 
-        fp = local_file_picker(dir=r"E:\dataset", ext=[".xlsx"])
+        fp = local_file_picker(dir=r"D://dataset", ext=[".xlsx"])
         fp.open()
 
         # 获取结果

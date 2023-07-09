@@ -1,8 +1,21 @@
 #!/usr/bin/env python
 """The setup script."""
 
+from pathlib import Path
 from setuptools import setup, find_packages
 import ex4nicegui
+
+
+def get_data_files(base):
+    base = Path(base)
+
+    all_js_files = base.rglob("*.js")
+
+    all_infos = ({"dir": js.parent.name, "js": str(js)} for js in all_js_files)
+
+    all_infos = ((info["dir"], [info["js"]]) for info in all_infos)
+
+    return list(all_infos)
 
 
 with open("README.md", encoding="utf8") as readme_file:
@@ -36,20 +49,27 @@ setup(
     keywords=["nicegui", "ex4nicegui", "webui"],
     name="ex4nicegui",
     packages=find_packages(include=["ex4nicegui", "ex4nicegui.*"]),
-    data_files=[
-        (
-            "echarts",
-            [
-                "ex4nicegui/reactive/echarts/ECharts.js",
-            ],
-        ),
-        (
-            "draggable",
-            [
-                "ex4nicegui/reactive/draggable/UseDraggable.js",
-            ],
-        ),
-    ],
+    data_files=get_data_files("ex4nicegui/reactive"),
+    # data_files=[
+    #     (
+    #         "echarts",
+    #         [
+    #             "ex4nicegui/reactive/echarts/ECharts.js",
+    #         ],
+    #     ),
+    #     (
+    #         "draggable",
+    #         [
+    #             "ex4nicegui/reactive/draggable/UseDraggable.js",
+    #         ],
+    #     ),
+    #     (
+    #         "useMouse",
+    #         [
+    #             "ex4nicegui/reactive/useMouse/UseMouse.js",
+    #         ],
+    #     ),
+    # ],
     test_suite="__tests",
     tests_require=test_requirements,
     url="",

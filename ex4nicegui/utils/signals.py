@@ -123,7 +123,7 @@ def ref_computed(
     priority_level: int = 1,
 ) -> ReadonlyRef[T]:
     getter = computed(fn, debug_trigger, priority_level)
-    return DescReadonlyRef(getter, desc)
+    return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
 
 
 def ref_computed_with_opts(

@@ -4,7 +4,7 @@ from nicegui.helpers import KWONLY_SLOTS
 from nicegui.events import handle_event, EventArguments
 from nicegui.dependencies import register_component
 from nicegui.element import Element
-from pathlib import Path
+
 
 register_component("ECharts", __file__, "ECharts.js")
 
