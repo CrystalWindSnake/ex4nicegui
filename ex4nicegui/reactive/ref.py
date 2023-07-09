@@ -150,7 +150,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
 
     def __init__(
         self,
-        options: TMaybeRef[Union[List, Dict]],
+        options: Union[TMaybeRef[List], TMaybeRef[Dict]],
         *,
         label: TMaybeRef[Optional[str]] = None,
         value: TMaybeRef[Any] = None,
@@ -221,7 +221,7 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
 
     def __init__(
         self,
-        options: TMaybeRef[Union[List, Dict]],
+        options: Union[TMaybeRef[List], TMaybeRef[Dict]],
         *,
         value: TMaybeRef[Any] = None,
         on_change: Optional[Callable[..., Any]] = None,
