@@ -145,7 +145,6 @@ def ref_computed(
     priority_level: int = 1,
 ) -> Union[ReadonlyRef[T], Callable[[Callable[..., T]], ReadonlyRef[T]]]:
     kws = {
-        "desc": desc,
         "debug_trigger": debug_trigger,
         "priority_level": priority_level,
     }

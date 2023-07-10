@@ -1,7 +1,8 @@
 from typing_extensions import Literal
 from nicegui import ui
-from ex4nicegui.reactive.ref import DrawerBindableUi
+from ex4nicegui.reactive.officials import DrawerBindableUi
 from signe import effect
+from typing import Union, Optional
 
 _TDrawerSide = Literal["left", "right"]
 
@@ -10,7 +11,7 @@ def drawer(
     side: _TDrawerSide = "left",
     overlay=False,
     *,
-    value: bool | None = None,
+    value: Optional[bool] = None,
     fixed: bool = False,
     bordered: bool = True,
     elevated: bool = False,

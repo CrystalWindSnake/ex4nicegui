@@ -1,10 +1,6 @@
-from .official import (
-    # color_picker,
-    aggrid,
-)
-
-from .ref import (
+from .officials import (
     TableBindableUi as table,
+    AggridBindableUi as aggrid,
     RadioBindableUi as radio,
     SelectBindableUi as select,
     SwitchBindableUi as switch,

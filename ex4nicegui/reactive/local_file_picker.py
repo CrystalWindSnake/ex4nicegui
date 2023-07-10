@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, cast,List
 from typing_extensions import Literal
 from signe import createSignal, effect, computed
 from nicegui import ui, Tailwind
@@ -31,7 +31,7 @@ def local_file_picker(
     title: Optional[str] = None,
     dir: Optional[str] = None,
     mode: SelectMode = "file",
-    ext: Optional[list[str]] = None,
+    ext: Optional[List[str]] = None,
 ):
     """本地文件目录选择框
 
@@ -39,7 +39,7 @@ def local_file_picker(
         title (Optional[str], optional): 标题. Defaults to None.
         dir (Optional[str], optional): 起始目录,默认为当前目录. Defaults to None.
         mode (SelectMode, optional): 选择文件或选择目录，'file' | 'dir'. Defaults to "file".
-        ext (Optional[list[str]], optional): 当 `mode` 为 'file' 时,保留指定的文件后缀.例如: ```ext=['.xlsx','.csv']```. Defaults to None.
+        ext (Optional[List[str]], optional): 当 `mode` 为 'file' 时,保留指定的文件后缀.例如: ```ext=['.xlsx','.csv']```. Defaults to None.
 
     Returns:
         _type_: open,result
