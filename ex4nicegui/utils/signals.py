@@ -115,28 +115,50 @@ def ref(value: T):
     return cast(Ref[T], Ref(s.getValue, s.setValue, s))
 
 
+@overload
 def ref_computed(
     fn: Callable[[], T],
-    desc="",
     *,
+    desc="",
     debug_trigger: Optional[Callable[..., None]] = None,
     priority_level: int = 1,
 ) -> ReadonlyRef[T]:
-    getter = computed(fn, debug_trigger, priority_level)
-    return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
+    ...
 
 
-def ref_computed_with_opts(
+@overload
+def ref_computed(
+    fn=None,
+    *,
     desc="",
     debug_trigger: Optional[Callable[..., None]] = None,
     priority_level: int = 1,
-):
-    def wrap(fn: Callable[[], T]) -> ReadonlyRef[T]:
-        return ref_computed(
-            fn, desc, debug_trigger=debug_trigger, priority_level=priority_level
-        )
+) -> Callable[[Callable[..., T]], ReadonlyRef[T]]:
+    ...
 
-    return wrap
+
+def ref_computed(
+    fn: Optional[Callable[[], T]] = None,
+    *,
+    desc="",
+    debug_trigger: Optional[Callable[..., None]] = None,
+    priority_level: int = 1,
+) -> Union[ReadonlyRef[T], Callable[[Callable[..., T]], ReadonlyRef[T]]]:
+    kws = {
+        "desc": desc,
+        "debug_trigger": debug_trigger,
+        "priority_level": priority_level,
+    }
+
+    if fn:
+        getter = computed(fn, **kws)
+        return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
+    else:
+
+        def wrap(fn: Callable[[], T]):
+            return ref_computed(fn, **kws)
+
+        return wrap
 
 
 class effect_refreshable:

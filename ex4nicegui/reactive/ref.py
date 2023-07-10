@@ -604,6 +604,7 @@ class LabelBindableUi(SingleValueBindableUi[str, ui.label]):
         @effect
         def _():
             self.element.on_text_change(str(ref_ui.value))
+            # self.element.update()
 
         return self
 

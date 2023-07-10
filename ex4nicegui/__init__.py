@@ -1,7 +1,6 @@
 from ex4nicegui.reactive.__index import *
 from ex4nicegui.utils.signals import (
     ref_computed,
-    ref_computed_with_opts,
     effect,
     effect_refreshable,
     ref_from_signal,

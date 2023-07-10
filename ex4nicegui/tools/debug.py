@@ -1,13 +1,6 @@
 from signe.core.effect import Effect
-from signe.core.signal import Signal
-from ex4nicegui import ref_computed, to_ref, effect
 import ex4nicegui.reactive as rxui
-from ex4nicegui.utils.signals import (
-    ReadonlyRef,
-    DescReadonlyRef,
-    Ref,
-    ref_computed_with_opts,
-)
+from ex4nicegui.utils.signals import ReadonlyRef, DescReadonlyRef, Ref, ref_computed
 from nicegui import ui
 from typing import Callable, Dict, TypeVar, Generic
 
@@ -46,7 +39,7 @@ def display_ref_vars_ui(vars_dict: Dict):
         if isinstance(value, DescReadonlyRef)
     }
 
-    @ref_computed_with_opts(priority_level=9999)
+    @ref_computed(priority_level=9999)
     def cp_rows():
         rows = []
 
