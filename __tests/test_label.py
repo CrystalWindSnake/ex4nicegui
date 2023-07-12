@@ -1,56 +1,93 @@
 import pytest
 from ex4nicegui.reactive import rxui
+from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import Screen
+from .screen import TestPage
 
 
-def test_const_str(screen: Screen):
-    rxui.label("test label")
+class PathCounnter:
+    def __init__(self) -> None:
+        self.__num = 0
 
-    screen.open("/")
-    screen.should_contain("test label")
+    def get_path(self):
+        self.__num += 1
+        return f"/{self.__num}"
 
 
-def test_ref_str(screen: Screen):
+path_counter = PathCounnter()
+
+
+def test_const_str(page: TestPage):
+    path = path_counter.get_path()
+
+    @ui.page(path)
+    def _():
+        rxui.label("test label")
+
+    page.open(path)
+    page.should_contain("test label")
+
+
+def test_ref_str(page: TestPage):
+    path = path_counter.get_path()
+
     r_str = to_ref("test label")
-    rxui.label(r_str)
 
-    screen.open("/")
-    screen.should_contain("test label")
+    @ui.page(path)
+    def _():
+        rxui.label(r_str)
+
+    page.open(path)
+    page.should_contain("test label")
 
 
-def test_ref_str_change_value(screen: Screen):
+def test_ref_str_change_value(page: TestPage):
+    path = path_counter.get_path()
+
     r_str = to_ref("old")
-    rxui.label(r_str)
 
-    screen.open("/")
-    screen.should_contain("old")
+    @ui.page(path)
+    def _():
+        rxui.label(r_str)
 
-    screen.wait()
+    page.open(path)
+    page.should_contain("old")
+
+    page.wait()
     r_str.value = "new"
 
-    screen.wait()
-    screen.should_contain("new")
+    page.wait()
+    page.should_contain("new")
 
 
-def test_bind_color(screen: Screen):
+def test_bind_color(page: TestPage):
+    path = path_counter.get_path()
+
     r_color = to_ref("red")
-    rxui.label("label").bind_color(r_color)
 
-    screen.open("/")
+    @ui.page(path)
+    def _():
+        rxui.label("label").bind_color(r_color)
 
-    assert screen.get_ele("label").evaluate("node=> node.style.color=='red'")
+    page.open(path)
+
+    assert page.get_ele("label").evaluate("node=> node.style.color=='red'")
 
 
-def test_bind_color_changed(screen: Screen):
+def test_bind_color_changed(page: TestPage):
+    path = path_counter.get_path()
+
     r_color = to_ref("red")
-    rxui.label("label").bind_color(r_color)
 
-    screen.open("/")
+    @ui.page(path)
+    def _():
+        rxui.label("label").bind_color(r_color)
 
-    assert screen.get_ele("label").evaluate("node=> node.style.color=='red'")
+    page.open(path)
 
-    screen.wait()
+    assert page.get_ele("label").evaluate("node=> node.style.color=='red'")
+
+    page.wait()
     r_color.value = "green"
-    screen.wait()
-    assert screen.get_ele("label").evaluate("node=> node.style.color=='green'")
+    page.wait()
+    assert page.get_ele("label").evaluate("node=> node.style.color=='green'")

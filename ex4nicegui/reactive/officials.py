@@ -13,7 +13,6 @@ from typing import (
     overload,
 )
 from typing_extensions import Literal, Self
-from nicegui.elements.input import Input
 from signe import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -44,6 +43,30 @@ TWidget = TypeVar("TWidget")
 class BindableUi(Generic[TWidget]):
     def __init__(self, element: TWidget) -> None:
         self.__element = element
+
+    def props(self, add: Optional[str] = None, *, remove: Optional[str] = None):
+        cast(ui.element, self.element).props(add, remove=remove)
+        return self
+
+    def classes(
+        self,
+        add: Optional[str] = None,
+        *,
+        remove: Optional[str] = None,
+        replace: Optional[str] = None,
+    ):
+        cast(ui.element, self.element).classes(add, remove=remove, replace=replace)
+        return self
+
+    def style(
+        self,
+        add: Optional[str] = None,
+        *,
+        remove: Optional[str] = None,
+        replace: Optional[str] = None,
+    ):
+        cast(ui.element, self.element).style(add, remove=remove, replace=replace)
+        return self
 
     @property
     def element(self):

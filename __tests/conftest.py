@@ -1,11 +1,10 @@
 import importlib
-from typing import Generator
 import pytest
 import logging
-from playwright.sync_api import Page
-from .screen import Screen
+from playwright.sync_api import Browser, Playwright
+from .screen import Screen, TestPage
 from nicegui import Client, globals
-from nicegui.page import page
+from nicegui.page import page as ui_page
 
 
 @pytest.fixture(autouse=True)
@@ -22,16 +21,24 @@ def reset_globals():
     ]
     importlib.reload(globals)
     globals.app.storage.clear()
-    globals.index_client = Client(page("/"), shared=True).__enter__()
+    globals.index_client = Client(ui_page("/"), shared=True).__enter__()
     globals.app.get("/")(globals.index_client.build_response)
 
 
-@pytest.fixture
-def screen(page: Page):
-    print("beforeEach")
-
-    screen = Screen(page)
+@pytest.fixture(scope="module")
+def screen(playwright: Playwright):
+    browser = playwright.chromium.launch(headless=False)
+    screen = Screen(browser)
 
     yield screen
 
     screen.stop_server()
+
+
+@pytest.fixture(scope="function")
+def page(screen: Screen):
+    test_page = screen.new_page()
+
+    yield test_page
+
+    test_page.close()
