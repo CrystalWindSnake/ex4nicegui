@@ -5,52 +5,34 @@ from ex4nicegui import to_ref
 from .screen import TestPage
 
 
-class PathCounnter:
-    def __init__(self) -> None:
-        self.__num = 0
-
-    def get_path(self):
-        self.__num += 1
-        return f"/{self.__num}"
-
-
-path_counter = PathCounnter()
-
-
-def test_const_str(page: TestPage):
-    path = path_counter.get_path()
-
-    @ui.page(path)
+def test_const_str(page: TestPage, page_path: str):
+    @ui.page(page_path)
     def _():
         rxui.label("test label")
 
-    page.open(path)
+    page.open(page_path)
     page.should_contain("test label")
 
 
-def test_ref_str(page: TestPage):
-    path = path_counter.get_path()
-
+def test_ref_str(page: TestPage, page_path: str):
     r_str = to_ref("test label")
 
-    @ui.page(path)
+    @ui.page(page_path)
     def _():
         rxui.label(r_str)
 
-    page.open(path)
+    page.open(page_path)
     page.should_contain("test label")
 
 
-def test_ref_str_change_value(page: TestPage):
-    path = path_counter.get_path()
-
+def test_ref_str_change_value(page: TestPage, page_path: str):
     r_str = to_ref("old")
 
-    @ui.page(path)
+    @ui.page(page_path)
     def _():
         rxui.label(r_str)
 
-    page.open(path)
+    page.open(page_path)
     page.should_contain("old")
 
     page.wait()
@@ -60,30 +42,26 @@ def test_ref_str_change_value(page: TestPage):
     page.should_contain("new")
 
 
-def test_bind_color(page: TestPage):
-    path = path_counter.get_path()
-
+def test_bind_color(page: TestPage, page_path: str):
     r_color = to_ref("red")
 
-    @ui.page(path)
+    @ui.page(page_path)
     def _():
         rxui.label("label").bind_color(r_color)
 
-    page.open(path)
+    page.open(page_path)
 
     assert page.get_ele("label").evaluate("node=> node.style.color=='red'")
 
 
-def test_bind_color_changed(page: TestPage):
-    path = path_counter.get_path()
-
+def test_bind_color_changed(page: TestPage, page_path: str):
     r_color = to_ref("red")
 
-    @ui.page(path)
+    @ui.page(page_path)
     def _():
         rxui.label("label").bind_color(r_color)
 
-    page.open(path)
+    page.open(page_path)
 
     assert page.get_ele("label").evaluate("node=> node.style.color=='red'")
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 
 from typing import (
     Any,
@@ -67,6 +68,15 @@ class BindableUi(Generic[TWidget]):
     ):
         cast(ui.element, self.element).style(add, remove=remove, replace=replace)
         return self
+
+    def add_slot(self, name: str, template: Optional[str] = None):
+        """Add a slot to the element.
+
+        :param name: name of the slot
+        :param template: Vue template of the slot
+        :return: the slot
+        """
+        return cast(ui.element, self.element).add_slot(name, template)
 
     @property
     def element(self):
@@ -175,7 +185,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         self,
         options: Union[TMaybeRef[List], TMaybeRef[Dict]],
         *,
-        label: TMaybeRef[Optional[str]] = None,
+        label: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[Any] = None,
         on_change: Optional[Callable[..., Any]] = None,
         with_input: TMaybeRef[bool] = False,
@@ -389,14 +399,14 @@ class CheckboxBindableUi(SingleValueBindableUi[bool, ui.checkbox]):
 class InputBindableUi(SingleValueBindableUi[str, ui.input]):
     def __init__(
         self,
-        label: TMaybeRef[Optional[str]] = None,
+        label: Optional[TMaybeRef[str]] = None,
         *,
-        placeholder: TMaybeRef[Optional[str]] = None,
+        placeholder: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[str] = "",
         password: TMaybeRef[bool] = False,
         password_toggle_button: TMaybeRef[bool] = False,
         on_change: Optional[Callable[..., Any]] = None,
-        autocomplete: TMaybeRef[Optional[List[str]]] = None,
+        autocomplete: Optional[TMaybeRef[List[str]]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
         kws = {
@@ -430,7 +440,7 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input]):
             ele.value = self.value
 
         def onModelValueChanged(args):
-            self._ref.value = args["args"]  # type: ignore
+            self._ref.value = args["args"] or ""  # type: ignore
 
         ele.on("update:modelValue", handler=onModelValueChanged)
 
@@ -451,14 +461,14 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input]):
 class LazyInputBindableUi(InputBindableUi):
     def __init__(
         self,
-        label: TMaybeRef[Optional[str]] = None,
+        label: Optional[TMaybeRef[str]] = None,
         *,
-        placeholder: TMaybeRef[Optional[str]] = None,
+        placeholder: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[str] = "",
         password: TMaybeRef[bool] = False,
         password_toggle_button: TMaybeRef[bool] = False,
         on_change: Optional[Callable[..., Any]] = None,
-        autocomplete: TMaybeRef[Optional[List[str]]] = None,
+        autocomplete: Optional[TMaybeRef[List[str]]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
         super().__init__(
@@ -480,18 +490,100 @@ class LazyInputBindableUi(InputBindableUi):
             ele.value = self.value
 
         def onValueChanged():
-            self._ref.value = ele.value
+            self._ref.value = ele.value or ""
 
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)
 
 
+_TSliderValue = TypeVar("_TSliderValue", float, int)
+
+
+class SliderBindableUi(SingleValueBindableUi[Optional[_TSliderValue], ui.slider]):
+    def __init__(
+        self,
+        min: TMaybeRef[_TSliderValue],
+        max: TMaybeRef[_TSliderValue],
+        step: TMaybeRef[_TSliderValue] = 1.0,
+        value: Optional[TMaybeRef[_TSliderValue]] = None,
+        on_change: Optional[Callable[..., Any]] = None,
+    ) -> None:
+        kws = {
+            "min": min,
+            "max": max,
+            "step": step,
+            "value": value,
+            "on_change": on_change,
+        }
+
+        value_kws = _convert_kws_ref2value(kws)
+
+        element = ui.slider(**value_kws).props("label label-always switch-label-side")
+
+        super().__init__(value, element)  # type: ignore
+
+        for key, value in kws.items():
+            if is_ref(value) and key != "value":
+                self.bind_prop(key, value)  # type: ignore
+
+        self._ex_setup()
+
+    def _ex_setup(self):
+        ele = self.element
+
+        @effect
+        def _():
+            ele.value = self.value
+
+        def onModelValueChanged(args):
+            self._ref.value = args["args"]  # type: ignore
+
+        ele.on("update:modelValue", handler=onModelValueChanged)
+
+    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+        if prop == "value":
+            return self.bind_value(ref_ui)
+
+        return super().bind_prop(prop, ref_ui)
+
+    def bind_value(self, ref_ui: ReadonlyRef[float]):
+        @effect
+        def _():
+            self.element.on_value_change(ref_ui.value)
+
+        return self
+
+
+class LazySliderBindableUi(SliderBindableUi):
+    def __init__(
+        self,
+        min: TMaybeRef[float],
+        max: TMaybeRef[float],
+        step: TMaybeRef[float] = 1,
+        value: TMaybeRef[float | None] = None,
+        on_change: Callable[..., Any] | None = None,
+    ) -> None:
+        super().__init__(min, max, step, value, on_change)
+
+    def _ex_setup(self):
+        ele = self.element
+
+        @effect
+        def _():
+            ele.value = self.value
+
+        def onValueChanged():
+            self._ref.value = ele.value
+
+        ele.on("change ", onValueChanged)
+
+
 class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
     def __init__(
         self,
-        label: TMaybeRef[Optional[str]] = None,
+        label: Optional[TMaybeRef[str]] = None,
         *,
-        placeholder: TMaybeRef[Optional[str]] = None,
+        placeholder: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[str] = "",
         on_change: Optional[Callable[..., Any]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
@@ -545,9 +637,9 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
 class LazyTextareaBindableUi(TextareaBindableUi):
     def __init__(
         self,
-        label: TMaybeRef[Optional[str]] = None,
+        label: Optional[TMaybeRef[str]] = None,
         *,
-        placeholder: TMaybeRef[Optional[str]] = None,
+        placeholder: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[str] = "",
         on_change: Optional[Callable[..., Any]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
@@ -637,8 +729,8 @@ class IconBindableUi(SingleValueBindableUi[str, ui.icon]):
         self,
         name: TMaybeRef[str],
         *,
-        size: TMaybeRef[Optional[str]] = None,
-        color: TMaybeRef[Optional[str]] = None,
+        size: Optional[TMaybeRef[str]] = None,
+        color: Optional[TMaybeRef[str]] = None,
     ) -> None:
         kws = {
             "name": name,
@@ -684,8 +776,8 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button]):
         text: TMaybeRef[str] = "",
         *,
         on_click: Optional[Callable[..., Any]] = None,
-        color: TMaybeRef[Optional[str]] = "primary",
-        icon: TMaybeRef[Optional[str]] = None,
+        color: Optional[TMaybeRef[str]] = "primary",
+        icon: Optional[TMaybeRef[str]] = None,
     ) -> None:
         kws = {
             "text": text,
@@ -897,9 +989,9 @@ class TableBindableUi(BindableUi[ui.table]):
         columns: TMaybeRef[List[Dict]],
         rows: TMaybeRef[List[Dict]],
         row_key: TMaybeRef[str] = "id",
-        title: TMaybeRef[Optional[str]] = None,
-        selection: TMaybeRef[Optional[Literal["single", "multiple"]]] = None,
-        pagination: TMaybeRef[Optional[int]] = 15,
+        title: Optional[TMaybeRef[str]] = None,
+        selection: Optional[TMaybeRef[Literal["single", "multiple"]]] = None,
+        pagination: Optional[TMaybeRef[int]] = 15,
         on_select: Optional[Callable[..., Any]] = None,
     ) -> None:
         kws = {
@@ -1153,3 +1245,59 @@ class CardActionsBindableUi(BindableUi[ui.card_actions]):
 
     def __exit__(self, *_: Any):
         self.element.__exit__(*_)
+
+
+class HtmlBindableUi(SingleValueBindableUi[str, ui.html]):
+    @staticmethod
+    def _setup_(binder: "HtmlBindableUi"):
+        first = True
+
+        @effect
+        def _():
+            nonlocal first
+
+            async def task():
+                pass
+                await ui.run_javascript(
+                    f"getElement({binder.element.id}).innerText= '{binder.value}' ",
+                    respond=False,
+                )
+
+            if not first:
+                asyncio.run(task())
+            else:
+                first = False
+
+    def __init__(
+        self,
+        content: TMaybeRef[str] = "",
+    ) -> None:
+        kws = {
+            "content": content,
+        }
+
+        value_kws = _convert_kws_ref2value(kws)
+
+        element = ui.html(**value_kws)
+
+        super().__init__(content, element)
+
+        for key, value in kws.items():
+            if is_ref(value):
+                self.bind_prop(key, value)  # type: ignore
+
+        HtmlBindableUi._setup_(self)
+
+    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+        if prop == "color":
+            return self.bind_color(ref_ui)
+
+        return super().bind_prop(prop, ref_ui)
+
+    def bind_color(self, ref_ui: ReadonlyRef):
+        @effect
+        def _():
+            ele = self.element
+            color = ref_ui.value
+            ele._style["color"] = color
+            ele.update()

@@ -46,14 +46,26 @@ class TestPage:
     def should_contain(self, text: str) -> None:
         expect(self.__page.get_by_text(text)).to_be_visible()
 
+    def should_contain_text(self, testid: str, text: str) -> None:
+        assert self.__page.get_by_test_id(testid).evaluate("node=>node.value") == text
+
     def click(self, text: str) -> None:
         self.__page.get_by_text(text).click()
+
+    def fill(self, test_id: str, type_str: str):
+        self.__page.get_by_test_id(test_id).fill(type_str)
+
+    def enter(self, test_id: str):
+        self.__page.get_by_test_id(test_id).press("Enter")
 
     def wait(self, timeout=500) -> None:
         self.__page.wait_for_timeout(timeout=timeout)
 
     def get_ele(self, text: str):
         return self.__page.get_by_text(text)
+
+    def get_by_testid(self, id: str):
+        return self.__page.get_by_test_id(id)
 
     def pause(self):
         self.__page.pause()

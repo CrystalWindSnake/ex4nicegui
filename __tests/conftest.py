@@ -8,7 +8,10 @@ from nicegui.page import page as ui_page
 
 
 @pytest.fixture(autouse=True)
-def reset_globals():
+def reset_globals(request: pytest.FixtureRequest):
+    if "noautofixt" in request.keywords:
+        return
+
     for path in {"/"}.union(globals.page_routes.values()):
         globals.app.remove_route(path)
     globals.app.middleware_stack = None
@@ -26,7 +29,9 @@ def reset_globals():
 
 
 @pytest.fixture(scope="module")
-def screen(playwright: Playwright):
+def screen(playwright: Playwright, request: pytest.FixtureRequest):
+    if "noautofixt" in request.keywords:
+        return
     browser = playwright.chromium.launch(headless=False)
     screen = Screen(browser)
 
@@ -36,9 +41,24 @@ def screen(playwright: Playwright):
 
 
 @pytest.fixture(scope="function")
-def page(screen: Screen):
+def page(screen: Screen, request: pytest.FixtureRequest):
+    if "noautofixt" in request.keywords:
+        return
     test_page = screen.new_page()
 
     yield test_page
 
     test_page.close()
+
+
+URL_COUNTER = 0
+
+
+@pytest.fixture
+def page_path(request: pytest.FixtureRequest):
+    if "noautofixt" in request.keywords:
+        return
+    global URL_COUNTER
+    URL_COUNTER += 1
+
+    return f"/{URL_COUNTER}"
