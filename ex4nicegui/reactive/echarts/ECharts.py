@@ -2,11 +2,8 @@ from typing import Any, Callable, Optional
 from dataclasses import dataclass
 from nicegui.helpers import KWONLY_SLOTS
 from nicegui.events import handle_event, EventArguments
-from nicegui.dependencies import register_component
 from nicegui.element import Element
 
-
-register_component("ECharts", __file__, "ECharts.js")
 
 _Chart_Click_Args = [
     "componentType",
@@ -36,7 +33,7 @@ class EChartsClickEventArguments(EventArguments):
     color: str
 
 
-class echarts(Element):
+class echarts(Element, component="ECharts.js"):
     def __init__(self, options: dict) -> None:
         super().__init__("ECharts")
         self._props["options"] = options
@@ -65,9 +62,8 @@ class echarts(Element):
     def on_chart_click(
         self, handler: Optional[Callable[[EChartsClickEventArguments], Any]]
     ):
-        def inner_handler(args: dict):
-            args = args["args"]
-            print(args)
+        def inner_handler(e):
+            args = e.args
             handle_event(
                 handler,
                 EChartsClickEventArguments(

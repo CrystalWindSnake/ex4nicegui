@@ -27,8 +27,8 @@ class QPagination(Element):
         self.__min = min
         self.__max = max
 
-        def onchange(arg):
-            arg_value = cast(int, arg["args"])
+        def onchange(e):
+            arg_value = cast(int, e.args)
 
             self._props["model-value"] = arg_value
             if isinstance(self.__value, Ref):

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, cast,List
+from typing import Any, Callable, Optional, cast, List
 from typing_extensions import Literal
 from signe import createSignal, effect, computed
 from nicegui import ui, Tailwind
@@ -155,8 +155,8 @@ def local_file_picker(
             grid.style("width:50vw")
             # grid.tailwind("w-96")
 
-            def dblClicked(msg):
-                path = cur_dir() / Path(msg["args"]["data"]["名称"])
+            def dblClicked(e):
+                path = cur_dir() / Path(e.args["data"]["名称"])
 
                 if path.is_dir():
                     set_cur_dir(path)
@@ -166,8 +166,8 @@ def local_file_picker(
                     set_result(str(path.absolute()))
                     dia.close()
 
-            def clicked(msg):
-                path = cur_dir() / Path(msg["args"]["data"]["名称"])
+            def clicked(e):
+                path = cur_dir() / Path(e.args["data"]["名称"])
 
                 if mode == "file" and path.is_dir():
                     return

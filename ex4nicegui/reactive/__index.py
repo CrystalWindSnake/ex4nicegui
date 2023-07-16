@@ -22,6 +22,9 @@ from .officials import (
     SliderBindableUi as slider,
     LazySliderBindableUi as lazy_slider,
     HtmlBindableUi as html,
+    ImageBindableUi as image,
+    UploadBindableUi as upload,
+    UploadResult,
 )
 from .q_pagination import QPagination as q_pagination
 from .local_file_picker import local_file_picker

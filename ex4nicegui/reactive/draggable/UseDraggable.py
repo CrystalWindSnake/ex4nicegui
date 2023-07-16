@@ -1,14 +1,10 @@
 from typing import Any, Callable, Optional
 from dataclasses import dataclass
-from nicegui import ui
 from nicegui.helpers import KWONLY_SLOTS
 from nicegui.events import handle_event, EventArguments
-from nicegui.dependencies import register_component
 from nicegui.element import Element
 from signe import createSignal, effect, batch
 from ex4nicegui.utils.signals import ref_from_signal
-
-register_component("UseDraggable", __file__, "UseDraggable.js")
 
 _Update_Args = [
     "x",
@@ -33,7 +29,7 @@ def use_draggable(element: Element, init_x=0.0, init_y=0.0, auto_bind_style=True
     return ud
 
 
-class UseDraggable(Element):
+class UseDraggable(Element, component="UseDraggable.js"):
     def __init__(self, element: Element, init_x=0.0, init_y=0.0) -> None:
         super().__init__("UseDraggable")
         self._props["elementId"] = str(element.id)
@@ -53,8 +49,8 @@ class UseDraggable(Element):
 
         self.on_update(update)
 
-        def on_isDraggingUpdate(args):
-            self.__isDragging_setter(args["args"]["isDragging"])
+        def on_isDraggingUpdate(e):
+            self.__isDragging_setter(e.args["isDragging"])
             # print(args['args']['isDragging'])
 
         self.on("isDraggingUpdate", on_isDraggingUpdate)
@@ -82,8 +78,8 @@ class UseDraggable(Element):
             element.update()
 
     def on_update(self, handler: Optional[Callable[..., Any]]):
-        def inner_handler(args: dict):
-            args = args["args"]
+        def inner_handler(e):
+            args = e.args
             handle_event(
                 handler,
                 UseDraggableUpdateEventArguments(

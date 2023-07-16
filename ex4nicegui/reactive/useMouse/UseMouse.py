@@ -2,12 +2,9 @@ from typing import Any, Callable, Optional
 from dataclasses import dataclass
 from nicegui.helpers import KWONLY_SLOTS
 from nicegui.events import handle_event, EventArguments
-from nicegui.dependencies import register_component
 from nicegui.element import Element
 from signe import createSignal, effect, batch
 
-
-register_component("UseMouse", __file__, "UseMouse.js")
 
 _Update_Args = [
     "x",
@@ -23,7 +20,7 @@ class UseMouseUpdateEventArguments(EventArguments):
     sourceType: str
 
 
-class UseMouse(Element):
+class UseMouse(Element, component="UseMouse.js"):
     def __init__(self, options: Optional[dict] = None) -> None:
         super().__init__("UseMouse")
 
@@ -56,8 +53,8 @@ class UseMouse(Element):
         return self.__sourceType_getter()
 
     def on_update(self, handler: Optional[Callable[..., Any]]):
-        def inner_handler(args: dict):
-            args = args["args"]
+        def inner_handler(e):
+            args = e.args
             handle_event(
                 handler,
                 UseMouseUpdateEventArguments(

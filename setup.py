@@ -21,7 +21,7 @@ def get_data_files(base):
 with open("README.md", encoding="utf8") as readme_file:
     readme = readme_file.read()
 
-requirements = ["signe>=0.1.8", "nicegui>=1.2.24", "typing_extensions"]
+requirements = ["signe>=0.1.8", "nicegui>=1.3.3", "typing_extensions"]
 
 test_requirements = ["pytest>=3"]
 
@@ -37,11 +37,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     description="...",
-    entry_points={
-        # 'console_scripts': [
-        #     'test_prj=test_prj.cli:main',
-        # ],
-    },
+    entry_points={},
     install_requires=requirements,
     license="MIT license",
     # long_description=readme,
@@ -50,26 +46,6 @@ setup(
     name="ex4nicegui",
     packages=find_packages(include=["ex4nicegui", "ex4nicegui.*"]),
     data_files=get_data_files("ex4nicegui/reactive"),
-    # data_files=[
-    #     (
-    #         "echarts",
-    #         [
-    #             "ex4nicegui/reactive/echarts/ECharts.js",
-    #         ],
-    #     ),
-    #     (
-    #         "draggable",
-    #         [
-    #             "ex4nicegui/reactive/draggable/UseDraggable.js",
-    #         ],
-    #     ),
-    #     (
-    #         "useMouse",
-    #         [
-    #             "ex4nicegui/reactive/useMouse/UseMouse.js",
-    #         ],
-    #     ),
-    # ],
     test_suite="__tests",
     tests_require=test_requirements,
     url="",

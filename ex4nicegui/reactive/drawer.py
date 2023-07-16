@@ -49,8 +49,8 @@ def drawer(
         value = "true" if r.value else "false"
         ele.props(f":model-value={value}")
 
-    def on_update(args):
-        r.value = args["args"]
+    def on_update(e):
+        r.value = e.args
 
     ele.on("update:modelValue", on_update)
 

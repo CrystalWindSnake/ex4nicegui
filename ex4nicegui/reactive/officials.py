@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+from pathlib import Path
 
 from typing import (
     Any,
@@ -11,9 +12,8 @@ from typing import (
     cast,
     Dict,
     Union,
-    overload,
 )
-from typing_extensions import Literal, Self
+from typing_extensions import Literal
 from signe import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -26,6 +26,7 @@ from ex4nicegui.utils.signals import (
 )
 import ex4nicegui.utils.common as utils_common
 from nicegui import ui
+from nicegui import events as ng_events
 from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.value_element import ValueElement
 from nicegui.elements.mixins.color_elements import (
@@ -172,8 +173,8 @@ def _convert_kws_ref2value(kws: Dict):
 class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
     @staticmethod
     def _setup_(binder: "SelectBindableUi"):
-        def onValueChanged(args):
-            binder._ref.value = args["args"]["label"]  # type: ignore
+        def onValueChanged(e):
+            binder._ref.value = e.args["label"]  # type: ignore
 
         @effect
         def _():
@@ -243,8 +244,8 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
 class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
     @staticmethod
     def _setup_(binder: "RadioBindableUi"):
-        def onValueChanged(args):
-            binder._ref.value = binder.element.options[args["args"]]  # type: ignore
+        def onValueChanged(e):
+            binder._ref.value = binder.element.options[e.args]  # type: ignore
 
         @effect
         def _():
@@ -301,8 +302,8 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
 class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
     @staticmethod
     def _setup_(binder: "SwitchBindableUi"):
-        def onValueChanged(args):
-            binder._ref.value = args["args"]  # type: ignore
+        def onValueChanged(e):
+            binder._ref.value = e.args  # type: ignore
 
         ele = cast(ValueElement, binder.element)
 
@@ -350,8 +351,8 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
 class CheckboxBindableUi(SingleValueBindableUi[bool, ui.checkbox]):
     @staticmethod
     def _setup_(binder: "CheckboxBindableUi"):
-        def onValueChanged(args):
-            binder._ref.value = args["args"]  # type: ignore
+        def onValueChanged(e):
+            binder._ref.value = e.args  # type: ignore
 
         ele = cast(ValueElement, binder.element)
 
@@ -439,8 +440,8 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input]):
         def _():
             ele.value = self.value
 
-        def onModelValueChanged(args):
-            self._ref.value = args["args"] or ""  # type: ignore
+        def onModelValueChanged(e):
+            self._ref.value = e.args or ""  # type: ignore
 
         ele.on("update:modelValue", handler=onModelValueChanged)
 
@@ -496,7 +497,7 @@ class LazyInputBindableUi(InputBindableUi):
         ele.on("keyup.enter", onValueChanged)
 
 
-_TSliderValue = TypeVar("_TSliderValue", float, int)
+_TSliderValue = TypeVar("_TSliderValue", float, int, None)
 
 
 class SliderBindableUi(SingleValueBindableUi[Optional[_TSliderValue], ui.slider]):
@@ -535,8 +536,8 @@ class SliderBindableUi(SingleValueBindableUi[Optional[_TSliderValue], ui.slider]
         def _():
             ele.value = self.value
 
-        def onModelValueChanged(args):
-            self._ref.value = args["args"]  # type: ignore
+        def onModelValueChanged(e):
+            self._ref.value = e.args  # type: ignore
 
         ele.on("update:modelValue", handler=onModelValueChanged)
 
@@ -557,10 +558,10 @@ class SliderBindableUi(SingleValueBindableUi[Optional[_TSliderValue], ui.slider]
 class LazySliderBindableUi(SliderBindableUi):
     def __init__(
         self,
-        min: TMaybeRef[float],
-        max: TMaybeRef[float],
-        step: TMaybeRef[float] = 1,
-        value: TMaybeRef[float | None] = None,
+        min: TMaybeRef[_TSliderValue],
+        max: TMaybeRef[_TSliderValue],
+        step: TMaybeRef[_TSliderValue] = 1,
+        value: TMaybeRef[_TSliderValue | None] = None,
         on_change: Callable[..., Any] | None = None,
     ) -> None:
         super().__init__(min, max, step, value, on_change)
@@ -615,8 +616,8 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
         def _():
             ele.value = self.value
 
-        def onModelValueChanged(args):
-            self._ref.value = args["args"]  # type: ignore
+        def onModelValueChanged(e):
+            self._ref.value = e.args  # type: ignore
 
         ele.on("update:modelValue", handler=onModelValueChanged)
 
@@ -669,8 +670,8 @@ class LazyTextareaBindableUi(TextareaBindableUi):
 class LabelBindableUi(SingleValueBindableUi[str, ui.label]):
     @staticmethod
     def _setup_(binder: "LabelBindableUi"):
-        def onValueChanged(args):
-            binder._ref.value = args["args"]["label"]  # type: ignore
+        def onValueChanged(e):
+            binder._ref.value = e.args["label"]  # type: ignore
 
         @effect
         def _():
@@ -865,8 +866,8 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         def _():
             ele._props["modelValue"] = self.value
 
-        def onModelValueChanged(args):
-            self._ref.value = args["args"]  # type: ignore
+        def onModelValueChanged(e):
+            self._ref.value = e.args  # type: ignore
 
         ele.on("update:modelValue", handler=onModelValueChanged)
 
@@ -908,8 +909,8 @@ class ColorPickerLazyBindableUi(ColorPickerBindableUi):
         # def _():
         #     ele._props["modelValue"] = self.value
 
-        def onModelValueChanged(args):
-            self._ref.value = args["args"]  # type: ignore
+        def onModelValueChanged(e):
+            self._ref.value = e.args  # type: ignore
 
         ele.on("change", handler=onModelValueChanged)
 
@@ -1301,3 +1302,107 @@ class HtmlBindableUi(SingleValueBindableUi[str, ui.html]):
             color = ref_ui.value
             ele._style["color"] = color
             ele.update()
+
+
+class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
+    @staticmethod
+    def _setup_(binder: "ImageBindableUi"):
+        @effect
+        def _():
+            binder.element.on_source_change(binder.value)
+
+    def __init__(
+        self,
+        source: Union[TMaybeRef[str], TMaybeRef[Path]] = "",
+    ) -> None:
+        kws = {
+            "source": source,
+        }
+
+        value_kws = _convert_kws_ref2value(kws)
+
+        element = ui.image(**value_kws)
+
+        super().__init__(source, element)  # type: ignore
+
+        for key, value in kws.items():
+            if is_ref(value):
+                self.bind_prop(key, value)  # type: ignore
+
+        # ImageBindableUi._setup_(self)
+
+    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+        if prop == "source":
+            return self.bind_source(ref_ui)
+
+        return super().bind_prop(prop, ref_ui)
+
+    def bind_source(self, ref_ui: ReadonlyRef[Union[str, Path]]):
+        @effect
+        def _():
+            ele = self.element
+            source = ref_ui.value
+            ele.on_source_change(source)
+
+
+class UploadResult:
+    def __init__(self, content: bytes = bytes()):
+        self.content = content
+
+    def get_bytes(self):
+        return self.content
+
+    @property
+    def ready(self):
+        return len(self.content) > 0
+
+
+class UploadBindableUi(SingleValueBindableUi[UploadResult, ui.upload]):
+    @staticmethod
+    def _setup_(binder: "UploadBindableUi"):
+        def on_upload(e: ng_events.UploadEventArguments):
+            binder._ref.value = UploadResult(e.content.read())
+
+        binder._on_upload_callbacks.append(on_upload)
+
+    def __init__(
+        self,
+        multiple: TMaybeRef[bool] = False,
+        max_file_size: Optional[TMaybeRef[int]] = None,
+        max_total_size: Optional[TMaybeRef[int]] = None,
+        max_files: Optional[TMaybeRef[int]] = None,
+        on_upload: Optional[Callable[..., Any]] = None,
+        on_rejected: Optional[Callable[..., Any]] = None,
+        label: TMaybeRef[str] = "",
+        auto_upload: TMaybeRef[bool] = False,
+    ) -> None:
+        kws = {
+            "multiple": multiple,
+            "max_file_size": max_file_size,
+            "max_total_size": max_total_size,
+            "max_files": max_files,
+            "on_rejected": on_rejected,
+            "label": label,
+            "auto_upload": auto_upload,
+        }
+
+        value_kws = _convert_kws_ref2value(kws)
+
+        self._on_upload_callbacks = []
+
+        def _on_upload(e: ng_events.UploadEventArguments):
+            for fn in self._on_upload_callbacks:
+                fn(e)
+
+        if on_upload:
+            self._on_upload_callbacks.append(on_upload)
+
+        element = ui.upload(**value_kws, on_upload=_on_upload)
+
+        super().__init__(UploadResult(), element)  # type: ignore
+
+        for key, value in kws.items():
+            if is_ref(value):
+                self.bind_prop(key, value)  # type: ignore
+
+        UploadBindableUi._setup_(self)
