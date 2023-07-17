@@ -1,10 +1,10 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, cast
 from dataclasses import dataclass
 from nicegui.helpers import KWONLY_SLOTS
 from nicegui.events import handle_event, EventArguments
 from nicegui.element import Element
 from signe import createSignal, effect, batch
-
+from ex4nicegui.utils.signals import ref_from_signal
 
 _Update_Args = [
     "x",
@@ -28,8 +28,13 @@ class UseMouse(Element, component="UseMouse.js"):
             self._props["options"] = options
 
         self.__x_getter, self.__x_setter = createSignal(0.0)
+        self.__x_readonly_ref = ref_from_signal(self.__x_getter)
+
         self.__y_getter, self.__y_setter = createSignal(0.0)
+        self.__y_readonly_ref = ref_from_signal(self.__y_getter)
+
         self.__sourceType_getter, self.__sourceType_setter = createSignal("sourceType")
+        self.__sourceType_readonly_ref = ref_from_signal(self.__sourceType_getter)
 
         def update(args: UseMouseUpdateEventArguments):
             @batch
@@ -42,15 +47,15 @@ class UseMouse(Element, component="UseMouse.js"):
 
     @property
     def x(self):
-        return self.__x_getter()
+        return self.__x_readonly_ref
 
     @property
     def y(self):
-        return self.__y_getter()
+        return self.__y_readonly_ref
 
     @property
     def sourceType(self):
-        return self.__sourceType_getter()
+        return self.__sourceType_readonly_ref
 
     def on_update(self, handler: Optional[Callable[..., Any]]):
         def inner_handler(e):
@@ -69,12 +74,12 @@ class UseMouse(Element, component="UseMouse.js"):
         self.on("update", inner_handler, args=_Update_Args)
 
 
-_Use_Mouse_Ins = UseMouse()
+_Use_Mouse_Ins = None
 
 
 def use_mouse(options: Optional[dict] = None):
     global _Use_Mouse_Ins
-    # if _Use_Mouse_Ins is None:
-    #     _Use_Mouse_Ins = UseMouse(options)
+    if _Use_Mouse_Ins is None:
+        _Use_Mouse_Ins = UseMouse(options)
 
-    return _Use_Mouse_Ins
+    return cast(UseMouse, _Use_Mouse_Ins)

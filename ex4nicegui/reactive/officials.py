@@ -576,7 +576,7 @@ class LazySliderBindableUi(SliderBindableUi):
         def onValueChanged():
             self._ref.value = ele.value
 
-        ele.on("change ", onValueChanged)
+        ele.on("change", onValueChanged)
 
 
 class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
@@ -1346,8 +1346,10 @@ class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
 
 
 class UploadResult:
-    def __init__(self, content: bytes = bytes()):
+    def __init__(self, content: bytes = bytes(), name="", type=""):
         self.content = content
+        self.name = name
+        self.type = type
 
     def get_bytes(self):
         return self.content
@@ -1361,7 +1363,7 @@ class UploadBindableUi(SingleValueBindableUi[UploadResult, ui.upload]):
     @staticmethod
     def _setup_(binder: "UploadBindableUi"):
         def on_upload(e: ng_events.UploadEventArguments):
-            binder._ref.value = UploadResult(e.content.read())
+            binder._ref.value = UploadResult(e.content.read(), e.name, e.type)
 
         binder._on_upload_callbacks.append(on_upload)
 
