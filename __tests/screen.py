@@ -31,44 +31,44 @@ class Screen:
         if self.server_thread is None:
             self.start_server()
 
-        return TestPage(self)
+        return ScreenPage(self)
 
 
-class TestPage:
+class ScreenPage:
     def __init__(self, screen: Screen) -> None:
         self.__screen = screen
-        self.__page = self.__screen.browser.new_page()
+        self._page = self.__screen.browser.new_page()
 
     def open(self, path: str):
-        self.__page.wait_for_selector("body", timeout=10000)
-        self.__page.goto(f"http://localhost:{PORT}{path}")
+        self._page.wait_for_selector("body", timeout=10000)
+        self._page.goto(f"http://localhost:{PORT}{path}")
 
     def should_contain(self, text: str) -> None:
-        expect(self.__page.get_by_text(text)).to_be_visible()
+        expect(self._page.get_by_text(text)).to_be_visible()
 
     def should_contain_text(self, testid: str, text: str) -> None:
-        assert self.__page.get_by_test_id(testid).evaluate("node=>node.value") == text
+        assert self._page.get_by_test_id(testid).evaluate("node=>node.value") == text
 
     def click(self, text: str) -> None:
-        self.__page.get_by_text(text).click()
+        self._page.get_by_text(text).click()
 
     def fill(self, test_id: str, type_str: str):
-        self.__page.get_by_test_id(test_id).fill(type_str)
+        self._page.get_by_test_id(test_id).fill(type_str)
 
     def enter(self, test_id: str):
-        self.__page.get_by_test_id(test_id).press("Enter")
+        self._page.get_by_test_id(test_id).press("Enter")
 
     def wait(self, timeout=500) -> None:
-        self.__page.wait_for_timeout(timeout=timeout)
+        self._page.wait_for_timeout(timeout=timeout)
 
     def get_ele(self, text: str):
-        return self.__page.get_by_text(text)
+        return self._page.get_by_text(text)
 
     def get_by_testid(self, id: str):
-        return self.__page.get_by_test_id(id)
+        return self._page.get_by_test_id(id)
 
     def pause(self):
-        self.__page.pause()
+        self._page.pause()
 
     def close(self):
-        self.__page.close()
+        self._page.close()

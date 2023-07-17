@@ -139,7 +139,7 @@ const pe = /* @__PURE__ */ H({
   setup(e, { emit: r }) {
     const t = e;
     return q(() => {
-      const o = document.getElementById(t.elementId), { x: a, y: c, style: g, isDragging: _ } = le(o, t.options);
+      const o = document.getElementById(`c${t.elementId}`), { x: a, y: c, style: g, isDragging: _ } = le(o, t.options);
       h([a, c, g], ([l, f, i]) => {
         r("update", { x: l, y: f, style: i });
       }), h(_, (l) => {

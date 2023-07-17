@@ -2,7 +2,7 @@ import importlib
 import pytest
 import logging
 from playwright.sync_api import Browser, Playwright
-from .screen import Screen, TestPage
+from .screen import Screen, ScreenPage
 from nicegui import Client, globals
 from nicegui.page import page as ui_page
 

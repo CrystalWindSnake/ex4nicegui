@@ -35,7 +35,7 @@ from nicegui.elements.mixins.color_elements import (
     TAILWIND_COLORS,
 )
 from nicegui.page_layout import Drawer
-from ex4nicegui.reactive.echarts.ECharts import echarts
+from ex4nicegui.reactive.ECharts.ECharts import echarts
 
 T = TypeVar("T")
 

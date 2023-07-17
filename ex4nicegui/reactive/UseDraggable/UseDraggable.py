@@ -31,7 +31,7 @@ def use_draggable(element: Element, init_x=0.0, init_y=0.0, auto_bind_style=True
 
 class UseDraggable(Element, component="UseDraggable.js"):
     def __init__(self, element: Element, init_x=0.0, init_y=0.0) -> None:
-        super().__init__("UseDraggable")
+        super().__init__()
         self._props["elementId"] = str(element.id)
         self._props["options"] = {"initialValue": {"x": init_x, "y": init_y}}
 

@@ -6,6 +6,12 @@ from nicegui.element import Element
 from signe import createSignal, effect, batch
 from ex4nicegui.utils.signals import ref_from_signal
 
+# from nicegui.dependencies import register_library
+# from pathlib import Path
+
+
+# register_library(Path(__file__).parent / "index-6543384e.js")
+
 _Update_Args = [
     "x",
     "y",
@@ -22,7 +28,7 @@ class UseMouseUpdateEventArguments(EventArguments):
 
 class UseMouse(Element, component="UseMouse.js"):
     def __init__(self, options: Optional[dict] = None) -> None:
-        super().__init__("UseMouse")
+        super().__init__()
 
         if options:
             self._props["options"] = options

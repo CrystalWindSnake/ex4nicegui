@@ -35,7 +35,7 @@ class EChartsClickEventArguments(EventArguments):
 
 class echarts(Element, component="ECharts.js"):
     def __init__(self, options: dict) -> None:
-        super().__init__("ECharts")
+        super().__init__()
         self._props["options"] = options
 
     def update_options(self, options: dict, opts: Optional[dict] = None):
