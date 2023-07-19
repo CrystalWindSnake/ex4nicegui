@@ -54,3 +54,19 @@ def test_set_current_page_over_max_size():
 
     r_cur_page.value = 0
     assert pagination_ref.current_source.value == list(range(0, 10))
+
+
+@pytest.mark.noautofixt
+def test_first_last_page():
+    page_size = 10
+    data = list(range(105))
+
+    r_cur_page = to_ref(12)
+    pagination_ref = rxui.use_pagination(data, page_size, r_cur_page)
+
+    assert pagination_ref.is_last_page.value
+    assert not pagination_ref.is_first_page.value
+
+    r_cur_page.value = 0
+    assert pagination_ref.is_first_page.value
+    assert not pagination_ref.is_last_page.value

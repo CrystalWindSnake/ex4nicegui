@@ -12,8 +12,9 @@ from typing import (
     cast,
     Dict,
     Union,
+    overload,
 )
-from typing_extensions import Literal
+from typing_extensions import Literal, Self
 from signe import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -25,7 +26,7 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 import ex4nicegui.utils.common as utils_common
-from nicegui import ui
+from nicegui import Tailwind, ui
 from nicegui import events as ng_events
 from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.value_element import ValueElement
@@ -70,6 +71,18 @@ class BindableUi(Generic[TWidget]):
         cast(ui.element, self.element).style(add, remove=remove, replace=replace)
         return self
 
+    @overload
+    def tailwind(self, *tailwind: Tailwind) -> Self:
+        ...
+
+    @overload
+    def tailwind(self, *classes: str) -> Self:
+        ...
+
+    def tailwind(self, *args):
+        cast(ui.element, self.element).tailwind(*args)
+        return self
+
     def add_slot(self, name: str, template: Optional[str] = None):
         """Add a slot to the element.
 
@@ -100,6 +113,28 @@ class BindableUi(Generic[TWidget]):
         def _():
             element = cast(ui.element, self.element)
             element.set_visibility(ref_ui.value)
+
+        return self
+
+    def on(
+        self,
+        type: str,
+        handler: Optional[Callable[..., Any]] = None,
+        args: Optional[List[str]] = None,
+        *,
+        throttle: float = 0.0,
+        leading_events: bool = True,
+        trailing_events: bool = True,
+    ):
+        ele = cast(ui.element, self.element)
+        ele.on(
+            type,
+            handler,
+            args,
+            throttle=throttle,
+            leading_events=leading_events,
+            trailing_events=trailing_events,
+        )
 
         return self
 
@@ -825,6 +860,20 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button]):
             ele = self.element
             ele._props["icon"] = ref_ui.value
             ele.update()
+
+        return self
+
+    def bind_enabled(self, ref_ui: ReadonlyRef[bool]):
+        @effect
+        def _():
+            self.element.on_enabled_change(ref_ui.value)
+
+        return self
+
+    def bind_disable(self, ref_ui: ReadonlyRef[bool]):
+        @effect
+        def _():
+            self.element.on_enabled_change(not ref_ui.value)
 
         return self
 

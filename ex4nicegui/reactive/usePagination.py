@@ -74,6 +74,23 @@ class PaginationRef(Generic[_T]):
     def current_source(self):
         return self.__cur_source
 
+    @property
+    def is_first_page(self):
+        @ref_computed
+        def cp():
+            return self.current_page.value == 1
+
+        return cp
+
+    @property
+    def is_last_page(self):
+        @ref_computed
+        def cp():
+            return self.current_page.value == self.page_count.value
+
+        return cp
+
     def create_q_pagination(self):
         page = QPagination(self.current_page, max=self.page_count)
+        page.props("boundary-links")
         return page
