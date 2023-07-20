@@ -56,8 +56,8 @@ def test_input_change_value_when_enter(page: ScreenPage, page_path: str):
     # page.pause()
     page.fill("target", "new value")
     page.wait()
-    assert page.get_by_testid("label").inner_text() == "old"
+    assert page.get_by_test_id("label").inner_text() == "old"
 
     page.enter("target")
     page.wait()
-    assert page.get_by_testid("label").inner_text() == "new value"
+    assert page.get_by_test_id("label").inner_text() == "new value"

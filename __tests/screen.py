@@ -43,6 +43,12 @@ class ScreenPage:
         self._page.wait_for_selector("body", timeout=10000)
         self._page.goto(f"http://localhost:{PORT}{path}")
 
+    def is_checked_by_label(self, target_test_id: str, label: str):
+        assert self.get_by_test_id(target_test_id).get_by_label(label).is_checked()
+
+    def get_by_test_id(self, testid: str):
+        return self._page.get_by_test_id(testid)
+
     def should_contain(self, text: str) -> None:
         expect(self._page.get_by_text(text)).to_be_visible()
 
@@ -66,9 +72,6 @@ class ScreenPage:
 
     def get_ele(self, text: str):
         return self._page.get_by_text(text)
-
-    def get_by_testid(self, id: str):
-        return self._page.get_by_test_id(id)
 
     def pause(self):
         self._page.pause()

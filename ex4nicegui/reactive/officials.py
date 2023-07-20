@@ -338,7 +338,11 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
     @staticmethod
     def _setup_(binder: "SwitchBindableUi"):
         def onValueChanged(e):
-            binder._ref.value = e.args  # type: ignore
+            ele._send_update_on_value_change = ele.LOOPBACK
+            cur_value = ele._event_args_to_value(e)
+            ele.set_value(cur_value)
+            ele._send_update_on_value_change = True
+            binder._ref.value = cur_value
 
         ele = cast(ValueElement, binder.element)
 
@@ -346,7 +350,7 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
         def _():
             ele.value = binder.value
 
-        ele.on("update:modelValue", handler=onValueChanged)
+        ele.on("update:modelValue", onValueChanged, [None], throttle=0)
 
     def __init__(
         self,
