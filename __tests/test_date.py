@@ -20,7 +20,7 @@ def test_const_value(page: ScreenPage, page_path: str):
 def test_const_range_value(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        rxui.date([{"from": "2023-01-01", "to": "2023-01-06"}, "2023-01-10"])
+        rxui.date([{"from": "2023-01-01", "to": "2023-01-06"}, "2023-01-10"])  # type: ignore
 
     page.open(page_path)
 
@@ -46,7 +46,7 @@ def test_ref_range_value(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.date(r_value)
+        rxui.date(r_value)  # type: ignore
 
     page.open(page_path)
 
@@ -64,7 +64,7 @@ def test_ref_change_value(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
         rxui.date(r_single_value).props(f'data-testid="{single_date_id}"')
-        rxui.date(r_range_value).props(f'data-testid="{range_date_id}" multiple range')
+        rxui.date(r_range_value).props(f'data-testid="{range_date_id}" multiple range')  # type: ignore
 
     page.open(page_path)
 
@@ -81,6 +81,6 @@ def test_ref_change_value(page: ScreenPage, page_path: str):
     r_range_value.value = [
         {"from": "2023-01-06", "to": "2023-01-10"},
         {"from": "2023-01-15", "to": "2023-01-16"},
-        "2023-01-12",
+        "2023-01-12",  # type: ignore
     ]
     expect(range_date.get_by_text("8 days").first).to_be_visible()
