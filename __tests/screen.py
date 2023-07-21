@@ -50,7 +50,7 @@ class ScreenPage:
         return self._page.get_by_test_id(testid)
 
     def should_contain(self, text: str) -> None:
-        expect(self._page.get_by_text(text)).to_be_visible()
+        expect(self._page.get_by_text(text).first).to_be_visible()
 
     def should_not_contain(self, text: str) -> None:
         expect(self._page.get_by_text(text)).not_to_be_visible()
