@@ -26,6 +26,7 @@ from .officials import (
     UploadBindableUi as upload,
     UploadResult,
     DrawerBindableUi as drawer,
+    DateBindableUi as date,
 )
 from .q_pagination import QPagination as q_pagination
 from .local_file_picker import local_file_picker
