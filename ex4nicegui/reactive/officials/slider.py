@@ -79,8 +79,8 @@ class LazySliderBindableUi(SliderBindableUi):
         min: TMaybeRef[_TSliderValue],
         max: TMaybeRef[_TSliderValue],
         step: TMaybeRef[_TSliderValue] = 1,
-        value: TMaybeRef[_TSliderValue | None] = None,
-        on_change: Callable[..., Any] | None = None,
+        value: Optional[TMaybeRef[_TSliderValue]] = None,
+        on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
         super().__init__(min, max, step, value, on_change)
 

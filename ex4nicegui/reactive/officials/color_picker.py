@@ -2,6 +2,7 @@ from typing import (
     Any,
     Callable,
     Optional,
+    Union,
 )
 from signe import effect
 from ex4nicegui.utils.signals import (
@@ -82,7 +83,7 @@ class ColorPickerLazyBindableUi(ColorPickerBindableUi):
         self,
         color: TMaybeRef[str] = "",
         *,
-        on_pick: Callable[..., Any] | None = None,
+        on_pick: Optional[Callable[..., Any]] = None,
         value: TMaybeRef[bool] = False,
     ) -> None:
         super().__init__(color, on_pick=on_pick, value=value)
