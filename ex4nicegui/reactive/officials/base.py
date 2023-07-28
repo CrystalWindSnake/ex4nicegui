@@ -16,6 +16,7 @@ from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
     to_ref,
+    ref_computed,
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import Tailwind, ui
@@ -33,6 +34,7 @@ TWidget = TypeVar("TWidget")
 class BindableUi(Generic[TWidget]):
     def __init__(self, element: TWidget) -> None:
         self.__element = element
+        self.tailwind = Tailwind(cast(ui.element, self.__element))
 
     def props(self, add: Optional[str] = None, *, remove: Optional[str] = None):
         cast(ui.element, self.element).props(add, remove=remove)
@@ -56,18 +58,6 @@ class BindableUi(Generic[TWidget]):
         replace: Optional[str] = None,
     ):
         cast(ui.element, self.element).style(add, remove=remove, replace=replace)
-        return self
-
-    @overload
-    def tailwind(self, *tailwind: Tailwind) -> Self:
-        ...
-
-    @overload
-    def tailwind(self, *classes: str) -> Self:
-        ...
-
-    def tailwind(self, *args):
-        cast(ui.element, self.element).tailwind(*args)
         return self
 
     def tooltip(self, text: str) -> Self:
@@ -106,6 +96,9 @@ class BindableUi(Generic[TWidget]):
             element.set_visibility(ref_ui.value)
 
         return self
+
+    def bind_not_visible(self, ref_ui: ReadonlyRef[bool]):
+        return self.bind_visible(ref_computed(lambda: not ref_ui.value))
 
     def on(
         self,
