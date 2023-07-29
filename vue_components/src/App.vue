@@ -1,27 +1,45 @@
 <script setup lang="ts">
-import DragZone from "./components/DragZone/DragZone.vue";
-
-const draggableElementIds = [
-  '1',
-  '2',
-  '3'
-]
+import { onMounted, reactive, ref } from "vue";
+import DropZone from "./components/DropZone/DropZone.vue";
 
 
-function onDrop(data) {
-  console.log('onDrop', data);
+const dropZoneRef = ref(null)
 
+onMounted(() => {
+
+  dropZoneRef.value.apply('item1', 'aqua')
+  dropZoneRef.value.apply('item2', 'red')
+
+})
+
+const keys = ref([] as string[])
+
+function onDraggableKeysUpdated(e: { keys: string[] }) {
+  console.log(e.keys);
+  keys.value = e.keys
+}
+
+function close(key: string) {
+  console.log('close');
+
+  dropZoneRef.value.removeKey(key)
 }
 
 </script>
 
 <template>
-  <input type="text" id="1">
-  <input type="text" id="4" draggable="true">
+  <div class="box" id="dragZone">
 
-  <div class="box" id="dragZone"></div>
+    <div v-for="k in keys" :key="k" :style="{ 'width': '4rem', 'height': '4rem', 'background-color': k }"
+      draggable="true"></div>
 
-  <DragZone dropZoneId="dragZone" :draggableElementIds="draggableElementIds" @dropUpdate="onDrop"></DragZone>
+  </div>
+
+  <DropZone dropZoneId="dragZone" ref="dropZoneRef" @onDraggableKeysUpdated="onDraggableKeysUpdated"></DropZone>
+
+
+  <div id="item1" style="width: 4rem; height: 4rem; background-color: aqua;"></div>
+  <div id="item2" style="width: 4rem; height: 4rem; background-color: red;"></div>
 </template>
 
 <style scoped>
@@ -35,3 +53,4 @@ input {
   user-select: none;
 }
 </style>
+./components/DropZone/DragZone.vue

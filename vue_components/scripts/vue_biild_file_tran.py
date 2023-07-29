@@ -61,6 +61,6 @@ def copy2styls(src, to_file):
 
 
 
-tran_vue_imports('UseDraggable')
+tran_vue_imports('dropZone')
 
 

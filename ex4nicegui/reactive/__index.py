@@ -7,3 +7,4 @@ from .UseDraggable.UseDraggable import use_draggable
 from .useMouse.UseMouse import use_mouse
 
 from .usePagination import PaginationRef as use_pagination
+from .dropZone.dropZone import use_drag_zone
