@@ -10,6 +10,8 @@ _Update_Args = [
     "x",
     "y",
     "style",
+    "isFirst",
+    "isFinal",
 ]
 
 
@@ -18,6 +20,8 @@ class UseDraggableUpdateEventArguments(EventArguments):
     x: float
     y: float
     style: str
+    isFirst: bool
+    isFinal: bool
 
 
 def use_draggable(element: Element, init_x=0.0, init_y=0.0, auto_bind_style=True):
@@ -40,12 +44,17 @@ class UseDraggable(Element, component="UseDraggable.js"):
         self.__y_getter, self.__y_setter = createSignal(init_y)
         self.__isDragging_getter, self.__isDragging_setter = createSignal(False)
 
+        self.__isFirst_getter, self.__isFirst_setter = createSignal(True)
+        self.__isFinal_getter, self.__isFinal_setter = createSignal(False)
+
         def update(args: UseDraggableUpdateEventArguments):
             @batch
             def _():
                 self.__style_setter(args.style)
                 self.__x_setter(args.x)
                 self.__y_setter(args.y)
+                self.__isFirst_setter(args.isFirst)
+                self.__isFinal_setter(args.isFinal)
 
         self.on_update(update)
 
@@ -71,6 +80,14 @@ class UseDraggable(Element, component="UseDraggable.js"):
     def is_dragging(self):
         return ref_from_signal(self.__isDragging_getter)
 
+    @property
+    def isFirst(self):
+        return ref_from_signal(self.__isFirst_getter)
+
+    @property
+    def isFinal(self):
+        return ref_from_signal(self.__isFinal_getter)
+
     def bind_style(self, element: Element):
         @effect
         def _():
@@ -88,6 +105,8 @@ class UseDraggable(Element, component="UseDraggable.js"):
                     x=args["x"],
                     y=args["y"],
                     style=args["style"],
+                    isFirst=args["isFirst"],
+                    isFinal=args["isFinal"],
                 ),
             )
 
