@@ -10,7 +10,7 @@ from ex4nicegui.utils.signals import (
 )
 from .base import BindableUi
 from .utils import _convert_kws_ref2value
-from ex4nicegui.reactive.ECharts.ECharts import echarts
+from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
 
 
 class EChartsBindableUi(BindableUi[echarts]):
