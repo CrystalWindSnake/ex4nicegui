@@ -12,7 +12,8 @@ from .color_picker import (
 )
 from .date import DateBindableUi as date
 from .drawer import DrawerBindableUi as drawer
-from .echarts import EChartsBindableUi as echarts
+
+# from .echarts import EChartsBindableUi as echarts
 from .html import HtmlBindableUi as html
 from .icon import IconBindableUi as icon
 from .image import ImageBindableUi as image
