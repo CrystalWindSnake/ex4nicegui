@@ -32,6 +32,9 @@ jobs:
       - run: python setup.py build
       - run: pwd
       - run: ls
-      - run: cd build/lib
+      - run: cd build
+      - run: ls
+      - run: cd lib
+      - run: ls
       - run: pwd
       - run: python -c "import ex4nicegui;from ex4nicegui.reactive import rxui"
