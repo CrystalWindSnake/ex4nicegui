@@ -28,7 +28,7 @@ def test_const_value(page: ScreenPage, page_path: str):
     assert not radio.get_by_label("b").is_checked()
 
     page.wait()
-    radio.get_by_label("b").check()
+    radio.get_by_label("b").check(force=True)
     assert not radio.get_by_label("a").is_checked()
     assert radio.get_by_label("b").is_checked()
 
@@ -57,7 +57,7 @@ def test_ref_value(page: ScreenPage, page_path: str):
     assert r_value.value == "a"
 
     page.wait()
-    radio.get_by_label("b").check()
+    radio.get_by_label("b").check(force=True)
     assert not radio.get_by_label("a").is_checked()
     assert radio.get_by_label("b").is_checked()
     assert r_value.value == "b"
