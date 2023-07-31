@@ -13,4 +13,4 @@ jobs:
           python-version: '3.8'
       - run: pip install pytest playwright pytest-playwright nicegui signe typing_extensions
       - run: playwright install
-      - run: pytest __tests/
+      - run: pytest
