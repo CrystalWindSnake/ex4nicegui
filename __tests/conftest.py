@@ -32,7 +32,7 @@ def reset_globals(request: pytest.FixtureRequest):
 def screen(playwright: Playwright, request: pytest.FixtureRequest):
     if "noautofixt" in request.keywords:
         return
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch()
     screen = Screen(browser)
 
     yield screen
