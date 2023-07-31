@@ -10,4 +10,5 @@ jobs:
         with:
           python-version: '3.7'
       - run: pip install pytest playwright nicegui signe typing_extensions
+      - run: cd /home/runner/work/ex4nicegui/ex4nicegui
       - run: pytest __tests/
