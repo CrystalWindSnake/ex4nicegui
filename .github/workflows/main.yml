@@ -30,11 +30,8 @@ jobs:
           python-version: '3.8'
       - run: pip install nicegui>=1.3.4 signe typing_extensions
       - run: python setup.py build
-      - run: pwd
-      - run: ls
-      - run: cd build
-      - run: ls
-      - run: cd lib
-      - run: ls
-      - run: pwd
-      - run: python -c "import ex4nicegui;from ex4nicegui.reactive import rxui"
+      - name: to build lib dir
+        working-directory: ./build/lib
+        run: ls
+        run: pwd
+        run: python -c "import ex4nicegui;from ex4nicegui.reactive import rxui"
