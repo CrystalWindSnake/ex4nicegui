@@ -27,7 +27,8 @@ def test_const_value(page: ScreenPage, page_path: str):
     assert radio.get_by_label("a").is_checked()
     assert not radio.get_by_label("b").is_checked()
 
-    page.wait()
+    page.wait(2000)
+    # page.click("text=b")
     radio.get_by_label("b").check(force=True)
     assert not radio.get_by_label("a").is_checked()
     assert radio.get_by_label("b").is_checked()
