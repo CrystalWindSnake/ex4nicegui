@@ -9,5 +9,5 @@ jobs:
       - uses: actions/setup-python@v3.1.4
         with:
           python-version: '3.7'
-      - run: pip install pytest playwright nicegui
+      - run: pip install pytest playwright nicegui signe typing_extensions
       - run: pytest __tests/
