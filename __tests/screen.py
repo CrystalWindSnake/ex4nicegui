@@ -49,6 +49,10 @@ class ScreenPage:
     def get_by_test_id(self, testid: str):
         return self._page.get_by_test_id(testid)
 
+    def radio_check_by_label(self, label: str):
+        self._page.click(f"text={label}")
+        self.wait()
+
     def should_contain(self, text: str) -> None:
         expect(self._page.get_by_text(text).first).to_be_visible()
 

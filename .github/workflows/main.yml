@@ -1,0 +1,37 @@
+name: test
+run-name: test Actions
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  run-all-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        # with:
+        #   ref: 'test-github_act'
+      - uses: actions/setup-python@v3.1.4
+        with:
+          python-version: '3.8'
+      - run: pip install pytest playwright pytest-playwright nicegui>=1.3.4 signe typing_extensions
+      - run: playwright install
+      # - run: python -m playwright install --with-deps
+      - run: pytest __tests/
+      # - run: pytest -k test_const_value __tests/test_radio.py
+  import-correct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3.1.4
+        with:
+          python-version: '3.8'
+      - run: pip install nicegui>=1.3.4 signe typing_extensions
+      - run: python setup.py build
+      - name: to build lib dir
+        working-directory: ./build/lib
+        run: |
+          ls
+          pwd
+          python -c "import ex4nicegui;from ex4nicegui.reactive import rxui"
+    
