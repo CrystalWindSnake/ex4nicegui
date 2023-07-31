@@ -23,7 +23,7 @@ with open("README.md", encoding="utf8") as readme_file:
 
 requirements = ["signe>=0.1.8", "nicegui>=1.3.4", "typing_extensions"]
 
-test_requirements = ["pytest>=3"]
+test_requirements = ["pytest>=3", "playwright"]
 
 setup(
     author="carson_jia",

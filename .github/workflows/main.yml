@@ -1,0 +1,13 @@
+name: test
+run-name: test Actions
+on: [push]
+jobs:
+  check-bats-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3.1.4
+        with:
+          python-version: '3.7'
+      - run: pip install pytest playwright
+      - run: pytest __tests/
