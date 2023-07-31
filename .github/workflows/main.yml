@@ -10,9 +10,9 @@ jobs:
           ref: 'test-github_act'
       - uses: actions/setup-python@v3.1.4
         with:
-          python-version: '3.7'
+          python-version: '3.8'
       - run: pip install pytest playwright pytest-playwright nicegui>=1.3.4 signe typing_extensions
       - run: playwright install
       # - run: python -m playwright install --with-deps
-      - run: pytest
+      - run: pytest __tests/
       # - run: pytest -k test_const_value __tests/test_radio.py
