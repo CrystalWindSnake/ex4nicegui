@@ -23,13 +23,12 @@ def test_const_value(page: ScreenPage, page_path: str):
     assert not radio.get_by_label("b").is_checked()
 
     page.wait()
-    radio.get_by_label("a").check()
+    page.radio_check_by_label("a")
     assert radio.get_by_label("a").is_checked()
     assert not radio.get_by_label("b").is_checked()
 
-    page.wait(2000)
-    # page.click("text=b")
-    radio.get_by_label("b").check(force=True)
+    page.wait()
+    page.radio_check_by_label("b")
     assert not radio.get_by_label("a").is_checked()
     assert radio.get_by_label("b").is_checked()
 
@@ -52,13 +51,13 @@ def test_ref_value(page: ScreenPage, page_path: str):
     assert r_value.value == ""
 
     page.wait()
-    radio.get_by_label("a").check()
+    page.radio_check_by_label("a")
     assert radio.get_by_label("a").is_checked()
     assert not radio.get_by_label("b").is_checked()
     assert r_value.value == "a"
 
     page.wait()
-    radio.get_by_label("b").check(force=True)
+    page.radio_check_by_label("b")
     assert not radio.get_by_label("a").is_checked()
     assert radio.get_by_label("b").is_checked()
     assert r_value.value == "b"
@@ -80,12 +79,12 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
     page.wait()
     r_value.value = "a"
 
-    radio.get_by_label("a").check()
+    page.radio_check_by_label("a")
     assert radio.get_by_label("a").is_checked()
     assert not radio.get_by_label("b").is_checked()
 
     page.wait()
     r_value.value = "b"
-    radio.get_by_label("b").check()
+    page.radio_check_by_label("b")
     assert not radio.get_by_label("a").is_checked()
     assert radio.get_by_label("b").is_checked()

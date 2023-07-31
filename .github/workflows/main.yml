@@ -14,3 +14,4 @@ jobs:
       - run: pip install pytest playwright pytest-playwright nicegui signe typing_extensions
       - run: python -m playwright install --with-deps
       - run: pytest
+      # - run: pytest -k test_const_value __tests/test_radio.py
