@@ -32,7 +32,10 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         )
 
         def onValueChanged(e):
-            binder._ref.value = opts_values[e.args["value"]]  # type: ignore
+            if e.args is None:
+                binder._ref.value = ""
+            else:
+                binder._ref.value = opts_values[e.args["value"]]  # type: ignore
 
         @effect
         def _():
