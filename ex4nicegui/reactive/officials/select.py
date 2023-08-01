@@ -32,7 +32,10 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         )
 
         def onValueChanged(e):
-            binder._ref.value = opts_values[e.args["value"]]  # type: ignore
+            if e.args is None:
+                binder._ref.value = ""
+            else:
+                binder._ref.value = opts_values[e.args["value"]]  # type: ignore
 
         @effect
         def _():
@@ -51,6 +54,18 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         multiple: TMaybeRef[bool] = False,
         clearable: TMaybeRef[bool] = False,
     ) -> None:
+        """Dropdown Selection
+
+        The options can be specified as a list of values, or as a dictionary mapping values to labels.
+        After manipulating the options, call `update()` to update the options in the UI.
+
+        :param options: a list ['value1', ...] or dictionary `{'value1':'label1', ...}` specifying the options
+        :param value: the initial value
+        :param on_change: callback to execute when selection changes
+        :param with_input: whether to show an input field to filter the options
+        :param multiple: whether to allow multiple selections
+        :param clearable: whether to add a button to clear the selection
+        """
         kws = {
             "options": options,
             "label": label,
