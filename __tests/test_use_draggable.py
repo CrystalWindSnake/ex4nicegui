@@ -42,6 +42,8 @@ def test_draggable(page: ScreenPage, page_path: str):
     page._page.mouse.move(x + 500, y)
     page._page.mouse.up()
 
+    page.wait()
+
     box_rect = box_target.bounding_box()
     assert box_rect is not None
 
