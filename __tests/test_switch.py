@@ -40,8 +40,11 @@ def test_ref_value(page: ScreenPage, page_path: str):
     expect(switch).not_to_be_checked()
     assert r_on.value == False
 
-    page.wait(1000)
-    switch.check()
+    # page.wait(1000)
+    # page.pause()
+    # switch.check()
+    page.wait()
+    page._page.get_by_test_id("switch").locator("div").nth(2).click()
     page.wait()
     expect(switch).to_be_checked()
     assert r_on.value == True
