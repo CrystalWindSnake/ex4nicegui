@@ -4,6 +4,7 @@ from typing import (
     List,
     Optional,
     Dict,
+    cast,
 )
 from typing_extensions import Literal
 import ex4nicegui.utils.common as utils_common
@@ -12,11 +13,18 @@ from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
     ref_computed,
+    to_ref,
+    to_value,
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
 from .base import BindableUi
 from .utils import _convert_kws_ref2value
+from nicegui.events import (
+    GenericEventArguments,
+    TableSelectionEventArguments,
+    handle_event,
+)
 
 
 class TableBindableUi(BindableUi[ui.table]):
@@ -50,8 +58,42 @@ class TableBindableUi(BindableUi[ui.table]):
             if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
 
+        self._arg_selection = selection
+        self._arg_row_key = row_key
+        self._selection_ref: Optional[ReadonlyRef[List[Any]]] = None
+
+    @property
+    def selection_ref(self):
+        if self._selection_ref is None:
+            self._selection_ref = to_ref([])
+
+            def on_select(_):
+                self._selection_ref.value = self.element.selected  # type: ignore
+
+            self.element.on("selection", on_select)
+
+        return cast(ReadonlyRef[List[Any]], self._selection_ref)
+
     @staticmethod
-    def from_pandas(df: TMaybeRef):
+    def from_pandas(
+        df: TMaybeRef,
+        *,
+        columns_define_fn: Optional[Callable[[str], Dict]] = None,
+        row_key="id",
+        title: Optional[TMaybeRef[str]] = None,
+        selection: Optional[TMaybeRef[Literal["single", "multiple"]]] = None,
+        pagination: Optional[TMaybeRef[int]] = 15,
+        on_select: Optional[Callable[..., Any]] = None,
+    ):
+        columns_define_fn = columns_define_fn or (lambda x: {})
+        other_kws = {
+            "row_key": row_key,
+            "title": title,
+            "selection": selection,
+            "pagination": pagination,
+            "on_select": on_select,
+        }
+
         if is_ref(df):
 
             @ref_computed
@@ -66,27 +108,33 @@ class TableBindableUi(BindableUi[ui.table]):
             def cp_cols():
                 return [
                     {
-                        "name": col,
-                        "label": col,
-                        "field": col,
+                        **{
+                            "name": col,
+                            "label": col,
+                            "field": col,
+                        },
+                        **columns_define_fn(col),
                     }
                     for col in cp_convert_df.value.columns
                 ]
 
-            return TableBindableUi(cp_cols, cp_rows)
+            return TableBindableUi(cp_cols, cp_rows, **other_kws)
 
         df = utils_common.convert_dataframe(df)
         rows = df.to_dict("records")
 
         cols = [
             {
-                "name": col,
-                "label": col,
-                "field": col,
+                **{
+                    "name": col,
+                    "label": col,
+                    "field": col,
+                },
+                **columns_define_fn(col),
             }
             for col in df.columns
         ]
-        return TableBindableUi(cols, rows)
+        return TableBindableUi(cols, rows, **other_kws)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "dataframe":
