@@ -1,7 +1,7 @@
 from typing import Any, Callable, Optional
 from dataclasses import dataclass
 from nicegui.helpers import KWONLY_SLOTS
-from nicegui.events import handle_event, EventArguments
+from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
 from signe import createSignal, effect, batch
 from ex4nicegui.utils.signals import ref_from_signal
@@ -16,7 +16,7 @@ _Update_Args = [
 
 
 @dataclass(**KWONLY_SLOTS)
-class UseDraggableUpdateEventArguments(EventArguments):
+class UseDraggableUpdateEventArguments(UiEventArguments):
     x: float
     y: float
     style: str
