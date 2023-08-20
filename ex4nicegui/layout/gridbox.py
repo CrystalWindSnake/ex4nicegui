@@ -1,7 +1,7 @@
 from typing import List, Optional, Union, cast
 from nicegui.client import Client
 from nicegui.element import Element
-from ex4nicegui.reactive.ref import RefUi
+from ex4nicegui.reactive.officials.base import BindableUi
 
 
 def _areas_str2array(areas: str) -> List[List[str]]:
@@ -75,10 +75,10 @@ grid-template-areas: {areas};
 display: grid;
 grid-template-columns: {template_columns};
 grid-template-rows:{template_rows};"""
-        ).classes("gap-2")
+        )
 
-    def areas_mark(self, element: Union[Element, RefUi], mark: str):
-        if isinstance(element, RefUi):
+    def areas_mark(self, element: Union[Element, BindableUi], mark: str):
+        if isinstance(element, BindableUi):
             element = element.element
         element = cast(Element, element)
         element.style(f"grid-area:{mark}")
