@@ -25,5 +25,6 @@ def test_mouse_move(page: ScreenPage, page_path: str):
     page.wait()
     page._page.mouse.move(10, 10)
 
+    page.wait(1000)
     page.should_contain("x:10")
     page.should_contain("y:10")
