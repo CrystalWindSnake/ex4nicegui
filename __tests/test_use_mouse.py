@@ -1,30 +1,27 @@
 import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import ref_computed
+from ex4nicegui import ref_computed, to_ref, effect
 from .screen import ScreenPage
 
 
 def test_mouse_move(page: ScreenPage, page_path: str):
+    r_x = to_ref(0.0)
+    r_y = to_ref(0.0)
+
     @ui.page(page_path)
     def _():
         r_mouse = rxui.use_mouse()
 
-        @ref_computed
-        def x_label():
-            return f"x:{r_mouse.x.value}"
-
-        @ref_computed
-        def y_label():
-            return f"y:{r_mouse.y.value}"
-
-        rxui.label(x_label)
-        rxui.label(y_label)
+        @effect
+        def _():
+            r_x.value = r_mouse.x.value
+            r_y.value = r_mouse.y.value
 
     page.open(page_path)
     page.wait()
     page._page.mouse.move(10, 10)
 
-    page.wait(1000)
-    page.should_contain("x:10")
-    page.should_contain("y:10")
+    page.wait()
+    assert r_x.value == 10
+    assert r_y.value == 10
