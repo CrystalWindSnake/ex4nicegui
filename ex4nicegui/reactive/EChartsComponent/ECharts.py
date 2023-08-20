@@ -1,7 +1,7 @@
 from typing import Any, Callable, Optional
 from dataclasses import dataclass
 from nicegui.helpers import KWONLY_SLOTS
-from nicegui.events import handle_event, EventArguments
+from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
 
 
@@ -20,7 +20,7 @@ _Chart_Click_Args = [
 
 
 @dataclass(**KWONLY_SLOTS)
-class EChartsClickEventArguments(EventArguments):
+class EChartsClickEventArguments(UiEventArguments):
     componentType: str
     seriesType: str
     seriesIndex: int

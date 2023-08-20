@@ -4,7 +4,7 @@ from nicegui.element import Element
 from ex4nicegui.utils.signals import to_ref, Ref
 from dataclasses import dataclass
 from nicegui.helpers import KWONLY_SLOTS
-from nicegui.events import handle_event, EventArguments
+from nicegui.events import handle_event, UiEventArguments
 
 
 _Update_Args = [
@@ -13,7 +13,7 @@ _Update_Args = [
 
 
 @dataclass(**KWONLY_SLOTS)
-class DropZoneUpdatedEventArguments(EventArguments):
+class DropZoneUpdatedEventArguments(UiEventArguments):
     keys: List[str]
 
 

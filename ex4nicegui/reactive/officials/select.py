@@ -25,16 +25,15 @@ T = TypeVar("T")
 class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
     @staticmethod
     def _setup_(binder: "SelectBindableUi"):
-        opts_values = (
-            list(binder.element.options.keys())
-            if isinstance(binder.element.options, Dict)
-            else binder.element.options
-        )
-
         def onValueChanged(e):
             if e.args is None:
                 binder._ref.value = ""
             else:
+                opts_values = (
+                    list(binder.element.options.keys())
+                    if isinstance(binder.element.options, Dict)
+                    else binder.element.options
+                )
                 binder._ref.value = opts_values[e.args["value"]]  # type: ignore
 
         @effect

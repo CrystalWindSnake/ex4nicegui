@@ -1,7 +1,7 @@
 import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref
+from ex4nicegui import to_ref, ref_computed
 from .screen import ScreenPage
 from playwright.sync_api import expect
 
@@ -62,3 +62,33 @@ def test_clearable(page: ScreenPage, page_path: str):
     expect(page._page.get_by_text("a", exact=True)).not_to_be_visible()
     expect(page._page.get_by_text("b", exact=True)).not_to_be_visible()
     assert r_str.value == ""
+
+
+def test_option_change(page: ScreenPage, page_path: str):
+    r_str = to_ref("")
+    r_has_data = to_ref(False)
+
+    @ref_computed
+    def cp_data():
+        if r_has_data.value:
+            return ["a", "b"]
+        return []
+
+    @ui.page(page_path)
+    def _():
+        rxui.switch("has data", value=r_has_data).props('data-testid="switch"')
+        rxui.select(cp_data, value=r_str).props('data-testid="target"')
+
+    page.open(page_path)
+
+    page.wait()
+    page._page.get_by_test_id("switch").locator("div").nth(2).click()
+
+    # page.wait()
+    page._page.get_by_text("arrow_drop_down").click()
+
+    # page.wait()
+    page._page.get_by_role("option", name="a").locator("div").nth(2).click()
+
+    page.wait()
+    assert r_str.value == "a"
