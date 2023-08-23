@@ -10,6 +10,19 @@ TON_FILE_CHANGE_HANDER = Callable[[Set[FileChange]], None]
 
 
 class FilesWatcher:
+    r"""
+    watchfiles component
+
+    ### use
+    ```python
+    fw = rxui.FilesWatcher(r'E:\test')
+
+    @g_fw.on_FileChange
+    def _(e):
+        print(e)
+    ```
+    """
+
     def __init__(self, paths: Union[Path, str], recursive=False) -> None:
         self.callbacks: List[TON_FILE_CHANGE_HANDER] = []
         self.__stop_event = asyncio.Event()
