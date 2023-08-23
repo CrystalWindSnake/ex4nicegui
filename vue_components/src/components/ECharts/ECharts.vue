@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch, toRaw } from 'vue'
 import { useEventListener, useResizeObserver } from "@vueuse/core";
 import * as echarts from "echarts";
 
 
 
-const emits = defineEmits(['chartClick'])
+const emits = defineEmits(['chartClick', 'chartClickBlank'])
 
 const props = defineProps<{
     options: {},
@@ -23,13 +23,25 @@ onMounted(() => {
     chartIns = echarts.init(chartDiv.value, props.theme)
     chartIns.setOption(props.options)
 
+
+
     watch(() => props.options, opts => {
+        console.log(opts);
         chartIns?.setOption(opts)
     })
 
-    chartIns.on('click', 'series', params => {
+    chartIns.on('click', params => {
         emits('chartClick', params)
     })
+
+    chartIns.getZr().on('click', function (event) {
+        // 没有 target 意味着鼠标/指针不在任何一个图形元素上，它是从“空白处”触发的。
+        if (!event.target) {
+            emits('chartClickBlank')
+        }
+
+
+    });
 
     useEventListener('resize', () => {
         chartIns?.resize()
@@ -55,8 +67,8 @@ defineExpose({
 </script>
 
 <template>
-    <div class="echart-container relative w-full h-full">
-        <div class="echart  w-full h-full" style="min-height: 30vh;min-width: 50rem;" ref="chartDiv">
+    <div class="echart-container relative">
+        <div class="echart  w-full h-full" ref="chartDiv">
         </div>
     </div>
 </template>

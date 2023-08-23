@@ -1,16 +1,18 @@
-from typing import (
-    Dict,
-)
+from typing import Dict, cast, Optional
 from signe import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
     ref_computed,
     _TMaybeRef as TMaybeRef,
+    to_ref,
 )
 from .base import BindableUi
 from .utils import _convert_kws_ref2value
-from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
+from ex4nicegui.reactive.EChartsComponent.ECharts import (
+    echarts,
+    EChartsClickEventArguments,
+)
 
 
 class EChartsBindableUi(BindableUi[echarts]):
@@ -27,6 +29,12 @@ class EChartsBindableUi(BindableUi[echarts]):
         element = echarts(**value_kws)
 
         super().__init__(element)
+
+        self.__click_info_ref = to_ref(cast(Optional[EChartsClickEventArguments], None))
+
+        @element.on_chart_click
+        def _(e: EChartsClickEventArguments):
+            self.__click_info_ref.value = e
 
         for key, value in kws.items():
             if is_ref(value):
@@ -53,6 +61,10 @@ class EChartsBindableUi(BindableUi[echarts]):
             return EChartsBindableUi(chart_opt)
 
         return EChartsBindableUi(EChartsBindableUi._pyecharts2opts(chart))
+
+    @property
+    def click_info_ref(self):
+        return self.__click_info_ref
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "options":

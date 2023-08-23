@@ -83,3 +83,17 @@ class echarts(Element, component="ECharts.js"):
             )
 
         self.on("chartClick", inner_handler, _Chart_Click_Args)
+
+    def on_chart_click_blank(
+        self, handler: Optional[Callable[[UiEventArguments], Any]]
+    ):
+        def inner_handler(e):
+            handle_event(
+                handler,
+                UiEventArguments(
+                    sender=self,
+                    client=self.client,
+                ),
+            )
+
+        self.on("chartClickBlank", inner_handler, _Chart_Click_Args)

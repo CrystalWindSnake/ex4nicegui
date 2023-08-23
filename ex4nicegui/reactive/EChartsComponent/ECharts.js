@@ -43945,13 +43945,13 @@ pt(qZ);
 pt(QZ);
 pt(bX);
 pt(tz);
-const TX = { class: "echart-container relative w-full h-full" }, CX = /* @__PURE__ */ GL({
+const TX = { class: "echart-container relative" }, CX = /* @__PURE__ */ GL({
   __name: "ECharts",
   props: {
     options: null,
     theme: null
   },
-  emits: ["chartClick"],
+  emits: ["chartClick", "chartClickBlank"],
   setup(r, { expose: e, emit: t }) {
     const a = r, n = Tb(null);
     FL(() => {
@@ -43960,9 +43960,11 @@ const TX = { class: "echart-container relative w-full h-full" }, CX = /* @__PURE
     let i = null;
     Db(() => {
       i = dV(n.value, a.theme), i.setOption(a.options), og(() => a.options, (s) => {
-        i == null || i.setOption(s);
-      }), i.on("click", "series", (s) => {
+        console.log(s), i == null || i.setOption(s);
+      }), i.on("click", (s) => {
         t("chartClick", s);
+      }), i.getZr().on("click", function(s) {
+        s.target || t("chartClickBlank");
       }), ZL("resize", () => {
         i == null || i.resize();
       }), JL(n, () => {
@@ -43977,7 +43979,6 @@ const TX = { class: "echart-container relative w-full h-full" }, CX = /* @__PURE
     }), (s, l) => (HL(), WL("div", TX, [
       $L("div", {
         class: "echart w-full h-full",
-        style: { "min-height": "30vh", "min-width": "50rem" },
         ref_key: "chartDiv",
         ref: n
       }, null, 512)

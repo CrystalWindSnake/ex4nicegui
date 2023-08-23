@@ -22,6 +22,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         *,
         html_columns: TMaybeRef[List[int]] = [],
         theme: TMaybeRef[str] = "balham",
+        **org_kws
     ) -> None:
         kws = {
             "options": options,
@@ -31,7 +32,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
 
         value_kws = _convert_kws_ref2value(kws)
 
-        element = ui.aggrid(**value_kws)
+        element = ui.aggrid(**value_kws, **org_kws)
 
         super().__init__(element)
 
@@ -40,7 +41,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
                 self.bind_prop(key, value)  # type: ignore
 
     @staticmethod
-    def from_pandas(df: TMaybeRef):
+    def from_pandas(df: TMaybeRef, **org_kws):
         if is_ref(df):
 
             @ref_computed
@@ -57,12 +58,12 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
                 data = {"columnDefs": columnDefs, "rowData": rowData}
                 return data
 
-            return AggridBindableUi(cp_options)
+            return AggridBindableUi(cp_options, **org_kws)
 
         columnDefs = [{"headerName": col, "field": col} for col in df.columns]  # type: ignore
         rowData = df.to_dict("records")  # type: ignore
         options = {"columnDefs": columnDefs, "rowData": rowData}
-        return AggridBindableUi(options)
+        return AggridBindableUi(options, **org_kws)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "options":
