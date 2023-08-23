@@ -90,7 +90,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
-            return self.bind_text(ref_ui)
+            return self.bind_value(ref_ui)
 
         if prop == "options":
             return self.bind_options(ref_ui)
@@ -105,7 +105,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
 
         return self
 
-    def bind_text(self, ref_ui: ReadonlyRef):
+    def bind_value(self, ref_ui: ReadonlyRef):
         @effect
         def _():
             cast(ValueElement, self.element).on_value_change(ref_ui.value)

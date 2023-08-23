@@ -2,6 +2,13 @@ from pathlib import Path
 import re
 import shutil
 
+FILE_MAPPING={
+    'ECharts':'EChartsComponent/ECharts.js',
+    'UseDraggable':'UseDraggable/UseDraggable.js',
+    'UseMouse':'UseMouse/UseMouse.js',
+    'DropZone':'DropZone/DropZone.js',
+}
+
 EX_REACTIVE_DIR_ROOT = Path(__file__).parent.parent.parent / 'ex4nicegui'/'reactive'
 
 DIST_ROOT = Path(__file__).parent.parent / 'dist'
@@ -41,7 +48,7 @@ def tran_vue_imports(js_file_name_without_ex:str):
         const_stms = "\n".join(each_const_stms) + "\n"
         # print(const_stms)
 
-        to_file = EX_REACTIVE_DIR_ROOT/ js_file_name_without_ex / js_file_name
+        to_file = EX_REACTIVE_DIR_ROOT/ FILE_MAPPING[js_file_name_without_ex]
 
         with open(to_file, mode="w", encoding="utf8") as f:
             f.write(const_stms)
@@ -61,6 +68,6 @@ def copy2styls(src, to_file):
 
 
 
-tran_vue_imports('dropZone')
+tran_vue_imports('ECharts')
 
 
