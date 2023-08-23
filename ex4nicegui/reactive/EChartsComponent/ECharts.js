@@ -43945,7 +43945,7 @@ pt(qZ);
 pt(QZ);
 pt(bX);
 pt(tz);
-const TX = { class: "echart-container relative w-full h-full" }, CX = /* @__PURE__ */ GL({
+const TX = { class: "echart-container relative" }, CX = /* @__PURE__ */ GL({
   __name: "ECharts",
   props: {
     options: null,
@@ -43979,7 +43979,6 @@ const TX = { class: "echart-container relative w-full h-full" }, CX = /* @__PURE
     }), (s, l) => (HL(), WL("div", TX, [
       $L("div", {
         class: "echart w-full h-full",
-        style: { "min-height": "30vh", "min-width": "50rem" },
         ref_key: "chartDiv",
         ref: n
       }, null, 512)

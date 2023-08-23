@@ -67,8 +67,8 @@ defineExpose({
 </script>
 
 <template>
-    <div class="echart-container relative w-full h-full">
-        <div class="echart  w-full h-full" style="min-height: 30vh;min-width: 50rem;" ref="chartDiv">
+    <div class="echart-container relative">
+        <div class="echart  w-full h-full" ref="chartDiv">
         </div>
     </div>
 </template>
