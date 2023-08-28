@@ -82,7 +82,10 @@ class LazySliderBindableUi(SliderBindableUi):
         value: Optional[TMaybeRef[_TSliderValue]] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        super().__init__(min, max, step, value, on_change)
+        super().__init__(min, max, step, value, None)
+
+        if on_change:
+            self.element.on("change", on_change)
 
     def _ex_setup(self):
         ele = self.element
