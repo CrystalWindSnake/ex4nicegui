@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 from dataclasses import dataclass
-from nicegui.helpers import KWONLY_SLOTS
+from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
 

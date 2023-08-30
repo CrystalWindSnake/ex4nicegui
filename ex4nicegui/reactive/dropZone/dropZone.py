@@ -3,7 +3,7 @@ from nicegui import ui, app
 from nicegui.element import Element
 from ex4nicegui.utils.signals import to_ref, Ref
 from dataclasses import dataclass
-from nicegui.helpers import KWONLY_SLOTS
+from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 
 
