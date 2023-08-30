@@ -22,10 +22,10 @@ T = TypeVar("T")
 class CheckboxBindableUi(SingleValueBindableUi[bool, ui.checkbox]):
     @staticmethod
     def _setup_(binder: "CheckboxBindableUi"):
-        def onValueChanged(e):
-            binder._ref.value = e.args  # type: ignore
-
         ele = cast(ValueElement, binder.element)
+
+        def onValueChanged(e):
+            binder._ref.value = e.args[0]  # type: ignore
 
         @effect
         def _():
