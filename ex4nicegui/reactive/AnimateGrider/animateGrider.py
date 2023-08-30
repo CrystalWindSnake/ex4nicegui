@@ -3,8 +3,8 @@ from nicegui import ui, app
 from nicegui.element import Element
 from collections import defaultdict
 from dataclasses import dataclass, field
-from nicegui.helpers import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
+from nicegui.dataclasses import KWONLY_SLOTS
 
 
 @dataclass
@@ -49,10 +49,10 @@ class AnimationFinishEventArguments(UiEventArguments):
 def _to_template_area(
     start_row: int,
     start_col: int,
-    end_row: Union[int, str],
-    end_col: Union[int, str],
+    end_row: Optional[Union[int, str]],
+    end_col: Optional[Union[int, str]],
 ):
-    return f"{start_row}/{start_col}/{end_row}/{end_col}"
+    return f"{start_row}/{start_col}/{end_row or 'auto'}/{end_col or 'auto'}"
 
 
 class AnimateGrider(Element, component="AnimateGrider.js"):
@@ -72,10 +72,14 @@ class AnimateGrider(Element, component="AnimateGrider.js"):
                 return
 
             element = self._steps_map[e.id].target
+            print(type(element).__name__, e.style)
             element.style(replace=e.style)
             if self._auto_set_pointer_events and e.resultProps.opacity <= 0:
                 element.style("pointer-events: auto;")
             # print(e.style)
+
+    def has_step(self, element: Element):
+        return element.id in self._steps_map
 
     def changePosition(
         self,
@@ -92,6 +96,7 @@ class AnimateGrider(Element, component="AnimateGrider.js"):
         id = element.id
 
         gridTemplateStyle = _to_template_area(start_row, start_col, end_row, end_col)
+        print(gridTemplateStyle)
         animateOption = {
             "duration": duration,
             "ease": ease,
@@ -118,7 +123,7 @@ class AnimateGrider(Element, component="AnimateGrider.js"):
         duration: float = 0.3,
         ease="power1.inOut",
     ):
-        is_first_init = element.id not in self._steps_map
+        is_first_init = not self.has_step(element)
 
         if is_first_init:
             self._steps_map[element.id] = StepInfo(element, current_index=0)
@@ -158,6 +163,7 @@ class AnimateGrider(Element, component="AnimateGrider.js"):
             raise ValueError(f"Step index exceeds valid range")
 
         props = step_info.get_current_props()
+        print("next step ==", "name:", type(element).__name__, " props:", props)
         return self.changePosition(element, **props.__dict__)
 
     def on_animation_finish(
@@ -179,7 +185,7 @@ class AnimateGrider(Element, component="AnimateGrider.js"):
         self.on("onAnimationFinish", inner_handler, _onAnimationFinish_Args)
 
     def target(self, element: Element):
-        pass
+        return Target(element, self)
 
 
 class Target:
@@ -198,7 +204,32 @@ class Target:
         duration: float = 0.3,
         ease="power1.inOut",
     ):
-        pass
+        args = {
+            "start_row": start_row,
+            "start_col": start_col,
+            "end_row": end_row,
+            "end_col": end_col,
+            "opacity": opacity,
+            "duration": duration,
+            "ease": ease,
+        }
+
+        check_keys = list(args.keys())[:4]
+
+        none_Keys = [k for k, v in args.items() if k in check_keys and v is None]
+
+        if self._grider.has_step(self._element):
+            pre_step = self._grider._steps_map[self._element.id]
+            pre_prop = pre_step.propsInfos[-1]
+            new_values = {k: v for k, v in pre_prop.__dict__.items() if k in none_Keys}
+            args.update(new_values)
+        elif start_row is None or start_col is None:
+            raise ValueError(
+                "start row or start column must not be None in the first step"
+            )
+
+        self._grider.add_step(self._element, **args)
+        return self
 
 
 def animate_grider(
