@@ -69,4 +69,5 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
     page.wait()
     r_value.value = True
 
+    page.wait(1000)
     assert target.is_checked()
