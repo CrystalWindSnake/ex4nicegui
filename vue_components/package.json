@@ -11,6 +11,7 @@
   "dependencies": {
     "@vueuse/core": "^10.2.0",
     "echarts": "^5.4.2",
+    "gsap": "^3.12.2",
     "vue": "^3.2.47"
   },
   "devDependencies": {

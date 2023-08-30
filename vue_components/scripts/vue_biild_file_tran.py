@@ -7,6 +7,7 @@ FILE_MAPPING={
     'UseDraggable':'UseDraggable/UseDraggable.js',
     'UseMouse':'UseMouse/UseMouse.js',
     'DropZone':'DropZone/DropZone.js',
+    'AnimateGrider':'AnimateGrider/AnimateGrider.js',
 }
 
 EX_REACTIVE_DIR_ROOT = Path(__file__).parent.parent.parent / 'ex4nicegui'/'reactive'
@@ -68,6 +69,6 @@ def copy2styls(src, to_file):
 
 
 
-tran_vue_imports('ECharts')
+tran_vue_imports('AnimateGrider')
 
 
