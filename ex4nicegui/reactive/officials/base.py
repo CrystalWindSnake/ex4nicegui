@@ -25,6 +25,7 @@ from nicegui.elements.mixins.color_elements import (
     QUASAR_COLORS,
     TAILWIND_COLORS,
 )
+from nicegui.elements.mixins.text_element import TextElement
 
 T = TypeVar("T")
 
@@ -80,6 +81,12 @@ class BindableUi(Generic[TWidget]):
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "visible":
             return self.bind_visible(ref_ui)
+
+        if prop == "text" and isinstance(self.element, TextElement):
+
+            @effect
+            def _():
+                cast(TextElement, self.element).on_text_change(ref_ui.value)
 
         @effect
         def _():
