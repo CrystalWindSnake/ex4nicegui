@@ -14,7 +14,7 @@ const entrys = [
 ]
 
 const libEntrys = entrys.map(p => resolve(__dirname, componentRoot, p, `${p}.ts`))
-const targetName = 'ECharts'
+const targetName = 'GridFlex'
 const targetEntry = resolve(__dirname, componentRoot, targetName, `${targetName}.ts`)
 
 // https://vitejs.dev/config/
