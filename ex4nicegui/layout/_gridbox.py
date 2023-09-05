@@ -54,7 +54,7 @@ class grid_box(Element):
         template_columns: Optional[str] = None,
         template_rows: Optional[str] = None,
         *,
-        _client: Client | None = None,
+        _client: Optional[Client] = None,
     ) -> None:
         super().__init__("div", _client=_client)
 
@@ -70,7 +70,6 @@ class grid_box(Element):
 
         self.style(
             f"""
-width: 100%;
 grid-template-areas: {areas};
 display: grid;
 grid-template-columns: {template_columns};
@@ -81,5 +80,8 @@ grid-template-rows:{template_rows};"""
         if isinstance(element, BindableUi):
             element = element.element
         element = cast(Element, element)
-        element.style(f"grid-area:{mark}")
+        element.style(self.mark_style(mark))
         return element
+
+    def mark_style(self, mark: str):
+        return f"grid-area:{mark}"
