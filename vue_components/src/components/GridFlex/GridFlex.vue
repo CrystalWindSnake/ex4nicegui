@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, effect, reactive, ref, watch, toRaw } from 'vue'
-import { useBreakpoints, breakpointsTailwind } from '@vueuse/core'
+import { useBreakpoints, breakpointsQuasar } from '@vueuse/core'
 
 
 type TProps = {
@@ -20,13 +20,29 @@ const breakpointStyleMap = computed(() => {
 
 
 function useStylesWithBreakpoints() {
-    const breakpoints = useBreakpoints(breakpointsTailwind)
+    const breakpoints = useBreakpoints({
+        sm: 600,
+        md: 1024,
+        lg: 1440,
+        xl: 1920
+    })
     const xs = breakpoints.smaller('sm')
-    const sm = breakpoints.smaller('md')
-    const md = breakpoints.smaller('lg')
-    const lg = breakpoints.smaller('xl')
-    const xl = breakpoints.smaller('2xl')
-    const xxl = breakpoints['2xl']
+    const sm = breakpoints.between('sm', 'md')
+    const md = breakpoints.between('md', 'lg')
+    const lg = breakpoints.between('lg', 'xl')
+    const xl = breakpoints.greaterOrEqual('xl')
+
+    const lt_sm = breakpoints.smaller('sm')
+    const lt_md = breakpoints.smaller('md')
+    const lt_lg = breakpoints.smaller('lg')
+    const lt_xl = breakpoints.smaller('xl')
+
+    const gt_xs = breakpoints.greaterOrEqual('sm')
+    const gt_sm = breakpoints.greaterOrEqual('md')
+    const gt_md = breakpoints.greaterOrEqual('lg')
+    const gt_lg = breakpoints.greaterOrEqual('xl')
+
+
 
     const kws = {
         'xs': xs,
@@ -34,23 +50,26 @@ function useStylesWithBreakpoints() {
         'md': md,
         'lg': lg,
         'xl': xl,
-        'xxl': xxl,
+
+        'lt-sm': lt_sm,
+        'lt-md': lt_md,
+        'lt-lg': lt_lg,
+        'lt-xl': lt_xl,
+
+        'gt-xs': gt_xs,
+        'gt-sm': gt_sm,
+        'gt-md': gt_md,
+        'gt-lg': gt_lg,
     }
 
     const style = computed(() => {
-        console.log('breakpointStyleMap', breakpointStyleMap.value);
         if (breakpointStyleMap.value.size === 0) {
             return props.normalStyles
         }
 
-
         for (const [breakpoint, refObj] of Object.entries(kws)) {
             if (refObj.value) {
-                console.log('bp targging', breakpoint, refObj.value);
-
                 if (breakpointStyleMap.value.has(breakpoint)) {
-                    console.log('trigg done:', breakpointStyleMap.value.get(breakpoint));
-
                     return breakpointStyleMap.value.get(breakpoint)!
                 }
             }
@@ -64,10 +83,10 @@ function useStylesWithBreakpoints() {
 
 const currentStyle = useStylesWithBreakpoints()
 
-effect(() => {
-    console.log('style:', currentStyle.value);
+// effect(() => {
+//     console.log('style:', currentStyle.value);
 
-})
+// })
 
 </script>
 

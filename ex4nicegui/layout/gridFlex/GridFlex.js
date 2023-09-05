@@ -1,154 +1,156 @@
-const g = Vue.getCurrentScope
-const x = Vue.onScopeDispose
-const b = Vue.toRef
-const S = Vue.readonly
-const M = Vue.customRef
-const f = Vue.ref
-const d = Vue.computed
-const $ = Vue.watchEffect
-const O = Vue.getCurrentInstance
-const k = Vue.onMounted
-const E = Vue.defineComponent
-const j = Vue.effect
-const B = Vue.openBlock
-const L = Vue.createElementBlock
-const _ = Vue.normalizeStyle
-const q = Vue.unref
-const C = Vue.renderSlot
-function N(n) {
-  return g() ? (x(n), !0) : !1;
+const M = Vue.getCurrentScope
+const _ = Vue.onScopeDispose
+const k = Vue.toRef
+const q = Vue.readonly
+const j = Vue.customRef
+const d = Vue.ref
+const m = Vue.computed
+const B = Vue.watchEffect
+const L = Vue.getCurrentInstance
+const C = Vue.onMounted
+const N = Vue.defineComponent
+const R = Vue.openBlock
+const G = Vue.createElementBlock
+const W = Vue.normalizeStyle
+const z = Vue.unref
+const D = Vue.renderSlot
+function F(n) {
+  return M() ? (_(n), !0) : !1;
 }
-const R = typeof window < "u", G = () => {
+const I = typeof window < "u", Q = () => {
 };
-function W(n, o) {
-  var t;
+function P(n, s) {
+  var r;
   if (typeof n == "number")
-    return n + o;
-  const u = ((t = n.match(/^-?[0-9]+\.?[0-9]*/)) == null ? void 0 : t[0]) || "", r = n.slice(u.length), l = Number.parseFloat(u) + o;
-  return Number.isNaN(l) ? n : l + r;
+    return n + s;
+  const o = ((r = n.match(/^-?[0-9]+\.?[0-9]*/)) == null ? void 0 : r[0]) || "", l = n.slice(o.length), t = Number.parseFloat(o) + s;
+  return Number.isNaN(t) ? n : t + l;
 }
-function z(...n) {
+function U(...n) {
   if (n.length !== 1)
-    return b(...n);
-  const o = n[0];
-  return typeof o == "function" ? S(M(() => ({ get: o, set: G }))) : f(o);
+    return k(...n);
+  const s = n[0];
+  return typeof s == "function" ? q(j(() => ({ get: s, set: Q }))) : d(s);
 }
-const h = R ? window : void 0;
-function D() {
-  const n = f(!1);
-  return O() && k(() => {
+const p = I ? window : void 0;
+function V() {
+  const n = d(!1);
+  return L() && C(() => {
     n.value = !0;
   }), n;
 }
-function F(n) {
-  const o = D();
-  return d(() => (o.value, !!n()));
+function A(n) {
+  const s = V();
+  return m(() => (s.value, !!n()));
 }
-function c(n, o = {}) {
-  const { window: t = h } = o, u = F(() => t && "matchMedia" in t && typeof t.matchMedia == "function");
-  let r;
-  const l = f(!1), a = () => {
-    r && ("removeEventListener" in r ? r.removeEventListener("change", e) : r.removeListener(e));
+function c(n, s = {}) {
+  const { window: r = p } = s, o = A(() => r && "matchMedia" in r && typeof r.matchMedia == "function");
+  let l;
+  const t = d(!1), i = () => {
+    l && ("removeEventListener" in l ? l.removeEventListener("change", e) : l.removeListener(e));
   }, e = () => {
-    u.value && (a(), r = t.matchMedia(z(n).value), l.value = !!(r != null && r.matches), r && ("addEventListener" in r ? r.addEventListener("change", e) : r.addListener(e)));
+    o.value && (i(), l = r.matchMedia(U(n).value), t.value = !!(l != null && l.matches), l && ("addEventListener" in l ? l.addEventListener("change", e) : l.addListener(e)));
   };
-  return $(e), N(() => a()), l;
+  return B(e), F(() => i()), t;
 }
-const I = {
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-  "2xl": 1536
-};
-function Q(n, o = {}) {
-  function t(e, s) {
-    let i = n[e];
-    return s != null && (i = W(i, s)), typeof i == "number" && (i = `${i}px`), i;
+function H(n, s = {}) {
+  function r(e, u) {
+    let a = n[e];
+    return u != null && (a = P(a, u)), typeof a == "number" && (a = `${a}px`), a;
   }
-  const { window: u = h } = o;
-  function r(e) {
-    return u ? u.matchMedia(e).matches : !1;
+  const { window: o = p } = s;
+  function l(e) {
+    return o ? o.matchMedia(e).matches : !1;
   }
-  const l = (e) => c(`(min-width: ${t(e)})`, o), a = Object.keys(n).reduce((e, s) => (Object.defineProperty(e, s, {
-    get: () => l(s),
+  const t = (e) => c(`(min-width: ${r(e)})`, s), i = Object.keys(n).reduce((e, u) => (Object.defineProperty(e, u, {
+    get: () => t(u),
     enumerable: !0,
     configurable: !0
   }), e), {});
-  return Object.assign(a, {
+  return Object.assign(i, {
     greater(e) {
-      return c(`(min-width: ${t(e, 0.1)})`, o);
+      return c(`(min-width: ${r(e, 0.1)})`, s);
     },
-    greaterOrEqual: l,
+    greaterOrEqual: t,
     smaller(e) {
-      return c(`(max-width: ${t(e, -0.1)})`, o);
+      return c(`(max-width: ${r(e, -0.1)})`, s);
     },
     smallerOrEqual(e) {
-      return c(`(max-width: ${t(e)})`, o);
+      return c(`(max-width: ${r(e)})`, s);
     },
-    between(e, s) {
-      return c(`(min-width: ${t(e)}) and (max-width: ${t(s, -0.1)})`, o);
+    between(e, u) {
+      return c(`(min-width: ${r(e)}) and (max-width: ${r(u, -0.1)})`, s);
     },
     isGreater(e) {
-      return r(`(min-width: ${t(e, 0.1)})`);
+      return l(`(min-width: ${r(e, 0.1)})`);
     },
     isGreaterOrEqual(e) {
-      return r(`(min-width: ${t(e)})`);
+      return l(`(min-width: ${r(e)})`);
     },
     isSmaller(e) {
-      return r(`(max-width: ${t(e, -0.1)})`);
+      return l(`(max-width: ${r(e, -0.1)})`);
     },
     isSmallerOrEqual(e) {
-      return r(`(max-width: ${t(e)})`);
+      return l(`(max-width: ${r(e)})`);
     },
-    isInBetween(e, s) {
-      return r(`(min-width: ${t(e)}) and (max-width: ${t(s, -0.1)})`);
+    isInBetween(e, u) {
+      return l(`(min-width: ${r(e)}) and (max-width: ${r(u, -0.1)})`);
     },
     current() {
-      const e = Object.keys(n).map((s) => [s, l(s)]);
-      return d(() => e.filter(([, s]) => s.value).map(([s]) => s));
+      const e = Object.keys(n).map((u) => [u, t(u)]);
+      return m(() => e.filter(([, u]) => u.value).map(([u]) => u));
     }
   });
 }
-const U = /* @__PURE__ */ E({
+const T = /* @__PURE__ */ N({
   __name: "GridFlex",
   props: {
     normalStyles: null,
     breakpointStyleMap: null
   },
   setup(n) {
-    const o = n, t = d(() => new Map(
-      Object.entries(o.breakpointStyleMap)
+    const s = n, r = m(() => new Map(
+      Object.entries(s.breakpointStyleMap)
     ));
-    function u() {
-      const l = Q(I), a = l.smaller("sm"), e = l.smaller("md"), s = l.smaller("lg"), i = l.smaller("xl"), v = l.smaller("2xl"), w = l["2xl"], y = {
-        xs: a,
+    function o() {
+      const t = H({
+        sm: 600,
+        md: 1024,
+        lg: 1440,
+        xl: 1920
+      }), i = t.smaller("sm"), e = t.between("sm", "md"), u = t.between("md", "lg"), a = t.between("lg", "xl"), g = t.greaterOrEqual("xl"), h = t.smaller("sm"), w = t.smaller("md"), v = t.smaller("lg"), y = t.smaller("xl"), x = t.greaterOrEqual("sm"), b = t.greaterOrEqual("md"), O = t.greaterOrEqual("lg"), S = t.greaterOrEqual("xl"), E = {
+        xs: i,
         sm: e,
-        md: s,
-        lg: i,
-        xl: v,
-        xxl: w
+        md: u,
+        lg: a,
+        xl: g,
+        "lt-sm": h,
+        "lt-md": w,
+        "lt-lg": v,
+        "lt-xl": y,
+        "gt-xs": x,
+        "gt-sm": b,
+        "gt-md": O,
+        "gt-lg": S
       };
-      return d(() => {
-        if (console.log("breakpointStyleMap", t.value), t.value.size === 0)
-          return o.normalStyles;
-        for (const [m, p] of Object.entries(y))
-          if (p.value && (console.log("bp targging", m, p.value), t.value.has(m)))
-            return console.log("trigg done:", t.value.get(m)), t.value.get(m);
-        return o.normalStyles;
+      return m(() => {
+        if (r.value.size === 0)
+          return s.normalStyles;
+        for (const [f, $] of Object.entries(E))
+          if ($.value && r.value.has(f))
+            return r.value.get(f);
+        return s.normalStyles;
       });
     }
-    const r = u();
-    return j(() => {
-      console.log("style:", r.value);
-    }), (l, a) => (B(), L("div", {
+    const l = o();
+    return (t, i) => (R(), G("div", {
       class: "grid",
-      style: _(q(r))
+      style: W(z(l))
     }, [
-      C(l.$slots, "default")
+      D(t.$slots, "default")
     ], 4));
   }
 });
 export {
-  U as default
+  T as default
 };
