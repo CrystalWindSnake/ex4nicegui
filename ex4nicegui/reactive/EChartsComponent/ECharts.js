@@ -43959,16 +43959,21 @@ const TX = { class: "echart-container relative" }, CX = /* @__PURE__ */ GL({
     });
     let i = null;
     Db(() => {
-      i = dV(n.value, a.theme), i.setOption(a.options), og(() => a.options, (s) => {
-        console.log(s), i == null || i.setOption(s);
-      }), i.on("click", (s) => {
-        t("chartClick", s);
-      }), i.getZr().on("click", function(s) {
-        s.target || t("chartClickBlank");
-      }), ZL("resize", () => {
-        i == null || i.resize();
+      i = dV(n.value, a.theme), i.setOption(a.options), og(() => a.options, (l) => {
+        i == null || i.setOption(l);
+      }), i.on("click", (l) => {
+        t("chartClick", l);
+      }), i.getZr().on("click", function(l) {
+        l.target || t("chartClickBlank");
+      });
+      function s() {
+        const l = n.value.getBoundingClientRect();
+        i == null || i.resize({ width: l.width - 5, height: l.height - 5 });
+      }
+      ZL("resize", () => {
+        s();
       }), JL(n, () => {
-        i == null || i.resize();
+        s();
       });
     });
     function o(s, l) {

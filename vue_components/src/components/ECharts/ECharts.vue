@@ -23,10 +23,7 @@ onMounted(() => {
     chartIns = echarts.init(chartDiv.value, props.theme)
     chartIns.setOption(props.options)
 
-
-
     watch(() => props.options, opts => {
-        console.log(opts);
         chartIns?.setOption(opts)
     })
 
@@ -39,16 +36,20 @@ onMounted(() => {
         if (!event.target) {
             emits('chartClickBlank')
         }
-
-
     });
 
+
+    function chartResize() {
+        const divRect = chartDiv.value.getBoundingClientRect()
+        chartIns?.resize({ width: divRect.width - 5, height: divRect.height - 5 })
+    }
+
     useEventListener('resize', () => {
-        chartIns?.resize()
+        chartResize()
     })
 
     useResizeObserver(chartDiv, () => {
-        chartIns?.resize()
+        chartResize()
     })
 
 

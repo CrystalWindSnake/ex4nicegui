@@ -42,3 +42,7 @@ def areas_array2str(areas_array: List[List[str]]):
 
     line2str = (f'"{" ".join(line)}"' for line in fix_empty)
     return " ".join(line2str)
+
+
+def best_grid_template_columns(min_column_size: str):
+    return f"repeat(auto-fit,minmax(min({min_column_size},100%),1fr))"
