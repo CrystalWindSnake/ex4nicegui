@@ -1,56 +1,52 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
-import DropZone from "./components/DropZone/DropZone.vue";
+import ECharts from "./components/ECharts/ECharts.vue";
 
 
-const dropZoneRef = ref(null)
-
-onMounted(() => {
-
-  dropZoneRef.value.apply('item1', 'aqua')
-  dropZoneRef.value.apply('item2', 'red')
-
-})
-
-const keys = ref([] as string[])
-
-function onDraggableKeysUpdated(e: { keys: string[] }) {
-  console.log(e.keys);
-  keys.value = e.keys
+const data = {
+  "xAxis": {
+    "type": "category",
+    "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  },
+  "yAxis": { "type": "value" },
+  "series": [{ "data": [120, 200, 150, 80, 70, 110, 130], "type": "bar" }],
 }
 
-function close(key: string) {
-  console.log('close');
 
-  dropZoneRef.value.removeKey(key)
-}
+
 
 </script>
 
 <template>
-  <div class="box" id="dragZone">
+  <div class="box">
 
-    <div v-for="k in keys" :key="k" :style="{ 'width': '4rem', 'height': '4rem', 'background-color': k }"
-      draggable="true"></div>
+    <div style="background-color: antiquewhite; grid-area: a;">xxx</div>
 
+    <div style="grid-area: b;background: #8dd165;"></div>
+
+    <ECharts :options="data" style="grid-area: c; border: 1px solid #000;"></ECharts>
+
+    <div style="grid-area: d;background: #d16565;"></div>
+    <div style=" grid-area: b;">
+
+      <ECharts :options="data" style="height: 100%;width: 100%; border: 1px solid #000;"></ECharts>
+    </div>
   </div>
-
-  <DropZone dropZoneId="dragZone" ref="dropZoneRef" @onDraggableKeysUpdated="onDraggableKeysUpdated"></DropZone>
-
-
-  <div id="item1" style="width: 4rem; height: 4rem; background-color: aqua;"></div>
-  <div id="item2" style="width: 4rem; height: 4rem; background-color: red;"></div>
 </template>
 
 <style scoped>
 .box {
-  width: 20rem;
-  height: 20rem;
-  background: burlywood;
-}
-
-input {
-  user-select: none;
+  min-width: 100vw;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+<<<<<<< HEAD
+  grid-template-rows: 1fr 1fr 1fr;
+=======
+>>>>>>> 004836b6f4002cc503d7a5eb09cdb101a440bbf7
+  grid-template-areas:
+    "a a"
+    "b c"
+    "d e";
 }
 </style>
-./components/DropZone/DragZone.vue

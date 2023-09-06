@@ -3,13 +3,15 @@ import re
 import shutil
 
 FILE_MAPPING={
-    'ECharts':'EChartsComponent/ECharts.js',
-    'UseDraggable':'UseDraggable/UseDraggable.js',
-    'UseMouse':'UseMouse/UseMouse.js',
-    'DropZone':'DropZone/DropZone.js',
+    'ECharts':'reactive/EChartsComponent/ECharts.js',
+    'UseDraggable':'reactive/UseDraggable/UseDraggable.js',
+    'UseMouse':'reactive/UseMouse/UseMouse.js',
+    'DropZone':'reactive/DropZone/DropZone.js',
+    'GridFlex':'layout/gridFlex/GridFlex.js',
+    
 }
 
-EX_REACTIVE_DIR_ROOT = Path(__file__).parent.parent.parent / 'ex4nicegui'/'reactive'
+EX_REACTIVE_DIR_ROOT = Path(__file__).parent.parent.parent / 'ex4nicegui'
 
 DIST_ROOT = Path(__file__).parent.parent / 'dist'
 
@@ -68,6 +70,6 @@ def copy2styls(src, to_file):
 
 
 
-tran_vue_imports('ECharts')
+tran_vue_imports('GridFlex')
 
 
