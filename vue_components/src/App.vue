@@ -27,6 +27,10 @@ const data = {
     <ECharts :options="data" style="grid-area: c; border: 1px solid #000;"></ECharts>
 
     <div style="grid-area: d;background: #d16565;"></div>
+    <div style=" grid-area: b;">
+
+      <ECharts :options="data" style="height: 100%;width: 100%; border: 1px solid #000;"></ECharts>
+    </div>
   </div>
 </template>
 
@@ -36,7 +40,10 @@ const data = {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
+<<<<<<< HEAD
   grid-template-rows: 1fr 1fr 1fr;
+=======
+>>>>>>> 004836b6f4002cc503d7a5eb09cdb101a440bbf7
   grid-template-areas:
     "a a"
     "b c"

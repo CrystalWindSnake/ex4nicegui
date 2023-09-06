@@ -164,7 +164,10 @@ class GridFlex(Element, component="GridFlex.js"):
             "align-items": Vertical_map[vertical],
             "gap": _gap_value(gap),
         }
+<<<<<<< HEAD
         print(styles)
+=======
+>>>>>>> 004836b6f4002cc503d7a5eb09cdb101a440bbf7
         styles.update(kws)
 
         if width_full:
