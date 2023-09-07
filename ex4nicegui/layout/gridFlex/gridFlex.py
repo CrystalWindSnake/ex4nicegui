@@ -147,7 +147,7 @@ class GridFlex(Element, component="GridFlex.js"):
         break_point: Optional[TBreakpoint] = None,
         **kws,
     ):
-        if area is not None:
+        if area is not None and area.strip() != "":
             areas_list = utils.areas_str2array(area)
             area = utils.areas_array2str(areas_list)
             areas_cols_len = max(map(len, areas_list))
