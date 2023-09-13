@@ -110,3 +110,37 @@ class DataSourceFacade(Generic[_TData]):
         self._dataSource._register_component(cp.id, on_source_update)
 
         return cp
+
+    def ui_slider(self, column: str, **ui_kws):
+        self._dataSource._idataSource.slider_check(self.data, column)
+
+        min, max = self._dataSource._idataSource.slider_min_max(self.data, column)
+        ui_kws.update({"min": min, "max": max})
+
+        cp = ui.slider(**ui_kws).props("label label-always switch-label-side")
+
+        def onchange():
+            def data_filter(data):
+                if cp.value is None or cp.value < min:
+                    return data
+                cond = data[column] == cp.value
+                return data[cond]
+
+            self._dataSource.send_filter(cp.id, Filter(data_filter))
+
+        cp.on("change", onchange)
+
+        def on_source_update(data):
+            min, max = self._dataSource._idataSource.slider_min_max(data, column)
+            print(min, max)
+            if min is None and max is None:
+                cp.value = None
+            else:
+                cp.value = min - 1
+
+            cp._props["min"] = min
+            cp._props["max"] = max
+
+        self._dataSource._register_component(cp.id, on_source_update)
+
+        return cp
