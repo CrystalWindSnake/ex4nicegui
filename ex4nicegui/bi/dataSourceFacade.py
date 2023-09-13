@@ -36,9 +36,9 @@ class DataSourceFacade(Generic[_TData]):
             cp.value = value
 
             def data_filter(data):
-                if value is None:
+                if cp.value is None:
                     return data
-                cond = data[column] == value
+                cond = data[column] == cp.value
                 return data[cond]
 
             self._dataSource.send_filter(cp.id, Filter(data_filter))
@@ -132,8 +132,7 @@ class DataSourceFacade(Generic[_TData]):
 
         def on_source_update(data):
             min, max = self._dataSource._idataSource.slider_min_max(data, column)
-            print(min, max)
-            if min is None and max is None:
+            if min is None or max is None:
                 cp.value = None
             else:
                 cp.value = min - 1
