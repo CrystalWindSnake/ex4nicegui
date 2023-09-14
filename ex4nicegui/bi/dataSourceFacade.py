@@ -135,10 +135,8 @@ class DataSourceFacade(Generic[_TData]):
             if min is None or max is None:
                 cp.value = None
             else:
-                cp.value = min - 1
-
-            cp._props["min"] = min
-            cp._props["max"] = max
+                cp._props["min"] = min
+                cp._props["max"] = max
 
         self._dataSource._register_component(cp.id, on_source_update)
 
