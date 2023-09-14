@@ -20,13 +20,24 @@ class DataSourceFacade(Generic[_TData]):
     def filtered_data(self) -> _TData:
         return cast(_TData, self._dataSource.filtered_data)
 
-    def ui_select(self, column: str, *, clearable=True, **ui_kws):
+    def ui_select(self, column: str, *, clearable=True, **kwargs) -> ui.select:
+        """
+        Creates a user interface select box.
+
+        Parameters:
+            column (str): The column name of the data source.
+            clearable (bool, optional): Whether to allow clearing the content of the select box. Default is True.
+            **kwargs: Additional optional parameters that will be passed to the ui.select constructor.
+
+        Returns:
+            ui.select: An instance of a user interface select box.
+        """
         options = self._dataSource._idataSource.duplicates_column_values(
             self.data, column
         )
-        ui_kws.update({"options": options, "clearable": clearable})
+        kwargs.update({"options": options, "clearable": clearable, "label": column})
 
-        cp = ui.select(**ui_kws)
+        cp = ui.select(**kwargs)
 
         def onchange(e):
             value = None
@@ -59,12 +70,21 @@ class DataSourceFacade(Generic[_TData]):
 
         return cp
 
-    def ui_aggrid(self, **ui_kws):
-        ui_kws.update(
+    def ui_aggrid(self, **kwargs):
+        """
+        Creates aggrid table.
+
+        Parameters:
+            **kwargs: Additional optional parameters that will be passed to the ui.aggrid constructor.
+
+        Returns:
+            ui.aggrid: aggrid table.
+        """
+        kwargs.update(
             {"options": self._dataSource._idataSource.get_aggrid_options(self.data)}
         )
 
-        cp = ui.aggrid(**ui_kws)
+        cp = ui.aggrid(**kwargs)
 
         def on_source_update(data):
             cp._props["options"] = self._dataSource._idataSource.get_aggrid_options(
@@ -76,13 +96,23 @@ class DataSourceFacade(Generic[_TData]):
 
         return cp
 
-    def ui_radio(self, column: str, **ui_kws):
+    def ui_radio(self, column: str, **kwargs):
+        """
+        Creates radio Selection.
+
+        Parameters:
+            column (str): The column name of the data source.
+            **kwargs: Additional optional parameters that will be passed to the ui.radio constructor.
+
+        Returns:
+            ui.radio: An radio Selection.
+        """
         options = self._dataSource._idataSource.duplicates_column_values(
             self.data, column
         )
-        ui_kws.update({"options": options})
+        kwargs.update({"options": options})
 
-        cp = ui.radio(**ui_kws)
+        cp = ui.radio(**kwargs)
 
         def onchange(e):
             cp.value = cp.options[e.args]
@@ -111,13 +141,23 @@ class DataSourceFacade(Generic[_TData]):
 
         return cp
 
-    def ui_slider(self, column: str, **ui_kws):
+    def ui_slider(self, column: str, **kwargs):
+        """
+        Creates Slider.
+
+        Parameters:
+            column (str): The column name of the data source.
+            **kwargs: Additional optional parameters that will be passed to the ui.slider constructor.
+
+        Returns:
+            ui.radio: An Slider.
+        """
         self._dataSource._idataSource.slider_check(self.data, column)
 
         min, max = self._dataSource._idataSource.slider_min_max(self.data, column)
-        ui_kws.update({"min": min, "max": max})
+        kwargs.update({"min": min, "max": max})
 
-        cp = ui.slider(**ui_kws).props("label label-always switch-label-side")
+        cp = ui.slider(**kwargs).props("label label-always switch-label-side")
 
         def onchange():
             def data_filter(data):
