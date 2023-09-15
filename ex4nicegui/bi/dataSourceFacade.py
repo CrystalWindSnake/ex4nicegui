@@ -1,11 +1,13 @@
-from typing import TypeVar, Generic, cast
+from typing import Any, Callable, Dict, TypeVar, Generic, cast, Union
 from nicegui import ui
-
-
+from ex4nicegui import ref_computed, effect
+from ex4nicegui.reactive import rxui
 from .dataSource import DataSource, Filter
 
 
 _TData = TypeVar("_TData")
+
+_TPyechartsData = Union[_TData, Callable[..., _TData]]
 
 
 class DataSourceFacade(Generic[_TData]):
@@ -20,13 +22,16 @@ class DataSourceFacade(Generic[_TData]):
     def filtered_data(self) -> _TData:
         return cast(_TData, self._dataSource.filtered_data)
 
-    def ui_select(self, column: str, *, clearable=True, **kwargs) -> ui.select:
+    def ui_select(
+        self, column: str, *, clearable=True, multiple=True, **kwargs
+    ) -> ui.select:
         """
         Creates a user interface select box.
 
         Parameters:
             column (str): The column name of the data source.
             clearable (bool, optional): Whether to allow clearing the content of the select box. Default is True.
+            multiple (bool, optional): Whether to allow multiple selections.
             **kwargs: Additional optional parameters that will be passed to the ui.select constructor.
 
         Returns:
@@ -35,21 +40,36 @@ class DataSourceFacade(Generic[_TData]):
         options = self._dataSource._idataSource.duplicates_column_values(
             self.data, column
         )
-        kwargs.update({"options": options, "clearable": clearable, "label": column})
+        kwargs.update(
+            {
+                "options": options,
+                "multiple": multiple,
+                "clearable": clearable,
+                "label": column,
+            }
+        )
 
-        cp = ui.select(**kwargs)
+        cp = ui.select(**kwargs).props("use-chips outlined")
 
         def onchange(e):
             value = None
             if e.args:
-                value = e.args["label"]
+                if isinstance(e.args, list):
+                    value = [arg["label"] for arg in e.args]
+                else:
+                    value = e.args["label"]
 
             cp.value = value
 
             def data_filter(data):
-                if cp.value is None:
+                if cp.value is None or not cp.value:
                     return data
-                cond = data[column] == cp.value
+
+                cond = None
+                if isinstance(cp.value, list):
+                    cond = data[column].isin(cp.value)
+                else:
+                    cond = data[column] == cp.value
                 return data[cond]
 
             self._dataSource.send_filter(cp.id, Filter(data_filter))
@@ -61,8 +81,12 @@ class DataSourceFacade(Generic[_TData]):
                 data, column
             )
             value = cp.value
-            if value not in options:
-                value = ""
+
+            if isinstance(value, list):
+                value = []
+            else:
+                if value not in options:
+                    value = ""
 
             cp.set_options(options, value=value)
 
@@ -181,3 +205,20 @@ class DataSourceFacade(Generic[_TData]):
         self._dataSource._register_component(cp.id, on_source_update)
 
         return cp
+
+    def ui_pyecharts(self, fn: Callable[[Any], Any]) -> Callable[..., ui.echart]:
+        def wrap():
+            import simplejson as json
+            from pyecharts.charts.chart import Base
+
+            @ref_computed
+            def chart_options():
+                chart = fn(self.filtered_data)
+                if isinstance(chart, Base):
+                    return cast(Dict, json.loads(chart.dump_options()))
+
+            cp = rxui.echarts(chart_options)
+
+            return cp.element
+
+        return wrap  # type: ignore

@@ -40,8 +40,7 @@ onMounted(() => {
 
 
     function chartResize() {
-        const divRect = chartDiv.value.getBoundingClientRect()
-        chartIns?.resize({ width: divRect.width - 5, height: divRect.height - 5 })
+        chartIns?.resize()
     }
 
     useEventListener('resize', () => {

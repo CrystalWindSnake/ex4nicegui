@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 from ex4nicegui.bi.types import _TFilterCallback
 from .types import _TFilterCallback
+from ex4nicegui.utils import common as utils_common
 
 
 class IDataSourceAble(Protocol):
@@ -45,7 +46,7 @@ class DataFrameDataSourceAble(IDataSourceAble):
         return data[column_name].drop_duplicates().tolist()
 
     def get_aggrid_options(self, data) -> Dict:
-        df = data
+        df = utils_common.convert_dataframe(data)
         return {
             "columnDefs": [{"field": col} for col in df.columns],
             "rowData": df.to_dict("records"),
