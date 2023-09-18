@@ -4,6 +4,7 @@ from typing import Callable, TypeVar
 _TData = TypeVar("_TData")
 
 _TElementID = int
+_TNgClientID = str
 _TComponentUpdateCallback = Callable[[_TData], None]
 _TFilterCallback = Callable[[_TData], _TData]
 
