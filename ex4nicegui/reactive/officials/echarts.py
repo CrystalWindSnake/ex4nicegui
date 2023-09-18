@@ -26,7 +26,7 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         value_kws = _convert_kws_ref2value(kws)
 
-        element = echarts(**value_kws).classes("grow self-stretch")
+        element = echarts(**value_kws).classes("grow self-stretch h-[16rem]")
 
         super().__init__(element)
 

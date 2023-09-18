@@ -1,13 +1,13 @@
-from typing import Any, Callable, Dict, TypeVar, Generic, cast, Union
+from __future__ import annotations
+from typing import Any, Callable, Dict, TypeVar, Generic, Union, cast
 from nicegui import ui
-from ex4nicegui import ref_computed, effect
+from ex4nicegui import ref_computed
 from ex4nicegui.reactive import rxui
 from .dataSource import DataSource, Filter
+from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
 
 
 _TData = TypeVar("_TData")
-
-_TPyechartsData = Union[_TData, Callable[..., _TData]]
 
 
 class DataSourceFacade(Generic[_TData]):
@@ -16,10 +16,12 @@ class DataSourceFacade(Generic[_TData]):
 
     @property
     def data(self) -> _TData:
+        """Data without any filtering"""
         return cast(_TData, self._dataSource.data)
 
     @property
     def filtered_data(self) -> _TData:
+        """Data after filtering"""
         return cast(_TData, self._dataSource.filtered_data)
 
     def ui_select(
@@ -82,8 +84,9 @@ class DataSourceFacade(Generic[_TData]):
             )
             value = cp.value
 
+            # Make the value within the options
             if isinstance(value, list):
-                value = []
+                value = list(set(value) & set(options))
             else:
                 if value not in options:
                     value = ""
@@ -115,6 +118,8 @@ class DataSourceFacade(Generic[_TData]):
                 data
             )
             cp.update()
+
+        on_source_update(self.filtered_data)
 
         self._dataSource._register_component(cp.id, on_source_update)
 
@@ -206,19 +211,53 @@ class DataSourceFacade(Generic[_TData]):
 
         return cp
 
-    def ui_pyecharts(self, fn: Callable[[Any], Any]) -> Callable[..., ui.echart]:
-        def wrap():
+    def ui_echarts(
+        self, fn: Callable[[Any], Union[Dict, "pyecharts.Base"]]  # pyright: ignore
+    ) -> echarts:
+        """Create charts
+
+        Args:
+            fn (Callable[[Any], Union[Dict, "pyecharts.Base"]]): builder function.
+
+        ## Examples
+
+        Support pyecharts
+
+        ```py
+        import pandas as pd
+        from ex4nicegui import bi
+        from pyecharts.charts import Bar
+
+        df = pd.DataFrame({"name": list("abcdc"), "value": range(5)})
+        ds = bi.data_source(df)
+
+        @ds.ui_echarts
+        def bar(data: pd.DataFrame):
+            c = (
+                Bar()
+                .add_xaxis(data["name"].tolist())
+                .add_yaxis("value", data["value"].tolist())
+            )
+
+            return c
+
+        bar.classes("h-[20rem]")
+        ```
+
+        """
+
+        @ref_computed
+        def chart_options():
+            options = fn(self.filtered_data)
+            if isinstance(options, Dict):
+                return options
+
             import simplejson as json
             from pyecharts.charts.chart import Base
 
-            @ref_computed
-            def chart_options():
-                chart = fn(self.filtered_data)
-                if isinstance(chart, Base):
-                    return cast(Dict, json.loads(chart.dump_options()))
+            if isinstance(options, Base):
+                return cast(Dict, json.loads(options.dump_options()))
 
-            cp = rxui.echarts(chart_options)
+        cp = rxui.echarts(chart_options)  # type: ignore
 
-            return cp.element
-
-        return wrap  # type: ignore
+        return cp.element  # type: ignore
