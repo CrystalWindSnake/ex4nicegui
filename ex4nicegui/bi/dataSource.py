@@ -122,12 +122,9 @@ class DataSource:
         client_id = ng_client.id
 
         if not self._component_map.has_client_record(client_id):
-            print("首次注册：", client_id)
 
             @ng_client.on_disconnect
             def _(e: Client):
-                print("on_disconnect：", e.id)
-
                 if not e.shared:
                     self._component_map.remove_client(e.id)
 

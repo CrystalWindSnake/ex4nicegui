@@ -1,6 +1,8 @@
-from signe import createSignal, effect, computed, on as signe_on
+from signe import createSignal, effect as signe_effect, computed, on as signe_on
 from signe.core.signal import Signal, SignalOption
+from signe.core.effect import Effect
 from signe import utils as signe_utils
+from .clientScope import NgClientScopeManager
 from signe.types import TSetter, TGetter
 from typing import (
     Any,
@@ -16,6 +18,8 @@ from typing import (
 from nicegui import ui
 
 T = TypeVar("T")
+
+_CLIENT_SCOPE_MANAGER = NgClientScopeManager()
 
 
 class ReadonlyRef(Generic[T]):
@@ -116,6 +120,39 @@ def ref(value: T):
 
 
 @overload
+def effect(
+    fn: None = ...,
+    *,
+    priority_level=1,
+    debug_trigger: Optional[Callable] = None,
+) -> signe_utils._TEffect_Fn[None]:
+    ...
+
+
+@overload
+def effect(
+    fn: Callable[..., None],
+    *,
+    priority_level=1,
+    debug_trigger: Optional[Callable] = None,
+) -> Effect[None]:
+    ...
+
+
+def effect(
+    fn: Optional[Callable[..., None]] = None,
+    *,
+    priority_level=1,
+    debug_trigger: Optional[Callable] = None,
+) -> Union[signe_utils._TEffect_Fn[None], Effect[None]]:
+    kws = {
+        "debug_trigger": debug_trigger,
+        "priority_level": priority_level,
+    }
+    return signe_effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+
+
+@overload
 def ref_computed(
     fn: Callable[[], T],
     *,
@@ -150,7 +187,7 @@ def ref_computed(
     }
 
     if fn:
-        getter = computed(fn, **kws)
+        getter = computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
         return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
     else:
 
@@ -192,7 +229,7 @@ class effect_refreshable:
             re_func.refresh()
 
         if len(self._refs) == 0:
-            runner = effect(runner)
+            runner = signe_effect(runner)
         else:
             runner = on(self._refs)(runner)
 
