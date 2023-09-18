@@ -33,5 +33,5 @@ jobs:
         run: |
           ls
           pwd
-          python -c "import ex4nicegui;from ex4nicegui.reactive import rxui"
+          python -c "import ex4nicegui;from ex4nicegui.reactive import rxui;from ex4nicegui import bi"
     

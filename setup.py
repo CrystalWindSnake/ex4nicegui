@@ -21,7 +21,7 @@ def get_data_files(base):
 with open("README.md", encoding="utf8") as readme_file:
     readme = readme_file.read()
 
-requirements = ["signe>=0.1.8", "nicegui>=1.3.13", "typing_extensions"]
+requirements = ["signe>=0.2.2", "nicegui>=1.3.13", "typing_extensions"]
 
 test_requirements = ["pytest>=3", "playwright", "pandas"]
 
