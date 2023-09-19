@@ -1,4 +1,5 @@
 # ex4nicegui
+[中文 README](./README.md)
 
 An extension library for [nicegui](https://github.com/zauberzeug/nicegui). It has built-in responsive components and fully implements data-responsive interface programming.
 
@@ -74,4 +75,129 @@ ui.run()
 ![](./asset/asyc_echarts_title.gif)
 
 
-### BI 
+
+### BI Module
+
+Create an interactive data visualization report using the minimal API.
+
+![](./asset/bi_examples1.gif)
+
+```python
+from nicegui import ui
+import pandas as pd
+import numpy as np
+from ex4nicegui import bi
+from ex4nicegui import effect, effect_refreshable
+from pyecharts.charts import Bar
+
+
+# data ready
+def gen_data():
+    np.random.seed(265)
+    field1 = ["a1", "a2", "a3", "a4"]
+    field2 = [f"name{i}" for i in range(1, 11)]
+    df = (
+        pd.MultiIndex.from_product([field1, field2], names=["cat", "name"])
+        .to_frame()
+        .reset_index(drop=True)
+    )
+    df[["idc1", "idc2"]] = np.random.randint(50, 1000, size=(len(df), 2))
+    return df
+
+
+df = gen_data()
+
+# Create a data source.
+ds = bi.data_source(df)
+
+# ui
+ui.query(".nicegui-content").classes("items-stretch no-wrap")
+
+with ui.row().classes("justify-evenly"):
+    # Create components based on the data source `ds`.
+    ds.ui_select("cat").classes("min-w-[10rem]")
+    ds.ui_select("name").classes("min-w-[10rem]")
+
+
+with ui.grid(columns=2):
+    # Configure the chart using a dictionary.
+    @ds.ui_echarts
+    def bar1(data: pd.DataFrame):
+        data = data.groupby("name").agg({"idc1": "sum", "idc2": "sum"}).reset_index()
+
+        return {
+            "xAxis": {"type": "value"},
+            "yAxis": {
+                "type": "category",
+                "data": data["name"].tolist(),
+                "inverse": True,
+            },
+            "legend": {"textStyle": {"color": "gray"}},
+            "series": [
+                {"type": "bar", "name": "idc1", "data": data["idc1"].tolist()},
+                {"type": "bar", "name": "idc2", "data": data["idc2"].tolist()},
+            ],
+        }
+
+    bar1.classes("h-[20rem]")
+
+    # Configure the chart using pyecharts.
+    @ds.ui_echarts
+    def bar2(data: pd.DataFrame):
+        data = data.groupby("name").agg({"idc1": "sum", "idc2": "sum"}).reset_index()
+
+        return (
+            Bar()
+            .add_xaxis(data["name"].tolist())
+            .add_yaxis("idc1", data["idc1"].tolist())
+            .add_yaxis("idc2", data["idc2"].tolist())
+        )
+
+    bar2.classes("h-[20rem]")
+
+    # Bind the click event to achieve navigation.
+    @bar2.on_chart_click
+    def _(e):
+        ui.open(f"/details/{e.name}", new_tab=True)
+
+
+# with response mechanisms, you can freely combine native nicegui components.
+label_a1_total = ui.label("")
+
+
+# this function will be triggered when ds changed.
+@effect
+def _():
+    # prop `filtered_data` is the filtered DataFrame.
+    df = ds.filtered_data
+    total = df[df["cat"] == "a1"]["idc1"].sum()
+    label_a1_total.text = f"idc1 total(cat==a1):{total}"
+
+
+# you can also use `effect_refreshable`, but you need to note that the components in the function are rebuilt each time.
+@effect_refreshable
+def _():
+    df = ds.filtered_data
+    total = df[df["cat"] == "a2"]["idc1"].sum()
+    ui.label(f"idc1 total(cat==a2):{total}")
+
+
+# the page to be navigated when clicking on the chart series.
+@ui.page("/details/{name}")
+def details_page(name: str):
+    ui.label("This table data will not change")
+    ui.aggrid.from_pandas(ds.data.query(f'name=="{name}"'))
+
+    ui.label("This table will change when the homepage data changes. ")
+
+    @bi.data_source
+    def new_ds():
+        return ds.filtered_data[["name", "idc1", "idc2"]]
+
+    new_ds.ui_aggrid()
+
+
+ui.run()
+```
+
+
