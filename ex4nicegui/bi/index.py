@@ -1,13 +1,13 @@
 from .dataSourceFacade import DataSourceFacade
 from .dataSource import DataSource
 from .protocols import CallableDataSourceAble, DataFrameDataSourceAble
-from typing import Callable, cast, TypeVar
+from typing import Callable, cast, TypeVar, Union
 
 
 _TData = TypeVar("_TData")
 
 
-def data_source(data: _TData) -> DataSourceFacade[_TData]:
+def data_source(data: Union[Callable[..., _TData], _TData]) -> DataSourceFacade[_TData]:
     """Create a data source
 
     Args:
