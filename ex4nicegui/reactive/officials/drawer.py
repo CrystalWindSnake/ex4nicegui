@@ -51,8 +51,7 @@ class DrawerBindableUi(SingleValueBindableUi[bool, Drawer]):
         else:
             element = ui.right_drawer(**value_kws)
 
-        element.style(f"background-color:rgba(25, 118, 210,0.3)")
-        element.classes("flex flex-col gap-4")
+        element.classes("flex flex-col gap-4 backdrop-blur-md bg-[#5898d4]/30")
 
         init_value = (
             element._props["model-value"]
