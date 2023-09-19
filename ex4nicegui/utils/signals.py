@@ -6,6 +6,7 @@ from .clientScope import NgClientScopeManager
 from signe.types import TSetter, TGetter
 from typing import (
     Any,
+    Dict,
     TypeVar,
     Generic,
     overload,
@@ -159,6 +160,7 @@ def ref_computed(
     desc="",
     debug_trigger: Optional[Callable[..., None]] = None,
     priority_level: int = 1,
+    debug_name: Optional[str] = None,
 ) -> ReadonlyRef[T]:
     ...
 
@@ -170,6 +172,7 @@ def ref_computed(
     desc="",
     debug_trigger: Optional[Callable[..., None]] = None,
     priority_level: int = 1,
+    debug_name: Optional[str] = None,
 ) -> Callable[[Callable[..., T]], ReadonlyRef[T]]:
     ...
 
@@ -180,10 +183,12 @@ def ref_computed(
     desc="",
     debug_trigger: Optional[Callable[..., None]] = None,
     priority_level: int = 1,
+    debug_name: Optional[str] = None,
 ) -> Union[ReadonlyRef[T], Callable[[Callable[..., T]], ReadonlyRef[T]]]:
     kws = {
         "debug_trigger": debug_trigger,
         "priority_level": priority_level,
+        "debug_name": debug_name,
     }
 
     if fn:
@@ -236,13 +241,16 @@ class effect_refreshable:
         return runner
 
 
-def on(refs: Union[ReadonlyRef, Sequence[ReadonlyRef]]):
+def on(
+    refs: Union[ReadonlyRef, Sequence[ReadonlyRef]],
+    effect_kws: Optional[Dict[str, Any]] = None,
+):
     if not isinstance(refs, Sequence):
         refs = [refs]
 
     getters = [getattr(r, "_ReadonlyRef___getter") for r in refs]
 
     def wrap(fn: Callable):
-        return signe_on(getters, fn)
+        return signe_on(getters, fn, effect_kws=effect_kws)
 
     return wrap
