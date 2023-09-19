@@ -43967,8 +43967,7 @@ const TX = { class: "echart-container relative" }, CX = /* @__PURE__ */ GL({
         l.target || t("chartClickBlank");
       });
       function s() {
-        const l = n.value.getBoundingClientRect();
-        i == null || i.resize({ width: l.width - 5, height: l.height - 5 });
+        i == null || i.resize();
       }
       ZL("resize", () => {
         s();
