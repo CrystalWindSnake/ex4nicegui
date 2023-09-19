@@ -1,6 +1,11 @@
 # ex4nicegui
 [中文 README](./README.md)
 
+- [Install](#-install)
+- [Usage](#-usage)
+- [Features](#-features)
+- [BI Module](#bi-module)
+
 An extension library for [nicegui](https://github.com/zauberzeug/nicegui). It has built-in responsive components and fully implements data-responsive interface programming.
 
 
@@ -76,7 +81,7 @@ ui.run()
 
 
 
-### BI Module
+## BI Module
 
 Create an interactive data visualization report using the minimal API.
 
