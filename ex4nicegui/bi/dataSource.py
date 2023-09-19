@@ -18,10 +18,15 @@ class Filter:
     callback: types._TFilterCallback
 
 
-@dataclass
-class ComponentInfo:
+@dataclass(frozen=True)
+class ComponentInfoKey:
     client_id: types._TNgClientID
     element_id: types._TElementID
+
+
+@dataclass
+class ComponentInfo:
+    key: ComponentInfoKey
     update_callback: types._TComponentUpdateCallback
     filter: Optional[Filter] = None
 
@@ -36,8 +41,8 @@ class ComponentMap:
         return client_id in self._client_map
 
     def add_info(self, info: ComponentInfo):
-        client_id = info.client_id
-        element_id = info.element_id
+        client_id = info.key.client_id
+        element_id = info.key.element_id
 
         if client_id not in self._client_map:
             self._client_map[client_id] = {element_id: info}
@@ -129,42 +134,40 @@ class DataSource:
                     self._component_map.remove_client(e.id)
 
         self._component_map.add_info(
-            ComponentInfo(client_id, element_id, update_callback)
+            ComponentInfo(ComponentInfoKey(client_id, element_id), update_callback)
         )
 
         return self
 
     def send_filter(self, element_id: types._TElementID, filter: Filter):
-        if not self._component_map.has_record(globals.get_client().id, element_id):
+        client_id = globals.get_client().id
+
+        if not self._component_map.has_record(client_id, element_id):
             raise ValueError("element not register")
 
-        self._component_map.set_filter(globals.get_client().id, element_id, filter)
+        self._component_map.set_filter(client_id, element_id, filter)
 
-        self.__notify_update([element_id])
+        self.__notify_update([ComponentInfoKey(client_id, element_id)])
         return self
 
-    def __notify_update(
-        self, ignore_element_ids: Optional[List[types._TElementID]] = None
-    ):
-        ignore_element_ids = ignore_element_ids or []
-
-        ignore_ids_set = set(ignore_element_ids)
+    def __notify_update(self, ignore_keys: Optional[List[ComponentInfoKey]] = None):
+        ignore_keys = ignore_keys or []
+        ignore_ids_set = set(ignore_keys)
 
         # nodify every component
-        for info in self._component_map.get_all_info():
-            target_id = info.element_id
-            if target_id in ignore_ids_set:
+        for current_info in self._component_map.get_all_info():
+            if current_info.key in ignore_ids_set:
                 continue
 
             # apply filters ,except current target
             filters = [
                 info.filter.callback
                 for info in self._component_map.get_all_info()
-                if info.element_id != target_id and info.filter
+                if (info.key != current_info.key) and info.filter
             ]
 
             new_data = self._idataSource.apply_filters(filters)
-            info.update_callback(new_data)
+            current_info.update_callback(new_data)
 
         self.__filters.value = [
             info.filter for info in self._component_map.get_all_info() if info.filter
