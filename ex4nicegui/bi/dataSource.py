@@ -102,6 +102,10 @@ class DataSource:
         self.__data = data_fn
         self._component_map = ComponentMap()
 
+        @on(data_fn)
+        def _():
+            self.__notify_update()
+
     @property
     def data(self):
         return self.__data.value
@@ -162,7 +166,7 @@ class DataSource:
                 if (info.key != current_info.key) and info.filter
             ]
 
-            new_data = self._idataSource.apply_filters(filters)
+            new_data = self._idataSource.apply_filters(self.__data.value, filters)
             current_info.update_callback(new_data)
 
         self.__filters.value = [

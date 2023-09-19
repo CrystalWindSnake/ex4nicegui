@@ -10,7 +10,7 @@ class IDataSourceAble(Protocol):
     def get_data(self):
         ...
 
-    def apply_filters(self, filters: List[_TFilterCallback]):
+    def apply_filters(self, data, filters: List[_TFilterCallback]):
         ...
 
     def duplicates_column_values(self, data, column_name: str) -> List:
@@ -35,8 +35,8 @@ class DataFrameDataSourceAble(IDataSourceAble):
     def get_data(self):
         return self.data
 
-    def apply_filters(self, filters: List[_TFilterCallback]):
-        new_data = self.data
+    def apply_filters(self, data, filters: List[_TFilterCallback]):
+        new_data = data
         for f in filters:
             new_data = f(new_data)
 
@@ -78,8 +78,8 @@ class CallableDataSourceAble(IDataSourceAble):
     def get_data(self):
         return self.data_fn()
 
-    def apply_filters(self, filters: List[_TFilterCallback]):
-        new_data = self.get_data()
+    def apply_filters(self, data, filters: List[_TFilterCallback]):
+        new_data = data
         for f in filters:
             new_data = f(new_data)
 
