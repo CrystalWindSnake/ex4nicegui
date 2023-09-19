@@ -102,10 +102,6 @@ class DataSource:
         self.__data = data_fn
         self._component_map = ComponentMap()
 
-        @on(data_fn)
-        def _():
-            self.__notify_update()
-
     @property
     def data(self):
         return self.__data.value
