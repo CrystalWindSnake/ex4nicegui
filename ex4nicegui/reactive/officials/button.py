@@ -57,7 +57,7 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button]):
         @effect
         def _():
             ele = self.element
-            ele._props["text"] = ref_ui.value
+            ele._props["label"] = ref_ui.value
             ele.update()
 
         return self
