@@ -5,7 +5,8 @@ from ex4nicegui import ref_computed
 from ex4nicegui.reactive import rxui
 from .dataSource import DataSource, Filter
 from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
-from .elements.ui_select import ui_select, SelectResult
+from .elements.ui_select import ui_select
+from .elements.ui_radio import ui_radio
 
 _TData = TypeVar("_TData")
 
@@ -24,9 +25,7 @@ class DataSourceFacade(Generic[_TData]):
         """Data after filtering"""
         return cast(_TData, self._dataSource.filtered_data)
 
-    def ui_select(
-        self, column: str, *, clearable=True, multiple=True, **kwargs
-    ) -> SelectResult:
+    def ui_select(self, column: str, *, clearable=True, multiple=True, **kwargs):
         """
         Creates a user interface select box.
 
@@ -37,9 +36,10 @@ class DataSourceFacade(Generic[_TData]):
             **kwargs: Additional optional parameters that will be passed to the ui.select constructor.
 
         Returns:
-            ui.select: An instance of a user interface select box.
+            SelectResult: An instance of a user interface select box.
         """
         kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws.update(kwargs)
         return ui_select(**kws)
 
     def ui_aggrid(self, **kwargs):
@@ -79,41 +79,11 @@ class DataSourceFacade(Generic[_TData]):
             **kwargs: Additional optional parameters that will be passed to the ui.radio constructor.
 
         Returns:
-            ui.radio: An radio Selection.
+            RadioResult: An radio Selection.
         """
-        options = self._dataSource._idataSource.duplicates_column_values(
-            self.data, column
-        )
-        kwargs.update({"options": options})
-
-        cp = ui.radio(**kwargs)
-
-        def onchange(e):
-            cp.value = cp.options[e.args]
-
-            def data_filter(data):
-                if cp.value not in cp.options:
-                    return data
-                cond = data[column] == cp.value
-                return data[cond]
-
-            self._dataSource.send_filter(cp.id, Filter(data_filter))
-
-        cp.on("update:modelValue", onchange)
-
-        def on_source_update(data):
-            options = self._dataSource._idataSource.duplicates_column_values(
-                data, column
-            )
-            value = cp.value
-            if value not in options:
-                value = ""
-
-            cp.set_options(options, value=value)
-
-        self._dataSource._register_component(cp.id, on_source_update)
-
-        return cp
+        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws.update(kwargs)
+        return ui_radio(**kws)
 
     def ui_slider(self, column: str, **kwargs):
         """
