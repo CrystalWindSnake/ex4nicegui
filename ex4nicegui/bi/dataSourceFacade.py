@@ -7,6 +7,7 @@ from .dataSource import DataSource, Filter
 from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
 from .elements.ui_select import ui_select
 from .elements.ui_radio import ui_radio
+from .elements.ui_slider import ui_slider
 
 _TData = TypeVar("_TData")
 
@@ -96,35 +97,9 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.radio: An Slider.
         """
-        self._dataSource._idataSource.slider_check(self.data, column)
-
-        min, max = self._dataSource._idataSource.slider_min_max(self.data, column)
-        kwargs.update({"min": min, "max": max})
-
-        cp = ui.slider(**kwargs).props("label label-always switch-label-side")
-
-        def onchange():
-            def data_filter(data):
-                if cp.value is None or cp.value < min:
-                    return data
-                cond = data[column] == cp.value
-                return data[cond]
-
-            self._dataSource.send_filter(cp.id, Filter(data_filter))
-
-        cp.on("change", onchange)
-
-        def on_source_update(data):
-            min, max = self._dataSource._idataSource.slider_min_max(data, column)
-            if min is None or max is None:
-                cp.value = None
-            else:
-                cp._props["min"] = min
-                cp._props["max"] = max
-
-        self._dataSource._register_component(cp.id, on_source_update)
-
-        return cp
+        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws.update(kwargs)
+        return ui_slider(**kws)
 
     def ui_echarts(
         self, fn: Callable[[Any], Union[Dict, "pyecharts.Base"]]  # pyright: ignore
