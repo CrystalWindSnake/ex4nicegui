@@ -5,7 +5,7 @@ from ex4nicegui import ref_computed
 from ex4nicegui.reactive import rxui
 from .dataSource import DataSource, Filter
 from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
-
+from .elements.ui_select import ui_select, SelectResult
 
 _TData = TypeVar("_TData")
 
@@ -26,7 +26,7 @@ class DataSourceFacade(Generic[_TData]):
 
     def ui_select(
         self, column: str, *, clearable=True, multiple=True, **kwargs
-    ) -> ui.select:
+    ) -> SelectResult:
         """
         Creates a user interface select box.
 
@@ -39,63 +39,8 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.select: An instance of a user interface select box.
         """
-        options = self._dataSource._idataSource.duplicates_column_values(
-            self.data, column
-        )
-        kwargs.update(
-            {
-                "options": options,
-                "multiple": multiple,
-                "clearable": clearable,
-                "label": column,
-            }
-        )
-
-        cp = ui.select(**kwargs).props("use-chips outlined")
-
-        def onchange(e):
-            value = None
-            if e.args:
-                if isinstance(e.args, list):
-                    value = [arg["label"] for arg in e.args]
-                else:
-                    value = e.args["label"]
-
-            cp.value = value
-
-            def data_filter(data):
-                if cp.value is None or not cp.value:
-                    return data
-
-                cond = None
-                if isinstance(cp.value, list):
-                    cond = data[column].isin(cp.value)
-                else:
-                    cond = data[column] == cp.value
-                return data[cond]
-
-            self._dataSource.send_filter(cp.id, Filter(data_filter))
-
-        cp.on("update:modelValue", onchange)
-
-        def on_source_update(data):
-            options = self._dataSource._idataSource.duplicates_column_values(
-                data, column
-            )
-            value = cp.value
-
-            # Make the value within the options
-            if isinstance(value, list):
-                value = list(set(value) & set(options))
-            else:
-                if value not in options:
-                    value = ""
-
-            cp.set_options(options, value=value)
-
-        self._dataSource._register_component(cp.id, on_source_update)
-
-        return cp
+        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        return ui_select(**kws)
 
     def ui_aggrid(self, **kwargs):
         """
