@@ -1,10 +1,42 @@
-from typing import Dict, List, Optional, cast
+from typing import Callable, Dict, Generator, List, Optional, Union, cast
 from ex4nicegui import to_ref, ref_computed, on
 from nicegui import globals, Client
 
 from dataclasses import dataclass
 from . import types
 from .protocols import IDataSourceAble
+
+
+class UpdateUtils:
+    def __init__(
+        self,
+        current_info: "ComponentInfo",
+        dataSourceAble: IDataSourceAble,
+        data,
+        component_infos: Generator["ComponentInfo", None, None],
+    ) -> None:
+        self.data = data
+        self._current_info = current_info
+        self._dataSourceAble = dataSourceAble
+        self._component_infos = list(component_infos)
+
+    def apply_filters_exclude_self(self):
+        """apply filters ,except self filter
+
+        Returns:
+            _type_: data after filters
+        """
+        filters = [
+            info.filter.callback
+            for info in self._component_infos
+            if (info.key != self._current_info.key) and info.filter
+        ]
+
+        return self._dataSourceAble.apply_filters(self.data, filters)
+
+
+_TComponentUpdateCallback = Callable[[UpdateUtils], None]
+_TComponentCanUpdateFn = Callable[["ComponentInfo"], bool]
 
 
 @dataclass
@@ -27,8 +59,15 @@ class ComponentInfoKey:
 @dataclass
 class ComponentInfo:
     key: ComponentInfoKey
-    update_callback: types._TComponentUpdateCallback
+    update_callback: _TComponentUpdateCallback
+    can_update_fn: Optional[_TComponentCanUpdateFn] = None
     filter: Optional[Filter] = None
+
+    def __eq__(self, other):
+        return isinstance(other, ComponentInfo) and self.key == other.key
+
+    def can_update(self, trigger: "ComponentInfo"):
+        return (self.can_update_fn is None) or self.can_update_fn(trigger)
 
 
 class ComponentMap:
@@ -56,9 +95,10 @@ class ComponentMap:
         if client_id in self._client_map:
             del self._client_map[client_id]
 
-    def has_record(self, client_id: types._TNgClientID, element_id: types._TElementID):
+    def has_record(self, key: ComponentInfoKey):
         return (
-            client_id in self._client_map and element_id in self._client_map[client_id]
+            key.client_id in self._client_map
+            and key.element_id in self._client_map[key.client_id]
         )
 
     def set_filter(
@@ -73,6 +113,9 @@ class ComponentMap:
         return (
             info for ele_map in self._client_map.values() for info in ele_map.values()
         )
+
+    def get_info(self, key: ComponentInfoKey) -> ComponentInfo:
+        return self._client_map[key.client_id][key.element_id]
 
 
 class DataSource:
@@ -121,7 +164,8 @@ class DataSource:
     def _register_component(
         self,
         element_id: types._TElementID,
-        update_callback: types._TComponentUpdateCallback,
+        update_callback: _TComponentUpdateCallback,
+        can_update_fn: Optional[_TComponentCanUpdateFn] = None,
     ):
         ng_client = globals.get_client()
         client_id = ng_client.id
@@ -133,42 +177,60 @@ class DataSource:
                 if not e.shared:
                     self._component_map.remove_client(e.id)
 
-        self._component_map.add_info(
-            ComponentInfo(ComponentInfoKey(client_id, element_id), update_callback)
+        info = ComponentInfo(
+            ComponentInfoKey(client_id, element_id), update_callback, can_update_fn
         )
+        self._component_map.add_info(info)
 
-        return self
+        return info
 
     def send_filter(self, element_id: types._TElementID, filter: Filter):
         client_id = globals.get_client().id
+        key = ComponentInfoKey(client_id, element_id)
 
-        if not self._component_map.has_record(client_id, element_id):
+        if not self._component_map.has_record(key):
             raise ValueError("element not register")
 
         self._component_map.set_filter(client_id, element_id, filter)
 
-        self.__notify_update([ComponentInfoKey(client_id, element_id)])
+        trigger_info = self._component_map.get_info(
+            ComponentInfoKey(client_id, element_id)
+        )
+
+        self.__notify_update(trigger_info)
         return self
 
-    def __notify_update(self, ignore_keys: Optional[List[ComponentInfoKey]] = None):
-        ignore_keys = ignore_keys or []
-        ignore_ids_set = set(ignore_keys)
-
+    def __notify_update(self, trigger_info: Optional[ComponentInfo] = None):
         # nodify every component
         for current_info in self._component_map.get_all_info():
-            if current_info.key in ignore_ids_set:
+            # not nodify the self triggering
+            if trigger_info and current_info.key == trigger_info.key:
                 continue
 
-            # apply filters ,except current target
-            filters = [
-                info.filter.callback
-                for info in self._component_map.get_all_info()
-                if (info.key != current_info.key) and info.filter
-            ]
+            # Each component decides whether to accept this notification
+            assert trigger_info
+            if not current_info.can_update(trigger_info):
+                continue
 
-            new_data = self._idataSource.apply_filters(self.__data.value, filters)
-            current_info.update_callback(new_data)
+            # filter is used according to the component
+            update_utils = self.create_update_utils(current_info)
+
+            current_info.update_callback(update_utils)
 
         self.__filters.value = [
             info.filter for info in self._component_map.get_all_info() if info.filter
         ]
+
+    def reset_can_update_fn(
+        self, key: ComponentInfoKey, can_update_fn: Union[_TComponentCanUpdateFn, None]
+    ):
+        self._component_map.get_info(key).can_update_fn = can_update_fn
+        return self
+
+    def create_update_utils(self, current_info: ComponentInfo):
+        return UpdateUtils(
+            current_info,
+            self._idataSource,
+            self.__data.value,
+            self._component_map.get_all_info(),
+        )

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import to_ref
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter
 from .models import UiResult
@@ -13,7 +13,8 @@ from nicegui.elements.mixins.value_element import ValueElement
 
 
 if TYPE_CHECKING:
-    from ex4nicegui.bi.dataSourceFacade import DataSourceFacade
+    from ex4nicegui.bi.dataSourceFacade import DataSourceFacade, DataSource
+    from ex4nicegui.bi.dataSource import UpdateUtils
 
 
 class QRangeValue(TypedDict):
@@ -54,9 +55,10 @@ class RangeResult(UiResult[QRange]):
     def __init__(
         self,
         element: QRange,
+        dataSource: DataSource,
         ref_value: Ref,
     ) -> None:
-        super().__init__(element)
+        super().__init__(element, dataSource)
         self._ref_value = ref_value
 
     @property
@@ -95,7 +97,8 @@ def ui_range(self: DataSourceFacade, column: str, **kwargs):
 
     cp.on("change", onchange)
 
-    def on_source_update(data):
+    def on_source_update(utils: UpdateUtils):
+        data = utils.apply_filters_exclude_self()
         min, max = self._dataSource._idataSource.range_min_max(data, column)
         if min is None or max is None:
             cp.value = None
@@ -114,4 +117,4 @@ def ui_range(self: DataSourceFacade, column: str, **kwargs):
 
     self._dataSource._register_component(cp.id, on_source_update)
 
-    return RangeResult(cp, ref_value)
+    return RangeResult(cp, self._dataSource, ref_value)

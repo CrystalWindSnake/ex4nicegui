@@ -9,6 +9,7 @@ from .elements.ui_select import ui_select
 from .elements.ui_radio import ui_radio
 from .elements.ui_slider import ui_slider
 from .elements.ui_range import ui_range
+from .elements.ui_echarts import ui_echarts
 
 
 _TData = TypeVar("_TData")
@@ -120,7 +121,7 @@ class DataSourceFacade(Generic[_TData]):
 
     def ui_echarts(
         self, fn: Callable[[Any], Union[Dict, "pyecharts.Base"]]  # pyright: ignore
-    ) -> echarts:
+    ):
         """Create charts
 
         Args:
@@ -152,19 +153,4 @@ class DataSourceFacade(Generic[_TData]):
         ```
 
         """
-
-        @ref_computed
-        def chart_options():
-            options = fn(self.filtered_data)
-            if isinstance(options, Dict):
-                return options
-
-            import simplejson as json
-            from pyecharts.charts.chart import Base
-
-            if isinstance(options, Base):
-                return cast(Dict, json.loads(options.dump_options()))
-
-        cp = rxui.echarts(chart_options)  # type: ignore
-
-        return cp.element  # type: ignore
+        return ui_echarts(self, fn)
