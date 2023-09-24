@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, TYPE_CHECKING
+from typing import Optional, TypeVar, Generic, TYPE_CHECKING
 from nicegui import globals as ng_globals, ui
 from ex4nicegui.bi.dataSource import ComponentInfoKey
 
@@ -18,6 +18,23 @@ class UiResult(Generic[_T_ELEMENT]):
     @property
     def element(self):
         return self.__element
+
+    def classes(
+        self,
+        add: Optional[str] = None,
+        *,
+        remove: Optional[str] = None,
+        replace: Optional[str] = None,
+    ):
+        return self.element.classes(add, remove=remove, replace=replace)
+
+    def props(
+        self,
+        add: Optional[str] = None,
+        *,
+        remove: Optional[str] = None,
+    ):
+        return self.element.props(add, remove=remove)
 
     def cancel_linkage(self, *ui_results: "UiResult"):
         client_id = ng_globals.get_client().id
