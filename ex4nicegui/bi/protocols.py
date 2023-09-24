@@ -27,6 +27,14 @@ class IDataSourceAble(Protocol):
     ) -> Tuple[Optional[float], Optional[float]]:
         ...
 
+    def range_check(self, data, column_name: str) -> None:
+        ...
+
+    def range_min_max(
+        self, data, column_name: str
+    ) -> Tuple[Optional[float], Optional[float]]:
+        ...
+
 
 class DataFrameDataSourceAble(IDataSourceAble):
     def __init__(self, df) -> None:
@@ -70,6 +78,24 @@ class DataFrameDataSourceAble(IDataSourceAble):
 
         return min, max
 
+    def range_check(self, data, column_name: str) -> None:
+        from pandas.api.types import is_numeric_dtype
+
+        if not is_numeric_dtype(data[column_name]):
+            raise ValueError(f"column[{column_name}] must be numeric type")
+
+    def range_min_max(
+        self, data, column_name: str
+    ) -> Tuple[Optional[float], Optional[float]]:
+        import numpy as np
+
+        min, max = data[column_name].min(), data[column_name].max()
+
+        if np.isnan(min) or np.isnan(max):
+            return None, None
+
+        return min, max
+
 
 class CallableDataSourceAble(IDataSourceAble):
     def __init__(self, fn: Callable) -> None:
@@ -96,9 +122,30 @@ class CallableDataSourceAble(IDataSourceAble):
         }
 
     def slider_check(self, data, column_name: str) -> None:
-        pass
+        from pandas.api.types import is_numeric_dtype
+
+        if not is_numeric_dtype(data[column_name]):
+            raise ValueError(f"column[{column_name}] must be numeric type")
 
     def slider_min_max(
+        self, data, column_name: str
+    ) -> Tuple[Optional[float], Optional[float]]:
+        import numpy as np
+
+        min, max = data[column_name].min(), data[column_name].max()
+
+        if np.isnan(min) or np.isnan(max):
+            return None, None
+
+        return min, max
+
+    def range_check(self, data, column_name: str) -> None:
+        from pandas.api.types import is_numeric_dtype
+
+        if not is_numeric_dtype(data[column_name]):
+            raise ValueError(f"column[{column_name}] must be numeric type")
+
+    def range_min_max(
         self, data, column_name: str
     ) -> Tuple[Optional[float], Optional[float]]:
         import numpy as np

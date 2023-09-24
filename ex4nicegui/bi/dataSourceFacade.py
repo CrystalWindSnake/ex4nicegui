@@ -8,6 +8,8 @@ from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
 from .elements.ui_select import ui_select
 from .elements.ui_radio import ui_radio
 from .elements.ui_slider import ui_slider
+from .elements.ui_range import ui_range
+
 
 _TData = TypeVar("_TData")
 
@@ -100,6 +102,21 @@ class DataSourceFacade(Generic[_TData]):
         kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
         kws.update(kwargs)
         return ui_slider(**kws)
+
+    def ui_range(self, column: str, **kwargs):
+        """
+        Creates Range.
+
+        Parameters:
+            column (str): The column name of the data source.
+            **kwargs: Additional optional parameters that will be passed to the ui.slider constructor.
+
+        Returns:
+            QRange: An Range.
+        """
+        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws.update(kwargs)
+        return ui_range(**kws)
 
     def ui_echarts(
         self, fn: Callable[[Any], Union[Dict, "pyecharts.Base"]]  # pyright: ignore
