@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, Dict, Union, cast
-from nicegui import ui
-from ex4nicegui import to_ref
-from ex4nicegui.utils.signals import Ref
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
+from nicegui.events import UiEventArguments
 from ex4nicegui.reactive import rxui
-from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
-from ex4nicegui.bi.dataSource import DataSource, Filter
+from ex4nicegui.reactive.EChartsComponent.ECharts import (
+    EChartsClickEventArguments,
+    echarts,
+)
+from ex4nicegui.bi.dataSource import DataSource
 from .models import UiResult
 from ex4nicegui.bi.dataSource import UpdateUtils
 
@@ -16,6 +17,16 @@ if TYPE_CHECKING:
 class EChartsResult(UiResult[echarts]):
     def __init__(self, element: echarts, dataSource: DataSource) -> None:
         super().__init__(element, dataSource)
+
+    def on_chart_click(
+        self, handler: Optional[Callable[[EChartsClickEventArguments], Any]]
+    ):
+        return self.element.on_chart_click(handler)
+
+    def on_chart_click_blank(
+        self, handler: Optional[Callable[[UiEventArguments], Any]]
+    ):
+        return self.element.on_chart_click_blank(handler)
 
 
 def ui_echarts(
