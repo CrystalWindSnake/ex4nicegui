@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from nicegui import ui
-from nicegui.elements.select import Select
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter

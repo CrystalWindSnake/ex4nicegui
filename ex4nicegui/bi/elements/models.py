@@ -1,10 +1,9 @@
 from __future__ import annotations
 from typing import Optional, TypeVar, Generic, TYPE_CHECKING, Union
-from nicegui import globals as ng_globals, ui
-from ex4nicegui.bi.dataSource import ComponentInfoKey
+from nicegui import ui
 
 if TYPE_CHECKING:
-    from ex4nicegui.bi.dataSource import DataSource, ComponentInfo
+    from ex4nicegui.bi.dataSource import DataSource
 
 
 _T_ELEMENT = TypeVar("_T_ELEMENT", bound=ui.element)
