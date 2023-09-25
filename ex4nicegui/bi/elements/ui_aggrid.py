@@ -35,7 +35,7 @@ def ui_aggrid(
     cp = ui.aggrid(**kwargs)
 
     def on_source_update():
-        data = self._dataSource.get_filtered_data(cp.id)
+        data = self._dataSource.get_filtered_data(cp)
         cp._props["options"] = self._dataSource._idataSource.get_aggrid_options(data)
         cp.update()
 

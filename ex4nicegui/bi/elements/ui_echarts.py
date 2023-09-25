@@ -34,7 +34,7 @@ class EChartsResult(UiResult[echarts]):
     def cancel_linkage(self, *source: Union[ui.element, "UiResult"]):
         super().cancel_linkage(*source)
         self.element.update_options(
-            self.chart_update(self._dataSource.get_filtered_data(self.element.id))
+            self.chart_update(self._dataSource.get_filtered_data(self.element))
         )
 
 
@@ -60,13 +60,13 @@ def ui_echarts(
     ele_id = cp.element.id
 
     def on_source_update():
-        data = self._dataSource.get_filtered_data(ele_id)
+        data = self._dataSource.get_filtered_data(cp.element)
         options = create_options(data)
         cp.element.update_options(options)
 
     info = self._dataSource._register_component(ele_id, on_source_update)
 
     cp.element.update_options(
-        create_options(self._dataSource.get_filtered_data(ele_id))
+        create_options(self._dataSource.get_filtered_data(cp.element))
     )
     return EChartsResult(cp.element, self._dataSource, create_options)

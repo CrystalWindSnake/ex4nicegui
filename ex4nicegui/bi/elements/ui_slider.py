@@ -46,7 +46,7 @@ def ui_slider(self: DataSourceFacade, column: str, **kwargs):
     cp.on("change", onchange)
 
     def on_source_update():
-        data = self._dataSource.get_filtered_data(cp.id)
+        data = self._dataSource.get_filtered_data(cp)
         min, max = self._dataSource._idataSource.slider_min_max(data, column)
         if min is None or max is None:
             cp.value = None

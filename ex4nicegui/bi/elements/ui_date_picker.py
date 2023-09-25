@@ -68,7 +68,7 @@ def ui_date_picker(
     cp.on("update:value", onchange)
 
     def on_source_update():
-        data = self._dataSource.get_filtered_data(cp.id)
+        data = self._dataSource.get_filtered_data(cp)
         # options = self._dataSource._idataSource.duplicates_column_values(data, column)
         # value = cp.value
 
