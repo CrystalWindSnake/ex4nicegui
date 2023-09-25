@@ -13,7 +13,7 @@ _T_ELEMENT = TypeVar("_T_ELEMENT", bound=ui.element)
 class UiResult(Generic[_T_ELEMENT]):
     def __init__(self, element: _T_ELEMENT, dataSource: "DataSource") -> None:
         self.__element = element
-        self.__dataSource = dataSource
+        self._dataSource = dataSource
 
     @property
     def element(self):
@@ -37,15 +37,23 @@ class UiResult(Generic[_T_ELEMENT]):
         return self.element.props(add, remove=remove)
 
     def cancel_linkage(self, *ui_results: "UiResult"):
-        client_id = ng_globals.get_client().id
+        get_info_key = self._dataSource.get_component_info_key
 
-        cancel_keys = set(
-            ComponentInfoKey(client_id, res.element.id) for res in ui_results
-        )
+        key = get_info_key(self.element.id)
 
-        def can_update_fn(trigger: ComponentInfo):
-            return trigger.key not in cancel_keys
+        info = self._dataSource._component_map.get_info(key)
 
-        self.__dataSource.reset_can_update_fn(
-            ComponentInfoKey(client_id, self.element.id), can_update_fn
-        )
+        for res in ui_results:
+            res_key = get_info_key(res.element.id)
+            info.exclude_keys.add(res_key)
+
+        # cancel_keys = set(
+        #     ComponentInfoKey(client_id, res.element.id) for res in ui_results
+        # )
+
+        # def can_update_fn(trigger: ComponentInfo):
+        #     return trigger.key not in cancel_keys
+
+        # self.__dataSource.reset_can_update_fn(
+        #     ComponentInfoKey(client_id, self.element.id), can_update_fn
+        # )

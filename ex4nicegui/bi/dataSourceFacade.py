@@ -10,6 +10,7 @@ from .elements.ui_radio import ui_radio
 from .elements.ui_slider import ui_slider
 from .elements.ui_range import ui_range
 from .elements.ui_echarts import ui_echarts
+from .elements.ui_aggrid import ui_aggrid
 
 
 _TData = TypeVar("_TData")
@@ -56,23 +57,7 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.aggrid: aggrid table.
         """
-        kwargs.update(
-            {"options": self._dataSource._idataSource.get_aggrid_options(self.data)}
-        )
-
-        cp = ui.aggrid(**kwargs)
-
-        def on_source_update(data):
-            cp._props["options"] = self._dataSource._idataSource.get_aggrid_options(
-                data
-            )
-            cp.update()
-
-        on_source_update(self.filtered_data)
-
-        self._dataSource._register_component(cp.id, on_source_update)
-
-        return cp
+        return ui_aggrid(self, **kwargs)
 
     def ui_radio(self, column: str, **kwargs):
         """

@@ -8,15 +8,17 @@ from ex4nicegui.reactive.EChartsComponent.ECharts import (
 )
 from ex4nicegui.bi.dataSource import DataSource
 from .models import UiResult
-from ex4nicegui.bi.dataSource import UpdateUtils
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.dataSourceFacade import DataSourceFacade
 
 
 class EChartsResult(UiResult[echarts]):
-    def __init__(self, element: echarts, dataSource: DataSource) -> None:
+    def __init__(
+        self, element: echarts, dataSource: DataSource, chart_update: Callable
+    ) -> None:
         super().__init__(element, dataSource)
+        self.chart_update = chart_update
 
     def on_chart_click(
         self, handler: Optional[Callable[[EChartsClickEventArguments], Any]]
@@ -27,6 +29,12 @@ class EChartsResult(UiResult[echarts]):
         self, handler: Optional[Callable[[UiEventArguments], Any]]
     ):
         return self.element.on_chart_click_blank(handler)
+
+    def cancel_linkage(self, *ui_results: UiResult):
+        super().cancel_linkage(*ui_results)
+        self.element.update_options(
+            self.chart_update(self._dataSource.get_filtered_data(self.element.id))
+        )
 
 
 def ui_echarts(
@@ -48,13 +56,16 @@ def ui_echarts(
         raise TypeError(f"not support options type[{type(options)}]")
 
     cp = rxui.echarts({})
+    ele_id = cp.element.id
 
-    def on_source_update(utils: UpdateUtils):
-        options = create_options(utils.apply_filters_exclude_self())
+    def on_source_update():
+        data = self._dataSource.get_filtered_data(ele_id)
+        options = create_options(data)
         cp.element.update_options(options)
 
-    info = self._dataSource._register_component(cp.element.id, on_source_update)
+    info = self._dataSource._register_component(ele_id, on_source_update)
 
-    udpate_utils = self._dataSource.create_update_utils(info)
-    cp.element.update_options(create_options(udpate_utils.apply_filters_exclude_self()))
-    return EChartsResult(cp.element, self._dataSource)
+    cp.element.update_options(
+        create_options(self._dataSource.get_filtered_data(ele_id))
+    )
+    return EChartsResult(cp.element, self._dataSource, create_options)

@@ -1,48 +1,13 @@
-from typing import Callable, Dict, Generator, List, Optional, Union, cast
+from typing import Callable, Dict, Generator, List, Optional, Set, Union, cast
 from ex4nicegui import to_ref, ref_computed, on
-from nicegui import globals, Client
+from nicegui import globals as ng_globals, Client
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from . import types
 from .protocols import IDataSourceAble
 
-
-class UpdateUtils:
-    def __init__(
-        self,
-        current_info: "ComponentInfo",
-        dataSourceAble: IDataSourceAble,
-        data,
-        component_infos: Generator["ComponentInfo", None, None],
-    ) -> None:
-        self.data = data
-        self._current_info = current_info
-        self._dataSourceAble = dataSourceAble
-        self._component_infos = list(component_infos)
-
-    def apply_filters_exclude_self(self):
-        """apply filters ,except self filter
-
-        Returns:
-            _type_: data after filters
-        """
-        filters = [
-            info.filter.callback
-            for info in self._component_infos
-            if (info.key != self._current_info.key) and info.filter
-        ]
-
-        return self._dataSourceAble.apply_filters(self.data, filters)
-
-
-_TComponentUpdateCallback = Callable[[UpdateUtils], None]
+_TComponentUpdateCallback = Callable[[], None]
 _TComponentCanUpdateFn = Callable[["ComponentInfo"], bool]
-
-
-@dataclass
-class DataSourceInfo:
-    source: "DataSource"
-    update_callback: types._TSourceBuildFn
 
 
 @dataclass
@@ -60,14 +25,11 @@ class ComponentInfoKey:
 class ComponentInfo:
     key: ComponentInfoKey
     update_callback: _TComponentUpdateCallback
-    can_update_fn: Optional[_TComponentCanUpdateFn] = None
     filter: Optional[Filter] = None
+    exclude_keys: Set[ComponentInfoKey] = field(default_factory=set)
 
     def __eq__(self, other):
         return isinstance(other, ComponentInfo) and self.key == other.key
-
-    def can_update(self, trigger: "ComponentInfo"):
-        return (self.can_update_fn is None) or self.can_update_fn(trigger)
 
 
 class ComponentMap:
@@ -161,13 +123,32 @@ class DataSource:
     def id(self):
         return self.__id
 
+    def get_component_info_key(self, element_id: types._TElementID):
+        client_id = ng_globals.get_client().id
+        return ComponentInfoKey(client_id, element_id)
+
+    def get_filtered_data(self, element_id: types._TElementID):
+        data = self._idataSource.get_data()
+        current_info = self._component_map.get_info(
+            self.get_component_info_key(element_id)
+        )
+
+        filters = [
+            info.filter.callback
+            for info in self._component_map.get_all_info()
+            if current_info.key != info.key
+            and (info.key not in current_info.exclude_keys)
+            and info.filter
+        ]
+
+        return self._idataSource.apply_filters(data, filters)
+
     def _register_component(
         self,
         element_id: types._TElementID,
         update_callback: _TComponentUpdateCallback,
-        can_update_fn: Optional[_TComponentCanUpdateFn] = None,
     ):
-        ng_client = globals.get_client()
+        ng_client = ng_globals.get_client()
         client_id = ng_client.id
 
         if not self._component_map.has_client_record(client_id):
@@ -177,15 +158,13 @@ class DataSource:
                 if not e.shared:
                     self._component_map.remove_client(e.id)
 
-        info = ComponentInfo(
-            ComponentInfoKey(client_id, element_id), update_callback, can_update_fn
-        )
+        info = ComponentInfo(ComponentInfoKey(client_id, element_id), update_callback)
         self._component_map.add_info(info)
 
         return info
 
     def send_filter(self, element_id: types._TElementID, filter: Filter):
-        client_id = globals.get_client().id
+        client_id = ng_globals.get_client().id
         key = ComponentInfoKey(client_id, element_id)
 
         if not self._component_map.has_record(key):
@@ -207,30 +186,22 @@ class DataSource:
             if trigger_info and current_info.key == trigger_info.key:
                 continue
 
-            # Each component decides whether to accept this notification
-            assert trigger_info
-            if not current_info.can_update(trigger_info):
-                continue
-
-            # filter is used according to the component
-            update_utils = self.create_update_utils(current_info)
-
-            current_info.update_callback(update_utils)
+            current_info.update_callback()
 
         self.__filters.value = [
             info.filter for info in self._component_map.get_all_info() if info.filter
         ]
 
-    def reset_can_update_fn(
-        self, key: ComponentInfoKey, can_update_fn: Union[_TComponentCanUpdateFn, None]
-    ):
-        self._component_map.get_info(key).can_update_fn = can_update_fn
-        return self
+        # def reset_can_update_fn(
+        #     self, key: ComponentInfoKey, can_update_fn: Union[_TComponentCanUpdateFn, None]
+        # ):
+        #     self._component_map.get_info(key).can_update_fn = can_update_fn
+        #     return self
 
-    def create_update_utils(self, current_info: ComponentInfo):
-        return UpdateUtils(
-            current_info,
-            self._idataSource,
-            self.__data.value,
-            self._component_map.get_all_info(),
-        )
+        # def create_update_utils(self, current_info: ComponentInfo):
+        # return UpdateUtils(
+        #     current_info,
+        #     self._idataSource,
+        #     self.__data.value,
+        #     self._component_map.get_all_info(),
+        # )

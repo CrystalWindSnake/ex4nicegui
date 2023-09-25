@@ -8,7 +8,6 @@ from .models import UiResult
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.dataSourceFacade import DataSourceFacade, DataSource
-    from ex4nicegui.bi.dataSource import UpdateUtils
 
 
 class SliderResult(UiResult[ui.slider]):
@@ -46,8 +45,8 @@ def ui_slider(self: DataSourceFacade, column: str, **kwargs):
 
     cp.on("change", onchange)
 
-    def on_source_update(utils: UpdateUtils):
-        data = utils.apply_filters_exclude_self()
+    def on_source_update():
+        data = self._dataSource.get_filtered_data(cp.id)
         min, max = self._dataSource._idataSource.slider_min_max(data, column)
         if min is None or max is None:
             cp.value = None

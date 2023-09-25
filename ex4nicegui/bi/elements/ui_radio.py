@@ -9,7 +9,6 @@ from .models import UiResult
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.dataSourceFacade import DataSourceFacade
-    from ex4nicegui.bi.dataSource import UpdateUtils
 
 
 class RadioResult(UiResult[ui.radio]):
@@ -47,8 +46,8 @@ def ui_radio(self: DataSourceFacade, column: str, **kwargs) -> RadioResult:
 
     cp.on("update:modelValue", onchange)
 
-    def on_source_update(utils: UpdateUtils):
-        data = utils.apply_filters_exclude_self()
+    def on_source_update():
+        data = self._dataSource.get_filtered_data(cp.id)
         options = self._dataSource._idataSource.duplicates_column_values(data, column)
         value = cp.value
         if value not in options:

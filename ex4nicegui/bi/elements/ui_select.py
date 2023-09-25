@@ -9,7 +9,6 @@ from .models import UiResult
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.dataSourceFacade import DataSourceFacade, DataSource
-    from ex4nicegui.bi.dataSource import UpdateUtils
 
 
 class SelectResult(UiResult[ui.select]):
@@ -88,8 +87,8 @@ def ui_select(
 
     cp.on("update:modelValue", onchange)
 
-    def on_source_update(utils: UpdateUtils):
-        data = utils.apply_filters_exclude_self()
+    def on_source_update():
+        data = self._dataSource.get_filtered_data(cp.id)
         options = self._dataSource._idataSource.duplicates_column_values(data, column)
         value = cp.value
 

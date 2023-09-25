@@ -1,5 +1,5 @@
 from typing_extensions import Protocol
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ex4nicegui.bi.types import _TFilterCallback
 from .types import _TFilterCallback
@@ -7,10 +7,10 @@ from ex4nicegui.utils import common as utils_common
 
 
 class IDataSourceAble(Protocol):
-    def get_data(self):
+    def get_data(self) -> Any:
         ...
 
-    def apply_filters(self, data, filters: List[_TFilterCallback]):
+    def apply_filters(self, data, filters: List[_TFilterCallback]) -> Any:
         ...
 
     def duplicates_column_values(self, data, column_name: str) -> List:
