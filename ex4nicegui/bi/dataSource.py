@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Generator, List, Optional, Set, Union, cast
+from typing import Callable, Dict, List, Optional, Set, cast
 from ex4nicegui import to_ref, ref_computed, on
 from nicegui import globals as ng_globals, Client
 
@@ -7,7 +7,6 @@ from . import types
 from .protocols import IDataSourceAble
 
 _TComponentUpdateCallback = Callable[[], None]
-_TComponentCanUpdateFn = Callable[["ComponentInfo"], bool]
 
 
 @dataclass
@@ -24,7 +23,7 @@ class ComponentInfoKey:
 @dataclass
 class ComponentInfo:
     key: ComponentInfoKey
-    update_callback: _TComponentUpdateCallback
+    update_callback: Optional[_TComponentUpdateCallback] = None
     filter: Optional[Filter] = None
     exclude_keys: Set[ComponentInfoKey] = field(default_factory=set)
 
@@ -146,7 +145,7 @@ class DataSource:
     def _register_component(
         self,
         element_id: types._TElementID,
-        update_callback: _TComponentUpdateCallback,
+        update_callback: Optional[_TComponentUpdateCallback] = None,
     ):
         ng_client = ng_globals.get_client()
         client_id = ng_client.id
@@ -177,6 +176,10 @@ class DataSource:
         )
 
         self.__notify_update(trigger_info)
+        self.__filters.value = [
+            info.filter for info in self._component_map.get_all_info() if info.filter
+        ]
+
         return self
 
     def __notify_update(self, trigger_info: Optional[ComponentInfo] = None):
@@ -186,22 +189,14 @@ class DataSource:
             if trigger_info and current_info.key == trigger_info.key:
                 continue
 
-            current_info.update_callback()
+            update_callback = current_info.update_callback
+            if update_callback:
+                update_callback()
 
-        self.__filters.value = [
-            info.filter for info in self._component_map.get_all_info() if info.filter
-        ]
-
-        # def reset_can_update_fn(
-        #     self, key: ComponentInfoKey, can_update_fn: Union[_TComponentCanUpdateFn, None]
-        # ):
-        #     self._component_map.get_info(key).can_update_fn = can_update_fn
-        #     return self
-
-        # def create_update_utils(self, current_info: ComponentInfo):
-        # return UpdateUtils(
-        #     current_info,
-        #     self._idataSource,
-        #     self.__data.value,
-        #     self._component_map.get_all_info(),
-        # )
+    def on_source_update(
+        self,
+        element_id: types._TElementID,
+        callback: _TComponentUpdateCallback,
+    ):
+        key = self.get_component_info_key(element_id)
+        self._component_map.get_info(key).update_callback = callback

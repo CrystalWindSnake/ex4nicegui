@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, TypeVar, Generic, TYPE_CHECKING
+from typing import Optional, TypeVar, Generic, TYPE_CHECKING, Union
 from nicegui import globals as ng_globals, ui
 from ex4nicegui.bi.dataSource import ComponentInfoKey
 
@@ -19,6 +19,10 @@ class UiResult(Generic[_T_ELEMENT]):
     def element(self):
         return self.__element
 
+    @property
+    def id(self):
+        return self.element.id
+
     def classes(
         self,
         add: Optional[str] = None,
@@ -36,24 +40,13 @@ class UiResult(Generic[_T_ELEMENT]):
     ):
         return self.element.props(add, remove=remove)
 
-    def cancel_linkage(self, *ui_results: "UiResult"):
+    def cancel_linkage(self, *source: Union[ui.element, "UiResult"]):
         get_info_key = self._dataSource.get_component_info_key
 
         key = get_info_key(self.element.id)
 
         info = self._dataSource._component_map.get_info(key)
 
-        for res in ui_results:
-            res_key = get_info_key(res.element.id)
+        for s in source:
+            res_key = get_info_key(s.id)
             info.exclude_keys.add(res_key)
-
-        # cancel_keys = set(
-        #     ComponentInfoKey(client_id, res.element.id) for res in ui_results
-        # )
-
-        # def can_update_fn(trigger: ComponentInfo):
-        #     return trigger.key not in cancel_keys
-
-        # self.__dataSource.reset_can_update_fn(
-        #     ComponentInfoKey(client_id, self.element.id), can_update_fn
-        # )

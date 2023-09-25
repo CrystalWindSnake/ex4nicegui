@@ -1,10 +1,8 @@
 from __future__ import annotations
 from typing import Any, Callable, Dict, TypeVar, Generic, Union, cast
 from nicegui import ui
-from ex4nicegui import ref_computed
-from ex4nicegui.reactive import rxui
 from .dataSource import DataSource, Filter
-from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
+from . import types as bi_types
 from .elements.ui_select import ui_select
 from .elements.ui_radio import ui_radio
 from .elements.ui_slider import ui_slider
@@ -139,3 +137,12 @@ class DataSourceFacade(Generic[_TData]):
 
         """
         return ui_echarts(self, fn)
+
+    def send_filter(
+        self, element: ui.element, filter: bi_types._TFilterCallback[_TData]
+    ):
+        ele_id = element.id
+        key = self._dataSource.get_component_info_key(ele_id)
+        if not self._dataSource._component_map.has_record(key):
+            self._dataSource._register_component(ele_id)
+        self._dataSource.send_filter(ele_id, Filter(filter))

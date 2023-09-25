@@ -6,6 +6,7 @@ from ex4nicegui.reactive.EChartsComponent.ECharts import (
     EChartsClickEventArguments,
     echarts,
 )
+from nicegui import ui
 from ex4nicegui.bi.dataSource import DataSource
 from .models import UiResult
 
@@ -30,8 +31,8 @@ class EChartsResult(UiResult[echarts]):
     ):
         return self.element.on_chart_click_blank(handler)
 
-    def cancel_linkage(self, *ui_results: UiResult):
-        super().cancel_linkage(*ui_results)
+    def cancel_linkage(self, *source: Union[ui.element, "UiResult"]):
+        super().cancel_linkage(*source)
         self.element.update_options(
             self.chart_update(self._dataSource.get_filtered_data(self.element.id))
         )

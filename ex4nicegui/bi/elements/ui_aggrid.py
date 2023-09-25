@@ -21,8 +21,8 @@ class AggridResult(UiResult[ui.aggrid]):
         super().__init__(element, dataSource)
         self.table_update = table_update
 
-    def cancel_linkage(self, *ui_results: UiResult):
-        super().cancel_linkage(*ui_results)
+    def cancel_linkage(self, *source: Union[ui.element, "UiResult"]):
+        super().cancel_linkage(*source)
         self.table_update()
 
 
