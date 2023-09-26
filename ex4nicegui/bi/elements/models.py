@@ -29,7 +29,8 @@ class UiResult(Generic[_T_ELEMENT]):
         remove: Optional[str] = None,
         replace: Optional[str] = None,
     ):
-        return self.element.classes(add, remove=remove, replace=replace)
+        self.element.classes(add, remove=remove, replace=replace)
+        return self
 
     def props(
         self,
@@ -37,7 +38,8 @@ class UiResult(Generic[_T_ELEMENT]):
         *,
         remove: Optional[str] = None,
     ):
-        return self.element.props(add, remove=remove)
+        self.element.props(add, remove=remove)
+        return self
 
     def cancel_linkage(self, *source: Union[ui.element, "UiResult"]):
         get_info_key = self._dataSource.get_component_info_key
@@ -49,3 +51,5 @@ class UiResult(Generic[_T_ELEMENT]):
         for s in source:
             res_key = get_info_key(s.id)
             info.exclude_keys.add(res_key)
+
+        return self
