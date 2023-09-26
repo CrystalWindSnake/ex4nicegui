@@ -29,7 +29,7 @@ from nicegui.elements.mixins.text_element import TextElement
 
 T = TypeVar("T")
 
-TWidget = TypeVar("TWidget")
+TWidget = TypeVar("TWidget", bound=ui.element)
 
 
 class BindableUi(Generic[TWidget]):
@@ -61,6 +61,13 @@ class BindableUi(Generic[TWidget]):
         cast(ui.element, self.element).style(add, remove=remove, replace=replace)
         return self
 
+    def __enter__(self) -> Self:
+        self.element.__enter__()
+        return self
+
+    def __exit__(self, *_):
+        self.element.default_slot.__exit__(*_)
+
     def tooltip(self, text: str) -> Self:
         cast(ui.element, self.element).tooltip(text)
         return self
@@ -77,6 +84,10 @@ class BindableUi(Generic[TWidget]):
     @property
     def element(self):
         return self.__element
+
+    def delete(self) -> None:
+        """Delete the element."""
+        self.element.delete()
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "visible":
