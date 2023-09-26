@@ -16,4 +16,4 @@ from signe import batch
 from ex4nicegui.experimental_ import gridLayout as exp_ui
 
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
