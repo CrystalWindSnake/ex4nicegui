@@ -55,6 +55,7 @@ class echarts(Element, component="ECharts.js"):
             [open echarts setOption docs](https://echarts.apache.org/zh/api.html#echartsInstance.setOption)
 
         """
+        self._props["options"] = options
         self.run_method("updateOptions", options, opts)
         self.update()
         return self

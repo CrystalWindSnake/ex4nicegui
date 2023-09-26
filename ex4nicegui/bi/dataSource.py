@@ -1,16 +1,12 @@
-from typing import Dict, List, Optional, cast
+from typing import Callable, Dict, List, Optional, Set, cast
 from ex4nicegui import to_ref, ref_computed, on
-from nicegui import globals, Client
+from nicegui import globals as ng_globals, Client, ui
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from . import types
 from .protocols import IDataSourceAble
 
-
-@dataclass
-class DataSourceInfo:
-    source: "DataSource"
-    update_callback: types._TSourceBuildFn
+_TComponentUpdateCallback = Callable[[], None]
 
 
 @dataclass
@@ -27,8 +23,12 @@ class ComponentInfoKey:
 @dataclass
 class ComponentInfo:
     key: ComponentInfoKey
-    update_callback: types._TComponentUpdateCallback
+    update_callback: Optional[_TComponentUpdateCallback] = None
     filter: Optional[Filter] = None
+    exclude_keys: Set[ComponentInfoKey] = field(default_factory=set)
+
+    def __eq__(self, other):
+        return isinstance(other, ComponentInfo) and self.key == other.key
 
 
 class ComponentMap:
@@ -56,9 +56,10 @@ class ComponentMap:
         if client_id in self._client_map:
             del self._client_map[client_id]
 
-    def has_record(self, client_id: types._TNgClientID, element_id: types._TElementID):
+    def has_record(self, key: ComponentInfoKey):
         return (
-            client_id in self._client_map and element_id in self._client_map[client_id]
+            key.client_id in self._client_map
+            and key.element_id in self._client_map[key.client_id]
         )
 
     def set_filter(
@@ -73,6 +74,9 @@ class ComponentMap:
         return (
             info for ele_map in self._client_map.values() for info in ele_map.values()
         )
+
+    def get_info(self, key: ComponentInfoKey) -> ComponentInfo:
+        return self._client_map[key.client_id][key.element_id]
 
 
 class DataSource:
@@ -118,12 +122,33 @@ class DataSource:
     def id(self):
         return self.__id
 
+    def get_component_info_key(self, element_id: types._TElementID):
+        client_id = ng_globals.get_client().id
+        return ComponentInfoKey(client_id, element_id)
+
+    def get_filtered_data(self, element: ui.element):
+        data = self._idataSource.get_data()
+
+        # note:must be use client id of the element
+        key = ComponentInfoKey(element.client.id, element.id)
+        current_info = self._component_map.get_info(key)
+
+        filters = [
+            info.filter.callback
+            for info in self._component_map.get_all_info()
+            if current_info.key != info.key
+            and (info.key not in current_info.exclude_keys)
+            and info.filter
+        ]
+
+        return self._idataSource.apply_filters(data, filters)
+
     def _register_component(
         self,
         element_id: types._TElementID,
-        update_callback: types._TComponentUpdateCallback,
+        update_callback: Optional[_TComponentUpdateCallback] = None,
     ):
-        ng_client = globals.get_client()
+        ng_client = ng_globals.get_client()
         client_id = ng_client.id
 
         if not self._component_map.has_client_record(client_id):
@@ -133,42 +158,46 @@ class DataSource:
                 if not e.shared:
                     self._component_map.remove_client(e.id)
 
-        self._component_map.add_info(
-            ComponentInfo(ComponentInfoKey(client_id, element_id), update_callback)
-        )
+        info = ComponentInfo(ComponentInfoKey(client_id, element_id), update_callback)
+        self._component_map.add_info(info)
 
-        return self
+        return info
 
     def send_filter(self, element_id: types._TElementID, filter: Filter):
-        client_id = globals.get_client().id
+        client_id = ng_globals.get_client().id
+        key = ComponentInfoKey(client_id, element_id)
 
-        if not self._component_map.has_record(client_id, element_id):
+        if not self._component_map.has_record(key):
             raise ValueError("element not register")
 
         self._component_map.set_filter(client_id, element_id, filter)
 
-        self.__notify_update([ComponentInfoKey(client_id, element_id)])
-        return self
+        trigger_info = self._component_map.get_info(
+            ComponentInfoKey(client_id, element_id)
+        )
 
-    def __notify_update(self, ignore_keys: Optional[List[ComponentInfoKey]] = None):
-        ignore_keys = ignore_keys or []
-        ignore_ids_set = set(ignore_keys)
-
-        # nodify every component
-        for current_info in self._component_map.get_all_info():
-            if current_info.key in ignore_ids_set:
-                continue
-
-            # apply filters ,except current target
-            filters = [
-                info.filter.callback
-                for info in self._component_map.get_all_info()
-                if (info.key != current_info.key) and info.filter
-            ]
-
-            new_data = self._idataSource.apply_filters(self.__data.value, filters)
-            current_info.update_callback(new_data)
-
+        self.__notify_update(trigger_info)
         self.__filters.value = [
             info.filter for info in self._component_map.get_all_info() if info.filter
         ]
+
+        return self
+
+    def __notify_update(self, trigger_info: Optional[ComponentInfo] = None):
+        # nodify every component
+        for current_info in self._component_map.get_all_info():
+            # not nodify the self triggering
+            if trigger_info and current_info.key == trigger_info.key:
+                continue
+
+            update_callback = current_info.update_callback
+            if update_callback:
+                update_callback()
+
+    def on_source_update(
+        self,
+        element_id: types._TElementID,
+        callback: _TComponentUpdateCallback,
+    ):
+        key = self.get_component_info_key(element_id)
+        self._component_map.get_info(key).update_callback = callback

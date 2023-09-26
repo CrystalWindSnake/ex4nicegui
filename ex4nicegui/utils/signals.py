@@ -126,6 +126,7 @@ def effect(
     *,
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
+    debug_name: Optional[str] = None,
 ) -> signe_utils._TEffect_Fn[None]:
     ...
 
@@ -136,6 +137,7 @@ def effect(
     *,
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
+    debug_name: Optional[str] = None,
 ) -> Effect[None]:
     ...
 
@@ -145,10 +147,12 @@ def effect(
     *,
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
+    debug_name: Optional[str] = None,
 ) -> Union[signe_utils._TEffect_Fn[None], Effect[None]]:
     kws = {
         "debug_trigger": debug_trigger,
         "priority_level": priority_level,
+        "debug_name": debug_name,
     }
     return signe_effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
 
