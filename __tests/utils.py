@@ -31,3 +31,11 @@ class SelectUtils:
         return self.page.locator(
             "css= .q-menu.q-position-engine.scroll > .q-virtual-scroll__content > * "
         ).all_inner_texts()
+
+    def click_cancel(self):
+        self.page.get_by_role("button", name="cancel").click()
+
+    def click_and_select(self, value: str):
+        # .locator("div").nth(2)
+        self.click()
+        self.page.get_by_role("option", name=value).click()

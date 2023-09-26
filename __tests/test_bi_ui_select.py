@@ -1,8 +1,5 @@
-import pytest
-from ex4nicegui.reactive import rxui
 from nicegui import ui
 from .screen import ScreenPage
-from playwright.sync_api import expect, Page
 import pandas as pd
 
 from ex4nicegui import bi
