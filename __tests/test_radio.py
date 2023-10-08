@@ -26,6 +26,7 @@ def test_const_value(page: ScreenPage, page_path: str):
 
     page.wait()
     target.check_by_label("b")
+    page.wait()
     assert not target.is_checked_by_label("a")
     assert target.is_checked_by_label("b")
 
@@ -55,6 +56,7 @@ def test_ref_value(page: ScreenPage, page_path: str):
 
     page.wait()
     target.check_by_label("b")
+    page.wait()
     assert not target.is_checked_by_label("a")
     assert target.is_checked_by_label("b")
     assert r_value.value == "b"
@@ -81,6 +83,7 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
 
     page.wait()
     r_value.value = "b"
+    page.wait()
     assert not target.is_checked_by_label("a")
     assert target.is_checked_by_label("b")
 
@@ -108,12 +111,14 @@ def test_ref_value_dict_options(page: ScreenPage, page_path: str):
 
     page.wait()
     target.check_by_label("a value")
+    page.wait()
     assert target.is_checked_by_label("a value")
     assert not target.is_checked_by_label("b value")
     assert r_value.value == "a"
 
     page.wait()
     target.check_by_label("b value")
+    page.wait()
     assert not target.is_checked_by_label("a value")
     assert target.is_checked_by_label("b value")
     assert r_value.value == "b"
