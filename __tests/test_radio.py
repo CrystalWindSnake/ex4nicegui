@@ -77,7 +77,7 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
 
     page.wait()
     r_value.value = "a"
-
+    page.wait()
     assert target.is_checked_by_label("a")
     assert not target.is_checked_by_label("b")
 
