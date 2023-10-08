@@ -1,36 +1,33 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import ScreenPage
-from playwright.sync_api import expect
-
-target_test_id = "radio"
+from .utils import RadioUtils, set_test_id
 
 
 def test_const_value(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        rxui.radio(["a", "b"]).props(f'data-testid="{target_test_id}"')
+        set_test_id(rxui.radio(["a", "b"]), "target")
 
     page.open(page_path)
 
-    radio = page.get_by_test_id(target_test_id)
+    target = RadioUtils(page, "target")
 
-    expect(radio).to_be_visible()
+    target.expect_to_be_visible()
 
-    assert not radio.get_by_label("a").is_checked()
-    assert not radio.get_by_label("b").is_checked()
-
-    page.wait()
-    page.radio_check_by_label("a")
-    assert radio.get_by_label("a").is_checked()
-    assert not radio.get_by_label("b").is_checked()
+    assert not target.is_checked_by_label("a")
+    assert not target.is_checked_by_label("b")
 
     page.wait()
-    page.radio_check_by_label("b")
-    assert not radio.get_by_label("a").is_checked()
-    assert radio.get_by_label("b").is_checked()
+    target.check_by_label("a")
+    assert target.is_checked_by_label("a")
+    assert not target.is_checked_by_label("b")
+
+    page.wait()
+    target.check_by_label("b")
+    assert not target.is_checked_by_label("a")
+    assert target.is_checked_by_label("b")
 
 
 def test_ref_value(page: ScreenPage, page_path: str):
@@ -38,28 +35,28 @@ def test_ref_value(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.radio(["a", "b"], value=r_value).props(f'data-testid="{target_test_id}"')
+        set_test_id(rxui.radio(["a", "b"], value=r_value), "target")
 
     page.open(page_path)
 
-    radio = page.get_by_test_id(target_test_id)
+    target = RadioUtils(page, "target")
 
-    expect(radio).to_be_visible()
+    target.expect_to_be_visible()
 
-    assert not radio.get_by_label("a").is_checked()
-    assert not radio.get_by_label("b").is_checked()
+    assert not target.is_checked_by_label("a")
+    assert not target.is_checked_by_label("b")
     assert r_value.value == ""
 
     page.wait()
-    page.radio_check_by_label("a")
-    assert radio.get_by_label("a").is_checked()
-    assert not radio.get_by_label("b").is_checked()
+    target.check_by_label("a")
+    assert target.is_checked_by_label("a")
+    assert not target.is_checked_by_label("b")
     assert r_value.value == "a"
 
     page.wait()
-    page.radio_check_by_label("b")
-    assert not radio.get_by_label("a").is_checked()
-    assert radio.get_by_label("b").is_checked()
+    target.check_by_label("b")
+    assert not target.is_checked_by_label("a")
+    assert target.is_checked_by_label("b")
     assert r_value.value == "b"
 
 
@@ -68,23 +65,55 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.radio(["a", "b"], value=r_value).props(f'data-testid="{target_test_id}"')
+        set_test_id(rxui.radio(["a", "b"], value=r_value), "target")
 
     page.open(page_path)
 
-    radio = page.get_by_test_id(target_test_id)
+    target = RadioUtils(page, "target")
 
-    expect(radio).to_be_visible()
+    target.expect_to_be_visible()
 
     page.wait()
     r_value.value = "a"
 
-    page.radio_check_by_label("a")
-    assert radio.get_by_label("a").is_checked()
-    assert not radio.get_by_label("b").is_checked()
+    assert target.is_checked_by_label("a")
+    assert not target.is_checked_by_label("b")
 
     page.wait()
     r_value.value = "b"
-    page.radio_check_by_label("b")
-    assert not radio.get_by_label("a").is_checked()
-    assert radio.get_by_label("b").is_checked()
+    assert not target.is_checked_by_label("a")
+    assert target.is_checked_by_label("b")
+
+
+def test_ref_value_dict_options(page: ScreenPage, page_path: str):
+    r_value = to_ref("")
+
+    @ui.page(page_path)
+    def _():
+        opts = {
+            "a": "a value",
+            "b": "b value",
+        }
+        set_test_id(rxui.radio(opts, value=r_value), "target")
+
+    page.open(page_path)
+
+    target = RadioUtils(page, "target")
+
+    target.expect_to_be_visible()
+
+    assert not target.is_checked_by_label("a value")
+    assert not target.is_checked_by_label("b value")
+    assert r_value.value == ""
+
+    page.wait()
+    target.check_by_label("a value")
+    assert target.is_checked_by_label("a value")
+    assert not target.is_checked_by_label("b value")
+    assert r_value.value == "a"
+
+    page.wait()
+    target.check_by_label("b value")
+    assert not target.is_checked_by_label("a value")
+    assert target.is_checked_by_label("b value")
+    assert r_value.value == "b"
