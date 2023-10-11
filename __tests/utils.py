@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
-from playwright.sync_api import Page
+from playwright.sync_api import expect
 from .screen import ScreenPage
 from nicegui import ui
 from typing_extensions import Protocol, Self
@@ -39,3 +39,22 @@ class SelectUtils:
         # .locator("div").nth(2)
         self.click()
         self.page.get_by_role("option", name=value).click()
+
+
+class RadioUtils:
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        self.page = screen_page._page
+        self.test_id = test_id
+        self.target_locator = self.page.get_by_test_id(test_id)
+
+    def expect_to_be_visible(self):
+        expect(self.target_locator).to_be_visible()
+
+    def is_checked_by_label(self, label: str):
+        return self.target_locator.get_by_label(label).is_checked()
+
+    def check_by_label(self, label: str):
+        # self.target_locator.click(f"text={label}")
+
+        self.target_locator.get_by_label(label).click()
+        return
