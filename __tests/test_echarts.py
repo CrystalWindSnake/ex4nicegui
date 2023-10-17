@@ -1,14 +1,15 @@
 import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import ref_computed
+from ex4nicegui import ref_computed, to_ref
 from .screen import ScreenPage
+from .utils import EChartsUtils, set_test_id
 
 
 def test_chart_display(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        rxui.echarts(
+        ins = rxui.echarts(
             {
                 "title": {"text": "echart title"},
                 "xAxis": {
@@ -20,9 +21,53 @@ def test_chart_display(page: ScreenPage, page_path: str):
             }
         )
 
+        set_test_id(ins, "target")
+
     page.open(page_path)
+
+    target = EChartsUtils(page, "target")
+
     page.wait()
 
-    chart = page._page.query_selector("*[_echarts_instance_]")
+    target.assert_chart_exists()
 
-    assert chart is not None
+
+def test_js_function_opt(page: ScreenPage, page_path: str):
+    r_unit = to_ref("kg")
+
+    yAxis_formatter = ref_computed(
+        lambda: f"""function (value, index) {{
+        return value + '{r_unit.value}';
+    }}
+    """
+    )
+
+    opts = ref_computed(
+        lambda: {
+            "xAxis": {
+                "type": "category",
+                "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            },
+            "yAxis": {
+                "type": "value",
+                "axisLabel": {":formatter": yAxis_formatter.value},
+            },
+            "series": [{"data": [120, 200, 150, 80, 70, 110, 130], "type": "bar"}],
+        }
+    )
+
+    @ui.page(page_path)
+    def _():
+        ins = rxui.echarts(opts)
+
+        set_test_id(ins, "target")
+
+    page.open(page_path)
+
+    target = EChartsUtils(page, "target")
+
+    page.wait()
+
+    opts = target.get_options()
+
+    assert "formatter" in opts["yAxis"][0]["axisLabel"]

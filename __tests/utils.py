@@ -58,3 +58,21 @@ class RadioUtils:
 
         self.target_locator.get_by_label(label).click()
         return
+
+
+class EChartsUtils:
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        self.page = screen_page._page
+        self.test_id = test_id
+        self.target_locator = self.page.get_by_test_id(test_id)
+
+    def assert_chart_exists(self):
+        attr = self.target_locator.get_attribute("_echarts_instance_")
+        assert attr is not None
+
+    def get_options(self):
+        opts = self.target_locator.evaluate(
+            f"node => echarts.getInstanceByDom(node).getOption()"
+        )
+
+        return opts
