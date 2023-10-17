@@ -80,6 +80,84 @@ ui.run()
 ![](./asset/asyc_echarts_title.gif)
 
 
+### echarts mouse events
+
+the `on` function parameters `event_name` and `query` to view the[echarts English Documentation](https://echarts.apache.org/handbook/en/concepts/event/)
+
+
+The following example binds the mouse click event
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_click(e):
+    ui.notify(f"on_click:{e}")
+
+bar.on("click", on_click)
+```
+
+
+The following example only triggers the mouseover event for a specified series.
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_first_series_mouseover(e):
+    ui.notify(e)
+
+
+bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
+
+ui.run()
+```
+
+
+
+
 
 ## BI Module
 

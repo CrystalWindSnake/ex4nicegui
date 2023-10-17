@@ -82,6 +82,82 @@ ui.run()
 ![](./asset/asyc_echarts_title.gif)
 
 
+### echarts 图表鼠标事件
+
+`on` 函数参数 `event_name` 以及 `query` 使用,查看[echarts 事件中文文档](https://echarts.apache.org/handbook/zh/concepts/event/)
+
+
+以下例子绑定鼠标单击事件
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_click(e):
+    ui.notify(f"on_click:{e}")
+
+bar.on("click", on_click)
+```
+
+
+以下例子只针对指定系列触发鼠标划过事件
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_first_series_mouseover(e):
+    ui.notify(e)
+
+
+bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
+
+ui.run()
+```
+
+
 
 ## BI 模块
 
