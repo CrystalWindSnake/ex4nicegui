@@ -3,6 +3,12 @@ from dataclasses import dataclass
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
+from pathlib import Path
+import nicegui
+
+
+NG_ROOT = Path(nicegui.__file__).parent / "elements"
+libraries = [NG_ROOT / "lib/echarts/echarts.min.js"]
 
 
 _Chart_Click_Args = [
@@ -33,7 +39,7 @@ class EChartsClickEventArguments(UiEventArguments):
     color: str
 
 
-class echarts(Element, component="ECharts.js"):
+class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ignore
     def __init__(self, options: dict) -> None:
         super().__init__()
         self._props["options"] = options
