@@ -60,7 +60,6 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
         ng_globals.get_client().on_connect(on_client_connect)
 
         def echartsOn_handler(e):
-            print(e)
             callbackId = e.args["callbackId"]
             params: Dict = e.args["params"]
             params["dataType"] = params.get("dataType")
