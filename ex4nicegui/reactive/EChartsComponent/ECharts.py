@@ -1,11 +1,12 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
+from nicegui import globals as ng_globals
 from pathlib import Path
 import nicegui
-
+import uuid
 
 NG_ROOT = Path(nicegui.__file__).parent / "elements"
 libraries = [NG_ROOT / "lib/echarts/echarts.min.js"]
@@ -26,7 +27,7 @@ _Chart_Click_Args = [
 
 
 @dataclass(**KWONLY_SLOTS)
-class EChartsClickEventArguments(UiEventArguments):
+class EChartsMouseEventArguments(UiEventArguments):
     componentType: str
     seriesType: str
     seriesIndex: int
@@ -39,10 +40,38 @@ class EChartsClickEventArguments(UiEventArguments):
     color: str
 
 
+_T_echats_on_callback = Callable[[EChartsMouseEventArguments], Any]
+
+
 class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ignore
     def __init__(self, options: dict) -> None:
         super().__init__()
         self._props["options"] = options
+
+        self._echarts_on_tasks: List[Callable] = []
+        self._echarts_on_callback_map: Dict[str, _T_echats_on_callback] = {}
+
+        def on_client_connect(client: nicegui.Client) -> Any:
+            for func in self._echarts_on_tasks:
+                func()
+
+            client.connect_handlers.remove(on_client_connect)  # type: ignore
+
+        ng_globals.get_client().on_connect(on_client_connect)
+
+        def echartsOn_handler(e):
+            print(e)
+            callbackId = e.args["callbackId"]
+            params: Dict = e.args["params"]
+            params["dataType"] = params.get("dataType")
+
+            if callbackId in self._echarts_on_callback_map:
+                event_args = EChartsMouseEventArguments(e.sender, e.client, **params)
+                handler = self._echarts_on_callback_map[callbackId]
+
+                handle_event(handler, event_args)
+
+        self.on("event_on", echartsOn_handler)
 
     def update_options(self, options: dict, opts: Optional[dict] = None):
         """update chart options
@@ -66,34 +95,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
         self.update()
         return self
 
-    def on_chart_click(
-        self, handler: Optional[Callable[[EChartsClickEventArguments], Any]]
-    ):
-        def inner_handler(e):
-            args = e.args
-            handle_event(
-                handler,
-                EChartsClickEventArguments(
-                    sender=self,
-                    client=self.client,
-                    componentType=args["componentType"],
-                    seriesType=args["seriesType"],
-                    seriesIndex=args["seriesIndex"],
-                    seriesName=args["seriesName"],
-                    name=args["name"],
-                    dataIndex=args["dataIndex"],
-                    data=args["data"],
-                    dataType=args["dataType"] if "dataType" in args else None,
-                    value=args["value"],
-                    color=args["color"],
-                ),
-            )
-
-        self.on("chartClick", inner_handler, _Chart_Click_Args)
-
-    def on_chart_click_blank(
-        self, handler: Optional[Callable[[UiEventArguments], Any]]
-    ):
+    def on_click_blank(self, handler: Optional[Callable[[UiEventArguments], Any]]):
         def inner_handler(e):
             handle_event(
                 handler,
@@ -103,4 +105,22 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
                 ),
             )
 
-        self.on("chartClickBlank", inner_handler, _Chart_Click_Args)
+        self.on("clickBlank", inner_handler, _Chart_Click_Args)
+
+    def echarts_on(
+        self,
+        event_name: str,
+        handler: _T_echats_on_callback,
+        query: Optional[Union[str, Dict]] = None,
+    ):
+        if not ng_globals.get_client().has_socket_connection:
+
+            def task_func():
+                self.echarts_on(event_name, handler, query)
+
+            self._echarts_on_tasks.append(task_func)
+            return
+
+        callback_id = uuid.uuid4().hex
+        self.run_method("echarts_on", event_name, query, callback_id)
+        self._echarts_on_callback_map[callback_id] = handler

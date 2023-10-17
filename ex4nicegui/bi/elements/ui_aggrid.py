@@ -4,7 +4,7 @@ from nicegui import ui
 from nicegui.events import UiEventArguments
 from ex4nicegui.reactive import rxui
 from ex4nicegui.reactive.EChartsComponent.ECharts import (
-    EChartsClickEventArguments,
+    EChartsMouseEventArguments,
     echarts,
 )
 from ex4nicegui.bi.dataSource import DataSource
