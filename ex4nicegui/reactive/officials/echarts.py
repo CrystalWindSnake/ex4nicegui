@@ -123,7 +123,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         bar = rxui.echarts(opts)
 
         def on_click(e):
-            print(f"on_click:{e}")
+            ui.notify(f"on_click:{e}")
 
         bar.on("click", on_click)
         ```
@@ -135,7 +135,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         ```python
         ...
         def on_line_click(e):
-            print(e)
+            ui.notify(e)
 
         bar.on("click", on_line_click,query='series.line')
         ```
@@ -167,7 +167,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         bar = rxui.echarts(opts)
 
         def on_first_series_mouseover(e):
-            print(f"on_first_series_mouseover:{e}")
+            ui.notify(f"on_first_series_mouseover:{e}")
 
         bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
         ```
