@@ -1,12 +1,6 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Callable, Union
 from nicegui import ui
-from nicegui.events import UiEventArguments
-from ex4nicegui.reactive import rxui
-from ex4nicegui.reactive.EChartsComponent.ECharts import (
-    EChartsClickEventArguments,
-    echarts,
-)
 from ex4nicegui.bi.dataSource import DataSource
 from .models import UiResult
 

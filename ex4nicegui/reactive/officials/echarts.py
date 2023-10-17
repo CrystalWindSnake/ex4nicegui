@@ -1,4 +1,5 @@
-from typing import Dict, cast, Optional
+from typing import Any, Callable, Dict, List, Union, cast, Optional
+from typing_extensions import Literal
 from signe import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -11,8 +12,21 @@ from .base import BindableUi
 from .utils import _convert_kws_ref2value
 from ex4nicegui.reactive.EChartsComponent.ECharts import (
     echarts,
-    EChartsClickEventArguments,
+    EChartsMouseEventArguments,
 )
+
+
+_TEventName = Literal[
+    "click",
+    "dblclick",
+    "mousedown",
+    "mousemove",
+    "mouseup",
+    "mouseover",
+    "mouseout",
+    "globalout",
+    "contextmenu",
+]
 
 
 class EChartsBindableUi(BindableUi[echarts]):
@@ -30,11 +44,12 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         super().__init__(element)
 
-        self.__click_info_ref = to_ref(cast(Optional[EChartsClickEventArguments], None))
+        self.__click_info_ref = to_ref(cast(Optional[EChartsMouseEventArguments], None))
 
-        @element.on_chart_click
-        def _(e: EChartsClickEventArguments):
+        def on_chart_click(e: EChartsMouseEventArguments):
             self.__click_info_ref.value = e
+
+        self.on("click", on_chart_click)
 
         for key, value in kws.items():
             if is_ref(value):
@@ -80,3 +95,83 @@ class EChartsBindableUi(BindableUi[echarts]):
             ele.update()
 
         return self
+
+    def on(
+        self,
+        event_name: _TEventName,
+        handler: Callable[..., Any],
+        query: Optional[Union[str, Dict]] = None,
+    ):
+        """echart instance event on.
+
+        [English Documentation](https://echarts.apache.org/handbook/en/concepts/event/)
+
+        [中文文档](https://echarts.apache.org/handbook/zh/concepts/event/)
+
+
+        Args:
+            event_name (_TEventName): general mouse events name.`'click', 'dblclick', 'mousedown', 'mousemove', 'mouseup', 'mouseover', 'mouseout', 'globalout', 'contextmenu'`
+            handler (Callable[..., Any]): event callback
+            query (Optional[Union[str,Dict]], optional): trigger callback of the specified component. Defaults to None.
+
+        ## Examples
+
+        ---
+
+        ### click event:
+        ```python
+        bar = rxui.echarts(opts)
+
+        def on_click(e):
+            ui.notify(f"on_click:{e}")
+
+        bar.on("click", on_click)
+        ```
+
+        ---
+
+        ### Use query to trigger callback of the specified component:
+
+        ```python
+        ...
+        def on_line_click(e):
+            ui.notify(e)
+
+        bar.on("click", on_line_click,query='series.line')
+        ```
+
+        ---
+        ### only trigger for specified series
+        ```python
+
+        opts = {
+            "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+            "yAxis": {
+                "type": "category",
+                "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+            },
+            "series": [
+                {
+                    "name": "first",
+                    "type": "bar",
+                    "data": [18203, 23489, 29034, 104970, 131744, 630230],
+                },
+                {
+                    "name": "second",
+                    "type": "bar",
+                    "data": [19325, 23438, 31000, 121594, 134141, 681807],
+                },
+            ],
+        }
+
+        bar = rxui.echarts(opts)
+
+        def on_first_series_mouseover(e):
+            ui.notify(f"on_first_series_mouseover:{e}")
+
+        bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
+        ```
+
+        ---
+        """
+        self.element.echarts_on(event_name, handler, query)

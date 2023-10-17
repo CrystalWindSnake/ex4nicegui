@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
 from nicegui.events import UiEventArguments
 from ex4nicegui.reactive import rxui
 from ex4nicegui.reactive.EChartsComponent.ECharts import (
-    EChartsClickEventArguments,
+    EChartsMouseEventArguments,
     echarts,
 )
 from nicegui import ui
@@ -22,7 +22,7 @@ class EChartsResult(UiResult[echarts]):
         self.chart_update = chart_update
 
     def on_chart_click(
-        self, handler: Optional[Callable[[EChartsClickEventArguments], Any]]
+        self, handler: Optional[Callable[[EChartsMouseEventArguments], Any]]
     ):
         return self.element.on_chart_click(handler)
 
