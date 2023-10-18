@@ -7,7 +7,7 @@ from nicegui import Client, globals
 from nicegui.page import page as ui_page
 
 
-HEADLESS = True
+HEADLESS = False
 
 
 @pytest.fixture(autouse=True)
