@@ -1,10 +1,10 @@
 import importlib
 import pytest
-import logging
-from playwright.sync_api import Browser, Playwright
-from .screen import Screen, ScreenPage
-from nicegui import Client, globals
+from playwright.sync_api import Playwright
+from .screen import Screen
 from nicegui.page import page as ui_page
+from nicegui import Client, binding, globals  # pylint: disable=redefined-builtin
+from nicegui.elements import plotly, pyplot
 
 
 HEADLESS = True
@@ -17,21 +17,24 @@ def reset_globals(request: pytest.FixtureRequest):
 
     for path in {"/"}.union(globals.page_routes.values()):
         globals.app.remove_route(path)
+    globals.app.openapi_schema = None
     globals.app.middleware_stack = None
     globals.app.user_middleware.clear()
     # NOTE favicon routes must be removed separately because they are not "pages"
-    [
-        globals.app.routes.remove(r)
-        for r in globals.app.routes
-        if r.path.endswith("/favicon.ico")  # type: ignore
-    ]
-    importlib.reload(globals)
+    for route in globals.app.routes:
+        if route.path.endswith("/favicon.ico"):
+            globals.app.routes.remove(route)
+    # importlib.reload(globals)
+    # # repopulate globals.optional_features
+    importlib.reload(plotly)
+    importlib.reload(pyplot)
     globals.app.storage.clear()
     globals.index_client = Client(ui_page("/"), shared=True).__enter__()
     globals.app.get("/")(globals.index_client.build_response)
+    binding.reset()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def screen(playwright: Playwright, request: pytest.FixtureRequest):
     if "noautofixt" in request.keywords:
         return
