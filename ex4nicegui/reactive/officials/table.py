@@ -60,19 +60,16 @@ class TableBindableUi(BindableUi[ui.table]):
 
         self._arg_selection = selection
         self._arg_row_key = row_key
-        self._selection_ref: Optional[ReadonlyRef[List[Any]]] = None
+        self._selection_ref: ReadonlyRef[List[Any]] = to_ref([])
+
+        def on_select(_):
+            self._selection_ref.value = self.element.selected  # type: ignore
+
+        self.element.on("selection", on_select)
 
     @property
     def selection_ref(self):
-        if self._selection_ref is None:
-            self._selection_ref = to_ref([])
-
-            def on_select(_):
-                self._selection_ref.value = self.element.selected  # type: ignore
-
-            self.element.on("selection", on_select)
-
-        return cast(ReadonlyRef[List[Any]], self._selection_ref)
+        return self._selection_ref
 
     @staticmethod
     def from_pandas(
