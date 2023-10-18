@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import List, Optional
 from playwright.sync_api import expect
 from .screen import ScreenPage
 from nicegui import ui
@@ -76,3 +76,33 @@ class EChartsUtils:
         )
 
         return opts
+
+
+class TableUtils:
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        self.page = screen_page._page
+        self.test_id = test_id
+        self.target_locator = self.page.get_by_test_id(test_id)
+
+    def expect_cell_to_be_visible(self, cell_values: List):
+        for cell_value in cell_values:
+            expect(
+                self.target_locator.get_by_role("cell", name=cell_value, exact=True)
+            ).to_be_visible()
+
+    def expect_cell_not_to_be_visible(self, cell_values: List):
+        for cell_value in cell_values:
+            expect(
+                self.target_locator.get_by_role("cell", name=cell_value, exact=True)
+            ).not_to_be_visible()
+
+    def click_checkbox(self, row_values: List):
+        name = " ".join((str(d) for d in row_values))
+        self.target_locator.get_by_role("row", name=name).get_by_role(
+            "checkbox"
+        ).click()
+
+    def get_cell_style(self, cell_value: str):
+        return self.target_locator.get_by_role(
+            "cell", name=cell_value, exact=True
+        ).get_attribute("style")
