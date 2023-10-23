@@ -26,15 +26,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
     @staticmethod
     def _setup_(binder: "SelectBindableUi"):
         def onValueChanged(e):
-            if e.args is None:
-                binder._ref.value = ""
-            else:
-                opts_values = (
-                    list(binder.element.options.keys())
-                    if isinstance(binder.element.options, Dict)
-                    else binder.element.options
-                )
-                binder._ref.value = opts_values[e.args["value"]]  # type: ignore
+            binder._ref.value = binder.element._event_args_to_value(e)  # type: ignore
 
         @effect
         def _():

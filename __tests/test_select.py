@@ -63,7 +63,7 @@ def test_clearable(page: ScreenPage, page_path: str):
 
     expect(target.page.get_by_text("a", exact=True)).not_to_be_visible()
     expect(target.page.get_by_text("b", exact=True)).not_to_be_visible()
-    assert r_str.value == ""
+    assert r_str.value is None
 
 
 def test_option_change(page: ScreenPage, page_path: str):
@@ -91,3 +91,52 @@ def test_option_change(page: ScreenPage, page_path: str):
 
     page.wait()
     assert r_str.value == "a"
+
+
+def test_multiple_list_opts(page: ScreenPage, page_path: str):
+    r_value = to_ref(["a", "b"])
+
+    @ui.page(page_path)
+    def _():
+        set_test_id(
+            rxui.select(["a", "b", "c", "d"], value=r_value, multiple=True), "target"
+        )
+
+    page.open(page_path)
+    target = SelectUtils(page, "target")
+
+    assert target.get_input_value() == "a, b"
+
+    page.wait()
+    target.click_and_select("d")
+
+    page.wait()
+    assert target.get_input_value() == "a, b, d"
+
+    # page.wait()
+    assert r_value.value == ["a", "b", "d"]
+
+
+def test_multiple_dict_opts(page: ScreenPage, page_path: str):
+    r_value = to_ref([1, 2])
+
+    @ui.page(page_path)
+    def _():
+        set_test_id(
+            rxui.select({1: "a", 2: "b", 3: "c", 4: "d"}, value=r_value, multiple=True),
+            "target",
+        )
+
+    page.open(page_path)
+    target = SelectUtils(page, "target")
+
+    assert target.get_input_value() == "a, b"
+
+    page.wait()
+    target.click_and_select("d")
+
+    page.wait()
+    assert target.get_input_value() == "a, b, d"
+
+    # page.wait()
+    assert r_value.value == [1, 2, 4]
