@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Any, Callable
 from playwright.sync_api import expect
 from .screen import ScreenPage
 from nicegui import ui
@@ -16,6 +16,35 @@ class IPropsAble(Protocol):
 
 def set_test_id(element: IPropsAble, id: str):
     return element.props(f'data-testid="{id}"')
+
+
+class fn:
+    def __init__(self, fn: Optional[Callable] = None) -> None:
+        self._fn = fn
+        self._called_count = 0
+
+    def mockClear(self):
+        self._called_count = 0
+        return self
+
+    @property
+    def calledTimes(self):
+        return self._called_count
+
+    def toHaveBeenCalled(self):
+        return self.calledTimes > 0
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        if self._fn is None:
+            pass
+            self._called_count += 1
+            return
+
+        assert self._fn is not None
+        result = self._fn(*args, **kwds)
+        self._called_count += 1
+
+        return result
 
 
 class SelectUtils:
@@ -108,3 +137,13 @@ class TableUtils:
         return self.target_locator.get_by_role(
             "cell", name=cell_value, exact=True
         ).get_attribute("style")
+
+
+class MermaidUtils:
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        self.page = screen_page._page
+        self.test_id = test_id
+        self.target_locator = self.page.get_by_test_id(test_id)
+
+    def click_node(self, nodeId: str):
+        self.target_locator.get_by_text(nodeId, exact=True).click()
