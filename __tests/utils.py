@@ -36,9 +36,11 @@ class SelectUtils:
         self.page.get_by_role("button", name="cancel").click()
 
     def click_and_select(self, value: str):
-        # .locator("div").nth(2)
         self.click()
         self.page.get_by_role("option", name=value).click()
+
+    def get_input_value(self):
+        return self.target_locator.input_value()
 
 
 class RadioUtils:
