@@ -110,6 +110,7 @@ def test_multiple_list_opts(page: ScreenPage, page_path: str):
     page.wait()
     target.click_and_select("d")
 
+    page.wait()
     assert target.get_input_value() == "a, b, d"
 
     # page.wait()
@@ -134,6 +135,7 @@ def test_multiple_dict_opts(page: ScreenPage, page_path: str):
     page.wait()
     target.click_and_select("d")
 
+    page.wait()
     assert target.get_input_value() == "a, b, d"
 
     # page.wait()
