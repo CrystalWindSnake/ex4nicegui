@@ -50,24 +50,26 @@ export default {
       }
       is_running = false;
 
+      if (this.zoomMode) {
+        const svg = d3Select(this.$el).select('svg')
+        const zoomBox = svg.select('g.root')
 
-      const svg = d3Select(this.$el).select('svg')
-      const zoomBox = svg.select('g.root')
+        var zoom = d3Zoom().on("zoom", function ({ transform }) {
+          zoomBox.attr("transform", transform);
+        });
 
-      var zoom = d3Zoom().on("zoom", function ({ transform }) {
-        zoomBox.attr("transform", transform);
-      });
+        svg.call(zoom);
 
-      svg.call(zoom);
-
-      svg.on('dblclick.zoom', () => {
-        svg.transition().duration(750).call(zoom.transform, zoomIdentity);
-      })
+        svg.on('dblclick.zoom', () => {
+          svg.transition().duration(750).call(zoom.transform, zoomIdentity);
+        })
+      }
     }
   },
   props: {
     content: String,
     currentId: String,
     clickableNodes: Array,
+    zoomMode: Boolean
   },
 };
