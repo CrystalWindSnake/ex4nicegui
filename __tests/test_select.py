@@ -63,7 +63,7 @@ def test_clearable(page: ScreenPage, page_path: str):
 
     expect(target.page.get_by_text("a", exact=True)).not_to_be_visible()
     expect(target.page.get_by_text("b", exact=True)).not_to_be_visible()
-    assert r_str.value == ""
+    assert r_str.value is None
 
 
 def test_option_change(page: ScreenPage, page_path: str):
