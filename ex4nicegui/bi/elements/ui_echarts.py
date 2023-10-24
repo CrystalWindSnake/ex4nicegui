@@ -21,15 +21,11 @@ class EChartsResult(UiResult[echarts]):
         super().__init__(element, dataSource)
         self.chart_update = chart_update
 
-    def on_chart_click(
-        self, handler: Optional[Callable[[EChartsMouseEventArguments], Any]]
-    ):
-        return self.element.on_chart_click(handler)
+    def on_chart_click(self, handler: Callable[[EChartsMouseEventArguments], Any]):
+        return self.element.echarts_on("click", handler)
 
-    def on_chart_click_blank(
-        self, handler: Optional[Callable[[UiEventArguments], Any]]
-    ):
-        return self.element.on_chart_click_blank(handler)
+    def on_chart_click_blank(self, handler: Callable[[UiEventArguments], Any]):
+        return self.element.on_click_blank(handler)
 
     def cancel_linkage(self, *source: Union[ui.element, "UiResult"]):
         super().cancel_linkage(*source)

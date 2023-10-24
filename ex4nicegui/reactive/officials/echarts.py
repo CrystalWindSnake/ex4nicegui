@@ -30,6 +30,8 @@ _TEventName = Literal[
 
 
 class EChartsBindableUi(BindableUi[echarts]):
+    EChartsMouseEventArguments = EChartsMouseEventArguments
+
     def __init__(
         self,
         options: TMaybeRef[Dict],

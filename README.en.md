@@ -112,8 +112,8 @@ opts = {
 
 bar = rxui.echarts(opts)
 
-def on_click(e):
-    ui.notify(f"on_click:{e}")
+def on_click(e: rxui.echarts.EChartsMouseEventArguments):
+    ui.notify(f"on_click:{e.seriesName}:{e.name}:{e.value}")
 
 bar.on("click", on_click)
 ```
@@ -146,8 +146,8 @@ opts = {
 
 bar = rxui.echarts(opts)
 
-def on_first_series_mouseover(e):
-    ui.notify(e)
+def on_first_series_mouseover(e: rxui.echarts.EChartsMouseEventArguments):
+    ui.notify(f"on_first_series_mouseover:{e.seriesName}:{e.name}:{e.value}")
 
 
 bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
@@ -170,6 +170,7 @@ from nicegui import ui
 import pandas as pd
 import numpy as np
 from ex4nicegui import bi
+from ex4nicegui.reactive import rxui
 from ex4nicegui import effect, effect_refreshable
 from pyecharts.charts import Bar
 
@@ -240,7 +241,7 @@ with ui.grid(columns=2):
 
     # Bind the click event to achieve navigation.
     @bar2.on_chart_click
-    def _(e):
+    def _(e: rxui.echarts.EChartsMouseEventArguments):
         ui.open(f"/details/{e.name}", new_tab=True)
 
 
