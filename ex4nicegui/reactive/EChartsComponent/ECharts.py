@@ -1,4 +1,5 @@
 from typing import Any, Callable, Dict, List, Optional, Union
+from typing_extensions import Literal
 from dataclasses import dataclass
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
@@ -41,6 +42,17 @@ class EChartsMouseEventArguments(UiEventArguments):
 
 
 _T_echats_on_callback = Callable[[EChartsMouseEventArguments], Any]
+_T_mouse_event_name = Literal[
+    "click",
+    "dblclick",
+    "mousedown",
+    "mousemove",
+    "mouseup",
+    "mouseover",
+    "mouseout",
+    "globalout",
+    "contextmenu",
+]
 
 
 class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ignore
@@ -108,7 +120,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
 
     def echarts_on(
         self,
-        event_name: str,
+        event_name: _T_mouse_event_name,
         handler: _T_echats_on_callback,
         query: Optional[Union[str, Dict]] = None,
     ):
