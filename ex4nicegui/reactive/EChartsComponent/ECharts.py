@@ -135,6 +135,5 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
             return
 
         callback_id = uuid.uuid4().hex
-        print("echarts_on:", event_name, query, callback_id)
         self.run_method("echarts_on", event_name, query, callback_id)
         self._echarts_on_callback_map[callback_id] = handler
