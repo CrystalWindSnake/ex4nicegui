@@ -1,7 +1,7 @@
 from typing import Dict, List
 from signe.core.effect import Effect
 from signe.core.scope import IScope
-from nicegui import globals as ng_globals, Client
+from nicegui import Client, context as ng_context
 
 
 _TClientID = str
@@ -24,10 +24,10 @@ class NgClientScopeManager:
         self._client_scope_map: Dict[_TClientID, NgClientScope] = {}
 
     def get_scope(self):
-        if len(ng_globals.get_slot_stack()) <= 0:
+        if len(ng_context.get_slot_stack()) <= 0:
             return
 
-        client = ng_globals.get_client()
+        client = ng_context.get_client()
         if client.shared:
             return
 

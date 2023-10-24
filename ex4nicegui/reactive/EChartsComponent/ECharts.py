@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
-from nicegui import globals as ng_globals
+from nicegui import context as ng_context
 from pathlib import Path
 import nicegui
 import uuid
@@ -57,7 +57,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
 
             client.connect_handlers.remove(on_client_connect)  # type: ignore
 
-        ng_globals.get_client().on_connect(on_client_connect)
+        ng_context.get_client().on_connect(on_client_connect)
 
         def echartsOn_handler(e):
             callbackId = e.args["callbackId"]
@@ -112,7 +112,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
         handler: _T_echats_on_callback,
         query: Optional[Union[str, Dict]] = None,
     ):
-        if not ng_globals.get_client().has_socket_connection:
+        if not ng_context.get_client().has_socket_connection:
 
             def task_func():
                 self.echarts_on(event_name, handler, query)

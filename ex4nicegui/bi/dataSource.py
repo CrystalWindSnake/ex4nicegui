@@ -1,6 +1,6 @@
 from typing import Callable, Dict, List, Optional, Set, cast
 from ex4nicegui import to_ref, ref_computed, on
-from nicegui import globals as ng_globals, Client, ui
+from nicegui import context as ng_context, Client, ui
 
 from dataclasses import dataclass, field
 from . import types
@@ -123,7 +123,7 @@ class DataSource:
         return self.__id
 
     def get_component_info_key(self, element_id: types._TElementID):
-        client_id = ng_globals.get_client().id
+        client_id = ng_context.get_client().id
         return ComponentInfoKey(client_id, element_id)
 
     def get_filtered_data(self, element: ui.element):
@@ -148,7 +148,7 @@ class DataSource:
         element_id: types._TElementID,
         update_callback: Optional[_TComponentUpdateCallback] = None,
     ):
-        ng_client = ng_globals.get_client()
+        ng_client = ng_context.get_client()
         client_id = ng_client.id
 
         if not self._component_map.has_client_record(client_id):
@@ -164,7 +164,7 @@ class DataSource:
         return info
 
     def send_filter(self, element_id: types._TElementID, filter: Filter):
-        client_id = ng_globals.get_client().id
+        client_id = ng_context.get_client().id
         key = ComponentInfoKey(client_id, element_id)
 
         if not self._component_map.has_record(key):

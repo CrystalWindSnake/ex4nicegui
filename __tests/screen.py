@@ -1,7 +1,7 @@
 import threading
 from playwright.sync_api import Page, expect, Browser
-from nicegui import globals, ui
-
+from nicegui import context, ui
+from nicegui.server import Server
 
 PORT = 3392
 
@@ -22,7 +22,7 @@ class Screen:
         # self.close()
         # self.caplog.clear()
         self.browser.close()
-        globals.server.should_exit = True
+        Server.instance.should_exit = True
 
         if self.server_thread:
             self.server_thread.join()

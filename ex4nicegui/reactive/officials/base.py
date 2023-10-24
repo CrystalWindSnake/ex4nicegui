@@ -97,7 +97,8 @@ class BindableUi(Generic[TWidget]):
 
             @effect
             def _():
-                cast(TextElement, self.element).on_text_change(ref_ui.value)
+                cast(TextElement, self.element).set_text(ref_ui.value)
+                self.element.update()
 
         @effect
         def _():

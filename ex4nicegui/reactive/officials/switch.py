@@ -67,6 +67,7 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
         @effect
         def _():
-            self.element.on_value_change(ref_ui.value)
+            self.element.set_value(ref_ui.value)
+            self.element.update()
 
         return self

@@ -61,7 +61,7 @@ class LabelBindableUi(SingleValueBindableUi[str, ui.label]):
     def bind_text(self, ref_ui: ReadonlyRef):
         @effect
         def _():
-            self.element.on_text_change(str(ref_ui.value))
-            # self.element.update()
+            self.element.set_text(str(ref_ui.value))
+            self.element.update()
 
         return self
