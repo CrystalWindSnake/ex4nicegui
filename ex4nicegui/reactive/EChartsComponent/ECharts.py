@@ -63,7 +63,9 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
         self._echarts_on_tasks: List[Callable] = []
         self._echarts_on_callback_map: Dict[str, _T_echats_on_callback] = {}
 
-        def on_client_connect(client: nicegui.Client) -> Any:
+        async def on_client_connect(client: nicegui.Client) -> Any:
+            await client.connected()
+
             for func in self._echarts_on_tasks:
                 func()
 
@@ -133,5 +135,6 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
             return
 
         callback_id = uuid.uuid4().hex
+        print("echarts_on:", event_name, query, callback_id)
         self.run_method("echarts_on", event_name, query, callback_id)
         self._echarts_on_callback_map[callback_id] = handler
