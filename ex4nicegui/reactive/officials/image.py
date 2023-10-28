@@ -18,7 +18,9 @@ class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
     def _setup_(binder: "ImageBindableUi"):
         @effect
         def _():
-            binder.element.on_source_change(binder.value)
+            value = binder.value
+            binder.element.set_source(value)
+            binder.element._handle_source_change(value)
 
     def __init__(
         self,

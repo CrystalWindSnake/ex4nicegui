@@ -74,13 +74,17 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button]):
     def bind_enabled(self, ref_ui: ReadonlyRef[bool]):
         @effect
         def _():
-            self.element.on_enabled_change(ref_ui.value)
+            value = ref_ui.value
+            self.element.set_enabled(value)
+            self.element._handle_enabled_change(value)
 
         return self
 
     def bind_disable(self, ref_ui: ReadonlyRef[bool]):
         @effect
         def _():
-            self.element.on_enabled_change(not ref_ui.value)
+            value = not ref_ui.value
+            self.element.set_enabled(value)
+            self.element._handle_enabled_change(value)
 
         return self
