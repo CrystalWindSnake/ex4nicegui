@@ -247,6 +247,7 @@ class effect_refreshable:
 
 def on(
     refs: Union[ReadonlyRef, Sequence[ReadonlyRef]],
+    onchanges=False,
     effect_kws: Optional[Dict[str, Any]] = None,
 ):
     if not isinstance(refs, Sequence):
@@ -255,6 +256,6 @@ def on(
     getters = [getattr(r, "_ReadonlyRef___getter") for r in refs]
 
     def wrap(fn: Callable):
-        return signe_on(getters, fn, effect_kws=effect_kws)
+        return signe_on(getters, fn, onchanges=onchanges, effect_kws=effect_kws)
 
     return wrap
