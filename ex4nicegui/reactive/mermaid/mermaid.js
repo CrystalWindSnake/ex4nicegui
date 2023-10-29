@@ -27,12 +27,17 @@ export default {
       window[actionCallback] = (nodeId) => {
         this.$emit('onNodeClick', { nodeId })
       }
+
+      this.actionCallback = actionCallback
     }
 
     this.update(content);
   },
-
-
+  unmounted() {
+    if (this.actionCallback && window[this.actionCallback]) {
+      delete window[this.actionCallback]
+    }
+  },
   methods: {
     async update(content) {
       if (this.last_content === content) return;
