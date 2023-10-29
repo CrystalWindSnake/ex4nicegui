@@ -12,11 +12,13 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi
+from .base import SingleValueBindableUi, DisableableBindableUi
 from .utils import _convert_kws_ref2value
 
 
-class InputBindableUi(SingleValueBindableUi[str, ui.input]):
+class InputBindableUi(
+    SingleValueBindableUi[str, ui.input], DisableableBindableUi[ui.input]
+):
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,

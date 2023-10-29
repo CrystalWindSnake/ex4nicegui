@@ -13,13 +13,15 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 from nicegui.elements.mixins.value_element import ValueElement
-from .base import SingleValueBindableUi
+from .base import SingleValueBindableUi, DisableableBindableUi
 from .utils import _convert_kws_ref2value
 
 T = TypeVar("T")
 
 
-class CheckboxBindableUi(SingleValueBindableUi[bool, ui.checkbox]):
+class CheckboxBindableUi(
+    SingleValueBindableUi[bool, ui.checkbox], DisableableBindableUi[ui.checkbox]
+):
     @staticmethod
     def _setup_(binder: "CheckboxBindableUi"):
         ele = cast(ValueElement, binder.element)
