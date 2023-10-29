@@ -162,6 +162,35 @@ class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
         return self
 
 
+from nicegui.elements.mixins.disableable_element import DisableableElement
+
+
+_T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
+
+
+class DisableableBindableUi(BindableUi[_T_DisableableBinder]):
+    def __init__(self, element: _T_DisableableBinder) -> None:
+        super().__init__(element)
+
+    def bind_enabled(self, ref_ui: ReadonlyRef[bool]):
+        @effect
+        def _():
+            value = ref_ui.value
+            self.element.set_enabled(value)
+            self.element._handle_enabled_change(value)
+
+        return self
+
+    def bind_disable(self, ref_ui: ReadonlyRef[bool]):
+        @effect
+        def _():
+            value = not ref_ui.value
+            self.element.set_enabled(value)
+            self.element._handle_enabled_change(value)
+
+        return self
+
+
 def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: ReadonlyRef):
     @effect
     def _():

@@ -11,14 +11,17 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi
+from .base import SingleValueBindableUi, DisableableBindableUi
 from .utils import _convert_kws_ref2value
 
 
 _TSliderValue = TypeVar("_TSliderValue", float, int, None)
 
 
-class SliderBindableUi(SingleValueBindableUi[Optional[_TSliderValue], ui.slider]):
+class SliderBindableUi(
+    SingleValueBindableUi[Optional[_TSliderValue], ui.slider],
+    DisableableBindableUi[ui.slider],
+):
     def __init__(
         self,
         min: TMaybeRef[_TSliderValue],

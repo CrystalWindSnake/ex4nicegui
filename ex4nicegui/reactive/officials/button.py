@@ -10,11 +10,13 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi, _bind_color
+from .base import SingleValueBindableUi, _bind_color, DisableableBindableUi
 from .utils import _convert_kws_ref2value
 
 
-class ButtonBindableUi(SingleValueBindableUi[str, ui.button]):
+class ButtonBindableUi(
+    SingleValueBindableUi[str, ui.button], DisableableBindableUi[ui.button]
+):
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -68,19 +70,5 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button]):
             ele = self.element
             ele._props["icon"] = ref_ui.value
             ele.update()
-
-        return self
-
-    def bind_enabled(self, ref_ui: ReadonlyRef[bool]):
-        @effect
-        def _():
-            self.element.on_enabled_change(ref_ui.value)
-
-        return self
-
-    def bind_disable(self, ref_ui: ReadonlyRef[bool]):
-        @effect
-        def _():
-            self.element.on_enabled_change(not ref_ui.value)
 
         return self
