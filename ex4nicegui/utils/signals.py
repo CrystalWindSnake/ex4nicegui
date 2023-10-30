@@ -250,10 +250,13 @@ def on(
     onchanges=False,
     effect_kws: Optional[Dict[str, Any]] = None,
 ):
+    effect_kws = effect_kws or {}
     if not isinstance(refs, Sequence):
         refs = [refs]
 
     getters = [getattr(r, "_ReadonlyRef___getter") for r in refs]
+
+    effect_kws.update({"scope": _CLIENT_SCOPE_MANAGER.get_scope()})
 
     def wrap(fn: Callable):
         return signe_on(getters, fn, onchanges=onchanges, effect_kws=effect_kws)
