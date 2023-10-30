@@ -5,10 +5,11 @@ from typing import (
     TypeVar,
     Dict,
 )
-from signe import effect
+
 from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
+    effect,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi

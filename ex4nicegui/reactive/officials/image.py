@@ -2,11 +2,12 @@ from pathlib import Path
 from typing import (
     Union,
 )
-from signe import effect
+
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
     _TMaybeRef as TMaybeRef,
+    effect,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi

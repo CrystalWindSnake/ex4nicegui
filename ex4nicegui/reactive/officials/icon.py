@@ -2,11 +2,12 @@ from typing import (
     Optional,
     cast,
 )
-from signe import effect
+
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
     _TMaybeRef as TMaybeRef,
+    effect,
 )
 from nicegui import ui
 from nicegui.elements.mixins.color_elements import (

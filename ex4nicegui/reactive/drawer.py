@@ -1,7 +1,7 @@
 from typing_extensions import Literal
 from nicegui import ui
 from ex4nicegui.reactive.officials import DrawerBindableUi
-from signe import effect
+from ex4nicegui.utils.signals import effect
 from typing import Union, Optional
 
 _TDrawerSide = Literal["left", "right"]
