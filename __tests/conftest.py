@@ -7,7 +7,7 @@ from nicegui import Client, binding, app, core
 from nicegui.elements import plotly, pyplot
 
 
-HEADLESS = True
+HEADLESS = False
 
 
 @pytest.fixture(autouse=True)
