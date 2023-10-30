@@ -5,9 +5,9 @@ from .screen import Screen
 from nicegui.page import page as ui_page
 from nicegui import Client, binding, app, core
 from nicegui.elements import plotly, pyplot
+import os
 
-
-HEADLESS = True
+HEADLESS = "GITHUB_ACTION" in os.environ
 
 
 @pytest.fixture(autouse=True)
