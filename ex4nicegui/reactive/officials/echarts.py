@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, List, Union, cast, Optional
 from typing_extensions import Literal
-from signe import effect
+from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,

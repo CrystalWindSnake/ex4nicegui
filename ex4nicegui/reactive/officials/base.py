@@ -11,7 +11,7 @@ from typing import (
     overload,
 )
 from typing_extensions import Self
-from signe import effect
+from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,

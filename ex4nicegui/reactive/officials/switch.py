@@ -5,7 +5,7 @@ from typing import (
     TypeVar,
     cast,
 )
-from signe import effect
+from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,

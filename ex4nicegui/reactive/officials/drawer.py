@@ -2,7 +2,7 @@ from typing import (
     Any,
 )
 from typing_extensions import Literal
-from signe import effect
+from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
     to_value,
     is_ref,

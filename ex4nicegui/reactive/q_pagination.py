@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, List, Optional, cast
 from nicegui.element import Element
-from signe import effect
+from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
     Ref,
     ref_computed,

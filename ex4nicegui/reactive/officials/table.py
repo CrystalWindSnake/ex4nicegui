@@ -8,7 +8,7 @@ from typing import (
 )
 from typing_extensions import Literal
 import ex4nicegui.utils.common as utils_common
-from signe import effect
+from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
