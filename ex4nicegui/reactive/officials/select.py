@@ -8,11 +8,12 @@ from typing import (
     Dict,
     Union,
 )
-from ex4nicegui import effect
+
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
     _TMaybeRef as TMaybeRef,
+    effect,
 )
 from nicegui import ui
 from nicegui.elements.mixins.value_element import ValueElement

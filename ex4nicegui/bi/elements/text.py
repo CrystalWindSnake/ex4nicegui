@@ -1,6 +1,6 @@
 from typing import Callable, Any, Union
 from nicegui import ui
-from ex4nicegui import effect
+from ex4nicegui.utils.signals import effect
 
 
 _T_Maybe_Callable = Any

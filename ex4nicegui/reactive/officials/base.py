@@ -11,13 +11,13 @@ from typing import (
     overload,
 )
 from typing_extensions import Self
-from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
     to_ref,
     ref_computed,
     _TMaybeRef as TMaybeRef,
+    effect,
 )
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.color_elements import (

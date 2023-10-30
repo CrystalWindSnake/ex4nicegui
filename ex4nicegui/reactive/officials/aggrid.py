@@ -3,8 +3,8 @@ from typing import (
     Dict,
 )
 import ex4nicegui.utils.common as utils_common
-from ex4nicegui import effect
 from ex4nicegui.utils.signals import (
+    effect,
     ReadonlyRef,
     is_ref,
     ref_computed,

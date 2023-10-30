@@ -2,12 +2,8 @@ from typing import (
     Any,
 )
 from typing_extensions import Literal
-from ex4nicegui import effect
-from ex4nicegui.utils.signals import (
-    to_value,
-    is_ref,
-    _TMaybeRef as TMaybeRef,
-)
+
+from ex4nicegui.utils.signals import to_value, is_ref, _TMaybeRef as TMaybeRef, effect
 from nicegui import ui
 from nicegui.page_layout import Drawer
 from .base import SingleValueBindableUi

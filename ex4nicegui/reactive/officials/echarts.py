@@ -1,12 +1,13 @@
 from typing import Any, Callable, Dict, List, Union, cast, Optional
 from typing_extensions import Literal
-from ex4nicegui import effect
+
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
     ref_computed,
     _TMaybeRef as TMaybeRef,
     to_ref,
+    effect,
 )
 from .base import BindableUi
 from .utils import _convert_kws_ref2value
