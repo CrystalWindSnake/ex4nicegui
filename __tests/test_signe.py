@@ -1,5 +1,9 @@
 import pytest
-from ex4nicegui import to_ref, on
+from nicegui import ui
+from ex4nicegui import to_ref, on, effect, batch
+from .screen import ScreenPage
+from playwright.sync_api import expect
+from .utils import SelectUtils, set_test_id
 
 
 def test_on_priority_level():
@@ -16,3 +20,11 @@ def test_on_priority_level():
 
     foo.value = "new"
     assert records == ["second", "first"]
+
+
+def test_batch_event(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        set_test_id(rxui.select(["a", "b"], label="test select"), "target")
+
+    page.open(page_path)
