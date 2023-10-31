@@ -9,6 +9,7 @@ from ex4nicegui.utils.signals import (
     to_value,
     ref,
     on,
+    event_batch,
     _TMaybeRef as TMaybeRef,
 )
 from ex4nicegui import tools
