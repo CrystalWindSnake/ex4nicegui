@@ -11,8 +11,6 @@ from typing_extensions import Protocol
 import math
 from ex4nicegui.reactive.q_pagination import QPagination
 
-_T = TypeVar("_T")
-
 
 def _clamp(value, min_v, max_v) -> int:
     return min(max(value, min_v), max_v)
