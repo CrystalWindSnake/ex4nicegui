@@ -147,3 +147,30 @@ class MermaidUtils:
 
     def click_node(self, nodeId: str):
         self.target_locator.get_by_text(nodeId, exact=True).click()
+
+
+class AggridUtils:
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        self.page = screen_page._page
+        self.test_id = test_id
+        self.target_locator = self.page.get_by_test_id(test_id)
+
+    def expect_cell_to_be_visible(self, cell_values: List):
+        for cell_value in cell_values:
+            expect(
+                self.target_locator.get_by_role("gridcell", name=cell_value, exact=True)
+            ).to_be_visible()
+
+    def expect_selection_cell_to_be_visible(self, cell_values: List):
+        for cell_value in cell_values:
+            expect(
+                self.target_locator.get_by_role("gridcell")
+                .locator("div")
+                .filter(has_text="a")
+            ).to_be_visible()
+
+    def expect_cell_not_to_be_visible(self, cell_values: List):
+        for cell_value in cell_values:
+            expect(
+                self.target_locator.get_by_role("gridcell", name=cell_value, exact=True)
+            ).not_to_be_visible()
