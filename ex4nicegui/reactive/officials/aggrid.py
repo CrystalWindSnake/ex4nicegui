@@ -1,6 +1,8 @@
 from typing import (
+    Callable,
     List,
     Dict,
+    Optional,
 )
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
@@ -22,16 +24,17 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         *,
         html_columns: TMaybeRef[List[int]] = [],
         theme: TMaybeRef[str] = "balham",
+        auto_size_columns: bool = True,
         **org_kws
     ) -> None:
         kws = {
             "options": options,
             "html_columns": html_columns,
             "theme": theme,
+            "auto_size_columns": auto_size_columns,
         }
 
         value_kws = _convert_kws_ref2value(kws)
-
         element = ui.aggrid(**value_kws, **org_kws)
 
         super().__init__(element)
@@ -41,7 +44,19 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
                 self.bind_prop(key, value)  # type: ignore
 
     @staticmethod
-    def from_pandas(df: TMaybeRef, **org_kws):
+    def _get_columnDefs_from_dataframe(df, columns_define_fn: Callable[[str], Dict]):
+        return [
+            {**{"headerName": col, "field": col}, **columns_define_fn(col)}
+            for col in df.columns  # type: ignore
+        ]
+
+    @staticmethod
+    def from_pandas(
+        df: TMaybeRef,
+        columns_define_fn: Optional[Callable[[str], Dict]] = None,
+        **org_kws
+    ):
+        columns_define_fn = columns_define_fn or (lambda x: {})
         if is_ref(df):
 
             @ref_computed
@@ -50,17 +65,18 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
 
             @ref_computed
             def cp_options():
-                columnDefs = [
-                    {"headerName": col, "field": col}
-                    for col in cp_convert_df.value.columns
-                ]
+                columnDefs = AggridBindableUi._get_columnDefs_from_dataframe(
+                    cp_convert_df.value, columns_define_fn
+                )
                 rowData = cp_convert_df.value.to_dict("records")
                 data = {"columnDefs": columnDefs, "rowData": rowData}
                 return data
 
             return AggridBindableUi(cp_options, **org_kws)
 
-        columnDefs = [{"headerName": col, "field": col} for col in df.columns]  # type: ignore
+        columnDefs = AggridBindableUi._get_columnDefs_from_dataframe(
+            df, columns_define_fn
+        )
         rowData = df.to_dict("records")  # type: ignore
         options = {"columnDefs": columnDefs, "rowData": rowData}
         return AggridBindableUi(options, **org_kws)
