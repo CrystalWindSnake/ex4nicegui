@@ -6,22 +6,28 @@ from ex4nicegui.utils.signals import (
     effect,
     _TMaybeRef as TMaybeRef,
 )
-from typing import Sequence, Iterable, TypeVar, Generic, List, Union, Tuple
+from typing import TypeVar
+from typing_extensions import Protocol
 import math
 from ex4nicegui.reactive.q_pagination import QPagination
-
-_T = TypeVar("_T")
-_TPaginationRefSource = Union[List[_T], Tuple[_T]]
 
 
 def _clamp(value, min_v, max_v) -> int:
     return min(max(value, min_v), max_v)
 
 
-class PaginationRef(Generic[_T]):
+class _SourceProtocol(Protocol):
+    def __len__(self) -> int:
+        ...
+
+    def __getitem__(self, idx):
+        ...
+
+
+class PaginationRef:
     def __init__(
         self,
-        source: TMaybeRef[List[_T]],
+        source: TMaybeRef[_SourceProtocol],
         page_size: TMaybeRef[int] = 10,
         page: TMaybeRef[int] = 1,
     ) -> None:
