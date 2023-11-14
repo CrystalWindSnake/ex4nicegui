@@ -98,5 +98,5 @@ class PaginationRef:
 
     def create_q_pagination(self):
         page = QPagination(self.current_page, max=self.page_count)
-        page.props("boundary-links")
+        page.props("boundary-links direction-links")
         return page
