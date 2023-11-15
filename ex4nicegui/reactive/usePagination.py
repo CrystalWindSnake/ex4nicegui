@@ -6,7 +6,7 @@ from ex4nicegui.utils.signals import (
     effect,
     _TMaybeRef as TMaybeRef,
 )
-from typing import TypeVar
+from typing import Any, TypeVar
 from typing_extensions import Protocol
 import math
 from ex4nicegui.reactive.q_pagination import QPagination
@@ -20,7 +20,7 @@ class _SourceProtocol(Protocol):
     def __len__(self) -> int:
         ...
 
-    def __getitem__(self, idx):
+    def __getitem__(self, __idx: slice) -> Any:
         ...
 
 
