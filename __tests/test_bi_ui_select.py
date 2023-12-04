@@ -6,7 +6,7 @@ from ex4nicegui import bi
 from .utils import SelectUtils, set_test_id
 
 
-def test_(page: ScreenPage, page_path: str):
+def test_base(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
         data = [
@@ -52,3 +52,27 @@ def test_(page: ScreenPage, page_path: str):
     menu_items = target3.get_selection_values()
     assert menu_items == [f"L3_Z_{n}" for n in range(1, 8)]
     target3.click()
+
+
+def test_custom_values(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        data = pd.DataFrame(
+            {"name": ["d", "a", "a", "e", None], "value": [2, 5, 4, 1, 5]}
+        )
+        source = bi.data_source(data)
+
+        def cus_df(df: pd.DataFrame):
+            df = df[df["name"].notnull()]
+            return df.sort_values(["name", "value"])
+
+        set_test_id(source.ui_select("name", custom_data_fn=cus_df), "target")
+
+    page.open(page_path)
+
+    target = SelectUtils(page, "target")
+
+    target.click()
+    page.wait()
+    menu_items = target.get_selection_values()
+    assert menu_items == ["a", "d", "e"]
