@@ -5,6 +5,7 @@ import pandas as pd
 from ex4nicegui import bi
 from .utils import set_test_id
 from . import utils as cp_utils
+from pyecharts.charts import Bar
 
 
 def test_remove_filters(page: ScreenPage, page_path: str):
@@ -37,6 +38,19 @@ def test_remove_filters(page: ScreenPage, page_path: str):
         set_test_id(source.ui_range("value"), "value range")
         set_test_id(source.ui_slider("value"), "value slider")
 
+        @source.ui_echarts
+        def bar(data: pd.DataFrame):
+            c = (
+                Bar()
+                .add_xaxis(data["name"].tolist())
+                .add_yaxis("value", data["value"].tolist())
+            )
+
+            return c
+
+        bar.classes("w-[50vw]")
+        set_test_id(bar, "echart bar")
+
         set_test_id(source.ui_aggrid(), "table1")
 
         #
@@ -52,6 +66,9 @@ def test_remove_filters(page: ScreenPage, page_path: str):
 
     name_select = cp_utils.SelectUtils(page, "name select")
     cls_select = cp_utils.SelectUtils(page, "cls select")
+    cls_radio = cp_utils.RadioUtils(page, "cls radio")
+
+    bar_chart = cp_utils.EChartsUtils(page, "echart bar")
 
     table1 = cp_utils.AggridUtils(page, "table1")
     table2 = cp_utils.AggridUtils(page, "table2")
@@ -76,10 +93,18 @@ def test_remove_filters(page: ScreenPage, page_path: str):
     cls_select.click()
     assert cls_select.get_selection_values() == ["c2"]
 
+    assert cls_radio.get_all_labels() == ["c2"]
+
+    assert bar_chart.get_options()["series"][0]["data"] == [4]
+
     assert len(table1.get_rows()) == 1
     assert len(table2.get_rows()) == 1
 
     reset_btn.click()
+
+    assert cls_radio.get_all_labels() == ["c1", "c2"]
+
+    assert bar_chart.get_options()["series"][0]["data"] == [0, 1, 2, 3, 4]
 
     assert len(table1.get_rows()) == 5
     assert len(table2.get_rows()) == 3
