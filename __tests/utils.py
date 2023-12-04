@@ -177,3 +177,18 @@ class AggridUtils:
             expect(
                 self.target_locator.get_by_role("gridcell", name=cell_value, exact=True)
             ).not_to_be_visible()
+
+    def get_rows(
+        self,
+    ):
+        return self.target_locator.locator(".ag-body-viewport").get_by_role("row").all()
+
+
+class ButtonUtils:
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        self.page = screen_page._page
+        self.test_id = test_id
+        self.target_locator = self.page.get_by_test_id(test_id)
+
+    def click(self):
+        self.target_locator.click()
