@@ -25,6 +25,10 @@ class RadioResult(UiResult["OptionGroup"]):
     def value(self):
         return self._ref_value.value
 
+    def _reset_state(self):
+        self._ref_value.value = None
+        self.element.value = None
+
 
 class OptionGroup(ui.element):
     def __init__(
@@ -139,9 +143,10 @@ def ui_radio(
 
             cp.set_options(new_opt_items, value=value)
 
-    self._dataSource._register_component(cp.id, on_source_update)
+    result = RadioResult(cp, self._dataSource, ref_value)
+    self._dataSource._register_component(cp.id, on_source_update, result)
 
-    return RadioResult(cp, self._dataSource, ref_value)
+    return result
 
 
 def _options_to_items(
