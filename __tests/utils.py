@@ -90,6 +90,9 @@ class RadioUtils:
         self.target_locator.get_by_label(label).click()
         return
 
+    def get_all_labels(self):
+        return self.target_locator.locator(".q-radio__label").all_inner_texts()
+
 
 class EChartsUtils:
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:

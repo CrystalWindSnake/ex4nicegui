@@ -3,7 +3,7 @@ from .screen import ScreenPage
 import pandas as pd
 
 from ex4nicegui import bi
-from .utils import SelectUtils, set_test_id
+from .utils import RadioUtils, set_test_id
 
 
 def test_base(page: ScreenPage, page_path: str):
@@ -25,54 +25,36 @@ def test_base(page: ScreenPage, page_path: str):
 
         source = bi.data_source(df)
 
-        set_test_id(source.ui_radio("level1"), "target1")
-        set_test_id(source.ui_radio("level2"), "target2")
+        set_test_id(
+            source.ui_radio("level1", custom_options_map={"L1_A": "A值"}), "target1"
+        )
+
+        def custom_options_map(v: str):
+            if v == "L2_M_2":
+                return {"label": "level2@m_2", "color": "red"}
+            return v
+
+        set_test_id(
+            source.ui_radio("level2", custom_options_map=custom_options_map), "target2"
+        )
         set_test_id(source.ui_radio("level3"), "target3")
 
     page.open(page_path)
 
-    target1 = SelectUtils(page, "target1")
-    target2 = SelectUtils(page, "target2")
-    target3 = SelectUtils(page, "target3")
+    target1 = RadioUtils(page, "target1")
+    target2 = RadioUtils(page, "target2")
+    target3 = RadioUtils(page, "target3")
 
-    target1.click()
+    assert not target1.is_checked_by_label("A值")
+    assert not target1.is_checked_by_label("L1_B")
+
     page.wait()
-    menu_items = target1.get_selection_values()
-    assert menu_items == ["L1_A", "L1_B"]
-    target1.click()
 
-    target2.click()
-    page.wait()
-    menu_items = target2.get_selection_values()
-    assert menu_items == ["L2_M_1", "L2_M_2", "L2_M_3", "L2_M_4"]
-    target2.click()
+    target1.check_by_label("A值")
+    assert target1.is_checked_by_label("A值")
+    assert not target1.is_checked_by_label("L1_B")
 
-    target3.click()
-    page.wait()
-    menu_items = target3.get_selection_values()
-    assert menu_items == [f"L3_Z_{n}" for n in range(1, 8)]
-    target3.click()
+    assert not target2.is_checked_by_label("L2_M_1")
+    assert not target2.is_checked_by_label("level2@m_2")
 
-
-def test_custom_values(page: ScreenPage, page_path: str):
-    @ui.page(page_path)
-    def _():
-        data = pd.DataFrame(
-            {"name": ["d", "a", "a", "e", None], "value": [2, 5, 4, 1, 5]}
-        )
-        source = bi.data_source(data)
-
-        def cus_df(df: pd.DataFrame):
-            df = df[df["name"].notnull()]
-            return df.sort_values(["name", "value"])
-
-        set_test_id(source.ui_select("name", custom_data_fn=cus_df), "target")
-
-    page.open(page_path)
-
-    target = SelectUtils(page, "target")
-
-    target.click()
-    page.wait()
-    menu_items = target.get_selection_values()
-    assert menu_items == ["a", "d", "e"]
+    assert target2.get_all_labels() == ["L2_M_1", "level2@m_2"]

@@ -74,7 +74,7 @@ class DataSourceFacade(Generic[_TData]):
         *,
         hide_filtered=True,
         custom_data_fn: Optional[Callable[[Any], Any]] = None,
-        custom_options_map: Optional[Union[Dict, Callable[[List], Dict]]] = None,
+        custom_options_map: Optional[Union[Dict, Callable[[Any], Any]]] = None,
         **kwargs,
     ):
         """
