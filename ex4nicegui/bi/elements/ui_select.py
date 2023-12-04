@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Optional
 from nicegui import ui
+from regex import D
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter
@@ -45,9 +46,18 @@ class SelectResult(UiResult[ui.select]):
 
 
 def ui_select(
-    self: DataSourceFacade, column: str, *, clearable=True, multiple=True, **kwargs
+    self: DataSourceFacade,
+    column: str,
+    *,
+    custom_data_fn: Optional[Callable[[Any], Any]] = None,
+    clearable=True,
+    multiple=True,
+    **kwargs,
 ) -> SelectResult:
-    options = self._dataSource._idataSource.duplicates_column_values(self.data, column)
+    custom_data_fn = custom_data_fn or (lambda data: data)
+    options = self._dataSource._idataSource.duplicates_column_values(
+        custom_data_fn(self.data), column
+    )
     kwargs.update(
         {
             "options": options,

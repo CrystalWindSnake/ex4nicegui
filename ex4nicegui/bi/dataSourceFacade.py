@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, Dict, TypeVar, Generic, Union, cast
+from typing import Any, Callable, Dict, Optional, TypeVar, Generic, Union, cast
 from nicegui import ui
 from .dataSource import DataSource, Filter
 from . import types as bi_types
@@ -28,7 +28,15 @@ class DataSourceFacade(Generic[_TData]):
         """Data after filtering"""
         return cast(_TData, self._dataSource.filtered_data)
 
-    def ui_select(self, column: str, *, clearable=True, multiple=True, **kwargs):
+    def ui_select(
+        self,
+        column: str,
+        *,
+        custom_data_fn: Optional[Callable[[Any], Any]] = None,
+        clearable=True,
+        multiple=True,
+        **kwargs,
+    ):
         """
         Creates a user interface select box.
 
@@ -45,7 +53,9 @@ class DataSourceFacade(Generic[_TData]):
         kws.update(kwargs)
         return ui_select(**kws)
 
-    def ui_aggrid(self, **kwargs):
+    def ui_aggrid(
+        self, *, custom_data_fn: Optional[Callable[[Any], Any]] = None, **kwargs
+    ):
         """
         Creates aggrid table.
 
@@ -55,9 +65,15 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.aggrid: aggrid table.
         """
-        return ui_aggrid(self, **kwargs)
+        return ui_aggrid(self, custom_data_fn=custom_data_fn, **kwargs)
 
-    def ui_radio(self, column: str, **kwargs):
+    def ui_radio(
+        self,
+        column: str,
+        *,
+        custom_data_fn: Optional[Callable[[Any], Any]] = None,
+        **kwargs,
+    ):
         """
         Creates radio Selection.
 

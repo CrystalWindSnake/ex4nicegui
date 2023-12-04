@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Optional
 from nicegui import ui
 from nicegui.elements.radio import Radio
 from ex4nicegui import to_ref
@@ -26,8 +26,17 @@ class RadioResult(UiResult[ui.radio]):
         return self._ref_value.value
 
 
-def ui_radio(self: DataSourceFacade, column: str, **kwargs) -> RadioResult:
-    options = self._dataSource._idataSource.duplicates_column_values(self.data, column)
+def ui_radio(
+    self: DataSourceFacade,
+    column: str,
+    *,
+    custom_data_fn: Optional[Callable[[Any], Any]] = None,
+    **kwargs,
+) -> RadioResult:
+    custom_data_fn = custom_data_fn or (lambda data: data)
+    options = self._dataSource._idataSource.duplicates_column_values(
+        custom_data_fn(self.data), column
+    )
     kwargs.update({"options": options})
 
     cp = ui.radio(**kwargs)
