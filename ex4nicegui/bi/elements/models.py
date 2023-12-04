@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import abstractmethod
 from typing import Optional, TypeVar, Generic, TYPE_CHECKING, Union
 from nicegui import ui
 
@@ -21,6 +22,10 @@ class UiResult(Generic[_T_ELEMENT]):
     @property
     def id(self):
         return self.element.id
+
+    @abstractmethod
+    def _reset_state(self):
+        pass
 
     def classes(
         self,
