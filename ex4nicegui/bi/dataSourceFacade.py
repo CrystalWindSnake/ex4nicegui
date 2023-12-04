@@ -28,6 +28,12 @@ class DataSourceFacade(Generic[_TData]):
         """Data after filtering"""
         return cast(_TData, self._dataSource.filtered_data)
 
+    def remove_filters(
+        self,
+    ):
+        """Remove the filter from the data source"""
+        pass
+
     def ui_select(
         self,
         column: str,
