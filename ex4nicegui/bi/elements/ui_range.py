@@ -4,7 +4,7 @@ from ex4nicegui import to_ref
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter
 from .models import UiResult
-from typing import Any, Callable, Optional, TYPE_CHECKING, cast
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, cast
 from typing_extensions import TypedDict
 
 
@@ -56,9 +56,11 @@ class RangeResult(UiResult[QRange]):
         element: QRange,
         dataSource: DataSource,
         ref_value: Ref,
+        init_data: Dict,
     ) -> None:
         super().__init__(element, dataSource)
         self._ref_value = ref_value
+        self._init_data = init_data
 
     @property
     def value(self):
@@ -67,6 +69,11 @@ class RangeResult(UiResult[QRange]):
     def drag_range(self):
         self.element.props("drag-range")
         return self
+
+    def _reset_state(self):
+        self._ref_value.value = self._init_data
+        self.element.set_value(self._init_data)
+        # self.element.update()
 
 
 def ui_range(self: DataSourceFacade, column: str, **kwargs):
@@ -114,6 +121,9 @@ def ui_range(self: DataSourceFacade, column: str, **kwargs):
                 cp.value = new_value
                 cp.update()
 
-    self._dataSource._register_component(cp.id, on_source_update)
+    result = RangeResult(
+        cp, self._dataSource, ref_value, init_data={"min": min, "max": max}
+    )
+    self._dataSource._register_component(cp.id, on_source_update, result)
 
-    return RangeResult(cp, self._dataSource, ref_value)
+    return result

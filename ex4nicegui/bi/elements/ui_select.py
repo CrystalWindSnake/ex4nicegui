@@ -115,6 +115,10 @@ def ui_select(
         cp.set_options(options, value=value)
 
     result = SelectResult(cp, self._dataSource, ref_value)
-    self._dataSource._register_component(cp.id, on_source_update, result)
+    self._dataSource._register_component(
+        cp.id,
+        on_source_update,
+        result,
+    )
 
     return result
