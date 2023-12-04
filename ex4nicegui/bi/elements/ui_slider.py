@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 from nicegui import ui
 from ex4nicegui import to_ref
 from ex4nicegui.utils.signals import Ref
@@ -16,13 +16,21 @@ class SliderResult(UiResult[ui.slider]):
         element: ui.slider,
         dataSource: DataSource,
         ref_value: Ref,
+        init_data: Dict,
     ) -> None:
         super().__init__(element, dataSource)
         self._ref_value = ref_value
+        self._init_data = init_data
 
     @property
     def value(self):
         return self._ref_value.value
+
+    def _reset_state(self):
+        min = self._init_data["min"]
+        max = self._init_data["max"]
+        self._ref_value.value = min
+        self.element.set_value(min)
 
 
 def ui_slider(self: DataSourceFacade, column: str, **kwargs):
@@ -54,6 +62,9 @@ def ui_slider(self: DataSourceFacade, column: str, **kwargs):
             cp._props["min"] = min
             cp._props["max"] = max
 
-    self._dataSource._register_component(cp.id, on_source_update)
+    result = SliderResult(
+        cp, self._dataSource, ref_value, init_data={"min": min, "max": max}
+    )
+    self._dataSource._register_component(cp.id, on_source_update, result)
 
-    return SliderResult(cp, self._dataSource, ref_value)
+    return result

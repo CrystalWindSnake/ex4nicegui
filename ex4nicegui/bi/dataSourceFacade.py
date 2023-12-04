@@ -1,5 +1,15 @@
 from __future__ import annotations
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    TYPE_CHECKING,
+    Optional,
+    TypeVar,
+    Generic,
+    Union,
+    cast,
+)
 from nicegui import ui
 from .dataSource import DataSource, Filter
 from . import types as bi_types
@@ -10,6 +20,9 @@ from .elements.ui_range import ui_range
 from .elements.ui_echarts import ui_echarts
 from .elements.ui_aggrid import ui_aggrid
 
+
+if TYPE_CHECKING:
+    from ex4nicegui.bi.elements.models import UiResult
 
 _TData = TypeVar("_TData")
 
@@ -27,6 +40,14 @@ class DataSourceFacade(Generic[_TData]):
     def filtered_data(self) -> _TData:
         """Data after filtering"""
         return cast(_TData, self._dataSource.filtered_data)
+
+    def remove_filters(self, *components: UiResult):
+        """Remove the filter from the data source"""
+        if len(components) == 0:
+            # remove all
+            self._dataSource.remove_all_filters()
+        else:
+            pass
 
     def ui_select(
         self,

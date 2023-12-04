@@ -1,4 +1,5 @@
 from __future__ import annotations
+import select
 from typing import TYPE_CHECKING, Any, Callable, Optional
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
@@ -42,6 +43,10 @@ class SelectResult(UiResult[ui.select]):
             return self._value_or_options.value
 
         return self._ref_value.value
+
+    def _reset_state(self):
+        self._ref_value.value = []
+        self.element.value = []
 
 
 def ui_select(
@@ -109,6 +114,11 @@ def ui_select(
 
         cp.set_options(options, value=value)
 
-    self._dataSource._register_component(cp.id, on_source_update)
+    result = SelectResult(cp, self._dataSource, ref_value)
+    self._dataSource._register_component(
+        cp.id,
+        on_source_update,
+        result,
+    )
 
-    return SelectResult(cp, self._dataSource, ref_value)
+    return result

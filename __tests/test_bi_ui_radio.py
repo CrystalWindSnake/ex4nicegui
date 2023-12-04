@@ -51,6 +51,7 @@ def test_base(page: ScreenPage, page_path: str):
     page.wait()
 
     target1.check_by_label("A值")
+    page.wait()
     assert target1.is_checked_by_label("A值")
     assert not target1.is_checked_by_label("L1_B")
 

@@ -1,10 +1,15 @@
-from typing import Callable, Dict, List, Optional, Set, cast
-from ex4nicegui import to_ref, ref_computed, on
+from __future__ import annotations
+from typing import Callable, Dict, List, Optional, Set, cast, TYPE_CHECKING
+from ex4nicegui import to_ref, ref_computed, on, batch
 from nicegui import context as ng_context, Client, ui
 
 from dataclasses import dataclass, field
 from . import types
 from .protocols import IDataSourceAble
+
+
+if TYPE_CHECKING:
+    from ex4nicegui.bi.elements.models import UiResult
 
 _TComponentUpdateCallback = Callable[[], None]
 
@@ -26,6 +31,7 @@ class ComponentInfo:
     update_callback: Optional[_TComponentUpdateCallback] = None
     filter: Optional[Filter] = None
     exclude_keys: Set[ComponentInfoKey] = field(default_factory=set)
+    uiResult: Optional[UiResult] = None
 
     def __eq__(self, other):
         return isinstance(other, ComponentInfo) and self.key == other.key
@@ -66,7 +72,7 @@ class ComponentMap:
         self,
         client_id: types._TNgClientID,
         element_id: types._TElementID,
-        filter: Filter,
+        filter: Optional[Filter],
     ):
         self._client_map[client_id][element_id].filter = filter
 
@@ -77,6 +83,9 @@ class ComponentMap:
 
     def get_info(self, key: ComponentInfoKey) -> ComponentInfo:
         return self._client_map[key.client_id][key.element_id]
+
+    def get_info_by_client(self, client_id: types._TNgClientID):
+        return self._client_map[client_id]
 
 
 class DataSource:
@@ -122,6 +131,24 @@ class DataSource:
     def id(self):
         return self.__id
 
+    def remove_all_filters(self):
+        ng_client = ng_context.get_client()
+        client_id = ng_client.id
+
+        @batch
+        def batch_update():
+            for eleId, _ in self._component_map.get_info_by_client(client_id).items():
+                self.send_filter(eleId, None)
+
+            # nodify every component
+            for current_info in self._component_map.get_all_info():
+                update_callback = current_info.update_callback
+                if update_callback:
+                    update_callback()
+
+                if current_info.uiResult:
+                    current_info.uiResult._reset_state()
+
     def get_component_info_key(self, element_id: types._TElementID):
         client_id = ng_context.get_client().id
         return ComponentInfoKey(client_id, element_id)
@@ -147,6 +174,7 @@ class DataSource:
         self,
         element_id: types._TElementID,
         update_callback: Optional[_TComponentUpdateCallback] = None,
+        ui_result: Optional[UiResult] = None,
     ):
         ng_client = ng_context.get_client()
         client_id = ng_client.id
@@ -158,12 +186,14 @@ class DataSource:
                 if not e.shared:
                     self._component_map.remove_client(e.id)
 
-        info = ComponentInfo(ComponentInfoKey(client_id, element_id), update_callback)
+        info = ComponentInfo(
+            ComponentInfoKey(client_id, element_id), update_callback, uiResult=ui_result
+        )
         self._component_map.add_info(info)
 
         return info
 
-    def send_filter(self, element_id: types._TElementID, filter: Filter):
+    def send_filter(self, element_id: types._TElementID, filter: Optional[Filter]):
         client_id = ng_context.get_client().id
         key = ComponentInfoKey(client_id, element_id)
 

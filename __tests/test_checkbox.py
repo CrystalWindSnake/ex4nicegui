@@ -21,8 +21,9 @@ def test_const_value(page: ScreenPage, page_path: str):
 
     assert not target.is_checked()
 
-    page.wait()
+    # page.wait()
     target.click()
+    page.wait()
 
     assert target.is_checked()
 
