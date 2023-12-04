@@ -1,20 +1,20 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 from nicegui import ui
-from nicegui.elements.radio import Radio
 from ex4nicegui import to_ref
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import DataSource, Filter
 from .models import UiResult
+import copy
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.dataSourceFacade import DataSourceFacade
 
 
-class RadioResult(UiResult[ui.radio]):
+class RadioResult(UiResult["OptionGroup"]):
     def __init__(
         self,
-        element: Radio,
+        element: "OptionGroup",
         dataSource: DataSource,
         ref_value: Ref,
     ) -> None:
@@ -26,44 +26,146 @@ class RadioResult(UiResult[ui.radio]):
         return self._ref_value.value
 
 
+class OptionGroup(ui.element):
+    def __init__(
+        self,
+        options: List,
+        *,
+        value: Any = None,
+    ) -> None:
+        super().__init__("q-option-group")
+
+        self._value = value
+        self._options = options
+        self._props["options"] = options
+        self._props["modelValue"] = value
+
+        self._on_change_callbacks: List[Callable[[Any], None]] = []
+
+        def on_modelValue(e):
+            value = e.args
+
+            self._value = value
+            self._props["modelValue"] = value
+            self.update()
+
+            for fn in self._on_change_callbacks:
+                fn(value)
+
+        self.on("update:modelValue", on_modelValue)
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, new_value):
+        self._value = new_value
+        self._props["modelValue"] = new_value
+        self.update()
+
+    @property
+    def options(self):
+        return self._options
+
+    def set_options(self, options, value):
+        self._options = options
+        self._props["options"] = options
+
+        self.value = value
+        self.update()
+
+    def on_change(self, callback: Callable[[Any], None]):
+        self._on_change_callbacks.append(callback)
+
+
 def ui_radio(
     self: DataSourceFacade,
     column: str,
     *,
+    hide_filtered=True,
     custom_data_fn: Optional[Callable[[Any], Any]] = None,
+    custom_options_map: Optional[Union[Dict, Callable[[List], Dict]]] = None,
     **kwargs,
 ) -> RadioResult:
     custom_data_fn = custom_data_fn or (lambda data: data)
+    custom_options_map = custom_options_map or {}
+
     options = self._dataSource._idataSource.duplicates_column_values(
         custom_data_fn(self.data), column
     )
-    kwargs.update({"options": options})
+    option_items = _options_to_items(options, custom_options_map)
 
-    cp = ui.radio(**kwargs)
+    kwargs.update({"options": option_items})
+
+    cp = OptionGroup(**kwargs)
     ref_value = to_ref(cp.value)
 
-    def onchange(e):
-        cp.value = cp.options[e.args]
+    @cp.on_change
+    def onchange(value):
+        cp.value = value
 
         def data_filter(data):
-            if cp.value not in cp.options:
+            value_in_options = any(cp.value == opt["value"] for opt in cp.options)
+            if not value_in_options:
                 return data
             cond = data[column] == cp.value
             return data[cond]
 
         self._dataSource.send_filter(cp.id, Filter(data_filter))
 
-    cp.on("update:modelValue", onchange)
-
     def on_source_update():
+        pass
         data = self._dataSource.get_filtered_data(cp)
-        options = self._dataSource._idataSource.duplicates_column_values(data, column)
+        filtered_options = self._dataSource._idataSource.duplicates_column_values(
+            data, column
+        )
+
+        filtered_options_set = set(filtered_options)
+
         value = cp.value
-        if value not in options:
+        if value not in filtered_options_set:
             value = ""
 
-        cp.set_options(options, value=value)
+        if hide_filtered:
+            cp.set_options(
+                _options_to_items(filtered_options, custom_options_map), value=value
+            )
+        else:
+            new_opt_items = copy.deepcopy(cp.options)
+
+            for opt in new_opt_items:
+                opt["disable"] = opt["value"] not in filtered_options_set
+
+            cp.set_options(new_opt_items, value=value)
 
     self._dataSource._register_component(cp.id, on_source_update)
 
     return RadioResult(cp, self._dataSource, ref_value)
+
+
+def _options_to_items(
+    options: List, custom_options_map: Union[Dict, Callable[[Any], Dict]]
+):
+    items = []
+
+    custom_options_fn: Callable[[Any], Dict] = None  # type: ignore
+
+    if isinstance(custom_options_map, Dict):
+        custom_options_fn = custom_options_map.get  # type: ignore
+    else:
+        custom_options_fn = custom_options_map
+
+    for opt in options:
+        cus_config = custom_options_fn(opt)
+        item = {"value": opt, "label": opt}
+        if cus_config:
+            if not isinstance(cus_config, dict):
+                cus_config = {"label": str(cus_config)}
+
+            cus_config.pop("value", None)
+            item.update(cus_config)
+
+        items.append(item)
+
+    return items

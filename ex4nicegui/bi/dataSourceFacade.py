@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, Dict, Optional, TypeVar, Generic, Union, cast
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic, Union, cast
 from nicegui import ui
 from .dataSource import DataSource, Filter
 from . import types as bi_types
@@ -42,6 +42,7 @@ class DataSourceFacade(Generic[_TData]):
 
         Parameters:
             column (str): The column name of the data source.
+            custom_data_fn (callback[[pd.DataFrame],pd.DataFrame]): allows for custom data sources. After the data source is filtered, it will be passed into this function, and the result returned by the function will be used for duplicate removal processing.
             clearable (bool, optional): Whether to allow clearing the content of the select box. Default is True.
             multiple (bool, optional): Whether to allow multiple selections.
             **kwargs: Additional optional parameters that will be passed to the ui.select constructor.
@@ -71,7 +72,9 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
+        hide_filtered=True,
         custom_data_fn: Optional[Callable[[Any], Any]] = None,
+        custom_options_map: Optional[Union[Dict, Callable[[List], Dict]]] = None,
         **kwargs,
     ):
         """
@@ -79,6 +82,8 @@ class DataSourceFacade(Generic[_TData]):
 
         Parameters:
             column (str): The column name of the data source.
+            custom_data_fn (callback[[pd.DataFrame],pd.DataFrame]): allows for custom data sources. After the data source is filtered, it will be passed into this function, and the result returned by the function will be used for duplicate removal processing.
+
             **kwargs: Additional optional parameters that will be passed to the ui.radio constructor.
 
         Returns:
