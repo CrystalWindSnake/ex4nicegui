@@ -10,6 +10,9 @@ class IDataSourceAble(Protocol):
     def get_data(self) -> Any:
         ...
 
+    def reload(self, data) -> None:
+        ...
+
     def apply_filters(self, data, filters: List[_TFilterCallback]) -> Any:
         ...
 
@@ -39,6 +42,9 @@ class IDataSourceAble(Protocol):
 class DataFrameDataSourceAble(IDataSourceAble):
     def __init__(self, df) -> None:
         self.data = df
+
+    def reload(self, data) -> None:
+        self.data = data
 
     def get_data(self):
         return self.data
@@ -100,6 +106,9 @@ class DataFrameDataSourceAble(IDataSourceAble):
 class CallableDataSourceAble(IDataSourceAble):
     def __init__(self, fn: Callable) -> None:
         self.data_fn = fn
+
+    def reload(self, data) -> None:
+        raise NotImplementedError("CallableDataSource not support reload")
 
     def get_data(self):
         return self.data_fn()

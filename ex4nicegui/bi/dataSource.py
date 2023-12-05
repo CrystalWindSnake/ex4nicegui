@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Callable, Dict, List, Optional, Set, cast, TYPE_CHECKING
-from ex4nicegui import to_ref, ref_computed, on, batch
+from ex4nicegui import to_ref, ref_computed, on, batch, effect
 from nicegui import context as ng_context, Client, ui
 
 from dataclasses import dataclass, field
@@ -97,14 +97,17 @@ class DataSource:
 
         self._idataSource = data
 
-        data_fn = lambda: data.get_data()
-        data_fn = ref_computed(data_fn)
+        self._source_data_ref = to_ref(None)
+
+        @effect
+        def _():
+            self._source_data_ref.value = self._idataSource.get_data()
 
         self.__filters = to_ref(cast(List[Filter], []))
 
         @ref_computed
         def apply_filters():
-            df = data_fn.value
+            df = self._source_data_ref.value
             for f in self.__filters.value:
                 df = f.callback(df)
 
@@ -112,16 +115,19 @@ class DataSource:
 
         self.__filtered_data = apply_filters
 
-        self.__data = data_fn
         self._component_map = ComponentMap()
 
-        @on(data_fn)
+        @on(self._source_data_ref)
         def _():
             self.__notify_update()
 
     @property
     def data(self):
-        return self.__data.value
+        return self._source_data_ref.value
+
+    def reload(self, data):
+        self._idataSource.reload(data)
+        self._source_data_ref.value = data
 
     @property
     def filtered_data(self):

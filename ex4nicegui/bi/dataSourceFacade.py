@@ -41,6 +41,18 @@ class DataSourceFacade(Generic[_TData]):
         """Data after filtering"""
         return cast(_TData, self._dataSource.filtered_data)
 
+    def reload(self, data, reset_filters=True):
+        """Reload the data source with the provided new data.
+
+        Args:
+            data (_type_): The new data source to be loaded.
+            reset_filters (bool, optional): Whether to remove all filters. Defaults to True.
+        """
+        self._dataSource.reload(data)
+
+        if reset_filters:
+            self.remove_filters()
+
     def remove_filters(self, *components: UiResult):
         """Remove the filter from the data source"""
         if len(components) == 0:
