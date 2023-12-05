@@ -59,3 +59,62 @@ def test_base(page: ScreenPage, page_path: str):
     assert not target2.is_checked_by_label("level2@m_2")
 
     assert target2.get_all_labels() == ["L2_M_1", "level2@m_2"]
+
+
+def test_sort_options(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        data = pd.DataFrame(
+            {
+                "name": list("aabcdf"),
+                "cls": ["c1", "c2", "c1", "c1", "c3", None],
+                "value": range(6),
+            }
+        )
+        source = bi.data_source(data)
+
+        set_test_id(
+            source.ui_radio("name", sort_options={"cls": "asc", "value": "desc"}),
+            "target",
+        )
+
+    page.open(page_path)
+
+    target = RadioUtils(page, "target")
+
+    assert target.get_all_labels() == ["c", "b", "a", "d", "f"]
+
+
+def test_null_options(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        data = pd.DataFrame(
+            {
+                "name": list("aabcdf"),
+                "cls": ["c1", "c2", "c1", "c1", "c3", None],
+                "value": range(6),
+            }
+        )
+        source = bi.data_source(data)
+
+        set_test_id(
+            source.ui_radio("cls"),
+            "target1",
+        )
+
+        set_test_id(
+            source.ui_radio("cls", exclude_null_value=True),
+            "target2",
+        )
+
+    page.open(page_path)
+
+    # target1
+    target1 = RadioUtils(page, "target1")
+
+    assert target1.get_all_labels() == ["c1", "c2", "c3", ""]
+
+    # target2
+    target2 = RadioUtils(page, "target2")
+
+    assert target2.get_all_labels() == ["c1", "c2", "c3"]

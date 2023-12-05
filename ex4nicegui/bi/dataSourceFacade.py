@@ -10,7 +10,6 @@ from typing import (
     Union,
     cast,
 )
-from typing_extensions import Literal
 from nicegui import ui
 from .dataSource import DataSource, Filter
 from . import types as bi_types
@@ -20,7 +19,7 @@ from .elements.ui_slider import ui_slider
 from .elements.ui_range import ui_range
 from .elements.ui_echarts import ui_echarts
 from .elements.ui_aggrid import ui_aggrid
-
+from ex4nicegui.bi import types as bi_types
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.elements.models import UiResult
@@ -66,7 +65,9 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
-        sort_options: Optional[Dict[str, Literal["asc", "desc"]]] = None,
+        sort_options: Optional[
+            Dict[str, bi_types._TDuplicates_column_values_sort_options]
+        ] = None,
         exclude_null_value=False,
         clearable=True,
         multiple=True,
@@ -107,8 +108,9 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
+        sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
+        exclude_null_value=False,
         hide_filtered=True,
-        custom_data_fn: Optional[Callable[[Any], Any]] = None,
         custom_options_map: Optional[Union[Dict, Callable[[Any], Any]]] = None,
         **kwargs,
     ):

@@ -1,9 +1,11 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from functools import partial
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 from nicegui import ui
 from ex4nicegui import to_ref
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import DataSource, Filter
+from ex4nicegui.bi import types as bi_types
 from .models import UiResult
 import copy
 
@@ -87,17 +89,20 @@ def ui_radio(
     self: DataSourceFacade,
     column: str,
     *,
+    sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
+    exclude_null_value=False,
     hide_filtered=True,
-    custom_data_fn: Optional[Callable[[Any], Any]] = None,
     custom_options_map: Optional[Union[Dict, Callable[[List], Dict]]] = None,
     **kwargs,
 ) -> RadioResult:
-    custom_data_fn = custom_data_fn or (lambda data: data)
+    duplicates_column_values = partial(
+        self._dataSource._idataSource.duplicates_column_values,
+        sort_options=sort_options,
+        exclude_null_value=exclude_null_value,
+    )
     custom_options_map = custom_options_map or {}
 
-    options = self._dataSource._idataSource.duplicates_column_values(
-        custom_data_fn(self.data), column
-    )
+    options = duplicates_column_values(self.data, column)
     option_items = _options_to_items(options, custom_options_map)
 
     kwargs.update({"options": option_items})
@@ -121,9 +126,7 @@ def ui_radio(
     def on_source_update():
         pass
         data = self._dataSource.get_filtered_data(cp)
-        filtered_options = self._dataSource._idataSource.duplicates_column_values(
-            data, column
-        )
+        filtered_options = duplicates_column_values(data, column)
 
         filtered_options_set = set(filtered_options)
 

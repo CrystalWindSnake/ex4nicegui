@@ -5,6 +5,7 @@ from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter
+from ex4nicegui.bi import types as bi_types
 from .models import UiResult
 
 
@@ -54,7 +55,7 @@ def ui_select(
     self: DataSourceFacade,
     column: str,
     *,
-    sort_options: Optional[Dict[str, Literal["asc", "desc"]]] = None,
+    sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
     exclude_null_value=True,
     clearable=True,
     multiple=True,
