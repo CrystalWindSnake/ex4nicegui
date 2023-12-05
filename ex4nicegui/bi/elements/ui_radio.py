@@ -104,7 +104,6 @@ def ui_radio(
 
     options = duplicates_column_values(self.data, column)
     option_items = _options_to_items(options, custom_options_map)
-
     kwargs.update({"options": option_items})
 
     cp = OptionGroup(**kwargs)
@@ -118,7 +117,8 @@ def ui_radio(
             value_in_options = any(cp.value == opt["value"] for opt in cp.options)
             if not value_in_options:
                 return data
-            cond = data[column] == cp.value
+
+            cond = data[column].isnull() if cp.value == "" else data[column] == cp.value
             return data[cond]
 
         self._dataSource.send_filter(cp.id, Filter(data_filter))
@@ -165,6 +165,7 @@ def _options_to_items(
         custom_options_fn = custom_options_map
 
     for opt in options:
+        opt = "" if opt is None else opt
         cus_config = custom_options_fn(opt)
         item = {"value": opt, "label": opt}
         if cus_config:
