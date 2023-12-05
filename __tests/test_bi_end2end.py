@@ -200,7 +200,7 @@ def test_reload_source(page: ScreenPage, page_path: str):
     assert table1.get_data() == except_data
     assert table2.get_data() == except_data
 
-    assert name_radio.get_all_labels() == ["a", "b", "c", "d"]
+    assert name_radio.get_all_labels() == ["a"]
     assert cls_radio.get_all_labels() == ["类别1", "c2"]
 
     # reload
@@ -217,6 +217,9 @@ def test_reload_source(page: ScreenPage, page_path: str):
     assert table1.get_data() == except_all_data
     assert table2.get_data() == except_all_data[:3]
 
+    assert name_radio.get_all_labels() == ["x", "m", "n", "y"]
+    assert cls_radio.get_all_labels() == ["new 类别1", "cls2"]
+
     #
     name_select.click_and_select("x")
 
@@ -228,5 +231,5 @@ def test_reload_source(page: ScreenPage, page_path: str):
     assert table1.get_data() == except_data
     assert table2.get_data() == except_data
 
-    assert name_radio.get_all_labels() == ["x", "m", "n", "y"]
+    assert name_radio.get_all_labels() == ["x"]
     assert cls_radio.get_all_labels() == ["new 类别1", "cls2"]
