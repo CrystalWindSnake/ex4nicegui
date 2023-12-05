@@ -183,6 +183,15 @@ class AggridUtils:
     ):
         return self.target_locator.locator(".ag-body-viewport").get_by_role("row").all()
 
+    def get_data(self):
+        return [
+            row.get_by_role('gridcell').all_inner_texts()
+            for row in self.get_rows()
+        ]
+
+            
+
+
 
 class ButtonUtils:
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:

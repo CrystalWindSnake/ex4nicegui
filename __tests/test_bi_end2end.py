@@ -108,3 +108,100 @@ def test_remove_filters(page: ScreenPage, page_path: str):
 
     assert len(table1.get_rows()) == 5
     assert len(table2.get_rows()) == 3
+
+
+def test_reload_source(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        df = pd.DataFrame(
+            {
+                "name": list("aabcd"),
+                "cls": [
+                    "c1",
+                    "c2",
+                    "c1",
+                    "c1",
+                    "c2",
+                ],
+                "value": range(5),
+            }
+        )
+
+        ds1 = bi.data_source(df)
+
+        df1 = pd.DataFrame(
+            {
+                "name": list("xxmny"),
+                "cls": [
+                    "cls1",
+                    "cls2",
+                    "cls1",
+                    "cls1",
+                    "cls2",
+                ],
+                "value": range(5),
+                "value1": range(100, 105),
+            }
+        )
+
+        @bi.data_source
+        def ds2():
+            return ds1.filtered_data.head(3)
+
+        def onclick():
+            ds1.reload(df1)
+
+        set_test_id(ui.button("reload", on_click=onclick), "button")
+
+        set_test_id(ds1.ui_select("name", multiple=False), "name select")
+        set_test_id(ds1.ui_select("cls", multiple=False), "cls select")
+
+        set_test_id(ds1.ui_aggrid(), "table1")
+
+        set_test_id(ds2.ui_aggrid(), "table2")
+
+    page.open(page_path)
+
+    reset_btn = cp_utils.ButtonUtils(page, "button")
+
+    name_select = cp_utils.SelectUtils(page, "name select")
+    cls_select = cp_utils.SelectUtils(page, "cls select")
+
+    table1 = cp_utils.AggridUtils(page, "table1")
+    table2 = cp_utils.AggridUtils(page, "table2")
+
+    name_select.click_and_select("a")
+    page.wait()
+
+    except_data = [
+        ["a", "c1", "0"],
+        ["a", "c2", "1"],
+    ]
+
+    assert table1.get_data() == except_data
+    assert table2.get_data() == except_data
+
+    # reload
+    reset_btn.click()
+
+    except_all_data = [
+        ["x", "cls1", "0", "100"],
+        ["x", "cls2", "1", "101"],
+        ["m", "cls1", "2", "102"],
+        ["n", "cls1", "3", "103"],
+        ["y", "cls2", "4", "104"],
+    ]
+
+    assert table1.get_data() == except_all_data
+    assert table2.get_data() == except_all_data[:3]
+
+    #
+    name_select.click_and_select("x")
+
+    except_data = [
+        ["x", "cls1", "0", "100"],
+        ["x", "cls2", "1", "101"],
+    ]
+
+    assert table1.get_data() == except_data
+    assert table2.get_data() == except_data
