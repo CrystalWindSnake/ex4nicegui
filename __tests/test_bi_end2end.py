@@ -156,6 +156,22 @@ def test_reload_source(page: ScreenPage, page_path: str):
         set_test_id(ds1.ui_select("name", multiple=False), "name select")
         set_test_id(ds1.ui_select("cls", multiple=False), "cls select")
 
+        set_test_id(
+            ds1.ui_radio(
+                "name", hide_filtered=True, custom_options_map={"": "null", "c1": "类别1"}
+            ),
+            "name radio",
+        )
+
+        set_test_id(
+            ds1.ui_radio(
+                "cls",
+                hide_filtered=False,
+                custom_options_map={"": "null", "c1": "类别1", "cls1": "new 类别1"},
+            ),
+            "cls radio",
+        )
+
         set_test_id(ds1.ui_aggrid(), "table1")
 
         set_test_id(ds2.ui_aggrid(), "table2")
@@ -166,6 +182,9 @@ def test_reload_source(page: ScreenPage, page_path: str):
 
     name_select = cp_utils.SelectUtils(page, "name select")
     cls_select = cp_utils.SelectUtils(page, "cls select")
+
+    name_radio = cp_utils.RadioUtils(page, "name radio")
+    cls_radio = cp_utils.RadioUtils(page, "cls radio")
 
     table1 = cp_utils.AggridUtils(page, "table1")
     table2 = cp_utils.AggridUtils(page, "table2")
@@ -180,6 +199,9 @@ def test_reload_source(page: ScreenPage, page_path: str):
 
     assert table1.get_data() == except_data
     assert table2.get_data() == except_data
+
+    assert name_radio.get_all_labels() == ["a", "b", "c", "d"]
+    assert cls_radio.get_all_labels() == ["类别1", "c2"]
 
     # reload
     reset_btn.click()
@@ -205,3 +227,6 @@ def test_reload_source(page: ScreenPage, page_path: str):
 
     assert table1.get_data() == except_data
     assert table2.get_data() == except_data
+
+    assert name_radio.get_all_labels() == ["x", "m", "n", "y"]
+    assert cls_radio.get_all_labels() == ["new 类别1", "cls2"]

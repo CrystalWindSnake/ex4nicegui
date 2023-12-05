@@ -132,18 +132,20 @@ def ui_radio(
 
         value = None if cp.value == "" else cp.value
         if value not in filtered_options_set:
-            value = ""
+            value = None
 
         if hide_filtered:
             cp.set_options(
                 _options_to_items(filtered_options, custom_options_map), value=value
             )
         else:
-            new_opt_items = copy.deepcopy(cp.options)
+            new_opt_items = copy.deepcopy(
+                _options_to_items(filtered_options, custom_options_map)
+            )
 
             for opt in new_opt_items:
-                value = None if opt["value"] == "" else opt["value"]
-                opt["disable"] = value not in filtered_options_set
+                temp_value = None if opt["value"] == "" else opt["value"]
+                opt["disable"] = temp_value not in filtered_options_set
 
             cp.set_options(new_opt_items, value=value)
 
