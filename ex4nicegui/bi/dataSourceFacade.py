@@ -65,9 +65,7 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
-        sort_options: Optional[
-            Dict[str, bi_types._TDuplicates_column_values_sort_options]
-        ] = None,
+        sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
         exclude_null_value=False,
         clearable=True,
         multiple=True,
