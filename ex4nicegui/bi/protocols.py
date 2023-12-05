@@ -1,7 +1,10 @@
 from typing_extensions import Protocol
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from ex4nicegui.bi.types import _TFilterCallback
+from ex4nicegui.bi.types import (
+    _TFilterCallback,
+    _TDuplicates_column_values_sort_options,
+)
 from .types import _TFilterCallback
 from ex4nicegui.utils import common as utils_common
 
@@ -16,7 +19,13 @@ class IDataSourceAble(Protocol):
     def apply_filters(self, data, filters: List[_TFilterCallback]) -> Any:
         ...
 
-    def duplicates_column_values(self, data, column_name: str) -> List:
+    def duplicates_column_values(
+        self,
+        data,
+        column_name: str,
+        *,
+        sort_options: Optional[_TDuplicates_column_values_sort_options],
+    ) -> List:
         ...
 
     def get_aggrid_options(self, data) -> Dict:
@@ -56,8 +65,21 @@ class DataFrameDataSourceAble(IDataSourceAble):
 
         return new_data
 
-    def duplicates_column_values(self, data, column_name: str) -> List:
-        return data[column_name].drop_duplicates().tolist()
+    def duplicates_column_values(
+        self,
+        data,
+        column_name: str,
+        *,
+        sort_options: Optional[_TDuplicates_column_values_sort_options],
+    ) -> List:
+        sort_options = sort_options or {}
+        sort_cols = list(sort_options.keys())
+        ascendings = list(opt == "asc" for opt in sort_options.values())
+        return (
+            data.sort_values(sort_cols, ascending=ascendings)[column_name]
+            .drop_duplicates()
+            .tolist()
+        )
 
     def get_aggrid_options(self, data) -> Dict:
         df = utils_common.convert_dataframe(data)
@@ -120,7 +142,13 @@ class CallableDataSourceAble(IDataSourceAble):
 
         return new_data
 
-    def duplicates_column_values(self, data, column_name: str) -> List:
+    def duplicates_column_values(
+        self,
+        data,
+        column_name: str,
+        *,
+        sort_options: Optional[_TDuplicates_column_values_sort_options],
+    ) -> List:
         return data[column_name].drop_duplicates().tolist()
 
     def get_aggrid_options(self, data) -> Dict:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import select
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import Ref
@@ -53,6 +53,7 @@ def ui_select(
     self: DataSourceFacade,
     column: str,
     *,
+    sort_options: Optional[Dict[str, Literal["asc", "desc"]]] = None,
     custom_data_fn: Optional[Callable[[Any], Any]] = None,
     clearable=True,
     multiple=True,
@@ -60,7 +61,7 @@ def ui_select(
 ) -> SelectResult:
     custom_data_fn = custom_data_fn or (lambda data: data)
     options = self._dataSource._idataSource.duplicates_column_values(
-        custom_data_fn(self.data), column
+        self.data, column, sort_options=sort_options
     )
     kwargs.update(
         {

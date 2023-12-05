@@ -10,6 +10,7 @@ from typing import (
     Union,
     cast,
 )
+from typing_extensions import Literal
 from nicegui import ui
 from .dataSource import DataSource, Filter
 from . import types as bi_types
@@ -65,6 +66,7 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
+        sort_options: Optional[Dict[str, Literal["asc", "desc"]]] = None,
         custom_data_fn: Optional[Callable[[Any], Any]] = None,
         clearable=True,
         multiple=True,
