@@ -1,11 +1,12 @@
 from __future__ import annotations
-import select
+from functools import partial
 from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter
 from .models import UiResult
+
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.dataSourceFacade import DataSourceFacade, DataSource
@@ -54,15 +55,18 @@ def ui_select(
     column: str,
     *,
     sort_options: Optional[Dict[str, Literal["asc", "desc"]]] = None,
-    custom_data_fn: Optional[Callable[[Any], Any]] = None,
+    exclude_null_value=True,
     clearable=True,
     multiple=True,
     **kwargs,
 ) -> SelectResult:
-    custom_data_fn = custom_data_fn or (lambda data: data)
-    options = self._dataSource._idataSource.duplicates_column_values(
-        self.data, column, sort_options=sort_options
+    duplicates_column_values = partial(
+        self._dataSource._idataSource.duplicates_column_values,
+        sort_options=sort_options,
+        exclude_null_value=exclude_null_value,
     )
+
+    options = duplicates_column_values(self.data, column)
     kwargs.update(
         {
             "options": options,
@@ -103,7 +107,7 @@ def ui_select(
 
     def on_source_update():
         data = self._dataSource.get_filtered_data(cp)
-        options = self._dataSource._idataSource.duplicates_column_values(data, column)
+        options = duplicates_column_values(data, column)
         value = cp.value
 
         # Make the value within the options

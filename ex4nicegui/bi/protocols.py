@@ -24,6 +24,7 @@ class IDataSourceAble(Protocol):
         data,
         column_name: str,
         *,
+        exclude_null_value=True,
         sort_options: Optional[_TDuplicates_column_values_sort_options],
     ) -> List:
         ...
@@ -46,83 +47,6 @@ class IDataSourceAble(Protocol):
         self, data, column_name: str
     ) -> Tuple[Optional[float], Optional[float]]:
         ...
-
-
-class DataFrameDataSourceAble(IDataSourceAble):
-    def __init__(self, df) -> None:
-        self.data = df
-
-    def reload(self, data) -> None:
-        self.data = data
-
-    def get_data(self):
-        return self.data
-
-    def apply_filters(self, data, filters: List[_TFilterCallback]):
-        new_data = data
-        for f in filters:
-            new_data = f(new_data)
-
-        return new_data
-
-    def duplicates_column_values(
-        self,
-        data,
-        column_name: str,
-        *,
-        sort_options: Optional[_TDuplicates_column_values_sort_options],
-    ) -> List:
-        sort_options = sort_options or {}
-        sort_cols = list(sort_options.keys())
-        ascendings = list(opt == "asc" for opt in sort_options.values())
-        return (
-            data.sort_values(sort_cols, ascending=ascendings)[column_name]
-            .drop_duplicates()
-            .tolist()
-        )
-
-    def get_aggrid_options(self, data) -> Dict:
-        df = utils_common.convert_dataframe(data)
-        return {
-            "columnDefs": [{"field": col} for col in df.columns],
-            "rowData": df.to_dict("records"),
-        }
-
-    def slider_check(self, data, column_name: str) -> None:
-        from pandas.api.types import is_numeric_dtype
-
-        if not is_numeric_dtype(data[column_name]):
-            raise ValueError(f"column[{column_name}] must be numeric type")
-
-    def slider_min_max(
-        self, data, column_name: str
-    ) -> Tuple[Optional[float], Optional[float]]:
-        import numpy as np
-
-        min, max = data[column_name].min(), data[column_name].max()
-
-        if np.isnan(min) or np.isnan(max):
-            return None, None
-
-        return min, max
-
-    def range_check(self, data, column_name: str) -> None:
-        from pandas.api.types import is_numeric_dtype
-
-        if not is_numeric_dtype(data[column_name]):
-            raise ValueError(f"column[{column_name}] must be numeric type")
-
-    def range_min_max(
-        self, data, column_name: str
-    ) -> Tuple[Optional[float], Optional[float]]:
-        import numpy as np
-
-        min, max = data[column_name].min(), data[column_name].max()
-
-        if np.isnan(min) or np.isnan(max):
-            return None, None
-
-        return min, max
 
 
 class CallableDataSourceAble(IDataSourceAble):
@@ -147,8 +71,17 @@ class CallableDataSourceAble(IDataSourceAble):
         data,
         column_name: str,
         *,
+        exclude_null_value=True,
         sort_options: Optional[_TDuplicates_column_values_sort_options],
     ) -> List:
+        sort_options = sort_options or {}
+        sort_cols = list(sort_options.keys())
+        ascendings = list(opt == "asc" for opt in sort_options.values())
+
+        data = data.sort_values(sort_cols, ascending=ascendings)
+        if exclude_null_value:
+            data = data[data[column_name].notnull()]
+
         return data[column_name].drop_duplicates().tolist()
 
     def get_aggrid_options(self, data) -> Dict:
@@ -193,3 +126,22 @@ class CallableDataSourceAble(IDataSourceAble):
             return None, None
 
         return min, max
+
+
+class DataFrameDataSourceAble(CallableDataSourceAble):
+    def __init__(self, df) -> None:
+        self.data = df
+        super().__init__(lambda: self.data)
+
+    def reload(self, data) -> None:
+        self.data = data
+
+    def get_data(self):
+        return self.data
+
+    def apply_filters(self, data, filters: List[_TFilterCallback]):
+        new_data = data
+        for f in filters:
+            new_data = f(new_data)
+
+        return new_data

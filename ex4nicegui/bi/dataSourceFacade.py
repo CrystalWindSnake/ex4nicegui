@@ -67,7 +67,7 @@ class DataSourceFacade(Generic[_TData]):
         column: str,
         *,
         sort_options: Optional[Dict[str, Literal["asc", "desc"]]] = None,
-        custom_data_fn: Optional[Callable[[Any], Any]] = None,
+        exclude_null_value=False,
         clearable=True,
         multiple=True,
         **kwargs,
