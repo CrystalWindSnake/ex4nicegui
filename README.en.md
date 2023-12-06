@@ -330,7 +330,53 @@ ds.ui_select('name')
 new_ds.ui_aggrid()
 ```
 Note that since `new_ds` uses `ds.filtered_data`, changes to `ds` will trigger the linkage change of `new_ds`, causing the table component created by `new_ds` to change.
+---
 
+Remove all filter states through the `ds.remove_filters` method:
+```python
+ds = bi.data_source(df)
+
+def on_remove_filters():
+    ds.remove_filters()
+
+ui.button("remove all filters", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+---
+
+Reset the data source through the `ds.reload` method:
+```python
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+new_df = pd.DataFrame(
+    {
+        "name": list("xxyyds"),
+        "cls": ["cla1", "cla2", "cla3", "cla3", "cla3", None],
+        "value": range(100, 106),
+    }
+)
+
+ds = bi.data_source(df)
+
+def on_remove_filters():
+    ds.reload(new_df)
+
+ui.button("reload data", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+
+---
 #### Dropdown Select Box `ds.ui_select`
 
 ```python

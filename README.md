@@ -312,6 +312,7 @@ df = pd.DataFrame(
 ds =  bi.data_source(df)
 ```
 
+---
 有时候，我们希望基于另一个数据源创建新的数据源，此时可以使用装饰器创建联动数据源:
 ```python
 df = pd.DataFrame(
@@ -338,8 +339,52 @@ new_ds.ui_aggrid()
 ```
 
 注意，由于 `new_ds` 中使用了 `ds.filtered_data` ，因此 `ds` 的变动会触发 `new_ds` 的联动变化，从而导致 `new_ds` 创建的表格组件产生变化
+---
+通过 `ds.remove_filters` 方法，移除所有筛选状态:
+```python
+ds = bi.data_source(df)
 
+def on_remove_filters():
+    ds.remove_filters()
 
+ui.button("remove all filters", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+---
+
+通过 `ds.reload` 方法，重设数据源:
+```python
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+new_df = pd.DataFrame(
+    {
+        "name": list("xxyyds"),
+        "cls": ["cla1", "cla2", "cla3", "cla3", "cla3", None],
+        "value": range(100, 106),
+    }
+)
+
+ds = bi.data_source(df)
+
+def on_remove_filters():
+    ds.reload(new_df)
+
+ui.button("reload data", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+
+---
 #### 下拉框选择框 `ds.ui_select`
 
 ```python
