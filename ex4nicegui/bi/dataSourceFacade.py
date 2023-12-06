@@ -74,6 +74,8 @@ class DataSourceFacade(Generic[_TData]):
         """
         Creates a user interface select box.
 
+        [文档链接](https://gitee.com/carson_add/ex4nicegui/tree/docs%2Fapis/#%E4%B8%8B%E6%8B%89%E6%A1%86%E9%80%89%E6%8B%A9%E6%A1%86-dsui_select)
+
         Parameters:
             column (str): The column name of the data source.
             clearable (bool, optional): Whether to allow clearing the content of the select box. Default is True.

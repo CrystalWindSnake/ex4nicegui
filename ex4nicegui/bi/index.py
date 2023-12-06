@@ -10,6 +10,8 @@ _TData = TypeVar("_TData")
 def data_source(data: Union[Callable[..., _TData], _TData]) -> DataSourceFacade[_TData]:
     """Create a data source
 
+    [文档链接](https://gitee.com/carson_add/ex4nicegui/tree/docs%2Fapis/#%E6%95%B0%E6%8D%AE%E6%BA%90-bidata_source)
+
     Args:
         data (_TData): Any supported data
 
