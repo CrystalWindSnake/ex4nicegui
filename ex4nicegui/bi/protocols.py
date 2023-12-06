@@ -25,7 +25,7 @@ class IDataSourceAble(Protocol):
         column_name: str,
         *,
         exclude_null_value=True,
-        sort_options: Optional[_TDuplicates_column_values_sort_options],
+        sort_options: Optional[_TDuplicates_column_values_sort_options] = None,
     ) -> List:
         ...
 
@@ -72,7 +72,7 @@ class CallableDataSourceAble(IDataSourceAble):
         column_name: str,
         *,
         exclude_null_value=True,
-        sort_options: Optional[_TDuplicates_column_values_sort_options],
+        sort_options: Optional[_TDuplicates_column_values_sort_options] = None,
     ) -> List:
         sort_options = sort_options or {}
         sort_cols = list(sort_options.keys())
