@@ -14,12 +14,9 @@ def test_base(page: ScreenPage, page_path: str):
 
         source = bi.data_source(df)
 
-        def custom_data_fn(df: pd.DataFrame):
-            return df.sort_values(["age", "name"], ascending=[False, True])
-
-        set_test_id(source.ui_aggrid(custom_data_fn=custom_data_fn), "target")
+        set_test_id(source.ui_aggrid(), "target")
 
     page.open(page_path)
 
     target = AggridUtils(page, "target")
-    target.expect_cell_to_be_visible(list("cabf"))
+    target.expect_cell_to_be_visible(list("facb"))
