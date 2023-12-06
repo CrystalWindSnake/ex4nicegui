@@ -284,4 +284,148 @@ def details_page(name: str):
 ui.run()
 ```
 
+### Details
 
+#### Data Source `bi.data_source`
+The data source is the core concept of the BI module, and all data linkage is based on this. In the current version (0.4.3), there are two ways to create a data source.
+
+Receive `pandas`'s `DataFrame`:
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+ds =  bi.data_source(df)
+```
+
+Sometimes, we want to create a new data source based on another data source, in which case we can use a decorator to create a linked data source:
+```python
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+ds =  bi.data_source(df)
+
+@bi.data_source
+def new_ds():
+    # df is pd.DataFrame 
+    df = ds.filtered_data
+    df=df.copy()
+    df['value'] = df['value'] * 100
+    return df
+
+ds.ui_select('name')
+new_ds.ui_aggrid()
+```
+Note that since `new_ds` uses `ds.filtered_data`, changes to `ds` will trigger the linkage change of `new_ds`, causing the table component created by `new_ds` to change.
+---
+
+Remove all filter states through the `ds.remove_filters` method:
+```python
+ds = bi.data_source(df)
+
+def on_remove_filters():
+    ds.remove_filters()
+
+ui.button("remove all filters", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+---
+
+Reset the data source through the `ds.reload` method:
+```python
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+new_df = pd.DataFrame(
+    {
+        "name": list("xxyyds"),
+        "cls": ["cla1", "cla2", "cla3", "cla3", "cla3", None],
+        "value": range(100, 106),
+    }
+)
+
+ds = bi.data_source(df)
+
+def on_remove_filters():
+    ds.reload(new_df)
+
+ui.button("reload data", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+
+---
+#### Dropdown Select Box `ds.ui_select`
+
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+ds = bi.data_source(df)
+
+ds.ui_select("name")
+```
+
+The first parameter column specifies the column name of the data source.
+
+---
+Set the order of options using the parameter `sort_options`:
+```python
+ds.ui_select("name", sort_options={"value": "desc", "name": "asc"})
+```
+
+---
+Set whether to exclude null values using the parameter `exclude_null_value`:
+```python
+df = pd.DataFrame(
+    {
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+    }
+)
+
+ds = bi.data_source(df)
+ds.ui_select("cls", exclude_null_value=True)
+```
+
+---
+You can set the parameters of the native nicegui select component through keyword arguments.
+
+Set default values through the value attribute:
+```python
+ds.ui_select("cls",value=['c1','c2'])
+ds.ui_select("cls",multiple=False,value='c1')
+```
+For multiple selections (the parameter `multiple` is defaulted to True), `value` needs to be specified as a list. For single selections, `value` should be set to non-list.
+
+---

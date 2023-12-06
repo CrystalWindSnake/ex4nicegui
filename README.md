@@ -285,3 +285,159 @@ def details_page(name: str):
 ui.run()
 ```
 
+
+
+### 细节
+
+
+
+
+#### 数据源 `bi.data_source`
+数据源是 BI 模块的核心概念，所有数据的联动基于此展开。当前版本(0.4.3)中，有两种创建数据源的方式
+
+接收 `pandas` 的 `DataFrame`:
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+ds =  bi.data_source(df)
+```
+
+---
+有时候，我们希望基于另一个数据源创建新的数据源，此时可以使用装饰器创建联动数据源:
+```python
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+ds =  bi.data_source(df)
+
+@bi.data_source
+def new_ds():
+    # df is pd.DataFrame 
+    df = ds.filtered_data
+    df=df.copy()
+    df['value'] = df['value'] * 100
+    return df
+
+ds.ui_select('name')
+new_ds.ui_aggrid()
+
+```
+
+注意，由于 `new_ds` 中使用了 `ds.filtered_data` ，因此 `ds` 的变动会触发 `new_ds` 的联动变化，从而导致 `new_ds` 创建的表格组件产生变化
+---
+通过 `ds.remove_filters` 方法，移除所有筛选状态:
+```python
+ds = bi.data_source(df)
+
+def on_remove_filters():
+    ds.remove_filters()
+
+ui.button("remove all filters", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+---
+
+通过 `ds.reload` 方法，重设数据源:
+```python
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+new_df = pd.DataFrame(
+    {
+        "name": list("xxyyds"),
+        "cls": ["cla1", "cla2", "cla3", "cla3", "cla3", None],
+        "value": range(100, 106),
+    }
+)
+
+ds = bi.data_source(df)
+
+def on_remove_filters():
+    ds.reload(new_df)
+
+ui.button("reload data", on_click=on_remove_filters)
+
+ds.ui_select("name")
+ds.ui_aggrid()
+```
+
+---
+#### 下拉框选择框 `ds.ui_select`
+
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+df = pd.DataFrame(
+    {
+        "name": list("aabcdf"),
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+        "value": range(6),
+    }
+)
+
+ds = bi.data_source(df)
+
+ds.ui_select("name")
+```
+
+第一个参数 column 指定数据源的列名
+
+---
+通过参数 `sort_options` 设置选项顺序:
+```python
+ds.ui_select("name", sort_options={"value": "desc", "name": "asc"})
+
+```
+
+---
+参数 `exclude_null_value` 设置是否排除空值:
+```python
+df = pd.DataFrame(
+    {
+        "cls": ["c1", "c2", "c1", "c1", "c3", None],
+    }
+)
+
+ds = bi.data_source(df)
+ds.ui_select("cls", exclude_null_value=True)
+```
+
+---
+
+你可以通过关键字参数，设置原生 nicegui select 组件的参数.
+
+通过 value 属性，设置默认值:
+```python
+ds.ui_select("cls",value=['c1','c2'])
+ds.ui_select("cls",multiple=False,value='c1')
+
+```
+
+多选时(参数 `multiple` 默认为 True)，`value` 需要指定为 list
+
+单选时，`value` 设置为非 list
