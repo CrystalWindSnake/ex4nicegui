@@ -54,19 +54,22 @@ def test_base(page: ScreenPage, page_path: str):
     target3.click()
 
 
-def test_custom_values(page: ScreenPage, page_path: str):
+def test_sort_options(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
         data = pd.DataFrame(
-            {"name": ["d", "a", "a", "e", None], "value": [2, 5, 4, 1, 5]}
+            {
+                "name": list("aabcdf"),
+                "cls": ["c1", "c2", "c1", "c1", "c3", None],
+                "value": range(6),
+            }
         )
         source = bi.data_source(data)
 
-        def cus_df(df: pd.DataFrame):
-            df = df[df["name"].notnull()]
-            return df.sort_values(["name", "value"])
-
-        set_test_id(source.ui_select("name", custom_data_fn=cus_df), "target")
+        set_test_id(
+            source.ui_select("name", sort_options={"cls": "asc", "value": "desc"}),
+            "target",
+        )
 
     page.open(page_path)
 
@@ -75,4 +78,48 @@ def test_custom_values(page: ScreenPage, page_path: str):
     target.click()
     page.wait()
     menu_items = target.get_selection_values()
-    assert menu_items == ["a", "d", "e"]
+    assert menu_items == ["c", "b", "a", "d", "f"]
+
+
+def test_null_options(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        data = pd.DataFrame(
+            {
+                "name": list("aabcdf"),
+                "cls": ["c1", "c2", "c1", "c1", "c3", None],
+                "value": range(6),
+            }
+        )
+        source = bi.data_source(data)
+
+        set_test_id(
+            source.ui_select("cls"),
+            "target1",
+        )
+
+        set_test_id(
+            source.ui_select("cls", exclude_null_value=True),
+            "target2",
+        )
+
+    page.open(page_path)
+
+    # target1
+    target1 = SelectUtils(page, "target1")
+
+    target1.click()
+    page.wait()
+    menu_items = target1.get_selection_values()
+    assert menu_items == ["c1", "c2", "c3", ""]
+
+    # target2
+    target2 = SelectUtils(page, "target2")
+
+    page.wait()
+    page._page.press("body", "Enter")
+    page.wait()
+    target2.click()
+    page.wait()
+    menu_items = target2.get_selection_values()
+    assert menu_items == ["c1", "c2", "c3"]

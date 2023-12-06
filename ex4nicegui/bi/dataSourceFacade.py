@@ -19,7 +19,7 @@ from .elements.ui_slider import ui_slider
 from .elements.ui_range import ui_range
 from .elements.ui_echarts import ui_echarts
 from .elements.ui_aggrid import ui_aggrid
-
+from ex4nicegui.bi import types as bi_types
 
 if TYPE_CHECKING:
     from ex4nicegui.bi.elements.models import UiResult
@@ -65,7 +65,8 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
-        custom_data_fn: Optional[Callable[[Any], Any]] = None,
+        sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
+        exclude_null_value=False,
         clearable=True,
         multiple=True,
         **kwargs,
@@ -75,7 +76,6 @@ class DataSourceFacade(Generic[_TData]):
 
         Parameters:
             column (str): The column name of the data source.
-            custom_data_fn (callback[[pd.DataFrame],pd.DataFrame]): allows for custom data sources. After the data source is filtered, it will be passed into this function, and the result returned by the function will be used for duplicate removal processing.
             clearable (bool, optional): Whether to allow clearing the content of the select box. Default is True.
             multiple (bool, optional): Whether to allow multiple selections.
             **kwargs: Additional optional parameters that will be passed to the ui.select constructor.
@@ -87,9 +87,7 @@ class DataSourceFacade(Generic[_TData]):
         kws.update(kwargs)
         return ui_select(**kws)
 
-    def ui_aggrid(
-        self, *, custom_data_fn: Optional[Callable[[Any], Any]] = None, **kwargs
-    ):
+    def ui_aggrid(self, **kwargs):
         """
         Creates aggrid table.
 
@@ -99,14 +97,15 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.aggrid: aggrid table.
         """
-        return ui_aggrid(self, custom_data_fn=custom_data_fn, **kwargs)
+        return ui_aggrid(self, **kwargs)
 
     def ui_radio(
         self,
         column: str,
         *,
+        sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
+        exclude_null_value=False,
         hide_filtered=True,
-        custom_data_fn: Optional[Callable[[Any], Any]] = None,
         custom_options_map: Optional[Union[Dict, Callable[[Any], Any]]] = None,
         **kwargs,
     ):
@@ -115,7 +114,6 @@ class DataSourceFacade(Generic[_TData]):
 
         Parameters:
             column (str): The column name of the data source.
-            custom_data_fn (callback[[pd.DataFrame],pd.DataFrame]): allows for custom data sources. After the data source is filtered, it will be passed into this function, and the result returned by the function will be used for duplicate removal processing.
 
             **kwargs: Additional optional parameters that will be passed to the ui.radio constructor.
 
