@@ -96,22 +96,23 @@ def ui_range(self: DataSourceFacade, column: str, **kwargs):
     cp.on("change", onchange)
 
     def on_source_update():
-        data = self._dataSource.get_filtered_data(cp)
-        min, max = self._dataSource._idataSource.range_min_max(data, column)
-        if min is None or max is None:
-            cp.value = None
-        else:
-            new_value = cast(TQRangeValue, cp.value)
-            if new_value is not None:
-                new_value = new_value.copy()
+        pass
+        # data = self._dataSource.get_filtered_data(cp)
+        # min, max = self._dataSource._idataSource.range_min_max(data, column)
+        # if min is None or max is None:
+        #     cp.value = None
+        # else:
+        #     new_value = cast(TQRangeValue, cp.value)
+        #     if new_value is not None:
+        #         new_value = new_value.copy()
 
-                if new_value["min"] < min:
-                    new_value["min"] = min
-                if new_value["max"] > max:
-                    new_value["max"] = max
+        #         if new_value["min"] < min:
+        #             new_value["min"] = min
+        #         if new_value["max"] > max:
+        #             new_value["max"] = max
 
-                cp.value = new_value
-                cp.update()
+        #         cp.value = new_value
+        #         cp.update()
 
     result = RangeResult(
         cp, self._dataSource, ref_value, init_data={"min": min, "max": max}
