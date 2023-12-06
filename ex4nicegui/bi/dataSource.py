@@ -138,22 +138,15 @@ class DataSource:
         return self.__id
 
     def remove_all_filters(self):
-        ng_client = ng_context.get_client()
-        client_id = ng_client.id
-
         @batch
         def batch_update():
-            for eleId, _ in self._component_map.get_info_by_client(client_id).items():
-                self.send_filter(eleId, None)
-
-            # nodify every component
+            # reset ui state
             for current_info in self._component_map.get_all_info():
-                update_callback = current_info.update_callback
-                if update_callback:
-                    update_callback()
-
                 if current_info.uiResult:
                     current_info.uiResult._reset_state()
+
+            # nodify every component
+            self.__notify_update()
 
     def get_component_info_key(self, element_id: types._TElementID):
         client_id = ng_context.get_client().id
