@@ -222,6 +222,7 @@ def test_reload_source(page: ScreenPage, page_path: str):
 
     #
     name_select.click_and_select("x")
+    page.wait()
 
     except_data = [
         ["x", "cls1", "0", "100"],
