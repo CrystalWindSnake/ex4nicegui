@@ -1,9 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from nicegui import ui
-from nicegui.client import Client
-from nicegui.elements.select import Select
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import to_ref, on
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter
 from .models import UiResult
@@ -49,29 +47,34 @@ def ui_date_picker(
     cp = UiDatePicker(value or "")
     ref_value = to_ref(cp.value)
 
+    @on(ref_value)
+    def _():
+        cp.value = ref_value.value
+
     def onchange(e):
         value = e.args
-
-        cp.value = value
         ref_value.value = value  # type: ignore
-
-        def data_filter(data):
-            if cp.value is None or not cp.value:
-                return data
-
-            cond = None
-            cond = data[column] == cp.value
-            return data[cond]
-
-        self._dataSource.send_filter(cp.id, Filter(data_filter))
+        self._dataSource.notify_update([result])
 
     cp.on("update:value", onchange)
 
     def on_source_update():
-        data = self._dataSource.get_filtered_data(cp)
+        pass
+        # data = self._dataSource.get_filtered_data(cp)
         # options = self._dataSource._idataSource.duplicates_column_values(data, column)
         # value = cp.value
 
-    self._dataSource._register_component(cp.id, on_source_update)
+    result = DatePickerResult(cp, self._dataSource, ref_value)
+    self._dataSource._register_component(cp.id, on_source_update, result)
 
-    return DatePickerResult(cp, self._dataSource, ref_value)
+    def data_filter(data):
+        if cp.value is None or not cp.value:
+            return data
+
+        cond = None
+        cond = data[column] == cp.value
+        return data[cond]
+
+    self._dataSource.send_filter(cp.id, Filter(data_filter))
+
+    return result

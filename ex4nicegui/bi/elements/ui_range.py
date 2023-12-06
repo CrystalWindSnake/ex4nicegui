@@ -91,39 +91,42 @@ def ui_range(self: DataSourceFacade, column: str, **kwargs):
     ref_value = to_ref(cast(TQRangeValue, cp.value))
 
     def onchange():
-        def data_filter(data):
-            cp_value = cast(TQRangeValue, cp.value)
-
-            if cp_value is None:
-                return data
-            cond = (data[column] >= cp_value["min"]) & (data[column] <= cp_value["max"])
-            return data[cond]
-
-        self._dataSource.send_filter(cp.id, Filter(data_filter))
+        self._dataSource.notify_update([result])
 
     cp.on("change", onchange)
 
     def on_source_update():
-        data = self._dataSource.get_filtered_data(cp)
-        min, max = self._dataSource._idataSource.range_min_max(data, column)
-        if min is None or max is None:
-            cp.value = None
-        else:
-            new_value = cast(TQRangeValue, cp.value)
-            if new_value is not None:
-                new_value = new_value.copy()
+        pass
+        # data = self._dataSource.get_filtered_data(cp)
+        # min, max = self._dataSource._idataSource.range_min_max(data, column)
+        # if min is None or max is None:
+        #     cp.value = None
+        # else:
+        #     new_value = cast(TQRangeValue, cp.value)
+        #     if new_value is not None:
+        #         new_value = new_value.copy()
 
-                if new_value["min"] < min:
-                    new_value["min"] = min
-                if new_value["max"] > max:
-                    new_value["max"] = max
+        #         if new_value["min"] < min:
+        #             new_value["min"] = min
+        #         if new_value["max"] > max:
+        #             new_value["max"] = max
 
-                cp.value = new_value
-                cp.update()
+        #         cp.value = new_value
+        #         cp.update()
 
     result = RangeResult(
         cp, self._dataSource, ref_value, init_data={"min": min, "max": max}
     )
     self._dataSource._register_component(cp.id, on_source_update, result)
+
+    def data_filter(data):
+        cp_value = cast(TQRangeValue, cp.value)
+
+        if cp_value is None:
+            return data
+        cond = (data[column] >= cp_value["min"]) & (data[column] <= cp_value["max"])
+        return data[cond]
+
+    self._dataSource.send_filter(cp.id, Filter(data_filter))
 
     return result

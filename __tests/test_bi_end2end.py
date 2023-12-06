@@ -79,7 +79,7 @@ def test_remove_filters(page: ScreenPage, page_path: str):
     cls_select.click()
     page.wait()
 
-    assert cls_select.get_selection_values() == ["c1", "c2"]
+    assert cls_select.get_options_values() == ["c1", "c2"]
 
     page.wait()
     page._page.press("body", "Enter")
@@ -91,7 +91,7 @@ def test_remove_filters(page: ScreenPage, page_path: str):
 
     page.wait()
     cls_select.click()
-    assert cls_select.get_selection_values() == ["c2"]
+    assert cls_select.get_options_values() == ["c2"]
 
     assert cls_radio.get_all_labels() == ["c2"]
 

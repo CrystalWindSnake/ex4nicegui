@@ -138,22 +138,15 @@ class DataSource:
         return self.__id
 
     def remove_all_filters(self):
-        ng_client = ng_context.get_client()
-        client_id = ng_client.id
-
         @batch
         def batch_update():
-            for eleId, _ in self._component_map.get_info_by_client(client_id).items():
-                self.send_filter(eleId, None)
-
-            # nodify every component
+            # reset ui state
             for current_info in self._component_map.get_all_info():
-                update_callback = current_info.update_callback
-                if update_callback:
-                    update_callback()
-
                 if current_info.uiResult:
                     current_info.uiResult._reset_state()
+
+            # nodify every component
+            self.__notify_update()
 
     def get_component_info_key(self, element_id: types._TElementID):
         client_id = ng_context.get_client().id
@@ -199,7 +192,12 @@ class DataSource:
 
         return info
 
-    def send_filter(self, element_id: types._TElementID, filter: Optional[Filter]):
+    def send_filter(
+        self,
+        element_id: types._TElementID,
+        filter: Optional[Filter],
+        notify_update=True,
+    ):
         client_id = ng_context.get_client().id
         key = ComponentInfoKey(client_id, element_id)
 
@@ -212,23 +210,36 @@ class DataSource:
             ComponentInfoKey(client_id, element_id)
         )
 
-        self.__notify_update(trigger_info)
-        self.__filters.value = [
-            info.filter for info in self._component_map.get_all_info() if info.filter
-        ]
+        if notify_update:
+            self.__notify_update([trigger_info])
 
         return self
 
-    def __notify_update(self, trigger_info: Optional[ComponentInfo] = None):
+    def notify_update(self, exclude: Optional[List[UiResult]] = None):
+        client_id = ng_context.get_client().id
+        exclude_infos = [
+            self._component_map.get_info(ComponentInfoKey(client_id, ur.id))
+            for ur in (exclude or [])
+        ]
+
+        return self.__notify_update(exclude_infos)
+
+    def __notify_update(self, exclude: Optional[List[ComponentInfo]] = None):
+        exclude_info_keys = set(info.key for info in (exclude or []))
+
         # nodify every component
         for current_info in self._component_map.get_all_info():
             # not nodify the self triggering
-            if trigger_info and current_info.key == trigger_info.key:
+            if len(exclude_info_keys) > 0 and current_info.key in exclude_info_keys:
                 continue
 
             update_callback = current_info.update_callback
             if update_callback:
                 update_callback()
+
+        self.__filters.value = [
+            info.filter for info in self._component_map.get_all_info() if info.filter
+        ]
 
     def on_source_update(
         self,

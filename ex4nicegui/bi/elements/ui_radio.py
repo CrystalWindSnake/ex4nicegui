@@ -1,8 +1,8 @@
 from __future__ import annotations
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 from nicegui import ui
-from ex4nicegui import to_ref
+from ex4nicegui import to_ref, on
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import DataSource, Filter
 from ex4nicegui.bi import types as bi_types
@@ -109,19 +109,14 @@ def ui_radio(
     cp = OptionGroup(**kwargs)
     ref_value = to_ref(cp.value)
 
+    @on(ref_value)
+    def _():
+        cp.value = ref_value.value
+
     @cp.on_change
     def onchange(value):
         cp.value = value
-
-        def data_filter(data):
-            value_in_options = any(cp.value == opt["value"] for opt in cp.options)
-            if not value_in_options:
-                return data
-
-            cond = data[column].isnull() if cp.value == "" else data[column] == cp.value
-            return data[cond]
-
-        self._dataSource.send_filter(cp.id, Filter(data_filter))
+        self._dataSource.notify_update([result])
 
     def on_source_update():
         pass
@@ -151,6 +146,16 @@ def ui_radio(
 
     result = RadioResult(cp, self._dataSource, ref_value)
     self._dataSource._register_component(cp.id, on_source_update, result)
+
+    def data_filter(data):
+        value_in_options = any(cp.value == opt["value"] for opt in cp.options)
+        if not value_in_options:
+            return data
+
+        cond = data[column].isnull() if cp.value == "" else data[column] == cp.value
+        return data[cond]
+
+    self._dataSource.send_filter(cp.id, Filter(data_filter))
 
     return result
 

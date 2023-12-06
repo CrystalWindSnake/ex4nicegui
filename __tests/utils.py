@@ -56,7 +56,7 @@ class SelectUtils:
     def click(self):
         self.target_locator.click()
 
-    def get_selection_values(self):
+    def get_options_values(self):
         return self.page.locator(
             "css= .q-menu.q-position-engine.scroll > .q-virtual-scroll__content > * "
         ).all_inner_texts()
@@ -70,6 +70,9 @@ class SelectUtils:
 
     def get_input_value(self):
         return self.target_locator.input_value()
+
+    def get_selected_values(self):
+        return self.target_locator.locator(".q-chip__content").all_inner_texts()
 
 
 class RadioUtils:
@@ -185,12 +188,8 @@ class AggridUtils:
 
     def get_data(self):
         return [
-            row.get_by_role('gridcell').all_inner_texts()
-            for row in self.get_rows()
+            row.get_by_role("gridcell").all_inner_texts() for row in self.get_rows()
         ]
-
-            
-
 
 
 class ButtonUtils:
