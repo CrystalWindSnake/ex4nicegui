@@ -1,8 +1,8 @@
 from __future__ import annotations
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 from nicegui import ui
-from ex4nicegui import to_ref
+from ex4nicegui import to_ref, on
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import DataSource, Filter
 from ex4nicegui.bi import types as bi_types
@@ -108,6 +108,10 @@ def ui_radio(
 
     cp = OptionGroup(**kwargs)
     ref_value = to_ref(cp.value)
+
+    @on(ref_value)
+    def _():
+        cp.value = ref_value.value
 
     @cp.on_change
     def onchange(value):
