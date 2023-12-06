@@ -112,16 +112,7 @@ def ui_radio(
     @cp.on_change
     def onchange(value):
         cp.value = value
-
-        def data_filter(data):
-            value_in_options = any(cp.value == opt["value"] for opt in cp.options)
-            if not value_in_options:
-                return data
-
-            cond = data[column].isnull() if cp.value == "" else data[column] == cp.value
-            return data[cond]
-
-        self._dataSource.send_filter(cp.id, Filter(data_filter))
+        self._dataSource.notify_update([result])
 
     def on_source_update():
         pass
@@ -151,6 +142,16 @@ def ui_radio(
 
     result = RadioResult(cp, self._dataSource, ref_value)
     self._dataSource._register_component(cp.id, on_source_update, result)
+
+    def data_filter(data):
+        value_in_options = any(cp.value == opt["value"] for opt in cp.options)
+        if not value_in_options:
+            return data
+
+        cond = data[column].isnull() if cp.value == "" else data[column] == cp.value
+        return data[cond]
+
+    self._dataSource.send_filter(cp.id, Filter(data_filter))
 
     return result
 

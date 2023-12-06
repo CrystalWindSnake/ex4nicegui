@@ -1,8 +1,8 @@
 from __future__ import annotations
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional
+from typing import TYPE_CHECKING, Optional
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import to_ref, ref_computed, on
 from ex4nicegui.utils.signals import Ref
 from ex4nicegui.bi.dataSource import Filter
 from ex4nicegui.bi import types as bi_types
@@ -80,6 +80,10 @@ def ui_select(
     cp = ui.select(**kwargs).props("use-chips outlined").classes("min-w-[8rem]")
     ref_value = to_ref(cp.value)
 
+    @on(ref_value)
+    def _():
+        cp.value = ref_value.value
+
     def onchange(e):
         value = None
         if e.args:
@@ -88,21 +92,9 @@ def ui_select(
             else:
                 value = e.args["label"]
 
-        cp.value = value
         ref_value.value = value  # type: ignore
 
-        def data_filter(data):
-            if cp.value is None or not cp.value:
-                return data
-
-            cond = None
-            if isinstance(cp.value, list):
-                cond = data[column].isin(cp.value)
-            else:
-                cond = data[column] == cp.value
-            return data[cond]
-
-        self._dataSource.send_filter(cp.id, Filter(data_filter))
+        self._dataSource.notify_update([result])
 
     cp.on("update:modelValue", onchange)
 
@@ -113,7 +105,7 @@ def ui_select(
 
         # Make the value within the options
         if isinstance(value, list):
-            value = list(set(value) & set(options))
+            value = [v for v in value if v in options]
         else:
             if value not in options:
                 value = ""
@@ -126,5 +118,19 @@ def ui_select(
         on_source_update,
         result,
     )
+
+    def data_filter(data):
+        if cp.value is None or not cp.value:
+            return data
+
+        cond = None
+        if isinstance(cp.value, list):
+            cond = data[column].isin(cp.value)
+        else:
+            cond = data[column] == cp.value
+        return data[cond]
+
+    self._dataSource.send_filter(cp.id, Filter(data_filter), notify_update=False)
+    self._dataSource.notify_update()
 
     return result
