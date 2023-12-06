@@ -19,6 +19,7 @@ from .elements.ui_slider import ui_slider
 from .elements.ui_range import ui_range
 from .elements.ui_echarts import ui_echarts
 from .elements.ui_aggrid import ui_aggrid
+from .elements.ui_table import ui_table
 from ex4nicegui.bi import types as bi_types
 
 if TYPE_CHECKING:
@@ -101,6 +102,18 @@ class DataSourceFacade(Generic[_TData]):
             ui.aggrid: aggrid table.
         """
         return ui_aggrid(self, **kwargs)
+
+    def ui_table(self, **kwargs):
+        """
+        Creates table.
+
+        Parameters:
+            **kwargs: Additional optional parameters that will be passed to the ui.table constructor.
+
+        Returns:
+            ui.table: ui.table.
+        """
+        return ui_table(self, **kwargs)
 
     def ui_radio(
         self,

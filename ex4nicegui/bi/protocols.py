@@ -32,6 +32,9 @@ class IDataSourceAble(Protocol):
     def get_aggrid_options(self, data) -> Dict:
         ...
 
+    def get_table_options(self, data) -> Dict:
+        ...
+
     def slider_check(self, data, column_name: str) -> None:
         ...
 
@@ -89,6 +92,16 @@ class CallableDataSourceAble(IDataSourceAble):
         return {
             "columnDefs": [{"field": col} for col in df.columns],
             "rowData": df.to_dict("records"),
+        }
+
+    def get_table_options(self, data) -> Dict:
+        df = utils_common.convert_dataframe(data)
+
+        return {
+            "columns": [
+                {"name": col, "label": col, "field": col} for col in df.columns
+            ],
+            "rows": df.to_dict("records"),
         }
 
     def slider_check(self, data, column_name: str) -> None:
