@@ -7,11 +7,11 @@ from .screen import ScreenPage
 
 
 def test_draggable(page: ScreenPage, page_path: str):
-    # r_drag = cast(UseDraggable, None)
+    r_drag = cast(UseDraggable, None)
 
     @ui.page(page_path)
     def _():
-        # nonlocal r_drag
+        nonlocal r_drag
         r_drag = rxui.use_draggable(init_x=100, init_y=100)
 
         @ref_computed
@@ -44,10 +44,8 @@ def test_draggable(page: ScreenPage, page_path: str):
     box_rect = box_target.bounding_box()
     assert box_rect is not None
 
-    # assert r_drag.x == 100.0
-    # assert r_drag.y == 100.0
-
-    page.pause()
+    assert r_drag.x == 100.0
+    assert r_drag.y == 100.0
 
     # start drag
     org_x = box_rect["x"]
@@ -61,7 +59,6 @@ def test_draggable(page: ScreenPage, page_path: str):
     page._page.mouse.move(x + 500, y)
     page._page.mouse.up()
 
-    page.pause()
     page.wait()
 
     box_rect = box_target.bounding_box()
@@ -69,5 +66,5 @@ def test_draggable(page: ScreenPage, page_path: str):
 
     assert box_rect["x"] == org_x + 500
 
-    # assert r_drag.x == 600.0
-    # assert r_drag.y == 100.0
+    assert r_drag.x == 600.0
+    assert r_drag.y == 100.0
