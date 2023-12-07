@@ -60,13 +60,7 @@ class EChartsBindableUi(BindableUi[echarts]):
 
     @staticmethod
     def _pyecharts2opts(chart):
-        import simplejson as json
-        from pyecharts.charts.chart import Base
-
-        if isinstance(chart, Base):
-            return json.loads(chart.dump_options())
-
-        return {}
+        return PyechartsUtils._chart2opts(chart)
 
     @staticmethod
     def from_pyecharts(chart: TMaybeRef):
@@ -178,3 +172,50 @@ class EChartsBindableUi(BindableUi[echarts]):
         ---
         """
         self.element.echarts_on(event_name, handler, query)
+
+
+class PyechartsUtils:
+    JS_CODE_FIX = "--x_x--0_0--"
+
+    @staticmethod
+    def _chart2opts(chart):
+        import simplejson as json
+        from pyecharts.charts.chart import Base
+        from pyecharts.charts.base import default
+
+        assert isinstance(chart, Base), "must be pyecharts chart object"
+
+        dumps_str = json.dumps(chart.get_options(), default=default, ignore_nan=True)
+        opts = json.loads(dumps_str)
+        PyechartsUtils._replace_key_name_of_js_code(opts)
+        return opts
+
+    @staticmethod
+    def _replace_key_name_of_js_code(opts: Dict):
+        stack = cast(List[Any], [opts])
+
+        while len(stack) > 0:
+            cur = stack.pop()
+            if isinstance(cur, list):
+                stack.extend(cur)
+            elif isinstance(cur, dict):
+                for key, value in tuple(cur.items()):
+                    if isinstance(value, str) and PyechartsUtils._is_js_code_str(value):
+                        cur[f":{key}"] = PyechartsUtils._replace_js_code_fix(value)
+                        del cur[key]
+                    else:
+                        stack.append(value)
+
+    @staticmethod
+    def _is_js_code_str(text: str):
+        return (
+            len(text) > 2 * len(PyechartsUtils.JS_CODE_FIX)
+            and text[: len(PyechartsUtils.JS_CODE_FIX)] == PyechartsUtils.JS_CODE_FIX
+            and text[-len(PyechartsUtils.JS_CODE_FIX) :] == PyechartsUtils.JS_CODE_FIX
+        )
+
+    @staticmethod
+    def _replace_js_code_fix(text: str):
+        start = len(PyechartsUtils.JS_CODE_FIX)
+        end = len(text) - len(PyechartsUtils.JS_CODE_FIX)
+        return text[start:end]

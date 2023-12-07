@@ -71,3 +71,45 @@ def test_js_function_opt(page: ScreenPage, page_path: str):
     opts = target.get_options()
 
     assert "formatter" in opts["yAxis"][0]["axisLabel"]
+
+
+def test_pyecharts(page: ScreenPage, page_path: str):
+    from pyecharts import options as opts
+    from pyecharts.charts import Bar
+    from pyecharts.commons import utils
+
+    @ui.page(page_path)
+    def _():
+        c = (
+            Bar()
+            .add_xaxis(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+            .add_yaxis(
+                "商家A",
+                [120, 200, 150, 80, 70, 110, 130],
+            )
+            .set_global_opts(
+                yaxis_opts=opts.AxisOpts(
+                    axislabel_opts={
+                        "formatter": utils.JsCode(
+                            """function (value, index) {
+                    return value + 'kg';
+                }"""
+                        )
+                    }
+                )
+            )
+        )
+
+        ins = rxui.echarts.from_pyecharts(c)
+
+        set_test_id(ins, "target")
+
+    page.open(page_path)
+
+    target = EChartsUtils(page, "target")
+
+    page.wait()
+
+    opts = target.get_options()
+
+    assert "formatter" in opts["yAxis"][0]["axisLabel"]
