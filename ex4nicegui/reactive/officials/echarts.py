@@ -185,10 +185,10 @@ class PyechartsUtils:
 
         assert isinstance(chart, Base), "must be pyecharts chart object"
 
-        # dumps_str = json.dumps(chart.get_options(), default=default, ignore_nan=True)
-        # opts = json.loads(dumps_str)
-        # PyechartsUtils._replace_key_name_of_js_code(opts)
-        return json.loads(chart.dump_options())
+        dumps_str = json.dumps(chart.get_options(), default=default, ignore_nan=True)
+        opts = json.loads(dumps_str)
+        PyechartsUtils._replace_key_name_of_js_code(opts)
+        return opts
 
     @staticmethod
     def _replace_key_name_of_js_code(opts: Dict):
