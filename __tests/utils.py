@@ -200,3 +200,16 @@ class ButtonUtils:
 
     def click(self):
         self.target_locator.click()
+
+
+class LabelUtils:
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        self.page = screen_page._page
+        self.test_id = test_id
+        self.target_locator = self.page.get_by_test_id(test_id)
+
+    def get_text(self):
+        return self.target_locator.inner_text()
+
+    def expect_text(self, text: str):
+        assert self.get_text() == text

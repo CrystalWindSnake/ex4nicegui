@@ -1,15 +1,31 @@
+from typing import cast
 import pytest
 from ex4nicegui.reactive import rxui
+from ex4nicegui.reactive.UseDraggable.UseDraggable import UseDraggable
 from nicegui import ui
-from ex4nicegui import ref_computed
+from ex4nicegui import ref_computed, to_ref
 from .screen import ScreenPage
+from .utils import set_test_id, LabelUtils
 
 
 def test_draggable(page: ScreenPage, page_path: str):
+    x_ref = to_ref(100.0)
+    y_ref = to_ref(100.0)
+    r_drag = cast(UseDraggable, None)
+
     @ui.page(page_path)
     def _():
-        box = ui.element("div").classes("my-box w-[10rem] h-[10rem] bg-blue")
-        r_drag = rxui.use_draggable(box)
+        nonlocal r_drag
+
+        @ref_computed
+        def position_text():
+            return f"x:{x_ref.value},y:{y_ref.value}"
+
+        with ui.card().classes("my-box w-[10rem] h-[10rem] bg-blue") as card:
+            ui.label("卡片")
+            rxui.label(position_text)
+
+        r_drag = rxui.use_draggable(card, init_x=x_ref, init_y=y_ref)
 
         @ref_computed
         def x_label():
@@ -31,6 +47,12 @@ def test_draggable(page: ScreenPage, page_path: str):
     box_rect = box_target.bounding_box()
     assert box_rect is not None
 
+    assert x_ref.value == 100.0
+    assert y_ref.value == 100.0
+    assert r_drag.x.value == 100.0
+    assert r_drag.y.value == 100.0
+
+    # start drag
     org_x = box_rect["x"]
 
     x = box_rect["x"] + box_rect["width"] / 2
@@ -48,3 +70,8 @@ def test_draggable(page: ScreenPage, page_path: str):
     assert box_rect is not None
 
     assert box_rect["x"] == org_x + 500
+
+    assert x_ref.value == 600.0
+    assert y_ref.value == 100.0
+    assert r_drag.x.value == 600.0
+    assert r_drag.y.value == 100.0
