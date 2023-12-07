@@ -131,9 +131,9 @@ class UseDraggable(Element, component="UseDraggable.js"):
         ), "draggable can only be applied to one current element"
         self.__target_id = target.id
         self._props["elementId"] = self.__target_id
-        self.run_method("applyTargetId", str(self.__target_id))
+        # self.run_method("applyTargetId", str(self.__target_id))
         if self._auto_bind_style:
             target.style(
-                add=f"position:fixed;left:{to_value(self.x)}px;top:{to_value(self.y)}px"
+                add=f"position:fixed;left:{to_value(self.x)}px;top:{to_value(self.y)}px;user-select:none;"
             )
             self.bind_style(target)

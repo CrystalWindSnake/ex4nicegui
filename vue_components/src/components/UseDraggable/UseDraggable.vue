@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { effect, onMounted, ref, watch } from "vue";
 import { useDraggable, UseDraggableOptions } from "@vueuse/core";
 
 const props = defineProps<{
@@ -21,22 +21,16 @@ const emits = defineEmits<{
   (event: "isDraggingUpdate", params: { isDragging: boolean }): void;
 }>();
 
-const targetId = ref(props.elementId);
-
-watch(targetId, (id) => {
-  if (id) {
-    apply(id);
-  }
-});
-
 defineExpose({
   applyTargetId: (id: string) => {
-    targetId.value = id;
+    apply(id);
   },
 });
 
 function apply(targetId: string) {
   const el = document.getElementById(`c${targetId}`);
+
+  console.log("run apply:", el);
 
   // `style` will be a helper computed for `left: ?px; top: ?px;`
 
@@ -74,6 +68,12 @@ function apply(targetId: string) {
     emits("isDraggingUpdate", { isDragging: v });
   });
 }
+
+onMounted(() => {
+  if (props.elementId) {
+    apply(props.elementId);
+  }
+});
 </script>
 
 <template></template>

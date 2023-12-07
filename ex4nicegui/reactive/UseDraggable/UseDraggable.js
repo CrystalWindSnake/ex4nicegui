@@ -1,134 +1,135 @@
-const U = Vue.unref
-const B = Vue.isRef
-const M = Vue.toRefs
+const T = Vue.unref
+const U = Vue.isRef
+const B = Vue.toRefs
 const N = Vue.customRef
 const W = Vue.getCurrentScope
 const X = Vue.onScopeDispose
 const D = Vue.ref
 const E = Vue.computed
-const w = Vue.watch
+const x = Vue.watch
 const Y = Vue.defineComponent
-function H(e) {
+const H = Vue.onMounted
+function q(e) {
   return W() ? (X(e), !0) : !1;
 }
-function v(e) {
-  return typeof e == "function" ? e() : U(e);
+function d(e) {
+  return typeof e == "function" ? e() : T(e);
 }
-const F = typeof window < "u", q = () => {
+const F = typeof window < "u", z = () => {
 };
-var z = Object.defineProperty, G = Object.defineProperties, J = Object.getOwnPropertyDescriptors, A = Object.getOwnPropertySymbols, K = Object.prototype.hasOwnProperty, Q = Object.prototype.propertyIsEnumerable, I = (e, r, t) => r in e ? z(e, r, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[r] = t, Z = (e, r) => {
+var G = Object.defineProperty, J = Object.defineProperties, K = Object.getOwnPropertyDescriptors, A = Object.getOwnPropertySymbols, Q = Object.prototype.hasOwnProperty, Z = Object.prototype.propertyIsEnumerable, I = (e, r, t) => r in e ? G(e, r, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[r] = t, j = (e, r) => {
   for (var t in r || (r = {}))
-    K.call(r, t) && I(e, t, r[t]);
+    Q.call(r, t) && I(e, t, r[t]);
   if (A)
     for (var t of A(r))
-      Q.call(r, t) && I(e, t, r[t]);
+      Z.call(r, t) && I(e, t, r[t]);
   return e;
-}, j = (e, r) => G(e, J(r));
-function k(e) {
-  if (!B(e))
-    return M(e);
+}, k = (e, r) => J(e, K(r));
+function R(e) {
+  if (!U(e))
+    return B(e);
   const r = Array.isArray(e.value) ? new Array(e.value.length) : {};
   for (const t in e.value)
     r[t] = N(() => ({
       get() {
         return e.value[t];
       },
-      set(a) {
+      set(o) {
         if (Array.isArray(e.value)) {
-          const o = [...e.value];
-          o[t] = a, e.value = o;
+          const a = [...e.value];
+          a[t] = o, e.value = a;
         } else {
-          const o = j(Z({}, e.value), { [t]: a });
-          Object.setPrototypeOf(o, e.value), e.value = o;
+          const a = k(j({}, e.value), { [t]: o });
+          Object.setPrototypeOf(a, e.value), e.value = a;
         }
       }
     }));
   return r;
 }
-function R(e) {
+function ee(e) {
   var r;
-  const t = v(e);
+  const t = d(e);
   return (r = t == null ? void 0 : t.$el) != null ? r : t;
 }
 const C = F ? window : void 0;
-function x(...e) {
-  let r, t, a, o;
-  if (typeof e[0] == "string" || Array.isArray(e[0]) ? ([t, a, o] = e, r = C) : [r, t, a, o] = e, !r)
-    return q;
-  Array.isArray(t) || (t = [t]), Array.isArray(a) || (a = [a]);
-  const d = [], l = () => {
-    d.forEach((i) => i()), d.length = 0;
-  }, g = (i, u, s, c) => (i.addEventListener(u, s, c), () => i.removeEventListener(u, s, c)), _ = w(
-    () => [R(r), v(o)],
-    ([i, u]) => {
-      l(), i && d.push(
-        ...t.flatMap((s) => a.map((c) => g(i, s, c, u)))
+function h(...e) {
+  let r, t, o, a;
+  if (typeof e[0] == "string" || Array.isArray(e[0]) ? ([t, o, a] = e, r = C) : [r, t, o, a] = e, !r)
+    return z;
+  Array.isArray(t) || (t = [t]), Array.isArray(o) || (o = [o]);
+  const u = [], v = () => {
+    u.forEach((i) => i()), u.length = 0;
+  }, _ = (i, p, l, s) => (i.addEventListener(p, l, s), () => i.removeEventListener(p, l, s)), g = x(
+    () => [ee(r), d(a)],
+    ([i, p]) => {
+      v(), i && u.push(
+        ...t.flatMap((l) => o.map((s) => _(i, l, s, p)))
       );
     },
     { immediate: !0, flush: "post" }
-  ), y = () => {
-    _(), l();
+  ), f = () => {
+    g(), v();
   };
-  return H(y), y;
+  return q(f), f;
 }
-var ee = Object.defineProperty, te = Object.defineProperties, re = Object.getOwnPropertyDescriptors, S = Object.getOwnPropertySymbols, ne = Object.prototype.hasOwnProperty, ae = Object.prototype.propertyIsEnumerable, b = (e, r, t) => r in e ? ee(e, r, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[r] = t, oe = (e, r) => {
+var te = Object.defineProperty, re = Object.defineProperties, ne = Object.getOwnPropertyDescriptors, S = Object.getOwnPropertySymbols, oe = Object.prototype.hasOwnProperty, ae = Object.prototype.propertyIsEnumerable, b = (e, r, t) => r in e ? te(e, r, { enumerable: !0, configurable: !0, writable: !0, value: t }) : e[r] = t, ie = (e, r) => {
   for (var t in r || (r = {}))
-    ne.call(r, t) && b(e, t, r[t]);
+    oe.call(r, t) && b(e, t, r[t]);
   if (S)
     for (var t of S(r))
       ae.call(r, t) && b(e, t, r[t]);
   return e;
-}, ie = (e, r) => te(e, re(r));
+}, le = (e, r) => re(e, ne(r));
 function se(e, r = {}) {
-  var t, a;
+  var t, o;
   const {
-    pointerTypes: o,
-    preventDefault: d,
-    stopPropagation: l,
-    exact: g,
-    onMove: _,
-    onEnd: y,
+    pointerTypes: a,
+    preventDefault: u,
+    stopPropagation: v,
+    exact: _,
+    onMove: g,
+    onEnd: f,
     onStart: i,
-    initialValue: u,
-    axis: s = "both",
-    draggingElement: c = C,
-    handle: m = e
-  } = r, p = D(
-    (t = v(u)) != null ? t : { x: 0, y: 0 }
-  ), f = D(), $ = (n) => o ? o.includes(n.pointerType) : !0, h = (n) => {
-    v(d) && n.preventDefault(), v(l) && n.stopPropagation();
+    initialValue: p,
+    axis: l = "both",
+    draggingElement: s = C,
+    handle: P = e
+  } = r, c = D(
+    (t = d(p)) != null ? t : { x: 0, y: 0 }
+  ), y = D(), w = (n) => a ? a.includes(n.pointerType) : !0, $ = (n) => {
+    d(u) && n.preventDefault(), d(v) && n.stopPropagation();
   }, V = (n) => {
-    if (!$(n) || v(g) && n.target !== v(e))
+    if (!w(n) || d(_) && n.target !== d(e))
       return;
-    const O = v(e).getBoundingClientRect(), P = {
-      x: n.clientX - O.left,
-      y: n.clientY - O.top
+    const m = d(e).getBoundingClientRect(), O = {
+      x: n.clientX - m.left,
+      y: n.clientY - m.top
     };
-    (i == null ? void 0 : i(P, n)) !== !1 && (f.value = P, h(n));
+    (i == null ? void 0 : i(O, n)) !== !1 && (y.value = O, $(n));
   }, L = (n) => {
-    if (!$(n) || !f.value)
+    if (!w(n) || !y.value)
       return;
-    let { x: O, y: P } = p.value;
-    (s === "x" || s === "both") && (O = n.clientX - f.value.x), (s === "y" || s === "both") && (P = n.clientY - f.value.y), p.value = {
-      x: O,
-      y: P
-    }, _ == null || _(p.value, n), h(n);
-  }, T = (n) => {
-    $(n) && f.value && (f.value = void 0, y == null || y(p.value, n), h(n));
+    let { x: m, y: O } = c.value;
+    (l === "x" || l === "both") && (m = n.clientX - y.value.x), (l === "y" || l === "both") && (O = n.clientY - y.value.y), c.value = {
+      x: m,
+      y: O
+    }, g == null || g(c.value, n), $(n);
+  }, M = (n) => {
+    w(n) && y.value && (y.value = void 0, f == null || f(c.value, n), $(n));
   };
   if (F) {
-    const n = { capture: (a = r.capture) != null ? a : !0 };
-    x(m, "pointerdown", V, n), x(c, "pointermove", L, n), x(c, "pointerup", T, n);
+    const n = { capture: (o = r.capture) != null ? o : !0 };
+    h(P, "pointerdown", V, n), h(s, "pointermove", L, n), h(s, "pointerup", M, n);
   }
-  return ie(oe({}, k(p)), {
-    position: p,
-    isDragging: E(() => !!f.value),
+  return le(ie({}, R(c)), {
+    position: c,
+    isDragging: E(() => !!y.value),
     style: E(
-      () => `left:${p.value.x}px;top:${p.value.y}px;`
+      () => `left:${c.value.x}px;top:${c.value.y}px;`
     )
   });
 }
-const ue = /* @__PURE__ */ Y({
+const pe = /* @__PURE__ */ Y({
   __name: "UseDraggable",
   props: {
     elementId: null,
@@ -136,48 +137,49 @@ const ue = /* @__PURE__ */ Y({
   },
   emits: ["update", "isDraggingUpdate"],
   setup(e, { expose: r, emit: t }) {
-    const a = e, o = D(a.elementId);
-    w(o, (l) => {
-      l && d(l);
-    }), r({
-      applyTargetId: (l) => {
-        o.value = l;
+    const o = e;
+    r({
+      applyTargetId: (u) => {
+        a(u);
       }
     });
-    function d(l) {
-      const g = document.getElementById(`c${l}`);
+    function a(u) {
+      const v = document.getElementById(`c${u}`);
+      console.log("run apply:", v);
       function _() {
         t("update", {
-          x: i.value,
-          y: u.value,
-          style: s.value,
+          x: f.value,
+          y: i.value,
+          style: p.value,
           isFirst: !0,
           isFinal: !1
         });
       }
-      function y() {
+      function g() {
         t("update", {
-          x: i.value,
-          y: u.value,
-          style: s.value,
+          x: f.value,
+          y: i.value,
+          style: p.value,
           isFirst: !1,
           isFinal: !0
         });
       }
-      const { x: i, y: u, style: s, isDragging: c } = se(g, {
+      const { x: f, y: i, style: p, isDragging: l } = se(v, {
         onStart: _,
-        onEnd: y,
-        ...a.options
+        onEnd: g,
+        ...o.options
       });
-      w([i, u, s], ([m, p, f]) => {
-        t("update", { x: m, y: p, style: f, isFirst: !1, isFinal: !1 });
-      }), w(c, (m) => {
-        t("isDraggingUpdate", { isDragging: m });
+      x([f, i, p], ([s, P, c]) => {
+        t("update", { x: s, y: P, style: c, isFirst: !1, isFinal: !1 });
+      }), x(l, (s) => {
+        t("isDraggingUpdate", { isDragging: s });
       });
     }
-    return (l, g) => null;
+    return H(() => {
+      o.elementId && a(o.elementId);
+    }), (u, v) => null;
   }
 });
 export {
-  ue as default
+  pe as default
 };

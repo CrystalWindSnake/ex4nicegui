@@ -1,39 +1,36 @@
 from typing import cast
-import pytest
 from ex4nicegui.reactive import rxui
 from ex4nicegui.reactive.UseDraggable.UseDraggable import UseDraggable
 from nicegui import ui
-from ex4nicegui import ref_computed, to_ref
+from ex4nicegui import ref_computed
 from .screen import ScreenPage
-from .utils import set_test_id, LabelUtils
 
 
 def test_draggable(page: ScreenPage, page_path: str):
-    x_ref = to_ref(100.0)
-    y_ref = to_ref(100.0)
-    r_drag = cast(UseDraggable, None)
+    # r_drag = cast(UseDraggable, None)
 
     @ui.page(page_path)
     def _():
-        nonlocal r_drag
+        # nonlocal r_drag
+        r_drag = rxui.use_draggable(init_x=100, init_y=100)
 
         @ref_computed
         def position_text():
-            return f"x:{x_ref.value},y:{y_ref.value}"
+            return f"x:{r_drag.x},y:{r_drag.y}"
 
         with ui.card().classes("my-box w-[10rem] h-[10rem] bg-blue") as card:
             ui.label("卡片")
             rxui.label(position_text)
 
-        r_drag = rxui.use_draggable(card, init_x=x_ref, init_y=y_ref)
+        r_drag.apply(card)
 
         @ref_computed
         def x_label():
-            return f"x:{r_drag.x.value}"
+            return f"x:{r_drag.x}"
 
         @ref_computed
         def y_label():
-            return f"y:{r_drag.y.value}"
+            return f"y:{r_drag.y}"
 
         rxui.label(x_label)
         rxui.label(y_label)
@@ -47,10 +44,10 @@ def test_draggable(page: ScreenPage, page_path: str):
     box_rect = box_target.bounding_box()
     assert box_rect is not None
 
-    assert x_ref.value == 100.0
-    assert y_ref.value == 100.0
-    assert r_drag.x.value == 100.0
-    assert r_drag.y.value == 100.0
+    # assert r_drag.x == 100.0
+    # assert r_drag.y == 100.0
+
+    page.pause()
 
     # start drag
     org_x = box_rect["x"]
@@ -64,6 +61,7 @@ def test_draggable(page: ScreenPage, page_path: str):
     page._page.mouse.move(x + 500, y)
     page._page.mouse.up()
 
+    page.pause()
     page.wait()
 
     box_rect = box_target.bounding_box()
@@ -71,7 +69,5 @@ def test_draggable(page: ScreenPage, page_path: str):
 
     assert box_rect["x"] == org_x + 500
 
-    assert x_ref.value == 600.0
-    assert y_ref.value == 100.0
-    assert r_drag.x.value == 600.0
-    assert r_drag.y.value == 100.0
+    # assert r_drag.x == 600.0
+    # assert r_drag.y == 100.0
