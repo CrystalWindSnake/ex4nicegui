@@ -214,6 +214,7 @@ def test_reload_source(page: ScreenPage, page_path: str):
         ["y", "cls2", "4", "104"],
     ]
 
+    page.wait()
     assert table1.get_data() == except_all_data
     assert table2.get_data() == except_all_data[:3]
 
