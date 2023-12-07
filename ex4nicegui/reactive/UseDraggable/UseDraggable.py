@@ -26,17 +26,16 @@ class UseDraggableUpdateEventArguments(UiEventArguments):
 
 
 def use_draggable(
-    element: Element,
-    init_x: _TMaybeRef[float] = 0.0,
-    init_y: _TMaybeRef[float] = 0.0,
+    init_x: float = 0.0,
+    init_y: float = 0.0,
     auto_bind_style=True,
 ):
-    ud = UseDraggable(element, init_x, init_y)
-    if auto_bind_style:
-        element.style(
-            add=f"position:fixed;left:{to_value(init_x)}px;top:{to_value(init_y)}px"
-        )
-        ud.bind_style(element)
+    ud = UseDraggable(init_x, init_y, auto_bind_style)
+    # if auto_bind_style:
+    #     element.style(
+    #         add=f"position:fixed;left:{to_value(init_x)}px;top:{to_value(init_y)}px"
+    #     )
+    #     ud.bind_style(element)
 
     return ud
 
@@ -44,15 +43,14 @@ def use_draggable(
 class UseDraggable(Element, component="UseDraggable.js"):
     def __init__(
         self,
-        element: Element,
-        init_x: _TMaybeRef[float] = 0.0,
-        init_y: _TMaybeRef[float] = 0.0,
+        init_x: float = 0.0,
+        init_y: float = 0.0,
+        auto_bind_style=True,
     ) -> None:
         super().__init__()
-        self._props["elementId"] = str(element.id)
-        self._props["options"] = {
-            "initialValue": {"x": to_value(init_x), "y": to_value(init_y)}
-        }
+        self.__target_id: Optional[int] = None
+        self._auto_bind_style = auto_bind_style
+        self._props["options"] = {"initialValue": {"x": init_x, "y": init_y}}
 
         self.__style_ref = to_ref("")
         self.__x_ref = to_ref(init_x)
@@ -81,23 +79,23 @@ class UseDraggable(Element, component="UseDraggable.js"):
 
     @property
     def x(self):
-        return self.__x_ref
+        return self.__x_ref.value
 
     @property
     def y(self):
-        return self.__y_ref
+        return self.__y_ref.value
 
     @property
     def style(self):
-        return self.__style_ref
+        return self.__style_ref.value
 
     @property
     def is_dragging(self):
-        return self.__isDragging_ref
+        return self.__isDragging_ref.value
 
     @property
     def isFirst(self):
-        return self.__isFirst_ref
+        return self.__isFirst_ref.value
 
     @property
     def isFinal(self):
@@ -126,3 +124,16 @@ class UseDraggable(Element, component="UseDraggable.js"):
             )
 
         self.on("update", inner_handler, args=_Update_Args)
+
+    def apply(self, target: Element):
+        assert (
+            self.__target_id is None
+        ), "draggable can only be applied to one current element"
+        self.__target_id = target.id
+        self._props["elementId"] = self.__target_id
+        self.run_method("applyTargetId", str(self.__target_id))
+        if self._auto_bind_style:
+            target.style(
+                add=f"position:fixed;left:{to_value(self.x)}px;top:{to_value(self.y)}px"
+            )
+            self.bind_style(target)
