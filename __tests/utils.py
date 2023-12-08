@@ -145,6 +145,12 @@ class TableUtils:
             "cell", name=cell_value, exact=True
         ).get_attribute("style")
 
+    def is_sortable(self, column_name: str):
+        # sortable
+        return self.target_locator.locator("thead th", has_text=column_name).evaluate(
+            "node => node.classList.contains('sortable')"
+        )
+
 
 class MermaidUtils:
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
