@@ -91,7 +91,7 @@ class DataSourceFacade(Generic[_TData]):
         kws.update(kwargs)
         return ui_select(**kws)
 
-    def ui_aggrid(self, **kwargs):
+    def ui_aggrid(self, *, options: Optional[Dict] = None, **kwargs):
         """
         Creates aggrid table.
 
@@ -101,7 +101,9 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.aggrid: aggrid table.
         """
-        return ui_aggrid(self, **kwargs)
+        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws.update(kwargs)
+        return ui_aggrid(**kws)
 
     def ui_table(self, **kwargs):
         """

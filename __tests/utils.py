@@ -192,6 +192,10 @@ class AggridUtils:
             row.get_by_role("gridcell").all_inner_texts() for row in self.get_rows()
         ]
 
+    def get_cells(self):
+        rows = self.get_rows()
+        return [r.get_by_role("gridcell").all() for r in rows]
+
 
 class ButtonUtils:
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
