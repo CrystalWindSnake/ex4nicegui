@@ -292,7 +292,7 @@ ui.run()
 
 
 
-#### 数据源 `bi.data_source`
+#### `bi.data_source`
 数据源是 BI 模块的核心概念，所有数据的联动基于此展开。当前版本(0.4.3)中，有两种创建数据源的方式
 
 接收 `pandas` 的 `DataFrame`:
@@ -386,7 +386,7 @@ ds.ui_aggrid()
 ```
 
 ---
-#### 下拉框选择框 `ds.ui_select`
+#### `ds.ui_select`
 
 ```python
 from nicegui import ui
@@ -442,3 +442,28 @@ ds.ui_select("cls",multiple=False,value='c1')
 多选时(参数 `multiple` 默认为 True)，`value` 需要指定为 list
 
 单选时，`value` 设置为非 list
+
+---
+
+#### `ds.ui_table`
+
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+data = pd.DataFrame({"name": ["f", "a", "c", "b"], "age": [1, 2, 3, 1]})
+ds = bi.data_source(data)
+
+ds.ui_table(
+    columns=[
+        {"label": "new colA", "field": "colA", "sortable": True},
+    ]
+)
+
+```
+
+- columns 与 nicegui `ui.table` 一致。其中 键值 `field` 对应数据源的列名，如果不存在，则该配置不会生效
+- rows 参数不会生效。因为表格的数据源始终由 data source 控制
+
+
