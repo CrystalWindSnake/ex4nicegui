@@ -447,6 +447,8 @@ ds.ui_select("cls",multiple=False,value='c1')
 
 #### `ds.ui_table`
 
+表格
+
 ```python
 from nicegui import ui
 from ex4nicegui import bi
@@ -465,5 +467,47 @@ ds.ui_table(
 
 - columns 与 nicegui `ui.table` 一致。其中 键值 `field` 对应数据源的列名，如果不存在，则该配置不会生效
 - rows 参数不会生效。因为表格的数据源始终由 data source 控制
+
+---
+
+#### `ds.ui_aggrid`
+
+
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+data = pd.DataFrame(
+    {
+        "colA": list("abcde"),
+        "colB": [f"n{idx}" for idx in range(5)],
+        "colC": list(range(5)),
+    }
+)
+df = pd.DataFrame(data)
+
+source = bi.data_source(df)
+
+source.ui_aggrid(
+    options={
+        "columnDefs": [
+            {"headerName": "xx", "field": "no exists"},
+            {"headerName": "new colA", "field": "colA"},
+            {
+                "field": "colC",
+                "cellClassRules": {
+                    "bg-red-300": "x < 3",
+                    "bg-green-300": "x >= 3",
+                },
+            },
+        ],
+        "rowData": [{"colX": [1, 2, 3, 4, 5]}],
+    }
+)
+```
+
+- 参数 options 与 nicegui `ui.aggrid` 一致。其中 `columnDefs` 中的键值 `field` 对应数据源的列名，如果不存在，则该配置不会生效
+- `rowData` 键值不会生效。因为表格的数据源始终由 data source 控制
 
 
