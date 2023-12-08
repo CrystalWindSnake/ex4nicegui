@@ -77,7 +77,7 @@ class DataSourceFacade(Generic[_TData]):
         Creates a user interface select box.
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#dropdown-select-box-dsui_select
-        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E4%B8%8B%E6%8B%89%E6%A1%86%E9%80%89%E6%8B%A9%E6%A1%86-dsui_select
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/docs/apis#dsui_select
 
         Args:
             column (str): The column name of the data source.

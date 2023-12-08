@@ -286,7 +286,7 @@ ui.run()
 
 ### Details
 
-#### Data Source `bi.data_source`
+#### `bi.data_source`
 The data source is the core concept of the BI module, and all data linkage is based on this. In the current version (0.4.3), there are two ways to create a data source.
 
 Receive `pandas`'s `DataFrame`:
@@ -377,7 +377,9 @@ ds.ui_aggrid()
 ```
 
 ---
-#### Dropdown Select Box `ds.ui_select`
+#### `ds.ui_select`
+
+Dropdown Select Box
 
 ```python
 from nicegui import ui
