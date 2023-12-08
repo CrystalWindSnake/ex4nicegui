@@ -386,11 +386,7 @@ ds.ui_aggrid()
 ```
 
 ---
-<<<<<<< HEAD
-#### `ds.ui_select`
-=======
 #### ui_select
->>>>>>> docs/apis
 
 ```python
 from nicegui import ui
@@ -449,11 +445,7 @@ ds.ui_select("cls",multiple=False,value='c1')
 
 ---
 
-<<<<<<< HEAD
-#### `ds.ui_table`
-=======
 #### ui_table
->>>>>>> docs/apis
 
 表格
 
@@ -478,11 +470,7 @@ ds.ui_table(
 
 ---
 
-<<<<<<< HEAD
-#### `ds.ui_aggrid`
-=======
 #### ui_aggrid
->>>>>>> docs/apis
 
 
 ```python

@@ -379,11 +379,7 @@ ds.ui_aggrid()
 ```
 
 ---
-<<<<<<< HEAD
-#### `ds.ui_select`
-=======
 #### ui_select
->>>>>>> docs/apis
 
 Dropdown Select Box
 
@@ -439,11 +435,7 @@ For multiple selections (the parameter `multiple` is defaulted to True), `value`
 ---
 
 
-<<<<<<< HEAD
-#### `ds.ui_table`
-=======
 #### ui_table
->>>>>>> docs/apis
 
 Table
 
@@ -468,11 +460,7 @@ ds.ui_table(
 
 ---
 
-<<<<<<< HEAD
-#### `ds.ui_aggrid`
-=======
 #### ui_aggrid
->>>>>>> docs/apis
 
 
 ```python
