@@ -76,8 +76,9 @@ class DataSourceFacade(Generic[_TData]):
         """
         Creates a user interface select box.
 
-        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#dropdown-select-box-dsui_select
-        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E4%B8%8B%E6%8B%89%E6%A1%86%E9%80%89%E6%8B%A9%E6%A1%86-dsui_select
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#dsui_select
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#dsui_select
+
 
         Args:
             column (str): The column name of the data source.
@@ -95,6 +96,10 @@ class DataSourceFacade(Generic[_TData]):
     def ui_aggrid(self, *, options: Optional[Dict] = None, **kwargs):
         """
         Creates aggrid table.
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ui_aggrid
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ui_aggrid
+
 
         Parameters:
             **kwargs: Additional optional parameters that will be passed to the ui.aggrid constructor.
@@ -115,6 +120,10 @@ class DataSourceFacade(Generic[_TData]):
     ):
         """
         Creates table.
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ui_table
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ui_table
+
 
         Parameters:
             **kwargs: Additional optional parameters that will be passed to the ui.table constructor.
@@ -139,6 +148,10 @@ class DataSourceFacade(Generic[_TData]):
         """
         Creates radio Selection.
 
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ui_radio
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ui_radio
+
+
         Parameters:
             column (str): The column name of the data source.
 
@@ -155,6 +168,11 @@ class DataSourceFacade(Generic[_TData]):
         """
         Creates Slider.
 
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ui_slider
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ui_slider
+
+
         Parameters:
             column (str): The column name of the data source.
             **kwargs: Additional optional parameters that will be passed to the ui.slider constructor.
@@ -169,6 +187,11 @@ class DataSourceFacade(Generic[_TData]):
     def ui_range(self, column: str, **kwargs):
         """
         Creates Range.
+
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ui_range
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ui_range
+
 
         Parameters:
             column (str): The column name of the data source.
@@ -185,6 +208,11 @@ class DataSourceFacade(Generic[_TData]):
         self, fn: Callable[[Any], Union[Dict, "pyecharts.Base"]]  # pyright: ignore
     ):
         """Create charts
+
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ui_echarts
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ui_echarts
+
 
         Args:
             fn (Callable[[Any], Union[Dict, "pyecharts.Base"]]): builder function.

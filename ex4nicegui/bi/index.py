@@ -10,8 +10,8 @@ _TData = TypeVar("_TData")
 def data_source(data: Union[Callable[..., _TData], _TData]) -> DataSourceFacade[_TData]:
     """Create a data source
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#data-source-bidata_source
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E6%95%B0%E6%8D%AE%E6%BA%90-bidata_source
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#bidata_source
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bidata_source
 
     Args:
         data (_TData): Any supported data

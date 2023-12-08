@@ -286,7 +286,7 @@ ui.run()
 
 ### Details
 
-#### Data Source `bi.data_source`
+#### `bi.data_source`
 The data source is the core concept of the BI module, and all data linkage is based on this. In the current version (0.4.3), there are two ways to create a data source.
 
 Receive `pandas`'s `DataFrame`:
@@ -329,7 +329,9 @@ def new_ds():
 ds.ui_select('name')
 new_ds.ui_aggrid()
 ```
+
 Note that since `new_ds` uses `ds.filtered_data`, changes to `ds` will trigger the linkage change of `new_ds`, causing the table component created by `new_ds` to change.
+
 ---
 
 Remove all filter states through the `ds.remove_filters` method:
@@ -377,7 +379,9 @@ ds.ui_aggrid()
 ```
 
 ---
-#### Dropdown Select Box `ds.ui_select`
+#### `ds.ui_select`
+
+Dropdown Select Box
 
 ```python
 from nicegui import ui
@@ -429,3 +433,71 @@ ds.ui_select("cls",multiple=False,value='c1')
 For multiple selections (the parameter `multiple` is defaulted to True), `value` needs to be specified as a list. For single selections, `value` should be set to non-list.
 
 ---
+
+
+#### `ds.ui_table`
+
+Table
+
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+data = pd.DataFrame({"name": ["f", "a", "c", "b"], "age": [1, 2, 3, 1]})
+ds = bi.data_source(data)
+
+ds.ui_table(
+    columns=[
+        {"label": "new colA", "field": "colA", "sortable": True},
+    ]
+)
+
+```
+
+- The parameter `columns` are consistent with nicegui `ui.table`. The key value `field` corresponds to the column name of the data source, and if it does not exist, this configuration will not take effect
+- The `rows` parameter will not take effect. Because the data source of the table is always controlled by the data source.
+
+---
+
+#### `ds.ui_aggrid`
+
+
+```python
+from nicegui import ui
+from ex4nicegui import bi
+import pandas as pd
+
+data = pd.DataFrame(
+    {
+        "colA": list("abcde"),
+        "colB": [f"n{idx}" for idx in range(5)],
+        "colC": list(range(5)),
+    }
+)
+df = pd.DataFrame(data)
+
+source = bi.data_source(df)
+
+source.ui_aggrid(
+    options={
+        "columnDefs": [
+            {"headerName": "xx", "field": "no exists"},
+            {"headerName": "new colA", "field": "colA"},
+            {
+                "field": "colC",
+                "cellClassRules": {
+                    "bg-red-300": "x < 3",
+                    "bg-green-300": "x >= 3",
+                },
+            },
+        ],
+        "rowData": [{"colX": [1, 2, 3, 4, 5]}],
+    }
+)
+```
+
+- The parameter `options` is consistent with nicegui `ui.aggrid`. The key value `field` in columnDefs corresponds to the column name of the data source, and if it does not exist, this configuration will not take effect.
+- The `rowData` key value will not take effect. Because the data source of the table is always controlled by the data source.
+
+
