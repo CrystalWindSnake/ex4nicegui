@@ -110,7 +110,9 @@ def ui_select(
             if value not in options:
                 value = ""
 
-        cp.set_options(options, value=value)
+        cp.set_options(options, value=[])
+        cp.value = value
+        cp.update()
 
     result = SelectResult(cp, self._dataSource, ref_value)
     self._dataSource._register_component(

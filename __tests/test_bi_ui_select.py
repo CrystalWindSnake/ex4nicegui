@@ -168,3 +168,36 @@ def test_default_value(page: ScreenPage, page_path: str):
         ["a", "c1", "0"],
         ["b", "c1", "200"],
     ]
+
+
+def test_update_options(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        df = pd.DataFrame(
+            {
+                "cls1": [
+                    "x1",
+                    "x1",
+                    "x1",
+                    "x2",
+                    "x2",
+                    "x2",
+                ],
+                "cls2": ["a", "b", "c", "c", "b", "a"],
+            }
+        )
+        ds = bi.data_source(df)
+
+        set_test_id(ds.ui_select("cls1", value="x1", multiple=False), "cls1")
+        set_test_id(ds.ui_select("cls2", clearable=False), "cls2")
+
+    page.open(page_path)
+
+    cls1_select = SelectUtils(page, "cls1")
+    cls2_select = SelectUtils(page, "cls2")
+
+    cls2_select.click_and_select("a")
+    cls1_select.click_and_select("x2")
+    cls2_select.click_and_select("a")
+
+    assert cls2_select.get_selected_values() == []
