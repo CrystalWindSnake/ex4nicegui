@@ -339,6 +339,7 @@ new_ds.ui_aggrid()
 ```
 
 注意，由于 `new_ds` 中使用了 `ds.filtered_data` ，因此 `ds` 的变动会触发 `new_ds` 的联动变化，从而导致 `new_ds` 创建的表格组件产生变化
+
 ---
 通过 `ds.remove_filters` 方法，移除所有筛选状态:
 ```python
