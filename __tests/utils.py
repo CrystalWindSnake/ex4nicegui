@@ -54,7 +54,7 @@ class SelectUtils:
         self.target_locator = self.page.get_by_test_id(test_id)
 
     def click(self):
-        self.target_locator.click()
+        self.target_locator.click(position={"x": 5, "y": 5})
 
     def get_options_values(self):
         return self.page.locator(
@@ -66,6 +66,7 @@ class SelectUtils:
 
     def click_and_select(self, value: str):
         self.click()
+        self.page.wait_for_timeout(500)
         self.page.get_by_role("option", name=value).click()
 
     def get_input_value(self):
