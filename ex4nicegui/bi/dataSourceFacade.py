@@ -4,6 +4,7 @@ from typing import (
     Callable,
     Dict,
     TYPE_CHECKING,
+    List,
     Optional,
     TypeVar,
     Generic,
@@ -105,7 +106,13 @@ class DataSourceFacade(Generic[_TData]):
         kws.update(kwargs)
         return ui_aggrid(**kws)
 
-    def ui_table(self, **kwargs):
+    def ui_table(
+        self,
+        *,
+        columns: Optional[List[Dict]] = None,
+        pagination=20,
+        **kwargs,
+    ):
         """
         Creates table.
 
@@ -115,7 +122,9 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.table: ui.table.
         """
-        return ui_table(self, **kwargs)
+        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws.update(kwargs)
+        return ui_table(**kws)
 
     def ui_radio(
         self,
