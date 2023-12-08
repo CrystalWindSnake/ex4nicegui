@@ -199,5 +199,5 @@ def test_update_options(page: ScreenPage, page_path: str):
     cls2_select.click_and_select("a")
     cls1_select.click_and_select("x2")
     cls2_select.click_and_select("a")
-
+    page.wait()
     assert cls2_select.get_selected_values() == []
