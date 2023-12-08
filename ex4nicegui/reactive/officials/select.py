@@ -45,6 +45,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         with_input: TMaybeRef[bool] = False,
         multiple: TMaybeRef[bool] = False,
         clearable: TMaybeRef[bool] = False,
+        **kwargs
     ) -> None:
         """Dropdown Selection
 
@@ -69,6 +70,8 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         }
 
         value_kws = _convert_kws_ref2value(kws)
+
+        value_kws.update(kwargs)
 
         element = ui.select(**value_kws)
         element.classes("min-w-[10rem]")
