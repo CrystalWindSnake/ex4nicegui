@@ -140,3 +140,36 @@ def test_multiple_dict_opts(page: ScreenPage, page_path: str):
 
     # page.wait()
     assert r_value.value == [1, 2, 4]
+
+
+def test_new_value_mode(page: ScreenPage, page_path: str):
+    r_str = to_ref(None)
+    r_opts = to_ref([])
+
+    @ui.page(page_path)
+    def _():
+        set_test_id(
+            rxui.select(
+                r_opts, clearable=True, value=r_str, new_value_mode="add-unique"
+            ),
+            "target",
+        )
+
+    page.open(page_path)
+    target = SelectUtils(page, "target")
+
+    target.input_and_enter("a")
+
+    target.click_cancel()
+
+    target.input_and_enter("other")
+
+    page.wait()
+    assert r_str.value == "other"
+
+    target.click_cancel()
+
+    page.wait()
+    assert r_str.value is None
+
+    assert r_opts.value == ["a", "other"]

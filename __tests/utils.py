@@ -75,6 +75,11 @@ class SelectUtils:
     def get_selected_values(self):
         return self.target_locator.locator(".q-chip__content").all_inner_texts()
 
+    def input_and_enter(self, text: str):
+        self.target_locator.type(text)
+        self.page.wait_for_timeout(500)
+        self.target_locator.press("Enter")
+
 
 class RadioUtils:
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
