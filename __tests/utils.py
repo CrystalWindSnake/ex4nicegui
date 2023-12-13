@@ -175,6 +175,8 @@ class EChartsUtils:
         y_value,
         color=None,
         seriesIndex=0,
+        x_position_offset=0.0,
+        y_position_offset=0.0,
     ):
         x, y = EChartsUtils.cal_series_pos(
             self.target_locator,
@@ -185,8 +187,30 @@ class EChartsUtils:
         )
 
         self.page.mouse.click(
-            x,
-            y,
+            x + x_position_offset,
+            y + y_position_offset,
+        )
+
+    def mouse_hover_series(
+        self,
+        x_value,
+        y_value,
+        color=None,
+        seriesIndex=0,
+        x_position_offset=0.0,
+        y_position_offset=0.0,
+    ):
+        x, y = EChartsUtils.cal_series_pos(
+            self.target_locator,
+            x_value,
+            y_value,
+            color,
+            seriesIndex,
+        )
+
+        self.page.mouse.move(
+            x + x_position_offset,
+            y + y_position_offset,
         )
 
     @staticmethod
@@ -209,8 +233,8 @@ class EChartsUtils:
 
         box = chartIns_box.bounding_box()
         return (
-            pos_x,
-            pos_y,
+            box["x"] + pos_x,
+            box["y"] + pos_y,
         )
 
 

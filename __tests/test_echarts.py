@@ -185,6 +185,7 @@ def test_click_event(
     page: ScreenPage, page_path: str
 ):
     click_data = {}
+    hover_data = {}
 
     @ui.page(page_path)
     def _():
@@ -223,6 +224,19 @@ def test_click_event(
 
         ins.on("click", onclick_series)
 
+        def on_mouser_over(
+            e: rxui.echarts.EChartsMouseEventArguments,
+        ):
+            hover_data[
+                "seriesName"
+            ] = e.seriesName
+
+        ins.on(
+            "mouseover",
+            on_mouser_over,
+            query={"seriesName": "Beta"},
+        )
+
         set_test_id(ins, "target")
 
     page.open(page_path)
@@ -231,8 +245,32 @@ def test_click_event(
 
     page.wait(1000)
 
-    target.click_series(0.05, "A")
+    target.click_series(
+        0.05, "A", y_position_offset=-8
+    )
 
     page.wait(1000)
 
     assert click_data["seriesName"] == "Alpha"
+
+    target.mouse_hover_series(
+        0.05,
+        "B",
+        color="Alpha",
+        y_position_offset=-8,
+    )
+
+    page.wait(1000)
+
+    assert "seriesName" not in hover_data
+
+    target.mouse_hover_series(
+        0.05,
+        "B",
+        color="Beta",
+        y_position_offset=+8,
+    )
+
+    page.wait(1000)
+
+    assert hover_data["seriesName"] == "Beta"
