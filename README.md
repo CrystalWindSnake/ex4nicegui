@@ -159,6 +159,128 @@ ui.run()
 ```
 
 
+## 响应式
+
+```python
+from ex4nicegui import (
+    to_ref,
+    ref_computed,
+    on,
+    effect,
+    effect_refreshable,
+    batch,
+    event_batch,
+)
+```
+常用 `to_ref`,`effect`,`ref_computed`,`on`
+
+### `to_ref`
+定义响应式对象,通过 `.value` 读写
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+a.value =2
+b.value = 'new text'
+
+print(a.value)
+```
+
+### `effect`
+接受一个函数,自动监控函数中使用到的响应式对象变化,从而自动执行函数
+
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+
+@effect
+def auto_run_when_ref_value():
+    print(f"a:{a.value}")
+
+
+def change_value():
+    a.value = 2
+    b.value = "new text"
+
+
+ui.button("change", on_click=change_value)
+```
+
+首次执行 effect ,函数`auto_run_when_ref_value`将被执行一次.之后点击按钮,改变 `a` 的值(通过 `a.value`),函数`auto_run_when_ref_value`再次执行
+
+
+### `ref_computed`
+与 `effect` 具备一样的功能，`ref_computed` 还能从函数中返回结果。一般用于从 `to_ref` 中进行二次计算
+
+```python
+a = to_ref(1)
+a_square = ref_computed(lambda: a.value * 2)
+
+
+@effect
+def effect1():
+    print(f"a_square:{a_square.value}")
+
+
+def change_value():
+    a.value = 2
+
+
+ui.button("change", on_click=change_value)
+```
+
+点击按钮后，`a.value` 值被修改，从而触发 `a_square` 重新计算.由于 `effect1` 中读取了 `a_square` 的值，从而触发 `effect1` 执行
+
+> `ref_computed` 是只读的 `to_ref`
+
+### `on`
+类似 `effect` 的功能,但是 `on` 需要明确指定监控的响应式对象
+
+```python
+
+a1 = to_ref(1)
+a2 = to_ref(10)
+b = to_ref("text")
+
+
+@on(a1)
+def watch_a1_only():
+    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
+
+
+@on([a1, b], onchanges=True)
+def watch_a1_and_b():
+    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
+
+
+def change_a1():
+    a1.value += 1
+    ui.notify("change_a1")
+
+
+ui.button("change a1", on_click=change_a1)
+
+
+def change_a2():
+    a2.value += 1
+    ui.notify("change_a2")
+
+
+ui.button("change a2", on_click=change_a2)
+
+
+def change_b():
+    b.value += "x"
+    ui.notify("change_b")
+
+
+ui.button("change b", on_click=change_b)
+
+```
+
+- 参数 `onchanges` 为 True 时(默认值为 False),指定的函数不会在绑定时执行 
+
 
 ## BI 模块
 

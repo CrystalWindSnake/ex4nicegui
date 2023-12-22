@@ -24,7 +24,9 @@ from .elements.ui_table import ui_table
 from ex4nicegui.bi import types as bi_types
 
 if TYPE_CHECKING:
-    from ex4nicegui.bi.elements.models import UiResult
+    from ex4nicegui.bi.elements.models import (
+        UiResult,
+    )
 
 _TData = TypeVar("_TData")
 
@@ -41,7 +43,9 @@ class DataSourceFacade(Generic[_TData]):
     @property
     def filtered_data(self) -> _TData:
         """Data after filtering"""
-        return cast(_TData, self._dataSource.filtered_data)
+        return cast(
+            _TData, self._dataSource.filtered_data
+        )
 
     def reload(self, data, reset_filters=True):
         """Reload the data source with the provided new data.
@@ -55,7 +59,9 @@ class DataSourceFacade(Generic[_TData]):
         if reset_filters:
             self.remove_filters()
 
-    def remove_filters(self, *components: UiResult):
+    def remove_filters(
+        self, *components: UiResult
+    ):
         """Remove the filter from the data source"""
         if len(components) == 0:
             # remove all
@@ -67,7 +73,9 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
-        sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
+        sort_options: Optional[
+            bi_types._TDuplicates_column_values_sort_options
+        ] = None,
         exclude_null_value=False,
         clearable=True,
         multiple=True,
@@ -76,8 +84,8 @@ class DataSourceFacade(Generic[_TData]):
         """
         Creates a user interface select box.
 
-        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#dsui_select
-        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#dsui_select
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ui_select
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ui_select
 
 
         Args:
@@ -89,11 +97,20 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             SelectResult: An instance of a user interface select box.
         """
-        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws = {
+            key: value
+            for key, value in locals().items()
+            if key not in ("kwargs")
+        }
         kws.update(kwargs)
         return ui_select(**kws)
 
-    def ui_aggrid(self, *, options: Optional[Dict] = None, **kwargs):
+    def ui_aggrid(
+        self,
+        *,
+        options: Optional[Dict] = None,
+        **kwargs,
+    ):
         """
         Creates aggrid table.
 
@@ -107,7 +124,11 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.aggrid: aggrid table.
         """
-        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws = {
+            key: value
+            for key, value in locals().items()
+            if key not in ("kwargs")
+        }
         kws.update(kwargs)
         return ui_aggrid(**kws)
 
@@ -131,7 +152,11 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.table: ui.table.
         """
-        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws = {
+            key: value
+            for key, value in locals().items()
+            if key not in ("kwargs")
+        }
         kws.update(kwargs)
         return ui_table(**kws)
 
@@ -139,10 +164,14 @@ class DataSourceFacade(Generic[_TData]):
         self,
         column: str,
         *,
-        sort_options: Optional[bi_types._TDuplicates_column_values_sort_options] = None,
+        sort_options: Optional[
+            bi_types._TDuplicates_column_values_sort_options
+        ] = None,
         exclude_null_value=False,
         hide_filtered=True,
-        custom_options_map: Optional[Union[Dict, Callable[[Any], Any]]] = None,
+        custom_options_map: Optional[
+            Union[Dict, Callable[[Any], Any]]
+        ] = None,
         **kwargs,
     ):
         """
@@ -160,7 +189,11 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             RadioResult: An radio Selection.
         """
-        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws = {
+            key: value
+            for key, value in locals().items()
+            if key not in ("kwargs")
+        }
         kws.update(kwargs)
         return ui_radio(**kws)
 
@@ -180,7 +213,11 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             ui.radio: An Slider.
         """
-        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws = {
+            key: value
+            for key, value in locals().items()
+            if key not in ("kwargs")
+        }
         kws.update(kwargs)
         return ui_slider(**kws)
 
@@ -200,12 +237,19 @@ class DataSourceFacade(Generic[_TData]):
         Returns:
             QRange: An Range.
         """
-        kws = {key: value for key, value in locals().items() if key not in ("kwargs")}
+        kws = {
+            key: value
+            for key, value in locals().items()
+            if key not in ("kwargs")
+        }
         kws.update(kwargs)
         return ui_range(**kws)
 
     def ui_echarts(
-        self, fn: Callable[[Any], Union[Dict, "pyecharts.Base"]]  # pyright: ignore
+        self,
+        fn: Callable[
+            [Any], Union[Dict, "pyecharts.Base"]
+        ],  # pyright: ignore
     ):
         """Create charts
 
@@ -246,10 +290,20 @@ class DataSourceFacade(Generic[_TData]):
         return ui_echarts(self, fn)
 
     def send_filter(
-        self, element: ui.element, filter: bi_types._TFilterCallback[_TData]
+        self,
+        element: ui.element,
+        filter: bi_types._TFilterCallback[_TData],
     ):
         ele_id = element.id
-        key = self._dataSource.get_component_info_key(ele_id)
-        if not self._dataSource._component_map.has_record(key):
-            self._dataSource._register_component(ele_id)
-        self._dataSource.send_filter(ele_id, Filter(filter))
+        key = self._dataSource.get_component_info_key(
+            ele_id
+        )
+        if not self._dataSource._component_map.has_record(
+            key
+        ):
+            self._dataSource._register_component(
+                ele_id
+            )
+        self._dataSource.send_filter(
+            ele_id, Filter(filter)
+        )

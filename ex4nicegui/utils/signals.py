@@ -94,6 +94,17 @@ def to_value(maybe_ref: _TMaybeRef[T]) -> T:
 
 
 def to_ref(maybe_ref: _TMaybeRef[T]):
+    """Takes an inner value and returns a reactive and mutable ref object, which has a single property .value that points to the inner value.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#to_ref
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#to_ref
+
+
+    Args:
+        maybe_ref (_TMaybeRef[T]): _description_
+
+
+    """
     if is_ref(maybe_ref):
         return cast(Ref[T], maybe_ref)
 
@@ -128,6 +139,19 @@ def effect(
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
 ) -> signe_utils._TEffect_Fn[None]:
+    """Runs a function immediately while reactively tracking its dependencies and re-runs it whenever the dependencies are changed.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#effect
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#effect
+
+
+    Args:
+        fn (None, optional): _description_. Defaults to ....
+        priority_level (int, optional): _description_. Defaults to 1.
+        debug_trigger (Optional[Callable], optional): _description_. Defaults to None.
+        debug_name (Optional[str], optional): _description_. Defaults to None.
+
+    """
     ...
 
 
@@ -166,6 +190,20 @@ def ref_computed(
     priority_level: int = 1,
     debug_name: Optional[str] = None,
 ) -> ReadonlyRef[T]:
+    """Takes a getter function and returns a readonly reactive ref object for the returned value from the getter. It can also take an object with get and set functions to create a writable ref object.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#ref_computed
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ref_computed
+
+
+    Args:
+        fn (Callable[[], T]): _description_
+        desc (str, optional): _description_. Defaults to "".
+        debug_trigger (Optional[Callable[..., None]], optional): _description_. Defaults to None.
+        priority_level (int, optional): _description_. Defaults to 1.
+        debug_name (Optional[str], optional): _description_. Defaults to None.
+
+    """
     ...
 
 
@@ -251,6 +289,19 @@ def on(
     priority_level=1,
     effect_kws: Optional[Dict[str, Any]] = None,
 ):
+    """Watches one or more reactive data sources and invokes a callback function when the sources change.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#on
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#on
+
+
+    Args:
+        refs (Union[ReadonlyRef, Sequence[ReadonlyRef]]): _description_
+        onchanges (bool, optional): _description_. Defaults to False.
+        priority_level (int, optional): _description_. Defaults to 1.
+        effect_kws (Optional[Dict[str, Any]], optional): _description_. Defaults to None.
+
+    """
     effect_kws = effect_kws or {}
     if not isinstance(refs, Sequence):
         refs = [refs]
