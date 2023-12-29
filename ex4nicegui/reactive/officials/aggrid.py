@@ -4,7 +4,6 @@ from typing import (
     Dict,
     Optional,
 )
-import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
     effect,
     ReadonlyRef,
@@ -25,7 +24,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         html_columns: TMaybeRef[List[int]] = [],
         theme: TMaybeRef[str] = "balham",
         auto_size_columns: bool = True,
-        **org_kws
+        **org_kws,
     ) -> None:
         kws = {
             "options": options,
@@ -54,21 +53,17 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
     def from_pandas(
         df: TMaybeRef,
         columns_define_fn: Optional[Callable[[str], Dict]] = None,
-        **org_kws
+        **org_kws,
     ):
         columns_define_fn = columns_define_fn or (lambda x: {})
         if is_ref(df):
 
             @ref_computed
-            def cp_convert_df():
-                return utils_common.convert_dataframe(df.value)
-
-            @ref_computed
             def cp_options():
                 columnDefs = AggridBindableUi._get_columnDefs_from_dataframe(
-                    cp_convert_df.value, columns_define_fn
+                    df.value, columns_define_fn
                 )
-                rowData = cp_convert_df.value.to_dict("records")
+                rowData = df.value.to_dict("records")
                 data = {"columnDefs": columnDefs, "rowData": rowData}
                 return data
 
