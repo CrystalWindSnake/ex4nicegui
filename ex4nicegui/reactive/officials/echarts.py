@@ -68,6 +68,8 @@ class EChartsBindableUi(BindableUi[echarts]):
 
             @ref_computed
             def chart_opt():
+                if not bool(chart.value):
+                    return {}
                 return EChartsBindableUi._pyecharts2opts(chart.value)
 
             return EChartsBindableUi(chart_opt)
