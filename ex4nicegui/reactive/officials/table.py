@@ -4,7 +4,6 @@ from typing import (
     List,
     Optional,
     Dict,
-    cast,
 )
 from typing_extensions import Literal
 import ex4nicegui.utils.common as utils_common
@@ -19,11 +18,6 @@ from ex4nicegui.utils.signals import (
 from nicegui import ui
 from .base import BindableUi
 from .utils import _convert_kws_ref2value
-from nicegui.events import (
-    GenericEventArguments,
-    TableSelectionEventArguments,
-    handle_event,
-)
 
 
 class TableBindableUi(BindableUi[ui.table]):
@@ -61,10 +55,10 @@ class TableBindableUi(BindableUi[ui.table]):
         self._arg_row_key = row_key
         self._selection_ref: ReadonlyRef[List[Any]] = to_ref([])
 
-        def on_select(_):
+        def on_selection(_):
             self._selection_ref.value = self.element.selected  # type: ignore
 
-        self.element.on("selection", on_select)
+        self.element.on("selection", on_selection)
 
     @property
     def selection_ref(self):
@@ -93,12 +87,8 @@ class TableBindableUi(BindableUi[ui.table]):
         if is_ref(df):
 
             @ref_computed
-            def cp_convert_df():
-                return utils_common.convert_dataframe(df.value)
-
-            @ref_computed
             def cp_rows():
-                return cp_convert_df.value.to_dict("records")
+                return df.value.to_dict("records")
 
             @ref_computed
             def cp_cols():
@@ -109,15 +99,14 @@ class TableBindableUi(BindableUi[ui.table]):
                             "label": col,
                             "field": col,
                         },
-                        **columns_define_fn(col),
+                        **columns_define_fn(col),  # type: ignore
                     }
-                    for col in cp_convert_df.value.columns
+                    for col in df.value.columns
                 ]
 
             return TableBindableUi(cp_cols, cp_rows, **other_kws)
 
-        df = utils_common.convert_dataframe(df)
-        rows = df.to_dict("records")
+        rows = df.to_dict("records")  # type: ignore
 
         cols = [
             {
@@ -128,7 +117,7 @@ class TableBindableUi(BindableUi[ui.table]):
                 },
                 **columns_define_fn(col),
             }
-            for col in df.columns
+            for col in df.columns  # type: ignore
         ]
         return TableBindableUi(cols, rows, **other_kws)
 
