@@ -1,17 +1,17 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import ref_computed, to_ref
 from .screen import ScreenPage
 from .utils import EChartsUtils, set_test_id
+from pyecharts import options as opts
+from pyecharts.charts import Bar
+from pyecharts.commons import utils
 
 
-def test_chart_display(
-    page: ScreenPage, page_path: str
-):
+def test_chart_display(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        ins = rxui.echarts(
+        target1 = rxui.echarts(
             {
                 "title": {"text": "echart title"},
                 "xAxis": {
@@ -44,20 +44,47 @@ def test_chart_display(
             }
         )
 
-        set_test_id(ins, "target")
+        show = to_ref(False)
+
+        @ref_computed
+        def chart_opts():
+            if not show.value:
+                return None
+
+            c = (
+                Bar()
+                .add_xaxis(
+                    [
+                        "Mon",
+                    ]
+                )
+                .add_yaxis(
+                    "商家A",
+                    [120],
+                )
+            )
+
+            return c
+
+        # Charts don't show up in ui, but the instance tag are still there
+        # i.g. https://github.com/CrystalWindSnake/ex4nicegui/issues/77
+        target2 = rxui.echarts.from_pyecharts(chart_opts)
+
+        set_test_id(target1, "target1")
+        set_test_id(target2, "target2")
 
     page.open(page_path)
 
-    target = EChartsUtils(page, "target")
+    target1 = EChartsUtils(page, "target1")
+    target2 = EChartsUtils(page, "target2")
 
     page.wait()
 
-    target.assert_chart_exists()
+    target1.assert_chart_exists()
+    target2.assert_chart_exists()
 
 
-def test_js_function_opt(
-    page: ScreenPage, page_path: str
-):
+def test_js_function_opt(page: ScreenPage, page_path: str):
     r_unit = to_ref("kg")
 
     yAxis_formatter = ref_computed(
@@ -83,9 +110,7 @@ def test_js_function_opt(
             },
             "yAxis": {
                 "type": "value",
-                "axisLabel": {
-                    ":formatter": yAxis_formatter.value
-                },
+                "axisLabel": {":formatter": yAxis_formatter.value},
             },
             "series": [
                 {
@@ -118,19 +143,10 @@ def test_js_function_opt(
 
     opts = target.get_options()
 
-    assert (
-        "formatter"
-        in opts["yAxis"][0]["axisLabel"]
-    )
+    assert "formatter" in opts["yAxis"][0]["axisLabel"]
 
 
-def test_pyecharts(
-    page: ScreenPage, page_path: str
-):
-    from pyecharts import options as opts
-    from pyecharts.charts import Bar
-    from pyecharts.commons import utils
-
+def test_pyecharts(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
         c = (
@@ -173,17 +189,12 @@ def test_pyecharts(
 
     page.wait()
 
-    opts = target.get_options()
+    chart_opts = target.get_options()
 
-    assert (
-        "formatter"
-        in opts["yAxis"][0]["axisLabel"]
-    )
+    assert "formatter" in chart_opts["yAxis"][0]["axisLabel"]
 
 
-def test_click_event(
-    page: ScreenPage, page_path: str
-):
+def test_click_event(page: ScreenPage, page_path: str):
     click_data = {}
     hover_data = {}
 
@@ -196,9 +207,7 @@ def test_click_event(
                 "data": ["A", "B"],
                 "inverse": True,
             },
-            "legend": {
-                "textStyle": {"color": "gray"}
-            },
+            "legend": {"textStyle": {"color": "gray"}},
             "series": [
                 {
                     "type": "bar",
@@ -218,18 +227,14 @@ def test_click_event(
         def onclick_series(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
-            click_data[
-                "seriesName"
-            ] = e.seriesName
+            click_data["seriesName"] = e.seriesName
 
         ins.on("click", onclick_series)
 
         def on_mouser_over(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
-            hover_data[
-                "seriesName"
-            ] = e.seriesName
+            hover_data["seriesName"] = e.seriesName
 
         ins.on(
             "mouseover",
@@ -245,9 +250,7 @@ def test_click_event(
 
     page.wait(1000)
 
-    target.click_series(
-        0.05, "A", y_position_offset=-8
-    )
+    target.click_series(0.05, "A", y_position_offset=-8)
 
     page.wait(1000)
 
