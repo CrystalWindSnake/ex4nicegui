@@ -21,14 +21,9 @@ T = TypeVar("T")
 class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
     @staticmethod
     def _setup_(binder: "NumberBindableUi"):
-        def onValueChanged(e):
-            binder._ref.value = e.args  # type: ignore
-
         @effect
         def _():
             binder.element.value = binder.value
-
-        binder.element.on("update:modelValue", handler=onValueChanged)
 
     def __init__(
         self,
@@ -61,13 +56,20 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
 
         value_kws = _convert_kws_ref2value(kws)
 
+        def inject_on_change(e):
+            self._ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
+
         element = ui.number(**value_kws)
         element.classes("min-w-[10rem]")
 
-        super().__init__(value, element)
+        super().__init__(value, element)  # type: ignore
 
         for key, value in kws.items():
             if is_ref(value):
-                self.bind_prop(key, value)
+                self.bind_prop(key, value)  # type: ignore
 
         NumberBindableUi._setup_(self)
