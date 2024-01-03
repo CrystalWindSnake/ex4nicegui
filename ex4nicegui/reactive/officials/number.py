@@ -25,8 +25,6 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
         def _():
             binder.element.value = binder.value
 
-        # binder.element.on("update:modelValue", handler=onValueChanged)
-
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
