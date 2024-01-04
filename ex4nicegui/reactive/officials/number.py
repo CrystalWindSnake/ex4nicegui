@@ -69,7 +69,7 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
         super().__init__(value, element)  # type: ignore
 
         for key, value in kws.items():
-            if is_ref(value):
+            if key != "value" and is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
 
         NumberBindableUi._setup_(self)

@@ -369,6 +369,12 @@ class InputUtils:
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
 
+    def dbclick(self):
+        self.target_locator.dblclick(position={"x": 5, "y": 5})
+
+    # def focus(self):
+    #     self.target_locator.focus()
+
     def keyboard_down(self, key: str):
         self.page.keyboard.down(key)
 
