@@ -42,6 +42,15 @@ def test_ref(page: ScreenPage, page_path: str):
     page.wait()
     assert r_value.value == 3.1166
 
+    # type replace
+    target.click()
+    target.dbclick()
+
+    target.input_text("66")
+
+    page.wait()
+    assert r_value.value == 66
+
 
 def test_on_change(page: ScreenPage, page_path: str):
     value_on_change = 0
