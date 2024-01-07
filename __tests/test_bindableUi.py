@@ -1,9 +1,7 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from .screen import ScreenPage
-from playwright.sync_api import expect
 from .utils import SelectUtils, SwitchUtils, LabelUtils, set_test_id
 
 
