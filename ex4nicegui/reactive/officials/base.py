@@ -20,6 +20,9 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     effect,
     to_value,
+    is_ref,
+    on,
+    signe_utils,
 )
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.color_elements import (
@@ -181,10 +184,13 @@ class BindableUi(Generic[TWidget]):
                         self.classes(remove=name)
         elif isinstance(classes, list):
             for ref_name in classes:
+                if is_ref(ref_name):
 
-                @effect
-                def _(ref_name=ref_name):
-                    self.classes(replace=ref_name.value)
+                    @on(ref_name)
+                    def _(state: signe_utils.WatchedState):
+                        self.classes(add=state.current, remove=state.previous)
+                else:
+                    self.classes(ref_name)  # type: ignore
 
 
 class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
