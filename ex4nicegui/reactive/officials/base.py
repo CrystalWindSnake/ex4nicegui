@@ -209,7 +209,7 @@ class BindableUi(Generic[TWidget]):
         @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bind-style
 
         Args:
-            classes (_T_bind_classes_type):
+            style (Dict[str, Union[ReadonlyRef[str], Ref[str]]]): _description_
         """
         if isinstance(style, dict):
             for name, ref_obj in style.items():
