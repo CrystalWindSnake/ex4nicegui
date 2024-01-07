@@ -163,7 +163,7 @@ class BindableUi(Generic[TWidget]):
     def bind_classes(self, classes: _T_bind_classes_type):
         """data binding is manipulating an element's class list
 
-        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#bind-class-names
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-class-names
         @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E7%BB%91%E5%AE%9A%E7%B1%BB%E5%90%8D
 
         Args:

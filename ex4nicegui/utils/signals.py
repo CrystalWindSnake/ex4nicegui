@@ -96,7 +96,7 @@ def to_value(maybe_ref: _TMaybeRef[T]) -> T:
 def to_ref(maybe_ref: _TMaybeRef[T]):
     """Takes an inner value and returns a reactive and mutable ref object, which has a single property .value that points to the inner value.
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#to_ref
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#to_ref
     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#to_ref
 
 
@@ -141,7 +141,7 @@ def effect(
 ) -> signe_utils._TEffect_Fn[None]:
     """Runs a function immediately while reactively tracking its dependencies and re-runs it whenever the dependencies are changed.
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#effect
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#effect
     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#effect
 
 
@@ -192,7 +192,7 @@ def ref_computed(
 ) -> ReadonlyRef[T]:
     """Takes a getter function and returns a readonly reactive ref object for the returned value from the getter. It can also take an object with get and set functions to create a writable ref object.
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#ref_computed
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ref_computed
     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ref_computed
 
 
@@ -291,7 +291,7 @@ def on(
 ):
     """Watches one or more reactive data sources and invokes a callback function when the sources change.
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#on
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#on
     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#on
 
 
