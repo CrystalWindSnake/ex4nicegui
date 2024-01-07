@@ -1,5 +1,3 @@
-import pytest
-from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, effect, on
 from .screen import ScreenPage
@@ -42,8 +40,12 @@ def test_on_cleanup_when_page_close(page: ScreenPage, page_path: str):
     value = to_ref("org")
 
     @fn
+    def call_fn_times():
+        pass
+
     def call():
         value.value
+        call_fn_times()
 
     @ui.page(page_path)
     def _():
@@ -57,10 +59,10 @@ def test_on_cleanup_when_page_close(page: ScreenPage, page_path: str):
     page.open(page_path)
     page.wait(1000)
 
-    assert call.calledTimes == 1
+    assert call_fn_times.calledTimes == 1
     page._page.get_by_role("link", name="to other page").click()
 
     # must wait for background execution to clean up
     page.wait(4000)
     value.value = "new"
-    assert call.calledTimes == 1
+    assert call_fn_times.calledTimes == 1

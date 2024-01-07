@@ -154,10 +154,190 @@ bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
 
 ui.run()
 ```
+---
+
+## functionality
+
+### Bind class names
+
+All component classes provide `bind_classes` for binding `class`, supporting three different data structures.
+
+Bind dictionaries
+
+```python
+bg_color = to_ref(False)
+has_error = to_ref(False)
+
+rxui.label("test").bind_classes({"bg-blue": bg_color, "text-red": has_error})
+
+rxui.switch("bg_color", value=bg_color)
+rxui.switch("has_error", value=has_error)
+```
+
+Dictionary key  is the class name, and a dictionary value of  a responsive variable with value `bool`. When the responsive value is `True`, the class name is applied to the component `class`.
+
+---
+
+Bind a responsive variable whose return value is a dictionary.
+
+```python
+bg_color = to_ref(False)
+has_error = to_ref(False)
+
+class_obj = ref_computed(
+    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
+)
+
+rxui.switch("bg_color", value=bg_color)
+rxui.switch("has_error", value=has_error)
+rxui.label("bind to ref_computed").bind_classes(class_obj)
+```
+
+---
+
+Bind to list
+
+```python
+bg_color = to_ref("red")
+bg_color_class = ref_computed(lambda: f"bg-{bg_color.value}")
+
+text_color = to_ref("green")
+text_color_class = ref_computed(lambda: f"text-{text_color.value}")
+
+rxui.select(["red", "green", "yellow"], label="bg color", value=bg_color)
+rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
+
+rxui.label("binding to arrays").bind_classes([bg_color_class, text_color_class])
+
+```
+
+Each element in the list is a responsive variable that returns the class name
+
+---
+
+## responsive
+
+```python
+from ex4nicegui import (
+    to_ref,
+    ref_computed,
+    on,
+    effect,
+    effect_refreshable,
+    batch,
+    event_batch,
+)
+```
+Commonly used `to_ref`, `effect`, `ref_computed`, `on`.
+
+### `to_ref`
+Defines responsive objects, read and written by `.value`.
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+a.value =2
+b.value = 'new text'
+
+print(a.value)
+```
+
+### `effect`
+Accepts a function and automatically monitors changes to the responsive objects used in the function to automatically execute the function.
+
+```python
+a = to_ref(1)
+b = to_ref("text")
 
 
+@effect
+def auto_run_when_ref_value():
+    print(f"a:{a.value}")
 
 
+def change_value():
+    a.value = 2
+    b.value = "new text"
+
+
+ui.button("change", on_click=change_value)
+```
+
+The first time the effect is executed, the function `auto_run_when_ref_value` will be executed once. After that, clicking on the button changes the value of `a` (via `a.value`) and the function `auto_run_when_ref_value` is executed again.
+
+### `ref_computed`
+As with `effect`, `ref_computed` can also return results from functions. Typically used for secondary computation from `to_ref`.
+
+```python
+a = to_ref(1)
+a_square = ref_computed(lambda: a.value * 2)
+
+
+@effect
+def effect1():
+    print(f"a_square:{a_square.value}")
+
+
+def change_value():
+    a.value = 2
+
+
+ui.button("change", on_click=change_value)
+```
+
+When the button is clicked, the value of `a.value` is modified, triggering a recalculation of `a_square`. As the value of `a_square` is read in `effect1`, it triggers `effect1` to execute the
+
+> `ref_computed` is read-only `to_ref`
+
+### `on`
+Similar to `effect`, but `on` needs to explicitly specify the responsive object to monitor.
+
+```python
+
+a1 = to_ref(1)
+a2 = to_ref(10)
+b = to_ref("text")
+
+
+@on(a1)
+def watch_a1_only():
+    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
+
+
+@on([a1, b], onchanges=True)
+def watch_a1_and_b():
+    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
+
+
+def change_a1():
+    a1.value += 1
+    ui.notify("change_a1")
+
+
+ui.button("change a1", on_click=change_a1)
+
+
+def change_a2():
+    a2.value += 1
+    ui.notify("change_a2")
+
+
+ui.button("change a2", on_click=change_a2)
+
+
+def change_b():
+    b.value += "x"
+    ui.notify("change_b")
+
+
+ui.button("change b", on_click=change_b)
+
+```
+
+- If the parameter `onchanges` is True (the default value is False), the specified function will not be executed at binding time.
+
+
+---
 
 ## BI Module
 

@@ -3,12 +3,13 @@ from __future__ import annotations
 from typing import (
     Any,
     Callable,
+    Dict,
     List,
     Optional,
     TypeVar,
     Generic,
+    Union,
     cast,
-    overload,
 )
 from typing_extensions import Self
 from ex4nicegui.utils.signals import (
@@ -18,6 +19,10 @@ from ex4nicegui.utils.signals import (
     ref_computed,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_value,
+    is_ref,
+    on,
+    signe_utils,
 )
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.color_elements import (
@@ -26,10 +31,21 @@ from nicegui.elements.mixins.color_elements import (
     TAILWIND_COLORS,
 )
 from nicegui.elements.mixins.text_element import TextElement
+from nicegui.elements.mixins.disableable_element import DisableableElement
+
 
 T = TypeVar("T")
 
 TWidget = TypeVar("TWidget", bound=ui.element)
+
+_T_bind_classes_type_dict = Dict[str, TMaybeRef[bool]]
+_T_bind_classes_type_ref_dict = ReadonlyRef[Dict[str, bool]]
+_T_bind_classes_type_array = List[Union[ReadonlyRef[str], Ref[str]]]
+
+
+_T_bind_classes_type = Union[
+    _T_bind_classes_type_dict, _T_bind_classes_type_ref_dict, _T_bind_classes_type_array
+]
 
 
 class BindableUi(Generic[TWidget]):
@@ -144,6 +160,48 @@ class BindableUi(Generic[TWidget]):
     def clear(self) -> None:
         cast(ui.element, self.element).clear()
 
+    def bind_classes(self, classes: _T_bind_classes_type):
+        """data binding is manipulating an element's class list
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/docs/apis/README.en.md#bind-class-names
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E7%BB%91%E5%AE%9A%E7%B1%BB%E5%90%8D
+
+        Args:
+            classes (_T_bind_classes_type):
+        """
+        if isinstance(classes, dict):
+            for name, ref_obj in classes.items():
+
+                @effect
+                def _(name=name, ref_obj=ref_obj):
+                    if to_value(ref_obj):
+                        self.classes(add=name)
+                    else:
+                        self.classes(remove=name)
+
+        elif isinstance(classes, (Ref, ReadonlyRef)):
+            ref_obj = to_value(classes)
+            assert isinstance(ref_obj, dict)
+
+            @effect
+            def _():
+                for name, value in to_value(classes).items():
+                    if value:
+                        self.classes(add=name)
+                    else:
+                        self.classes(remove=name)
+        elif isinstance(classes, list):
+            for ref_name in classes:
+                if is_ref(ref_name):
+
+                    @on(ref_name)
+                    def _(state: signe_utils.WatchedState):
+                        self.classes(add=state.current, remove=state.previous)
+                else:
+                    self.classes(ref_name)  # type: ignore
+
+        return self
+
 
 class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
     def __init__(self, value: TMaybeRef[T], element: TWidget) -> None:
@@ -160,9 +218,6 @@ class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
             ref.value = self._ref.value
 
         return self
-
-
-from nicegui.elements.mixins.disableable_element import DisableableElement
 
 
 _T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)

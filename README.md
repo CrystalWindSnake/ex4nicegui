@@ -159,6 +159,67 @@ ui.run()
 ```
 
 
+## 组件功能
+
+### 绑定类名
+
+所有的组件类提供 `bind_classes` 用于绑定 `class`，支持三种不同的数据结构。
+
+绑定字典
+
+```python
+bg_color = to_ref(False)
+has_error = to_ref(False)
+
+rxui.label("test").bind_classes({"bg-blue": bg_color, "text-red": has_error})
+
+rxui.switch("bg_color", value=bg_color)
+rxui.switch("has_error", value=has_error)
+```
+
+字典键值为类名,对应值为 bool 的响应式变量。当响应式值为 `True`，类名应用到组件 class
+
+
+---
+
+绑定返回值为字典的响应式变量
+
+```python
+bg_color = to_ref(False)
+has_error = to_ref(False)
+
+class_obj = ref_computed(
+    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
+)
+
+rxui.switch("bg_color", value=bg_color)
+rxui.switch("has_error", value=has_error)
+rxui.label("bind to ref_computed").bind_classes(class_obj)
+```
+
+---
+
+绑定为列表
+
+```python
+bg_color = to_ref("red")
+bg_color_class = ref_computed(lambda: f"bg-{bg_color.value}")
+
+text_color = to_ref("green")
+text_color_class = ref_computed(lambda: f"text-{text_color.value}")
+
+rxui.select(["red", "green", "yellow"], label="bg color", value=bg_color)
+rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
+
+rxui.label("binding to arrays").bind_classes([bg_color_class, text_color_class])
+
+```
+
+列表中每个元素为返回类名的响应式变量
+
+
+---
+
 ## 响应式
 
 ```python
@@ -174,6 +235,8 @@ from ex4nicegui import (
 ```
 常用 `to_ref`,`effect`,`ref_computed`,`on`
 
+---
+
 ### `to_ref`
 定义响应式对象,通过 `.value` 读写
 ```python
@@ -185,6 +248,8 @@ b.value = 'new text'
 
 print(a.value)
 ```
+
+---
 
 ### `effect`
 接受一个函数,自动监控函数中使用到的响应式对象变化,从而自动执行函数
@@ -209,6 +274,7 @@ ui.button("change", on_click=change_value)
 
 首次执行 effect ,函数`auto_run_when_ref_value`将被执行一次.之后点击按钮,改变 `a` 的值(通过 `a.value`),函数`auto_run_when_ref_value`再次执行
 
+---
 
 ### `ref_computed`
 与 `effect` 具备一样的功能，`ref_computed` 还能从函数中返回结果。一般用于从 `to_ref` 中进行二次计算
@@ -233,6 +299,8 @@ ui.button("change", on_click=change_value)
 点击按钮后，`a.value` 值被修改，从而触发 `a_square` 重新计算.由于 `effect1` 中读取了 `a_square` 的值，从而触发 `effect1` 执行
 
 > `ref_computed` 是只读的 `to_ref`
+
+---
 
 ### `on`
 类似 `effect` 的功能,但是 `on` 需要明确指定监控的响应式对象
@@ -281,6 +349,7 @@ ui.button("change b", on_click=change_b)
 
 - 参数 `onchanges` 为 True 时(默认值为 False),指定的函数不会在绑定时执行 
 
+---
 
 ## BI 模块
 

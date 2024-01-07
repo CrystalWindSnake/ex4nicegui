@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import List, Optional, Any, Callable
+from typing import List, Optional, Any, Callable, Union
 from playwright.sync_api import expect, Locator
 from .screen import ScreenPage
-from nicegui import ui
 from typing_extensions import Protocol, Self
 
 
@@ -56,15 +55,27 @@ def tran_str(value):
     return value
 
 
-class SelectUtils:
+class BaseUiUtils:
     def __init__(
         self,
         screen_page: ScreenPage,
         test_id: str,
     ) -> None:
+        self.screen_page = screen_page
         self.page = screen_page._page
         self.test_id = test_id
         self.target_locator = self.page.get_by_test_id(test_id)
+
+    def expect_to_have_class(self, classes: Union[List[str], str]):
+        expect(self.target_locator).to_have_class(classes)
+
+    def expect_not_to_have_class(self, classes: Union[List[str], str]):
+        expect(self.target_locator).not_to_have_class(classes)
+
+
+class SelectUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
@@ -94,15 +105,9 @@ class SelectUtils:
         self.target_locator.press("Enter")
 
 
-class RadioUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class RadioUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def expect_to_be_visible(self):
         expect(self.target_locator).to_be_visible()
@@ -120,15 +125,9 @@ class RadioUtils:
         return self.target_locator.locator(".q-radio__label").all_inner_texts()
 
 
-class EChartsUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class EChartsUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def assert_chart_exists(self):
         attr = self.target_locator.get_attribute("_echarts_instance_")
@@ -136,7 +135,7 @@ class EChartsUtils:
 
     def get_options(self):
         opts = self.target_locator.evaluate(
-            f"node => echarts.getInstanceByDom(node).getOption()"
+            "node => echarts.getInstanceByDom(node).getOption()"
         )
 
         return opts
@@ -204,21 +203,16 @@ class EChartsUtils:
         )
 
         box = chartIns_box.bounding_box()
+        assert box
         return (
             box["x"] + pos_x,
             box["y"] + pos_y,
         )
 
 
-class TableUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class TableUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def expect_cell_to_be_visible(self, cell_values: List):
         for cell_value in cell_values:
@@ -258,29 +252,17 @@ class TableUtils:
         )
 
 
-class MermaidUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class MermaidUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def click_node(self, nodeId: str):
         self.target_locator.get_by_text(nodeId, exact=True).click()
 
 
-class AggridUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class AggridUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def expect_cell_to_be_visible(self, cell_values: List):
         for cell_value in cell_values:
@@ -325,29 +307,17 @@ class AggridUtils:
         return [r.get_by_role("gridcell").all() for r in rows]
 
 
-class ButtonUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class ButtonUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def click(self):
         self.target_locator.click()
 
 
-class LabelUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class LabelUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def get_text(self):
         return self.target_locator.inner_text()
@@ -356,15 +326,9 @@ class LabelUtils:
         assert self.get_text() == text
 
 
-class InputUtils:
-    def __init__(
-        self,
-        screen_page: ScreenPage,
-        test_id: str,
-    ) -> None:
-        self.page = screen_page._page
-        self.test_id = test_id
-        self.target_locator = self.page.get_by_test_id(test_id)
+class InputUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
@@ -393,3 +357,11 @@ class InputUtils:
 class InputNumberUtils(InputUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
+
+
+class SwitchUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
+
+    def click(self):
+        self.target_locator.locator("div").first.click()
