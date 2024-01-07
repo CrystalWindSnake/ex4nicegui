@@ -148,3 +148,62 @@ def test_bind_classes(page: ScreenPage, page_path: str):
         label.expect_to_have_class("bg-green text-yellow")
 
     test3()
+
+
+def test_bind_style(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        # binding to dict
+        def binding_to_dict():
+            bg_color = to_ref("blue")
+            text_color = to_ref("red")
+
+            test_prefix = "binding_to_dict"
+
+            set_test_id(
+                rxui.select(
+                    ["blue", "green", "yellow"], label="bg color", value=bg_color
+                ),
+                f"{test_prefix}_select1",
+            )
+
+            set_test_id(
+                rxui.select(
+                    ["red", "green", "yellow"], label="text color", value=text_color
+                ),
+                f"{test_prefix}_select2",
+            )
+            set_test_id(
+                rxui.label("test").bind_style(
+                    {
+                        "background-color": bg_color,
+                        "color": text_color,
+                    }
+                ),
+                f"{test_prefix}_label",
+            )
+
+        binding_to_dict()
+
+    page.open(page_path)
+    page.wait()
+
+    def test_binding_to_dict():
+        test_prefix = "binding_to_dict"
+        select1 = SelectUtils(page, f"{test_prefix}_select1")
+        select2 = SelectUtils(page, f"{test_prefix}_select2")
+        label = LabelUtils(page, f"{test_prefix}_label")
+
+        assert label.get_style_attr_value() == "background-color: blue; color: red;"
+
+        #
+        select1.click_and_select("green")
+
+        assert label.get_style_attr_value() == "background-color: green; color: red;"
+
+        #
+        select2.click_and_select("yellow")
+
+        assert label.get_style_attr_value() == "background-color: green; color: yellow;"
+
+    test_binding_to_dict()

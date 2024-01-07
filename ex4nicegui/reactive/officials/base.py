@@ -202,6 +202,18 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
+    def bind_style(self, style: Dict[str, Union[ReadonlyRef[str], Ref[str]]]):
+        if isinstance(style, dict):
+            for name, ref_obj in style.items():
+                if is_ref(ref_obj):
+
+                    @effect
+                    def _(name=name, ref_obj=ref_obj):
+                        self.element._style[name] = ref_obj.value
+                        self.element.update()
+
+        return self
+
 
 class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
     def __init__(self, value: TMaybeRef[T], element: TWidget) -> None:
