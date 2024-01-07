@@ -203,6 +203,14 @@ class BindableUi(Generic[TWidget]):
         return self
 
     def bind_style(self, style: Dict[str, Union[ReadonlyRef[str], Ref[str]]]):
+        """data binding is manipulating an element's style
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-style
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bind-style
+
+        Args:
+            classes (_T_bind_classes_type):
+        """
         if isinstance(style, dict):
             for name, ref_obj in style.items():
                 if is_ref(ref_obj):
