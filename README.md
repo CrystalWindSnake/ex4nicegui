@@ -241,7 +241,7 @@ rxui.select(["blue", "green", "yellow"], label="bg color", value=bg_color)
 rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 ```
 
-`bind_style` 传入字典，`key` 为样式名字，`value` 为样式值，响应式字符串或数值
+`bind_style` 传入字典，`key` 为样式名字，`value` 为样式值，响应式字符串
 
 
 ---
