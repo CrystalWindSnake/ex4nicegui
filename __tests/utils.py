@@ -61,12 +61,16 @@ class BaseUiUtils:
         screen_page: ScreenPage,
         test_id: str,
     ) -> None:
+        self.screen_page = screen_page
         self.page = screen_page._page
         self.test_id = test_id
         self.target_locator = self.page.get_by_test_id(test_id)
 
     def expect_to_have_class(self, classes: Union[List[str], str]):
         expect(self.target_locator).to_have_class(classes)
+
+    def expect_not_to_have_class(self, classes: Union[List[str], str]):
+        expect(self.target_locator).not_to_have_class(classes)
 
 
 class SelectUtils(BaseUiUtils):
@@ -353,3 +357,11 @@ class InputUtils(BaseUiUtils):
 class InputNumberUtils(InputUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
+
+
+class SwitchUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
+
+    def click(self):
+        self.target_locator.locator("div").first.click()

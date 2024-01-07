@@ -4,7 +4,7 @@ from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from .screen import ScreenPage
 from playwright.sync_api import expect
-from .utils import SelectUtils, set_test_id
+from .utils import SelectUtils, SwitchUtils, LabelUtils, set_test_id
 
 
 def test_bind_classes(page: ScreenPage, page_path: str):
@@ -16,12 +16,23 @@ def test_bind_classes(page: ScreenPage, page_path: str):
             bg_color = to_ref(False)
             has_error = to_ref(False)
 
-            rxui.label("test").bind_classes(
-                {"bg-blue": bg_color, "text-red": has_error}
+            test_prefix = "test1"
+
+            set_test_id(
+                rxui.switch("bg_color", value=bg_color),
+                f"{test_prefix}_switch1",
+            )
+            set_test_id(
+                rxui.switch("has_error", value=has_error),
+                f"{test_prefix}_switch2",
             )
 
-            rxui.switch("bg_color", value=bg_color)
-            rxui.switch("has_error", value=has_error)
+            set_test_id(
+                rxui.label("test").bind_classes(
+                    {"bg-blue": bg_color, "text-red": has_error}
+                ),
+                f"{test_prefix}_label",
+            )
 
         # can also bind to a ref_computed
         def bind_to_ref_computed():
@@ -32,9 +43,21 @@ def test_bind_classes(page: ScreenPage, page_path: str):
                 lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
             )
 
-            rxui.switch("bg_color", value=bg_color)
-            rxui.switch("has_error", value=has_error)
-            rxui.label("bind to ref_computed").bind_classes(class_obj)
+            test_prefix = "test2"
+
+            set_test_id(
+                rxui.switch("bg_color", value=bg_color),
+                f"{test_prefix}_switch1",
+            )
+            set_test_id(
+                rxui.switch("has_error", value=has_error),
+                f"{test_prefix}_switch2",
+            )
+
+            set_test_id(
+                rxui.label("bind to ref_computed").bind_classes(class_obj),
+                f"{test_prefix}_label",
+            )
 
         # binding to list
         def bind_to_list():
@@ -44,13 +67,27 @@ def test_bind_classes(page: ScreenPage, page_path: str):
             text_color = to_ref("green")
             text_color_class = ref_computed(lambda: f"text-{text_color.value}")
 
-            rxui.select(["red", "green", "yellow"], label="bg color", value=bg_color)
-            rxui.select(
-                ["red", "green", "yellow"], label="text color", value=text_color
+            test_prefix = "test3"
+
+            set_test_id(
+                rxui.select(
+                    ["red", "green", "yellow"], label="bg color", value=bg_color
+                ),
+                f"{test_prefix}_select1",
             )
 
-            rxui.label("binding to arrays").bind_classes(
-                [bg_color_class, text_color_class]
+            set_test_id(
+                rxui.select(
+                    ["red", "green", "yellow"], label="text color", value=text_color
+                ),
+                f"{test_prefix}_select2",
+            )
+
+            set_test_id(
+                rxui.label("binding to arrays").bind_classes(
+                    [bg_color_class, text_color_class]
+                ),
+                f"{test_prefix}_label",
             )
 
         binding_to_dict()
@@ -58,7 +95,58 @@ def test_bind_classes(page: ScreenPage, page_path: str):
         bind_to_list()
 
     page.open(page_path)
+    page.wait()
 
-    target = SelectUtils(page, "target")
+    def test1():
+        test_prefix = "test1"
+        switch1 = SwitchUtils(page, f"{test_prefix}_switch1")
+        switch2 = SwitchUtils(page, f"{test_prefix}_switch2")
+        label = LabelUtils(page, f"{test_prefix}_label")
 
-    expect(target.page.get_by_text("test select", exact=True)).to_be_visible()
+        label.expect_not_to_have_class("bg-red text-green")
+        switch1.click()
+
+        label.expect_to_have_class(["bg-blue"])
+
+        switch2.click()
+        label.expect_to_have_class("bg-blue text-red")
+
+    test1()
+
+    def test2():
+        test_prefix = "test2"
+        switch1 = SwitchUtils(page, f"{test_prefix}_switch1")
+        switch2 = SwitchUtils(page, f"{test_prefix}_switch2")
+        label = LabelUtils(page, f"{test_prefix}_label")
+
+        label.expect_not_to_have_class("bg-red text-green")
+        switch1.click()
+
+        label.expect_to_have_class("bg-blue")
+
+        switch2.click()
+        label.expect_to_have_class("bg-blue text-red")
+
+    test2()
+
+    def test3():
+        test_prefix = "test3"
+        select1 = SelectUtils(page, f"{test_prefix}_select1")
+        select2 = SelectUtils(page, f"{test_prefix}_select2")
+        label = LabelUtils(page, f"{test_prefix}_label")
+
+        label.expect_to_have_class("bg-red text-green")
+
+        #
+        select1.click_and_select("green")
+
+        label.expect_not_to_have_class("bg-red")
+        label.expect_to_have_class("text-green bg-green")
+
+        #
+        select2.click_and_select("yellow")
+
+        label.expect_not_to_have_class("text-green")
+        label.expect_to_have_class("bg-green text-yellow")
+
+    test3()

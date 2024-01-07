@@ -200,6 +200,8 @@ class BindableUi(Generic[TWidget]):
                 else:
                     self.classes(ref_name)  # type: ignore
 
+        return self
+
 
 class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
     def __init__(self, value: TMaybeRef[T], element: TWidget) -> None:
