@@ -39,7 +39,7 @@ T = TypeVar("T")
 TWidget = TypeVar("TWidget", bound=ui.element)
 
 _T_bind_classes_type_dict = Dict[str, TMaybeRef[bool]]
-_T_bind_classes_type_ref_dict = ReadonlyRef[dict[str, bool]]
+_T_bind_classes_type_ref_dict = ReadonlyRef[Dict[str, bool]]
 _T_bind_classes_type_array = List[Union[ReadonlyRef[str], Ref[str]]]
 
 
