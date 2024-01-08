@@ -215,6 +215,32 @@ Each element in the list is a responsive variable that returns the class name
 
 ---
 
+### bind-style
+
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+from ex4nicegui.utils.signals import to_ref
+
+
+bg_color = to_ref("blue")
+text_color = to_ref("red")
+
+rxui.label("test").bind_style(
+    {
+        "background-color": bg_color,
+        "color": text_color,
+    }
+)
+
+rxui.select(["blue", "green", "yellow"], label="bg color", value=bg_color)
+rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
+```
+
+`bind_style` passed into dictionary, `key` is style name, `value` is style value, responsive string
+
+---
+
 ## responsive
 
 ```python

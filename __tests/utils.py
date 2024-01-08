@@ -72,6 +72,9 @@ class BaseUiUtils:
     def expect_not_to_have_class(self, classes: Union[List[str], str]):
         expect(self.target_locator).not_to_have_class(classes)
 
+    def get_style_attr_value(self) -> str:
+        return self.target_locator.evaluate("element => element.getAttribute('style')")
+
 
 class SelectUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:

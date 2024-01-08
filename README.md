@@ -217,6 +217,32 @@ rxui.label("binding to arrays").bind_classes([bg_color_class, text_color_class])
 
 列表中每个元素为返回类名的响应式变量
 
+---
+
+### bind-style
+
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+from ex4nicegui.utils.signals import to_ref
+
+
+bg_color = to_ref("blue")
+text_color = to_ref("red")
+
+rxui.label("test").bind_style(
+    {
+        "background-color": bg_color,
+        "color": text_color,
+    }
+)
+
+rxui.select(["blue", "green", "yellow"], label="bg color", value=bg_color)
+rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
+```
+
+`bind_style` 传入字典，`key` 为样式名字，`value` 为样式值，响应式字符串
+
 
 ---
 
