@@ -11,7 +11,7 @@ export default {
     });
 
 
-    this.updateOptions(this.options);
+    this.update_chart();
 
     this.resizeObs = new ResizeObserver(this.chart.resize)
     this.resizeObs.observe(this.$el);
@@ -24,9 +24,9 @@ export default {
     this.chart.dispose();
   },
   methods: {
-    updateOptions(options, opts) {
-      convertDynamicProperties(options, true);
-      this.chart.setOption(options, opts);
+    update_chart(opts) {
+      convertDynamicProperties(this.options, true);
+      this.chart.setOption(this.options, opts ?? { notMerge: this.chart.options?.series.length != this.options.series.length });
     },
 
 
