@@ -2,7 +2,7 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import ref_computed, to_ref
 from .screen import ScreenPage
-from .utils import EChartsUtils, set_test_id
+from .utils import EChartsUtils, ButtonUtils, set_test_id
 from pyecharts import options as opts
 from pyecharts.charts import Bar
 from pyecharts.commons import utils
@@ -277,3 +277,50 @@ def test_click_event(page: ScreenPage, page_path: str):
     page.wait(1000)
 
     assert hover_data["seriesName"] == "Beta"
+
+
+def test_update_opts(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        opts = {
+            "title": {"text": "title", "bottom": 0},
+            "xAxis": {"type": "value"},
+            "yAxis": {
+                "type": "category",
+                "data": ["a", "b"],
+            },
+            "series": [
+                {
+                    "name": "first",
+                    "type": "bar",
+                    "data": [18203, 23489],
+                },
+                {
+                    "name": "second",
+                    "type": "bar",
+                    "data": [19325, 23438],
+                },
+            ],
+        }
+
+        r_opts = to_ref(opts)
+
+        set_test_id(rxui.echarts(r_opts), "target")
+
+        def on_click():
+            del r_opts.value["title"]["bottom"]
+            r_opts.value = r_opts.value
+
+        set_test_id(ui.button("del title bottom", on_click=on_click), "botton")
+
+    page.open(page_path)
+    page.wait()
+
+    target = EChartsUtils(page, "target")
+    button = ButtonUtils(page, "botton")
+
+    assert target.get_options()["title"][0]["bottom"] == 0
+
+    button.click()
+
+    assert target.get_options()["title"][0]["bottom"] is None
