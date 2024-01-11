@@ -333,28 +333,44 @@ class InputUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
+        self.target_box = self.page.locator("css=label.q-input").filter(
+            has=self.page.get_by_test_id(test_id)
+        )
+
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
 
     def dbclick(self):
         self.target_locator.dblclick(position={"x": 5, "y": 5})
 
-    # def focus(self):
-    #     self.target_locator.focus()
+    def click_cancel_icon(self):
+        self.target_box.get_by_role("button").click()
+        return self
 
     def keyboard_down(self, key: str):
         self.page.keyboard.down(key)
+        return self
 
     def get_input_value(self):
         return self.target_locator.input_value()
 
     def input_text(self, text: str):
         self.target_locator.type(text)
+        return self
+
+    def fill_text(self, text: str):
+        self.target_locator.fill(text)
+        return self
+
+    def enter(self):
+        self.target_locator.press("Enter")
+        return self
 
     def input_and_enter(self, text: str):
         self.input_text(text)
         self.page.wait_for_timeout(500)
-        self.target_locator.press("Enter")
+        self.enter()
+        return self
 
 
 class InputNumberUtils(InputUtils):
