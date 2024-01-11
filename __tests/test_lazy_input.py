@@ -1,8 +1,8 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import ScreenPage
+from .utils import InputUtils, set_test_id, LabelUtils
 
 
 def test_const_str(page: ScreenPage, page_path: str):
@@ -47,17 +47,26 @@ def test_input_change_value_when_enter(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.lazy_input(value=r_str).props('data-testid="input"')
-        rxui.label(r_str).props('data-testid="label"')
+        input = rxui.lazy_input(value=r_str).props("clearable")
+        set_test_id(input, "input")
+        label = rxui.label(r_str)
+        set_test_id(label, "label")
 
     page.open(page_path)
-
     page.wait()
+
+    input = InputUtils(page, "input")
+    label = LabelUtils(page, "label")
+
     # page.pause()
-    page.fill("input", "new value")
+    input.fill_text("new value")
     page.wait()
-    assert page.get_by_test_id("label").inner_text() == "old"
+    assert label.get_text() == "old"
 
-    page.enter("input")
+    input.enter()
     page.wait()
-    assert page.get_by_test_id("label").inner_text() == "new value"
+    assert label.get_text() == "new value"
+
+    input.click_cancel_icon()
+    page.wait()
+    assert label.get_text() == ""

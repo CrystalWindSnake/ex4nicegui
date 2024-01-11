@@ -116,5 +116,9 @@ class LazyInputBindableUi(InputBindableUi):
         def onValueChanged():
             self._ref.value = ele.value or ""
 
+        def on_clear(_):
+            self._ref.value = ""
+
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)
+        ele.on("clear", on_clear)
