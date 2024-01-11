@@ -352,8 +352,7 @@ class InputUtils(BaseUiUtils):
         return self
 
     def get_input_value(self):
-        self.target_locator.input_value()
-        return self
+        return self.target_locator.input_value()
 
     def input_text(self, text: str):
         self.target_locator.type(text)
