@@ -26,14 +26,9 @@ class CheckboxBindableUi(
     def _setup_(binder: "CheckboxBindableUi"):
         ele = cast(ValueElement, binder.element)
 
-        def onValueChanged(e):
-            binder._ref.value = e.args[0]  # type: ignore
-
         @effect
         def _():
             ele.value = binder.value
-
-        ele.on("update:modelValue", handler=onValueChanged)
 
     def __init__(
         self,
@@ -45,6 +40,13 @@ class CheckboxBindableUi(
         kws = {"text": text, "value": value, "on_change": on_change}
 
         value_kws = _convert_kws_ref2value(kws)
+
+        def inject_on_change(e):
+            self._ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
 
         element = ui.checkbox(**value_kws)
 

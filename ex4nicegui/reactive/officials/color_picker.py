@@ -31,6 +31,13 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
 
         value_kws = _convert_kws_ref2value(kws)
 
+        def inject_on_change(e):
+            self._ref.value = e.value
+            if on_pick:
+                on_pick(e)
+
+        value_kws.update({"on_pick": inject_on_change})
+
         with ui.card().tight():
             element_menu = ui.color_picker(**value_kws)
             self._element_picker = element_menu.default_slot.children[0]
@@ -52,11 +59,6 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         @effect
         def _():
             ele._props["modelValue"] = self.value
-
-        def onModelValueChanged(e):
-            self._ref.value = e.args  # type: ignore
-
-        ele.on("update:modelValue", handler=onModelValueChanged)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":

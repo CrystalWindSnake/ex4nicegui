@@ -23,12 +23,12 @@ T = TypeVar("T")
 class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
     @staticmethod
     def _setup_(binder: "SwitchBindableUi"):
-        def onValueChanged(e):
-            ele._send_update_on_value_change = ele.LOOPBACK
-            cur_value = ele._event_args_to_value(e)
-            ele.set_value(cur_value)
-            ele._send_update_on_value_change = True
-            binder._ref.value = cur_value
+        # def onValueChanged(e):
+        #     ele._send_update_on_value_change = ele.LOOPBACK
+        #     cur_value = ele._event_args_to_value(e)
+        #     ele.set_value(cur_value)
+        #     ele._send_update_on_value_change = True
+        #     binder._ref.value = cur_value
 
         ele = cast(ValueElement, binder.element)
 
@@ -36,7 +36,7 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
         def _():
             ele.value = binder.value
 
-        ele.on("update:modelValue", onValueChanged, [None], throttle=0)  # type: ignore
+        # ele.on("update:modelValue", onValueChanged, [None], throttle=0)  # type: ignore
 
     def __init__(
         self,
@@ -48,6 +48,13 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
         kws = {"text": text, "value": value, "on_change": on_change}
 
         value_kws = _convert_kws_ref2value(kws)
+
+        def inject_on_change(e):
+            self._ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
 
         element = ui.switch(**value_kws)
 

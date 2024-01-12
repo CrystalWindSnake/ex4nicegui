@@ -50,6 +50,13 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
 
         value_kws = _convert_kws_ref2value(kws)
 
+        def inject_on_change(e):
+            self._ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
+
         element = ui.date(**value_kws)
 
         super().__init__(value, element)  # type: ignore
@@ -65,12 +72,7 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
 
         @effect
         def _():
-            ele.value = self.value
-
-        def onModelValueChanged(e):
-            self._ref.value = e.args[0] or ""  # type: ignore
-
-        ele.on("update:modelValue", handler=onModelValueChanged)
+            ele.set_value(self.value)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":

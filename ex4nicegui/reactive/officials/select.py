@@ -26,14 +26,9 @@ T = TypeVar("T")
 class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
     @staticmethod
     def _setup_(binder: "SelectBindableUi"):
-        def onValueChanged(e):
-            binder._ref.value = binder.element._event_args_to_value(e)  # type: ignore
-
         @effect
         def _():
             binder.element.value = binder.value
-
-        binder.element.on("update:modelValue", handler=onValueChanged)
 
     def __init__(
         self,
@@ -45,7 +40,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         with_input: TMaybeRef[bool] = False,
         multiple: TMaybeRef[bool] = False,
         clearable: TMaybeRef[bool] = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Dropdown Selection
 
@@ -72,6 +67,13 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         value_kws = _convert_kws_ref2value(kws)
 
         value_kws.update(kwargs)
+
+        def inject_on_change(e):
+            self._ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
 
         element = ui.select(**value_kws)
         element.classes("min-w-[10rem]")

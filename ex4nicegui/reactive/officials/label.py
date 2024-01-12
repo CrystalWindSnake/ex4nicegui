@@ -12,14 +12,9 @@ from .utils import _convert_kws_ref2value
 class LabelBindableUi(SingleValueBindableUi[str, ui.label]):
     @staticmethod
     def _setup_(binder: "LabelBindableUi"):
-        def onValueChanged(e):
-            binder._ref.value = e.args["label"]  # type: ignore
-
         @effect
         def _():
             binder.element.text = binder.value
-
-        binder.element.on("update:modelValue", handler=onValueChanged)
 
     def __init__(
         self,
