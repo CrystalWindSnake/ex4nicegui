@@ -16,6 +16,8 @@ from ex4nicegui.reactive.EChartsComponent.ECharts import (
     EChartsMouseEventArguments,
 )
 
+from nicegui.awaitable_response import AwaitableResponse
+
 
 _TEventName = Literal[
     "click",
@@ -174,6 +176,30 @@ class EChartsBindableUi(BindableUi[echarts]):
         ---
         """
         self.element.echarts_on(event_name, handler, query)
+
+    def run_chart_method(
+        self, name: str, *args, timeout: float = 1, check_interval: float = 0.01
+    ) -> AwaitableResponse:
+        """Run a method of the JSONEditor instance.
+
+        See the `ECharts documentation <https://echarts.apache.org/en/api.html#echartsInstance>`_ for a list of methods.
+
+        If the function is awaited, the result of the method call is returned.
+        Otherwise, the method is executed without waiting for a response.
+
+        :param name: name of the method (a prefix ":" indicates that the arguments are JavaScript expressions)
+        :param args: arguments to pass to the method (Python objects or JavaScript expressions)
+        :param timeout: timeout in seconds (default: 1 second)
+        :param check_interval: interval in seconds to check for a response (default: 0.01 seconds)
+
+        :return: AwaitableResponse that can be awaited to get the result of the method call
+        """
+        return self.element.run_chart_method(
+            name,
+            *args,
+            timeout=timeout,
+            check_interval=check_interval,
+        )
 
 
 class PyechartsUtils:

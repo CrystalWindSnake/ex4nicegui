@@ -324,3 +324,39 @@ def test_update_opts(page: ScreenPage, page_path: str):
     button.click()
 
     assert target.get_options()["title"][0]["bottom"] is None
+
+
+def test_run_chart_method(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        chart = rxui.echarts(
+            {
+                "xAxis": {"type": "value"},
+                "yAxis": {"type": "category", "data": ["A", "B"], "inverse": True},
+                "series": [
+                    {"type": "bar", "name": "Alpha", "data": [0.1, 0.2]},
+                ],
+            }
+        )
+
+        def onclick():
+            chart.run_chart_method("setOption", {"title": {"text": "new title"}})
+
+        btn = ui.button("clear", on_click=onclick)
+
+        set_test_id(chart, "target")
+
+        set_test_id(btn, "botton")
+
+    page.open(page_path)
+    page.wait()
+
+    target = EChartsUtils(page, "target")
+    button = ButtonUtils(page, "botton")
+
+    assert "title" not in target.get_options()
+
+    button.click()
+    page.wait()
+
+    assert target.get_options()["title"][0]["text"] == "new title"
