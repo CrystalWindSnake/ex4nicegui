@@ -40,24 +40,15 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
             if on_change:
                 on_change(e)
 
-        value_kws.update({"on_change": inject_on_change})
+        value_kws.update({"value": "", "on_change": inject_on_change})
 
         element = ui.textarea(**value_kws)
 
         super().__init__(value, element)
 
         for key, value in kws.items():
-            if is_ref(value) and key != "value":
+            if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        self._ex_setup()
-
-    def _ex_setup(self):
-        ele = self.element
-
-        # @effect
-        # def _():
-        #     ele.value = self.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -65,7 +56,7 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_value(self, ref_ui: ReadonlyRef[bool]):
+    def bind_value(self, ref_ui: ReadonlyRef[str]):
         @effect
         def _():
             self.element.set_value(ref_ui.value)
@@ -92,7 +83,6 @@ class LazyTextareaBindableUi(TextareaBindableUi):
             validation=validation,
         )
 
-    def _ex_setup(self):
         ele = self.element
 
         @effect

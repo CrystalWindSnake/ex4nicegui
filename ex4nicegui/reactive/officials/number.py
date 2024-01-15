@@ -9,7 +9,6 @@ from typing import (
 from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
-    effect,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi
@@ -19,12 +18,6 @@ T = TypeVar("T")
 
 
 class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
-    @staticmethod
-    def _setup_(binder: "NumberBindableUi"):
-        @effect
-        def _():
-            binder.element.value = binder.value
-
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
@@ -69,7 +62,5 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
         super().__init__(value, element)  # type: ignore
 
         for key, value in kws.items():
-            if key != "value" and is_ref(value):
+            if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        NumberBindableUi._setup_(self)

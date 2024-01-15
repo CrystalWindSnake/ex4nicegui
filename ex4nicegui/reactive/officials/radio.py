@@ -26,19 +26,19 @@ T = TypeVar("T")
 class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
     @staticmethod
     def _setup_(binder: "RadioBindableUi"):
-        def onValueChanged(e):
-            opts_values = (
-                list(binder.element.options.keys())
-                if isinstance(binder.element.options, Dict)
-                else binder.element.options
-            )
-            binder._ref.value = opts_values[e.args]  # type: ignore
+        # def onValueChanged(e):
+        #     opts_values = (
+        #         list(binder.element.options.keys())
+        #         if isinstance(binder.element.options, Dict)
+        #         else binder.element.options
+        #     )
+        #     binder._ref.value = opts_values[e.args]  # type: ignore
 
         @effect
         def _():
             binder.element.value = binder.value
 
-        binder.element.on("update:modelValue", handler=onValueChanged)
+        # binder.element.on("update:modelValue", handler=onValueChanged)
 
     def __init__(
         self,
@@ -51,6 +51,13 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
 
         value_kws = _convert_kws_ref2value(kws)
 
+        def inject_on_change(e):
+            self._ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"value": None, "on_change": inject_on_change})
+
         element = ui.radio(**value_kws)
 
         super().__init__(value, element)
@@ -58,8 +65,6 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)
-
-        RadioBindableUi._setup_(self)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -82,6 +87,6 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         @effect
         def _():
             cast(ValueElement, self.element).set_value(ref_ui.value)
-            self.element.update()
+            # self.element.update()
 
         return self
