@@ -9,6 +9,7 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi
@@ -25,10 +26,11 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
         on_change: Optional[Callable[..., Any]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
+        value_ref = to_ref(value)
         kws = {
             "label": label,
             "placeholder": placeholder,
-            "value": value,
+            "value": value_ref,
             "validation": validation,
             "on_change": on_change,
         }
@@ -36,7 +38,7 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
         value_kws = _convert_kws_ref2value(kws)
 
         def inject_on_change(e):
-            self._ref.value = e.value
+            value_ref.value = e.value
             if on_change:
                 on_change(e)
 
@@ -44,7 +46,7 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
 
         element = ui.textarea(**value_kws)
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
             if is_ref(value):
@@ -79,7 +81,7 @@ class LazyTextareaBindableUi(TextareaBindableUi):
             label,
             placeholder=placeholder,
             value=value,
-            on_change=on_change,
+            on_change=None,
             validation=validation,
         )
 
@@ -91,6 +93,8 @@ class LazyTextareaBindableUi(TextareaBindableUi):
 
         def onValueChanged():
             self._ref.value = ele.value
+            if on_change:
+                on_change()
 
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)

@@ -10,12 +10,6 @@ from .utils import _convert_kws_ref2value
 
 
 class LabelBindableUi(SingleValueBindableUi[str, ui.label]):
-    @staticmethod
-    def _setup_(binder: "LabelBindableUi"):
-        @effect
-        def _():
-            binder.element.text = binder.value
-
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -33,8 +27,6 @@ class LabelBindableUi(SingleValueBindableUi[str, ui.label]):
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        LabelBindableUi._setup_(self)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "text":

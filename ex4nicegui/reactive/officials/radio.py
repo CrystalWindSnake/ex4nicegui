@@ -14,6 +14,7 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from nicegui.elements.mixins.value_element import ValueElement
@@ -47,12 +48,13 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         value: TMaybeRef[Any] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        kws = {"options": options, "value": value, "on_change": on_change}
+        value_ref = to_ref(value)
+        kws = {"options": options, "value": value_ref, "on_change": on_change}
 
         value_kws = _convert_kws_ref2value(kws)
 
         def inject_on_change(e):
-            self._ref.value = e.value
+            value_ref.value = e.value
             if on_change:
                 on_change(e)
 
@@ -60,7 +62,7 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
 
         element = ui.radio(**value_kws)
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
             if is_ref(value):

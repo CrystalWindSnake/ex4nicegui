@@ -1,25 +1,20 @@
-from typing import (
-    Any,
-    Callable,
-    List,
-    Optional,
-    Dict,
-)
+from typing import Any, Callable, List, Optional, Dict
+
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
+    to_ref,
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
 )
+
 from nicegui import ui
-from .base import SingleValueBindableUi, DisableableBindableUi
+from .base import SingleValueBindableUi, DisableableMixin
 from .utils import _convert_kws_ref2value
 
 
-class InputBindableUi(
-    SingleValueBindableUi[str, ui.input], DisableableBindableUi[ui.input]
-):
+class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
@@ -45,8 +40,10 @@ class InputBindableUi(
 
         value_kws = _convert_kws_ref2value(kws)
 
+        value_ref = to_ref(value)
+
         def inject_on_change(e):
-            self._ref.value = e.value
+            value_ref.value = e.value
             if on_change:
                 on_change(e)
 
@@ -54,20 +51,11 @@ class InputBindableUi(
 
         element = ui.input(**value_kws)
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
-            if is_ref(value) and key != "value":
+            if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        self._ex_setup()
-
-    def _ex_setup(self):
-        ele = self.element
-
-        @effect
-        def _():
-            ele.value = self.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -82,6 +70,10 @@ class InputBindableUi(
             self.element.update()
 
         return self
+
+
+def _nothing():
+    pass
 
 
 class LazyInputBindableUi(InputBindableUi):
@@ -103,12 +95,13 @@ class LazyInputBindableUi(InputBindableUi):
             value=value,
             password=password,
             password_toggle_button=password_toggle_button,
-            on_change=on_change,
+            on_change=None,
             autocomplete=autocomplete,
             validation=validation,
         )
 
-    def _ex_setup(self):
+        on_change = on_change or _nothing
+
         ele = self.element
 
         @effect
@@ -117,9 +110,11 @@ class LazyInputBindableUi(InputBindableUi):
 
         def onValueChanged():
             self._ref.value = ele.value or ""
+            on_change()
 
         def on_clear(_):
             self._ref.value = ""
+            on_change()
 
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)

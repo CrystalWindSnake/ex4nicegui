@@ -6,6 +6,7 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi
@@ -42,8 +43,9 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         :param mask: the format of the date string (default: 'YYYY-MM-DD')
         :param on_change: callback to execute when changing the date
         """
+        value_ref = to_ref(value)
         kws = {
-            "value": value,
+            "value": value_ref,
             "mask": mask,
             "on_change": on_change,
         }
@@ -51,7 +53,7 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         value_kws = _convert_kws_ref2value(kws)
 
         def inject_on_change(e):
-            self._ref.value = e.value
+            value_ref.value = e.value
             if on_change:
                 on_change(e)
 
@@ -59,20 +61,11 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
 
         element = ui.date(**value_kws)
 
-        super().__init__(value, element)  # type: ignore
+        super().__init__(value_ref, element)  # type: ignore
 
         for key, value in kws.items():
-            if is_ref(value) and key != "value":
+            if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        self._ex_setup()
-
-    def _ex_setup(self):
-        ele = self.element
-
-        @effect
-        def _():
-            ele.set_value(self.value)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":

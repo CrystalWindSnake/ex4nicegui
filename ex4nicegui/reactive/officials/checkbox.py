@@ -10,18 +10,17 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from nicegui.elements.mixins.value_element import ValueElement
-from .base import SingleValueBindableUi, DisableableBindableUi
+from .base import SingleValueBindableUi, DisableableMixin
 from .utils import _convert_kws_ref2value
 
 T = TypeVar("T")
 
 
-class CheckboxBindableUi(
-    SingleValueBindableUi[bool, ui.checkbox], DisableableBindableUi[ui.checkbox]
-):
+class CheckboxBindableUi(SingleValueBindableUi[bool, ui.checkbox], DisableableMixin):
     @staticmethod
     def _setup_(binder: "CheckboxBindableUi"):
         ele = cast(ValueElement, binder.element)
@@ -37,12 +36,13 @@ class CheckboxBindableUi(
         value: TMaybeRef[bool] = False,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        kws = {"text": text, "value": value, "on_change": on_change}
+        value_ref = to_ref(value)
+        kws = {"text": text, "value": value_ref, "on_change": on_change}
 
         value_kws = _convert_kws_ref2value(kws)
 
         def inject_on_change(e):
-            self._ref.value = e.value
+            value_ref.value = e.value
             if on_change:
                 on_change(e)
 
@@ -50,13 +50,11 @@ class CheckboxBindableUi(
 
         element = ui.checkbox(**value_kws)
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        CheckboxBindableUi._setup_(self)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":

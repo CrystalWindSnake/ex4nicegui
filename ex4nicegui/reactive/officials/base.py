@@ -6,6 +6,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Protocol,
     TypeVar,
     Generic,
     Union,
@@ -243,9 +244,10 @@ class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
 _T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
 
 
-class DisableableBindableUi(BindableUi[_T_DisableableBinder]):
-    def __init__(self, element: _T_DisableableBinder) -> None:
-        super().__init__(element)
+class DisableableMixin(Protocol):
+    @property
+    def element(self) -> DisableableElement:
+        ...
 
     def bind_enabled(self, ref_ui: ReadonlyRef[bool]):
         @effect
@@ -264,6 +266,9 @@ class DisableableBindableUi(BindableUi[_T_DisableableBinder]):
             self.element._handle_enabled_change(value)
 
         return self
+
+
+DisableableBindableUi = DisableableMixin
 
 
 def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: ReadonlyRef):
