@@ -44,10 +44,15 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
 
 def test_input_change_value(page: ScreenPage, page_path: str):
     r_str = to_ref("old")
+    dummy = ""
 
     @ui.page(page_path)
     def _():
-        rxui.input(value=r_str).props('data-testid="input"')
+        def onchange():
+            nonlocal dummy
+            dummy = r_str.value
+
+        rxui.input(value=r_str, on_change=onchange).props('data-testid="input"')
         rxui.label(r_str).props('data-testid="label"')
 
     page.open(page_path)
@@ -58,3 +63,5 @@ def test_input_change_value(page: ScreenPage, page_path: str):
 
     page.wait()
     assert page.get_by_test_id("label").inner_text() == "new value"
+
+    assert dummy == "new value"

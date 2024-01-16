@@ -62,7 +62,7 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
         def inject_on_change(e):
             value_ref.value = e.value
             if on_change:
-                on_change(e)
+                on_change()
 
         value_kws.update({"on_change": inject_on_change})
 
