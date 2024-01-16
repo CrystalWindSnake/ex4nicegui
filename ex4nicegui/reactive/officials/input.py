@@ -133,6 +133,6 @@ class LazyInputBindableUi(InputBindableUi):
         self,
         value_ref: Ref[str],
         value_kws: dict,
-        on_change: Callable[..., Any] | None = None,
+        on_change: Optional[Callable[..., Any]] = None,
     ):
         pass

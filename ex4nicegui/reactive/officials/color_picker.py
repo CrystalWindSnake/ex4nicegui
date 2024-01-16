@@ -114,6 +114,6 @@ class ColorPickerLazyBindableUi(ColorPickerBindableUi):
         self,
         color_ref: Ref[str],
         value_kws: dict,
-        on_pick: Callable[..., Any] | None = None,
+        on_pick: Optional[Callable[..., Any]] = None,
     ):
         pass

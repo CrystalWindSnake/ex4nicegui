@@ -110,6 +110,6 @@ class LazySliderBindableUi(SliderBindableUi):
         self,
         value_ref: Ref[float],
         value_kws: dict,
-        on_change: Callable[..., Any] | None = None,
+        on_change: Optional[Callable[..., Any]] = None,
     ):
         pass
