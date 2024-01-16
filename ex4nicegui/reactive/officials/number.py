@@ -80,6 +80,5 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
         @effect
         def _():
             self.element.set_value(ref_ui.value)
-            self.element.update()
 
         return self
