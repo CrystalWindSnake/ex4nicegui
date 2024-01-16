@@ -6,6 +6,7 @@ from typing import (
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
+    Ref,
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
@@ -40,12 +41,7 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
 
         value_kws = _convert_kws_ref2value(kws)
 
-        def inject_on_change(e):
-            color_ref.value = e.value
-            if on_pick:
-                on_pick(e)
-
-        value_kws.update({"on_pick": inject_on_change})
+        self._setup_on_change(color_ref, value_kws, on_pick)
 
         with ui.card().tight():
             element_menu = ui.color_picker(**value_kws)
@@ -80,6 +76,19 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
 
         return self
 
+    def _setup_on_change(
+        self,
+        color_ref: Ref[str],
+        value_kws: dict,
+        on_pick: Optional[Callable[..., Any]] = None,
+    ):
+        def inject_on_change(e):
+            color_ref.value = e.value
+            if on_pick:
+                on_pick(e)
+
+        value_kws.update({"on_pick": inject_on_change})
+
 
 class ColorPickerLazyBindableUi(ColorPickerBindableUi):
     def __init__(
@@ -100,3 +109,11 @@ class ColorPickerLazyBindableUi(ColorPickerBindableUi):
                 on_pick()
 
         ele.on("change", handler=onModelValueChanged)
+
+    def _setup_on_change(
+        self,
+        color_ref: Ref[str],
+        value_kws: dict,
+        on_pick: Callable[..., Any] | None = None,
+    ):
+        pass

@@ -6,6 +6,7 @@ from typing import (
 )
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
+    Ref,
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
@@ -37,12 +38,7 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
 
         value_kws = _convert_kws_ref2value(kws)
 
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                on_change(e)
-
-        value_kws.update({"value": "", "on_change": inject_on_change})
+        self._setup_on_change(value_ref, value_kws, on_change)
 
         element = ui.textarea(**value_kws)
 
@@ -65,6 +61,19 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
             self.element.update()
 
         return self
+
+    def _setup_on_change(
+        self,
+        value_ref: Ref[str],
+        value_kws: dict,
+        on_change: Optional[Callable[..., Any]] = None,
+    ):
+        def inject_on_change(e):
+            value_ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
 
 
 class LazyTextareaBindableUi(TextareaBindableUi):
@@ -98,3 +107,11 @@ class LazyTextareaBindableUi(TextareaBindableUi):
 
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)
+
+    def _setup_on_change(
+        self,
+        value_ref: Ref[str],
+        value_kws: dict,
+        on_change: Callable[..., Any] | None = None,
+    ):
+        pass

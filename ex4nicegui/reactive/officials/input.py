@@ -3,6 +3,7 @@ from typing import Any, Callable, List, Optional, Dict
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
+    Ref,
     to_ref,
     is_ref,
     _TMaybeRef as TMaybeRef,
@@ -42,12 +43,7 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
 
         value_ref = to_ref(value)
 
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                on_change(e)
-
-        value_kws.update({"on_change": inject_on_change})
+        self._setup_on_change(value_ref, value_kws, on_change)
 
         element = ui.input(**value_kws)
 
@@ -56,6 +52,19 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
+
+    def _setup_on_change(
+        self,
+        value_ref: Ref[str],
+        value_kws: dict,
+        on_change: Optional[Callable[..., Any]] = None,
+    ):
+        def inject_on_change(e):
+            value_ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -119,3 +128,11 @@ class LazyInputBindableUi(InputBindableUi):
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)
         ele.on("clear", on_clear)
+
+    def _setup_on_change(
+        self,
+        value_ref: Ref[str],
+        value_kws: dict,
+        on_change: Callable[..., Any] | None = None,
+    ):
+        pass

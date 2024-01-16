@@ -3,14 +3,17 @@ from typing import (
     Callable,
     Optional,
     TypeVar,
+    Union,
 )
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
+    Ref,
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
     to_ref,
+    to_value,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi, DisableableMixin
@@ -29,10 +32,10 @@ class SliderBindableUi(
         min: TMaybeRef[_TSliderValue],
         max: TMaybeRef[_TSliderValue],
         step: TMaybeRef[_TSliderValue] = 1.0,
-        value: Optional[TMaybeRef[_TSliderValue]] = None,
+        value: TMaybeRef[Union[_TSliderValue, None]] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        value_ref = to_ref(value)
+        value_ref = to_ref(to_value(value) or 0)
         kws = {
             "min": min,
             "max": max,
@@ -43,12 +46,7 @@ class SliderBindableUi(
 
         value_kws = _convert_kws_ref2value(kws)
 
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                on_change(e)
-
-        value_kws.update({"on_change": inject_on_change})
+        self._setup_on_change(value_ref, value_kws, on_change)
 
         element = ui.slider(**value_kws).props("label label-always switch-label-side")
 
@@ -72,6 +70,19 @@ class SliderBindableUi(
 
         return self
 
+    def _setup_on_change(
+        self,
+        value_ref: Ref[float],
+        value_kws: dict,
+        on_change: Optional[Callable[..., Any]] = None,
+    ):
+        def inject_on_change(e):
+            value_ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
+
 
 class LazySliderBindableUi(SliderBindableUi):
     def __init__(
@@ -84,7 +95,6 @@ class LazySliderBindableUi(SliderBindableUi):
     ) -> None:
         super().__init__(min, max, step, value, on_change)
 
-    def _ex_setup(self):
         ele = self.element
 
         @effect
@@ -95,3 +105,11 @@ class LazySliderBindableUi(SliderBindableUi):
             self._ref.value = ele.value
 
         ele.on("change", onValueChanged)
+
+    def _setup_on_change(
+        self,
+        value_ref: Ref[float],
+        value_kws: dict,
+        on_change: Callable[..., Any] | None = None,
+    ):
+        pass
