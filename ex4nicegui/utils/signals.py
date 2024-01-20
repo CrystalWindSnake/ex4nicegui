@@ -282,7 +282,7 @@ class ref_computed_method(Generic[T]):
 
         return self.__instance_map[instance]
 
-    def __get__(self, __instance: Any, __owner: type | None = None):
+    def __get__(self, __instance: Any, __owner: Optional[type] = None):
         return cast(ReadonlyRef[T], self.__get_computed(__instance))
 
 
