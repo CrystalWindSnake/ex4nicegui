@@ -1,5 +1,5 @@
 from functools import partial
-import inspect
+import types
 from weakref import WeakKeyDictionary
 from signe import batch as signe_batch, effect as signe_effect, computed, on as signe_on
 from signe.core.signal import Signal, SignalOption
@@ -243,9 +243,7 @@ def ref_computed(
     }
 
     if fn:
-        is_class_define_method = inspect.ismethod(fn)
-
-        if is_class_define_method:
+        if _is_class_define_method(fn):
             return cast(ref_computed_method[T], ref_computed_method(fn))  # type: ignore
 
         getter = computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
@@ -257,6 +255,19 @@ def ref_computed(
             return ref_computed(fn, **kws)
 
         return wrap
+
+
+def _is_class_define_method(fn: Callable):
+    has_name = hasattr(fn, "__name__")
+    qualname_prefix = f".<locals>.{fn.__name__}" if has_name else ""
+
+    return (
+        hasattr(fn, "__qualname__")
+        and has_name
+        and "." in fn.__qualname__
+        and qualname_prefix != fn.__qualname__[-len(qualname_prefix) :]
+        and (isinstance(fn, types.FunctionType))
+    )
 
 
 class ref_computed_method(Generic[T]):
