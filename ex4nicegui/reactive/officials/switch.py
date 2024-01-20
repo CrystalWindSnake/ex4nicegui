@@ -3,7 +3,6 @@ from typing import (
     Callable,
     Optional,
     TypeVar,
-    cast,
 )
 
 from ex4nicegui.utils.signals import (
@@ -11,9 +10,9 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
-from nicegui.elements.mixins.value_element import ValueElement
 from .base import SingleValueBindableUi
 from .utils import _convert_kws_ref2value
 
@@ -21,23 +20,6 @@ T = TypeVar("T")
 
 
 class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
-    @staticmethod
-    def _setup_(binder: "SwitchBindableUi"):
-        def onValueChanged(e):
-            ele._send_update_on_value_change = ele.LOOPBACK
-            cur_value = ele._event_args_to_value(e)
-            ele.set_value(cur_value)
-            ele._send_update_on_value_change = True
-            binder._ref.value = cur_value
-
-        ele = cast(ValueElement, binder.element)
-
-        @effect
-        def _():
-            ele.value = binder.value
-
-        ele.on("update:modelValue", onValueChanged, [None], throttle=0)  # type: ignore
-
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -45,19 +27,25 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
         value: TMaybeRef[bool] = False,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        kws = {"text": text, "value": value, "on_change": on_change}
+        value_ref = to_ref(value)
+        kws = {"text": text, "value": value_ref, "on_change": on_change}
 
         value_kws = _convert_kws_ref2value(kws)
 
+        def inject_on_change(e):
+            value_ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
+
         element = ui.switch(**value_kws)
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        SwitchBindableUi._setup_(self)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":

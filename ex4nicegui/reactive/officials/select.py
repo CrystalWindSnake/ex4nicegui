@@ -14,6 +14,7 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from nicegui.elements.mixins.value_element import ValueElement
@@ -24,17 +25,6 @@ T = TypeVar("T")
 
 
 class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
-    @staticmethod
-    def _setup_(binder: "SelectBindableUi"):
-        def onValueChanged(e):
-            binder._ref.value = binder.element._event_args_to_value(e)  # type: ignore
-
-        @effect
-        def _():
-            binder.element.value = binder.value
-
-        binder.element.on("update:modelValue", handler=onValueChanged)
-
     def __init__(
         self,
         options: Union[TMaybeRef[List], TMaybeRef[Dict]],
@@ -45,7 +35,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         with_input: TMaybeRef[bool] = False,
         multiple: TMaybeRef[bool] = False,
         clearable: TMaybeRef[bool] = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Dropdown Selection
 
@@ -59,10 +49,11 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         :param multiple: whether to allow multiple selections
         :param clearable: whether to add a button to clear the selection
         """
+        value_ref = to_ref(value)
         kws = {
             "options": options,
             "label": label,
-            "value": value,
+            "value": value_ref,
             "on_change": on_change,
             "with_input": with_input,
             "multiple": multiple,
@@ -73,16 +64,21 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
 
         value_kws.update(kwargs)
 
+        def inject_on_change(e):
+            value_ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
+
         element = ui.select(**value_kws)
         element.classes("min-w-[10rem]")
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)
-
-        SelectBindableUi._setup_(self)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":

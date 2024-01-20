@@ -8,6 +8,7 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from nicegui.elements.mixins.color_elements import (
@@ -25,8 +26,9 @@ class IconBindableUi(SingleValueBindableUi[str, ui.icon]):
         size: Optional[TMaybeRef[str]] = None,
         color: Optional[TMaybeRef[str]] = None,
     ) -> None:
+        name_ref = to_ref(name)
         kws = {
-            "name": name,
+            "name": name_ref,
             "size": size,
             "color": color,
         }
@@ -35,7 +37,7 @@ class IconBindableUi(SingleValueBindableUi[str, ui.icon]):
 
         element = ui.icon(**value_kws)
 
-        super().__init__(name, element)
+        super().__init__(name_ref, element)
 
         for key, value in kws.items():
             if is_ref(value):

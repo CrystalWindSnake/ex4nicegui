@@ -8,6 +8,7 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi
@@ -27,15 +28,16 @@ class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
         self,
         source: Union[TMaybeRef[str], TMaybeRef[Path]] = "",
     ) -> None:
+        source_ref = to_ref(source)
         kws = {
-            "source": source,
+            "source": source_ref,
         }
 
         value_kws = _convert_kws_ref2value(kws)
 
         element = ui.image(**value_kws)
 
-        super().__init__(source, element)  # type: ignore
+        super().__init__(source_ref, element)  # type: ignore
 
         for key, value in kws.items():
             if is_ref(value):

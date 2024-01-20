@@ -6,9 +6,11 @@ from typing import (
 )
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
+    Ref,
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi
@@ -25,37 +27,26 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
         on_change: Optional[Callable[..., Any]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
+        value_ref = to_ref(value)
         kws = {
             "label": label,
             "placeholder": placeholder,
-            "value": value,
+            "value": value_ref,
             "validation": validation,
             "on_change": on_change,
         }
 
         value_kws = _convert_kws_ref2value(kws)
 
+        self._setup_on_change(value_ref, value_kws, on_change)
+
         element = ui.textarea(**value_kws)
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
-            if is_ref(value) and key != "value":
+            if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
-
-        self._ex_setup()
-
-    def _ex_setup(self):
-        ele = self.element
-
-        @effect
-        def _():
-            ele.value = self.value
-
-        def onModelValueChanged(e):
-            self._ref.value = e.args  # type: ignore
-
-        ele.on("update:modelValue", handler=onModelValueChanged)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -63,13 +54,26 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_value(self, ref_ui: ReadonlyRef[bool]):
+    def bind_value(self, ref_ui: ReadonlyRef[str]):
         @effect
         def _():
             self.element.set_value(ref_ui.value)
             self.element.update()
 
         return self
+
+    def _setup_on_change(
+        self,
+        value_ref: Ref[str],
+        value_kws: dict,
+        on_change: Optional[Callable[..., Any]] = None,
+    ):
+        def inject_on_change(e):
+            value_ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"on_change": inject_on_change})
 
 
 class LazyTextareaBindableUi(TextareaBindableUi):
@@ -86,11 +90,10 @@ class LazyTextareaBindableUi(TextareaBindableUi):
             label,
             placeholder=placeholder,
             value=value,
-            on_change=on_change,
+            on_change=None,
             validation=validation,
         )
 
-    def _ex_setup(self):
         ele = self.element
 
         @effect
@@ -99,6 +102,16 @@ class LazyTextareaBindableUi(TextareaBindableUi):
 
         def onValueChanged():
             self._ref.value = ele.value
+            if on_change:
+                on_change()
 
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)
+
+    def _setup_on_change(
+        self,
+        value_ref: Ref[str],
+        value_kws: dict,
+        on_change: Optional[Callable[..., Any]] = None,
+    ):
+        pass

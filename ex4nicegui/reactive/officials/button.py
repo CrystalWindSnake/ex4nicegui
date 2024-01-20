@@ -10,13 +10,11 @@ from ex4nicegui.utils.signals import (
     effect,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi, _bind_color, DisableableBindableUi
+from .base import SingleValueBindableUi, _bind_color, DisableableMixin
 from .utils import _convert_kws_ref2value
 
 
-class ButtonBindableUi(
-    SingleValueBindableUi[str, ui.button], DisableableBindableUi[ui.button]
-):
+class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
     def __init__(
         self,
         text: TMaybeRef[str] = "",

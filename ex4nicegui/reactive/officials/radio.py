@@ -14,6 +14,7 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_ref,
 )
 from nicegui import ui
 from nicegui.elements.mixins.value_element import ValueElement
@@ -26,19 +27,19 @@ T = TypeVar("T")
 class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
     @staticmethod
     def _setup_(binder: "RadioBindableUi"):
-        def onValueChanged(e):
-            opts_values = (
-                list(binder.element.options.keys())
-                if isinstance(binder.element.options, Dict)
-                else binder.element.options
-            )
-            binder._ref.value = opts_values[e.args]  # type: ignore
+        # def onValueChanged(e):
+        #     opts_values = (
+        #         list(binder.element.options.keys())
+        #         if isinstance(binder.element.options, Dict)
+        #         else binder.element.options
+        #     )
+        #     binder._ref.value = opts_values[e.args]  # type: ignore
 
         @effect
         def _():
             binder.element.value = binder.value
 
-        binder.element.on("update:modelValue", handler=onValueChanged)
+        # binder.element.on("update:modelValue", handler=onValueChanged)
 
     def __init__(
         self,
@@ -47,19 +48,25 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         value: TMaybeRef[Any] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        kws = {"options": options, "value": value, "on_change": on_change}
+        value_ref = to_ref(value)
+        kws = {"options": options, "value": value_ref, "on_change": on_change}
 
         value_kws = _convert_kws_ref2value(kws)
 
+        def inject_on_change(e):
+            value_ref.value = e.value
+            if on_change:
+                on_change(e)
+
+        value_kws.update({"value": None, "on_change": inject_on_change})
+
         element = ui.radio(**value_kws)
 
-        super().__init__(value, element)
+        super().__init__(value_ref, element)
 
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)
-
-        RadioBindableUi._setup_(self)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -82,6 +89,6 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         @effect
         def _():
             cast(ValueElement, self.element).set_value(ref_ui.value)
-            self.element.update()
+            # self.element.update()
 
         return self
