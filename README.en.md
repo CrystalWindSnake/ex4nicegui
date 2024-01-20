@@ -268,6 +268,8 @@ b.value = 'new text'
 print(a.value)
 ```
 
+---
+
 ### `effect`
 Accepts a function and automatically monitors changes to the responsive objects used in the function to automatically execute the function.
 
@@ -290,6 +292,8 @@ ui.button("change", on_click=change_value)
 ```
 
 The first time the effect is executed, the function `auto_run_when_ref_value` will be executed once. After that, clicking on the button changes the value of `a` (via `a.value`) and the function `auto_run_when_ref_value` is executed again.
+
+---
 
 ### `ref_computed`
 As with `effect`, `ref_computed` can also return results from functions. Typically used for secondary computation from `to_ref`.
@@ -314,6 +318,25 @@ ui.button("change", on_click=change_value)
 When the button is clicked, the value of `a.value` is modified, triggering a recalculation of `a_square`. As the value of `a_square` is read in `effect1`, it triggers `effect1` to execute the
 
 > `ref_computed` is read-only `to_ref`
+
+If you prefer to organize your code by class, ``ref_computed`` also supports acting on instance methods
+
+``python
+class MyState.
+    def __init__(self) -> None.
+        self.r_text = to_ref("")
+
+    @ref_computed
+    def post_text(self): return self.r_text.value
+        return self.r_text.value + "post"
+
+state = MyState()
+
+rxui.input(value=state.r_text)
+rxui.label(state.post_text)
+```
+
+---
 
 ### `on`
 Similar to `effect`, but `on` needs to explicitly specify the responsive object to monitor.

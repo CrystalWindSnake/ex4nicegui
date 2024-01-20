@@ -326,6 +326,25 @@ ui.button("change", on_click=change_value)
 
 > `ref_computed` 是只读的 `to_ref`
 
+
+如果你更喜欢通过类组织代码，`ref_computed` 同样支持作用到实例方法上
+
+```python
+class MyState:
+    def __init__(self) -> None:
+        self.r_text = to_ref("")
+
+    @ref_computed
+    def post_text(self):
+        return self.r_text.value + "post"
+
+state = MyState()
+
+rxui.input(value=state.r_text)
+rxui.label(state.post_text)
+```
+
+
 ---
 
 ### `on`
