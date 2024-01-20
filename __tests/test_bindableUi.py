@@ -198,11 +198,13 @@ def test_bind_style(page: ScreenPage, page_path: str):
 
         #
         select1.click_and_select("green")
+        page.wait()
 
         assert label.get_style_attr_value() == "background-color: green; color: red;"
 
         #
         select2.click_and_select("yellow")
+        page.wait()
 
         assert label.get_style_attr_value() == "background-color: green; color: yellow;"
 

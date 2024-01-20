@@ -1,3 +1,6 @@
+from functools import partial
+import types
+from weakref import WeakKeyDictionary
 from signe import batch as signe_batch, effect as signe_effect, computed, on as signe_on
 from signe.core.signal import Signal, SignalOption
 from signe.core.effect import Effect
@@ -7,6 +10,7 @@ from signe.types import TSetter, TGetter
 from typing import (
     Any,
     Dict,
+    Protocol,
     TypeVar,
     Generic,
     overload,
@@ -181,9 +185,14 @@ def effect(
     return signe_effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
 
 
+class TInstanceCall(Protocol[T]):
+    def __call__(_, self) -> T:
+        ...
+
+
 @overload
 def ref_computed(
-    fn: Callable[[], T],
+    fn: Union[Callable[[], T], TInstanceCall[T]],
     *,
     desc="",
     debug_trigger: Optional[Callable[..., None]] = None,
@@ -220,7 +229,7 @@ def ref_computed(
 
 
 def ref_computed(
-    fn: Optional[Callable[[], T]] = None,
+    fn: Optional[Union[Callable[[], T], TInstanceCall[T]]] = None,
     *,
     desc="",
     debug_trigger: Optional[Callable[..., None]] = None,
@@ -234,14 +243,54 @@ def ref_computed(
     }
 
     if fn:
+        if _is_class_define_method(fn):
+            return cast(ref_computed_method[T], ref_computed_method(fn))  # type: ignore
+
         getter = computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
         return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
+
     else:
 
         def wrap(fn: Callable[[], T]):
             return ref_computed(fn, **kws)
 
         return wrap
+
+
+def _is_class_define_method(fn: Callable):
+    has_name = hasattr(fn, "__name__")
+    qualname_prefix = f".<locals>.{fn.__name__}" if has_name else ""
+
+    return (
+        hasattr(fn, "__qualname__")
+        and has_name
+        and "." in fn.__qualname__
+        and qualname_prefix != fn.__qualname__[-len(qualname_prefix) :]
+        and (isinstance(fn, types.FunctionType))
+    )
+
+
+class ref_computed_method(Generic[T]):
+    __isabstractmethod__: bool
+
+    def __init__(
+        self,
+        fget: Callable[[Any], T],
+    ) -> None:
+        self._fget = fget
+        self.__instance_map: WeakKeyDictionary[
+            object, ReadonlyRef
+        ] = WeakKeyDictionary()
+
+    def __get_computed(self, instance):
+        if instance not in self.__instance_map:
+            cp = ref_computed(partial(self._fget, instance))
+            self.__instance_map[instance] = cp
+
+        return self.__instance_map[instance]
+
+    def __get__(self, __instance: Any, __owner: Optional[type] = None):
+        return cast(ReadonlyRef[T], self.__get_computed(__instance))
 
 
 class effect_refreshable:
