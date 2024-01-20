@@ -18,8 +18,8 @@ def get_data_files(base):
     return list(all_infos)
 
 
-with open("README.md", encoding="utf8") as readme_file:
-    readme = readme_file.read()
+readme = Path("README.en.md").read_text("utf8")
+
 
 requirements = ["signe>=0.2.6", "nicegui>=1.4.0", "typing_extensions"]
 
@@ -35,11 +35,12 @@ setup(
         "Natural Language :: English",
         "Programming Language :: Python :: 3.8",
     ],
-    description="...",
+    description="Extension library based on nicegui, providing data responsive,BI functionality modules",
     entry_points={},
     install_requires=requirements,
     license="MIT license",
-    # long_description=readme,
+    long_description=readme,
+    long_description_content_type="text/markdown",
     include_package_data=True,
     keywords=["nicegui", "ex4nicegui", "webui"],
     name="ex4nicegui",
