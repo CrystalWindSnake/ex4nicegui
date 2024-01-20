@@ -31,4 +31,6 @@ def test_method_decorator(page: ScreenPage, page_path: str):
     label.expect_text("post")
 
     input.fill_text("new text")
+    page.wait()
+
     label.expect_text("new text post")
