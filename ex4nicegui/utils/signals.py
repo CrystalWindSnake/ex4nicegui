@@ -1,5 +1,5 @@
 from functools import partial
-import types
+import inspect
 from weakref import WeakKeyDictionary
 from signe import batch as signe_batch, effect as signe_effect, computed, on as signe_on
 from signe.core.signal import Signal, SignalOption
@@ -243,11 +243,7 @@ def ref_computed(
     }
 
     if fn:
-        is_class_define_method = (
-            hasattr(fn, "__qualname__")
-            and "." in fn.__qualname__
-            and (isinstance(fn, types.FunctionType))
-        )
+        is_class_define_method = inspect.ismethod(fn)
 
         if is_class_define_method:
             return cast(ref_computed_method[T], ref_computed_method(fn))  # type: ignore
