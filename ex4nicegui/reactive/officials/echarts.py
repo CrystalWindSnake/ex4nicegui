@@ -37,8 +37,7 @@ class EChartsBindableUi(BindableUi[echarts]):
     EChartsMouseEventArguments = EChartsMouseEventArguments
 
     def __init__(
-        self,
-        options: TMaybeRef[Dict],
+        self, options: TMaybeRef[Dict], not_merge: TMaybeRef[Union[bool, None]] = None
     ) -> None:
         kws = {
             "options": options,
@@ -49,12 +48,9 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         super().__init__(element)
 
-        # self.__click_info_ref = to_ref(cast(Optional[EChartsMouseEventArguments], None))
-
-        # def on_chart_click(e: EChartsMouseEventArguments):
-        #     self.__click_info_ref.value = e
-
-        # self.on("click", on_chart_click)
+        self.__update_setting = None
+        if not_merge is not None:
+            self.__update_setting = {"notMerge": not_merge}
 
         for key, value in kws.items():
             if is_ref(value):
@@ -100,10 +96,6 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         return EChartsBindableUi(EChartsBindableUi._pyecharts2opts(chart))
 
-    # @property
-    # def click_info_ref(self):
-    #     return self.__click_info_ref
-
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "options":
             return self.bind_options(ref_ui)
@@ -114,7 +106,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         @effect
         def _():
             ele = self.element
-            ele.update_options(ref_ui.value)
+            ele.update_options(ref_ui.value, self.__update_setting)
             ele.update()
 
         return self
