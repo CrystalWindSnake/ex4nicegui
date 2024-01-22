@@ -393,8 +393,6 @@ def test_create_map(page: ScreenPage, page_path: str):
                     "map": "test_map",
                     "roam": True,
                 },
-                "tooltip": {},
-                "legend": {},
                 "series": [],
             }
         )
