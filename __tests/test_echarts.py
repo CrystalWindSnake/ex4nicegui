@@ -1,5 +1,5 @@
 from ex4nicegui.reactive import rxui
-from nicegui import ui
+from nicegui import ui, app
 from ex4nicegui import ref_computed, to_ref
 from .screen import ScreenPage
 from .utils import EChartsUtils, ButtonUtils, set_test_id
@@ -360,3 +360,51 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
     page.wait()
 
     assert target.get_options()["title"][0]["text"] == "new title"
+
+
+def test_create_map(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        #
+        @app.get("/test/map")
+        def get_map_data():
+            return {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {"adcode": 110000, "name": "北京市"},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [[35, 10], [45, 45], [15, 40], [10, 20], [35, 10]],
+                                [[20, 30], [35, 35], [30, 20], [20, 30]],
+                            ],
+                        },
+                    }
+                ],
+            }
+
+        rxui.echarts.register_map("test_map", "/test/map")
+
+        chart = rxui.echarts(
+            {
+                "geo": {
+                    "map": "test_map",
+                    "roam": True,
+                },
+                "tooltip": {},
+                "legend": {},
+                "series": [],
+            }
+        )
+
+        set_test_id(chart, "target")
+
+    page.open(page_path)
+    page.wait()
+
+    # page.pause()
+
+    target = EChartsUtils(page, "target")
+    target.assert_chart_exists()

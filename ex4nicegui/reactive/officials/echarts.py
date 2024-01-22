@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, cast, Optional
 from typing_extensions import Literal
 
@@ -6,7 +7,6 @@ from ex4nicegui.utils.signals import (
     is_ref,
     ref_computed,
     _TMaybeRef as TMaybeRef,
-    to_ref,
     effect,
 )
 from .base import BindableUi
@@ -17,7 +17,8 @@ from ex4nicegui.reactive.EChartsComponent.ECharts import (
 )
 
 from nicegui.awaitable_response import AwaitableResponse
-
+from nicegui import ui, app
+import orjson as json
 
 _TEventName = Literal[
     "click",
@@ -44,21 +45,42 @@ class EChartsBindableUi(BindableUi[echarts]):
         }
 
         value_kws = _convert_kws_ref2value(kws)
-
         element = echarts(**value_kws).classes("grow self-stretch h-[16rem]")
 
         super().__init__(element)
 
-        self.__click_info_ref = to_ref(cast(Optional[EChartsMouseEventArguments], None))
+        # self.__click_info_ref = to_ref(cast(Optional[EChartsMouseEventArguments], None))
 
-        def on_chart_click(e: EChartsMouseEventArguments):
-            self.__click_info_ref.value = e
+        # def on_chart_click(e: EChartsMouseEventArguments):
+        #     self.__click_info_ref.value = e
 
-        self.on("click", on_chart_click)
+        # self.on("click", on_chart_click)
 
         for key, value in kws.items():
             if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
+
+    @classmethod
+    def register_map(cls, map_name: str, src: Union[str, Path]):
+        if isinstance(src, Path):
+            src = app.add_static_file(local_file=src)
+
+        print(src)
+        assert isinstance(src, str)
+
+        ui.add_body_html(
+            rf"""
+            <script>
+                window.addEventListener('DOMContentLoaded', () => {{
+                    fetch("{src}")
+                        .then((response) => response.json())
+                        .then((data) => {{
+                            echarts.registerMap('{map_name}', data);
+                        }});
+                }});
+            </script>
+        """
+        )
 
     @staticmethod
     def _pyecharts2opts(chart):
@@ -78,9 +100,9 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         return EChartsBindableUi(EChartsBindableUi._pyecharts2opts(chart))
 
-    @property
-    def click_info_ref(self):
-        return self.__click_info_ref
+    # @property
+    # def click_info_ref(self):
+    #     return self.__click_info_ref
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "options":

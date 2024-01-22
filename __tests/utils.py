@@ -136,6 +136,8 @@ class EChartsUtils(BaseUiUtils):
         attr = self.target_locator.get_attribute("_echarts_instance_")
         assert attr is not None
 
+        expect(self.target_locator.locator("css=canvas")).to_be_visible()
+
     def get_options(self):
         opts = self.target_locator.evaluate(
             "node => echarts.getInstanceByDom(node).getOption()"
