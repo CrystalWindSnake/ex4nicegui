@@ -265,6 +265,9 @@ class MermaidUtils(BaseUiUtils):
     def click_node(self, nodeId: str):
         self.target_locator.get_by_text(nodeId, exact=True).click()
 
+    def assert_svg_exists(self):
+        expect(self.target_locator.locator("css=svg")).to_be_visible(timeout=5000)
+
 
 class AggridUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
