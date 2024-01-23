@@ -58,10 +58,18 @@ class EChartsBindableUi(BindableUi[echarts]):
 
     @classmethod
     def register_map(cls, map_name: str, src: Union[str, Path]):
+        """Registers available maps. This can only be used after including geo component or chart series of map.
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#rxui.echarts.register_map
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#rxui.echarts.register_map
+
+        Args:
+            map_name (str): Map name, referring to map value set in geo component or map.
+            src (Union[str, Path]): Map data. If str, it should be a network address. If path, it should be a valid file.
+        """
         if isinstance(src, Path):
             src = app.add_static_file(local_file=src)
 
-        print(src)
         assert isinstance(src, str)
 
         ui.add_body_html(

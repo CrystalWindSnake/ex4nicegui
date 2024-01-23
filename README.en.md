@@ -241,6 +241,44 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 
 ---
 
+### rxui.echarts
+Charting with echarts
+
+#### rxui.echarts.register_map
+Register a map.
+
+```python
+rxui.echarts.register_map(
+    "china", "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"
+)
+
+rxui.echarts(
+    {
+        "geo": {
+            "map": "china",
+            "roam": True,
+        },
+        "tooltip": {},
+        "legend": {},
+        "series": [], }
+    }
+)
+```
+
+- The parameter `map_name` is a customized map name. Note that `map` must correspond to a registered name in the chart configuration.
+- The parameter `src` is a valid network link to the map data.
+
+You can also provide the path to the local json file for the map data.
+```python
+from pathlib import Path
+
+rxui.echarts.register_map(
+    "china", Path("map-data.json")
+)
+```
+
+---
+
 ## responsive
 
 ```python

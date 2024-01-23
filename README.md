@@ -246,6 +246,45 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 
 ---
 
+### rxui.echarts
+使用 echarts 制作图表
+
+#### rxui.echarts.register_map
+注册地图.
+
+```python
+rxui.echarts.register_map(
+    "china", "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"
+)
+
+rxui.echarts(
+    {
+        "geo": {
+            "map": "china",
+            "roam": True,
+        },
+        "tooltip": {},
+        "legend": {},
+        "series": [],
+    }
+)
+```
+
+- 参数 `map_name` 为自定义的地图名字。注意在图表配置中 `map` 必需对应注册的名字
+- 参数 `src` 为有效的地图数据网络链接。
+
+你也可以直接提供本地地图数据的json文件路径对象(Path)
+```python
+from pathlib import Path
+
+rxui.echarts.register_map(
+    "china", Path("map-data.json")
+)
+```
+
+
+---
+
 ## 响应式
 
 ```python
