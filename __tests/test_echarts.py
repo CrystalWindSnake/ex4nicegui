@@ -140,6 +140,7 @@ def test_js_function_opt(page: ScreenPage, page_path: str):
     target = EChartsUtils(page, "target")
 
     page.wait()
+    target.assert_chart_exists()
 
     opts = target.get_options()
 
@@ -188,6 +189,7 @@ def test_pyecharts(page: ScreenPage, page_path: str):
     target = EChartsUtils(page, "target")
 
     page.wait()
+    target.assert_chart_exists()
 
     chart_opts = target.get_options()
 
@@ -249,6 +251,7 @@ def test_click_event(page: ScreenPage, page_path: str):
     target = EChartsUtils(page, "target")
 
     page.wait(1000)
+    target.assert_chart_exists()
 
     target.click_series(0.05, "A", y_position_offset=-8)
 
@@ -319,6 +322,7 @@ def test_update_opts(page: ScreenPage, page_path: str):
     target = EChartsUtils(page, "target")
     button = ButtonUtils(page, "botton")
 
+    target.assert_chart_exists()
     assert target.get_options()["title"][0]["bottom"] == 0
 
     button.click()
@@ -358,6 +362,8 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
 
     button.click()
     page.wait()
+
+    target.assert_chart_exists()
 
     assert target.get_options()["title"][0]["text"] == "new title"
 
