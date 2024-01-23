@@ -78,8 +78,6 @@ def test_chart_display(page: ScreenPage, page_path: str):
     target1 = EChartsUtils(page, "target1")
     target2 = EChartsUtils(page, "target2")
 
-    page.wait()
-
     target1.assert_chart_exists()
     target2.assert_chart_exists()
 
@@ -188,7 +186,6 @@ def test_pyecharts(page: ScreenPage, page_path: str):
 
     target = EChartsUtils(page, "target")
 
-    page.wait()
     target.assert_chart_exists()
 
     chart_opts = target.get_options()
@@ -250,7 +247,6 @@ def test_click_event(page: ScreenPage, page_path: str):
 
     target = EChartsUtils(page, "target")
 
-    page.wait(1000)
     target.assert_chart_exists()
 
     target.click_series(0.05, "A", y_position_offset=-8)
@@ -317,7 +313,6 @@ def test_update_opts(page: ScreenPage, page_path: str):
         set_test_id(ui.button("del title bottom", on_click=on_click), "botton")
 
     page.open(page_path)
-    page.wait()
 
     target = EChartsUtils(page, "target")
     button = ButtonUtils(page, "botton")
@@ -353,7 +348,6 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
         set_test_id(btn, "botton")
 
     page.open(page_path)
-    page.wait()
 
     target = EChartsUtils(page, "target")
     button = ButtonUtils(page, "botton")
@@ -407,8 +401,6 @@ def test_create_map(page: ScreenPage, page_path: str):
 
     page.open(page_path)
     page.wait()
-
-    # page.pause()
 
     target = EChartsUtils(page, "target")
     target.assert_chart_exists()
