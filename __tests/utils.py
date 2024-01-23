@@ -132,11 +132,12 @@ class EChartsUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
-    def assert_chart_exists(self):
+    def assert_canvas_exists(self):
+        expect(self.target_locator.locator("css=canvas")).to_be_visible(timeout=5000)
+
+    def assert_echarts_attachment(self):
         attr = self.target_locator.get_attribute("_echarts_instance_", timeout=10000)
         assert attr is not None
-
-        expect(self.target_locator.locator("css=canvas")).to_be_visible(timeout=5000)
 
     def get_options(self):
         opts = self.target_locator.evaluate(

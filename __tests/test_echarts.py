@@ -78,8 +78,8 @@ def test_chart_display(page: ScreenPage, page_path: str):
     target1 = EChartsUtils(page, "target1")
     target2 = EChartsUtils(page, "target2")
 
-    target1.assert_chart_exists()
-    target2.assert_chart_exists()
+    target1.assert_canvas_exists()
+    target2.assert_echarts_attachment()
 
 
 def test_js_function_opt(page: ScreenPage, page_path: str):
@@ -137,8 +137,7 @@ def test_js_function_opt(page: ScreenPage, page_path: str):
 
     target = EChartsUtils(page, "target")
 
-    page.wait()
-    target.assert_chart_exists()
+    target.assert_canvas_exists()
 
     opts = target.get_options()
 
@@ -186,7 +185,7 @@ def test_pyecharts(page: ScreenPage, page_path: str):
 
     target = EChartsUtils(page, "target")
 
-    target.assert_chart_exists()
+    target.assert_canvas_exists()
 
     chart_opts = target.get_options()
 
@@ -247,7 +246,7 @@ def test_click_event(page: ScreenPage, page_path: str):
 
     target = EChartsUtils(page, "target")
 
-    target.assert_chart_exists()
+    target.assert_canvas_exists()
 
     target.click_series(0.05, "A", y_position_offset=-8)
 
@@ -317,7 +316,7 @@ def test_update_opts(page: ScreenPage, page_path: str):
     target = EChartsUtils(page, "target")
     button = ButtonUtils(page, "botton")
 
-    target.assert_chart_exists()
+    target.assert_canvas_exists()
     assert target.get_options()["title"][0]["bottom"] == 0
 
     button.click()
@@ -352,12 +351,12 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
     target = EChartsUtils(page, "target")
     button = ButtonUtils(page, "botton")
 
+    target.assert_canvas_exists()
+
     assert "title" not in target.get_options()
 
     button.click()
     page.wait()
-
-    target.assert_chart_exists()
 
     assert target.get_options()["title"][0]["text"] == "new title"
 
@@ -403,4 +402,4 @@ def test_create_map(page: ScreenPage, page_path: str):
     page.wait()
 
     target = EChartsUtils(page, "target")
-    target.assert_chart_exists()
+    target.assert_canvas_exists()
