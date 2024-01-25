@@ -1,4 +1,5 @@
 from __future__ import annotations
+from re import Pattern
 
 from typing import List, Optional, Any, Callable, Union
 from playwright.sync_api import expect, Locator
@@ -75,6 +76,9 @@ class BaseUiUtils:
     def get_style_attr_value(self) -> str:
         return self.target_locator.evaluate("element => element.getAttribute('style')")
 
+    def expect_to_be_visible(self):
+        expect(self.target_locator).to_be_visible()
+
 
 class SelectUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
@@ -108,12 +112,23 @@ class SelectUtils(BaseUiUtils):
         self.target_locator.press("Enter")
 
 
-class RadioUtils(BaseUiUtils):
+class ColorPickerUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
-    def expect_to_be_visible(self):
-        expect(self.target_locator).to_be_visible()
+    def expect_has_button(self):
+        expect(self.page.locator("button")).to_be_visible()
+
+    def click_button(self):
+        self.page.locator("button").click()
+
+    def click_color_panel(self):
+        self.page.locator(".q-color-picker__spectrum-black").click()
+
+
+class RadioUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
 
     def is_checked_by_label(self, label: str):
         return self.target_locator.get_by_label(label).is_checked()
@@ -330,6 +345,9 @@ class LabelUtils(BaseUiUtils):
 
     def get_text(self):
         return self.target_locator.inner_text()
+
+    def expect_contain_text(self, expected):
+        return expect(self.target_locator).to_contain_text(expected)
 
     def expect_text(self, text: str):
         assert self.get_text() == text
