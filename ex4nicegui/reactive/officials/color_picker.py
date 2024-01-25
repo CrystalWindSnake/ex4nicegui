@@ -44,7 +44,12 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         self._setup_on_change(color_ref, value_kws, on_pick)
 
         with ui.card().tight():
-            element_menu = ui.color_picker(**value_kws)
+            exclued_color = {**value_kws}
+            exclued_color.pop("color")
+
+            element_menu = ui.color_picker(**exclued_color)
+            element_menu.set_color(value_kws.get("value") or "")
+
             self._element_picker = element_menu.default_slot.children[0]
             self._element_picker.props('format-model="rgba"')
 
@@ -65,14 +70,14 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
     def bind_color(self, ref_ui: ReadonlyRef[str]):
         @effect
         def _():
-            self._element_picker._props["modelValue"] = ref_ui.value
+            self.element.set_color(ref_ui.value)
 
         return self
 
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
         @effect
         def _():
-            self._element_picker._props["value"] = ref_ui.value
+            self.element.set_value(ref_ui.value)
 
         return self
 
@@ -83,7 +88,7 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         on_pick: Optional[Callable[..., Any]] = None,
     ):
         def inject_on_change(e):
-            color_ref.value = e.value
+            color_ref.value = e.color
             if on_pick:
                 on_pick(e)
 
