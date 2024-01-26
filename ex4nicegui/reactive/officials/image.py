@@ -16,19 +16,11 @@ from .utils import _convert_kws_ref2value
 
 
 class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
-    @staticmethod
-    def _setup_(binder: "ImageBindableUi"):
-        @effect
-        def _():
-            value = binder.value
-            binder.element.set_source(value)
-            binder.element._handle_source_change(value)
-
     def __init__(
         self,
         source: Union[TMaybeRef[str], TMaybeRef[Path]] = "",
     ) -> None:
-        source_ref = to_ref(source)
+        source_ref = to_ref(source)  # type: ignore
         kws = {
             "source": source_ref,
         }
@@ -43,8 +35,6 @@ class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
             if is_ref(value):
                 self.bind_prop(key, value)  # type: ignore
 
-        # ImageBindableUi._setup_(self)
-
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "source":
             return self.bind_source(ref_ui)
@@ -54,6 +44,4 @@ class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
     def bind_source(self, ref_ui: ReadonlyRef[Union[str, Path]]):
         @effect
         def _():
-            ele = self.element
-            source = ref_ui.value
-            ele.on_source_change(source)
+            self.element.set_source(ref_ui.value)
