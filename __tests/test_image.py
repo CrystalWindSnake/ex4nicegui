@@ -50,5 +50,6 @@ def test_source(page: ScreenPage, page_path: str):
     img_source.value = img_bs64  # type: ignore
 
     target.expect_load_image()
+    page.wait(1000)
 
     assert target.get_src().startswith("data:image/png;base64,iVB")
