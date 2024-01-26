@@ -52,4 +52,5 @@ def test_source(page: ScreenPage, page_path: str):
     target.expect_load_image()
     page.wait(1000)
 
-    assert target.get_src().startswith("data:image/png;base64,iVB")
+    src = target.get_src()
+    assert src.startswith("data:image/png;base64,iVB")
