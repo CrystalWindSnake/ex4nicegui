@@ -1,6 +1,6 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import to_ref
 from .screen import ScreenPage
 from .utils import ImageUtils, set_test_id
 from pathlib import Path

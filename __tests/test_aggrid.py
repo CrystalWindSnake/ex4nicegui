@@ -1,7 +1,7 @@
 import pandas as pd
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import to_ref
 from .screen import ScreenPage
 from playwright.sync_api import expect
 from .utils import AggridUtils, set_test_id
@@ -56,5 +56,4 @@ def test_aggrid_from_dataframe_columns_define_fn(page: ScreenPage, page_path: st
     page.open(page_path)
 
     table = AggridUtils(page, "target")
-    # page.pause()
     table.expect_selection_cell_to_be_visible(list("abcd"))

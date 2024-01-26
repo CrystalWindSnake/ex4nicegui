@@ -1,6 +1,6 @@
 import threading
-from playwright.sync_api import Page, expect, Browser
-from nicegui import context, ui
+from playwright.sync_api import expect, Browser
+from nicegui import ui
 from nicegui.server import Server
 
 PORT = 3392
@@ -38,6 +38,7 @@ class ScreenPage:
     def __init__(self, screen: Screen) -> None:
         self.__screen = screen
         self._page = self.__screen.browser.new_page()
+        self._page.set_default_timeout(5000)
 
     def open(self, path: str):
         self._page.wait_for_selector("body", timeout=10000)

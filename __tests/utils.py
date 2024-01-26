@@ -1,5 +1,4 @@
 from __future__ import annotations
-from re import Pattern
 
 from typing import List, Optional, Any, Callable, Union
 from playwright.sync_api import expect, Locator
@@ -82,6 +81,9 @@ class BaseUiUtils:
 
     def expect_to_be_visible(self):
         expect(self.target_locator).to_be_visible()
+
+    def expect_to_have_text(self, text: str):
+        expect(self.target_locator).to_have_text(text)
 
 
 class SelectUtils(BaseUiUtils):
@@ -365,6 +367,9 @@ class InputUtils(BaseUiUtils):
             has=self.page.get_by_test_id(test_id)
         )
 
+    def expect_to_have_text(self, text: str):
+        return expect(self.target_box).to_have_value(text)
+
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
 
@@ -431,3 +436,14 @@ class ImageUtils(BaseUiUtils):
 
     def expect_load_image(self):
         expect(self.get_image()).to_be_visible()
+
+
+class CheckboxUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
+
+    def is_checked(self):
+        return self.target_locator.is_checked()
+
+    def click(self):
+        return self.target_locator.click()
