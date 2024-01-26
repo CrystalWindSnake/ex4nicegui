@@ -16,14 +16,6 @@ from .utils import _convert_kws_ref2value
 
 
 class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
-    @staticmethod
-    def _setup_(binder: "ImageBindableUi"):
-        @effect
-        def _():
-            value = binder.value
-            binder.element.set_source(value)
-            binder.element._handle_source_change(value)
-
     def __init__(
         self,
         source: Union[TMaybeRef[str], TMaybeRef[Path]] = "",

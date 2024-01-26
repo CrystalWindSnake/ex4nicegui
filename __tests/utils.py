@@ -66,6 +66,10 @@ class BaseUiUtils:
         self.test_id = test_id
         self.target_locator = self.page.get_by_test_id(test_id)
 
+    def expect_find_by_class(self, classes: Union[List[str], str]):
+        target = self.target_locator.filter(has=self.page.locator(f".{classes}"))
+        expect(target).to_be_visible()
+
     def expect_to_have_class(self, classes: Union[List[str], str]):
         expect(self.target_locator).to_have_class(classes)
 
@@ -390,3 +394,22 @@ class SwitchUtils(BaseUiUtils):
 
     def click(self):
         self.target_locator.locator("div").first.click()
+
+
+class ImageUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
+        self.__img_target = self.target_locator.locator("img")
+
+    def get_image(self):
+        return self.__img_target
+
+    def get_src(
+        self,
+    ):
+        res = self.get_image().get_attribute("src")
+        assert res
+        return res
+
+    def expect_load_image(self):
+        expect(self.get_image()).to_be_visible()
