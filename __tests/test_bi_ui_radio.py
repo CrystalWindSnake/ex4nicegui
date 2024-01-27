@@ -43,7 +43,7 @@ def test_base(page: ScreenPage, page_path: str):
 
     target1 = RadioUtils(page, "target1")
     target2 = RadioUtils(page, "target2")
-    target3 = RadioUtils(page, "target3")
+    RadioUtils(page, "target3")
 
     assert not target1.is_checked_by_label("A值")
     assert not target1.is_checked_by_label("L1_B")

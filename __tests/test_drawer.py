@@ -7,7 +7,7 @@ from .screen import ScreenPage
 def test_display(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        with rxui.drawer() as dw:
+        with rxui.drawer():
             ui.label("drawer showed")
 
     page.open(page_path)
@@ -25,7 +25,7 @@ def test_toggle_side(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        with rxui.drawer(r_side) as dw:
+        with rxui.drawer(r_side):
             ui.label("drawer showed")
             rxui.label(r_side)
 

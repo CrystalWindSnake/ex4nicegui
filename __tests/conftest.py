@@ -3,7 +3,7 @@ import pytest
 from playwright.sync_api import Playwright
 from .screen import Screen
 from nicegui.page import page as ui_page
-from nicegui import Client, binding, app, core
+from nicegui import Client, binding, app
 from nicegui.elements import plotly, pyplot
 import os
 

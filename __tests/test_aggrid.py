@@ -28,7 +28,7 @@ def test_aggrid(page: ScreenPage, page_path: str):
 
     page.open(page_path)
 
-    expect(page._page.locator(f"css=[data-testid=target]")).to_be_visible()
+    expect(page._page.locator("css=[data-testid=target]")).to_be_visible()
 
 
 def test_aggrid_from_dataframe(page: ScreenPage, page_path: str):
