@@ -93,6 +93,10 @@ class SelectUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
+        self.target_box = self.page.locator("css=label.q-select").filter(
+            has=self.page.get_by_test_id(test_id)
+        )
+
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
 
@@ -357,9 +361,6 @@ class LabelUtils(BaseUiUtils):
 
     def expect_contain_text(self, expected):
         return expect(self.target_locator).to_contain_text(expected)
-
-    def expect_text(self, text: str):
-        assert self.get_text() == text
 
 
 class InputUtils(BaseUiUtils):

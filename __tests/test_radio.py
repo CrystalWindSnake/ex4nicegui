@@ -5,31 +5,29 @@ from .screen import ScreenPage
 from .utils import RadioUtils, set_test_id
 
 
-def test_const_value(page: ScreenPage, page_path: str):
+def test_display(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.radio(["a", "b"]), "target")
+        set_test_id(rxui.radio(["a", "b"]), "target const")
 
     page.open(page_path)
 
-    target = RadioUtils(page, "target")
+    def normal_check(radio_utils: RadioUtils):
+        radio_utils.expect_to_be_visible()
 
-    target.expect_to_be_visible()
+        assert not radio_utils.is_checked_by_label("a")
+        assert not radio_utils.is_checked_by_label("b")
 
-    assert not target.is_checked_by_label("a")
-    assert not target.is_checked_by_label("b")
+        radio_utils.check_by_label("a")
+        assert radio_utils.is_checked_by_label("a")
+        assert not radio_utils.is_checked_by_label("b")
 
-    page.wait()
-    target.check_by_label("a")
-    page.wait()
-    assert target.is_checked_by_label("a")
-    assert not target.is_checked_by_label("b")
+        radio_utils.check_by_label("b")
+        assert not radio_utils.is_checked_by_label("a")
+        assert radio_utils.is_checked_by_label("b")
 
-    page.wait()
-    target.check_by_label("b")
-    page.wait()
-    assert not target.is_checked_by_label("a")
-    assert target.is_checked_by_label("b")
+    target_const = RadioUtils(page, "target const")
+    normal_check(target_const)
 
 
 def test_ref_value(page: ScreenPage, page_path: str):

@@ -1,4 +1,3 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
@@ -15,7 +14,6 @@ def test_const_str(page: ScreenPage, page_path: str):
     page.open(page_path)
 
     target = SelectUtils(page, "target")
-
     expect(target.page.get_by_text("test select", exact=True)).to_be_visible()
 
 
@@ -32,15 +30,14 @@ def test_ref_str(page: ScreenPage, page_path: str):
     expect(target.page.get_by_text("a", exact=True)).not_to_be_visible()
     expect(target.page.get_by_text("b", exact=True)).not_to_be_visible()
 
-    page.wait()
     r_str.value = "a"
     expect(target.page.get_by_text("a", exact=True)).to_be_visible()
 
-    page.wait()
+    # page.wait()
     r_str.value = "b"
     expect(target.page.get_by_text("b", exact=True)).to_be_visible()
 
-    page.wait()
+    # page.wait()
     r_str.value = ""
     expect(target.page.get_by_text("a", exact=True)).not_to_be_visible()
     expect(target.page.get_by_text("b", exact=True)).not_to_be_visible()
