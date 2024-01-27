@@ -88,6 +88,12 @@ class BaseUiUtils:
     def expect_to_have_text(self, text: str):
         expect(self.target_locator).to_have_text(text)
 
+    def expect_to_have_value(self, value: str):
+        return expect(self.target_locator).to_have_value(value)
+
+    def expect_not_to_have_value(self, value: str):
+        return expect(self.target_locator).not_to_have_value(value)
+
 
 class SelectUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
@@ -113,8 +119,11 @@ class SelectUtils(BaseUiUtils):
         self.page.wait_for_timeout(500)
         self.page.get_by_role("option", name=value).click()
 
-    def get_input_value(self):
-        return self.target_locator.input_value()
+    # def get_input_value(self):
+    #     return self.target_locator.input_value()
+
+    # def expect_have_value(self, value: str):
+    #     return expect(self.target_locator).to_have_value(value)
 
     def get_selected_values(self):
         return self.target_locator.locator(".q-chip__content").all_inner_texts()

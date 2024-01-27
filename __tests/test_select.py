@@ -1,9 +1,9 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import to_ref, ref_computed, effect
 from .screen import ScreenPage
 from playwright.sync_api import expect
-from .utils import SelectUtils, set_test_id
+from .utils import SelectUtils, set_test_id, ButtonUtils, SwitchUtils
 
 
 def test_const_str(page: ScreenPage, page_path: str):
@@ -27,20 +27,18 @@ def test_ref_str(page: ScreenPage, page_path: str):
     page.open(page_path)
     target = SelectUtils(page, "target")
 
-    expect(target.page.get_by_text("a", exact=True)).not_to_be_visible()
-    expect(target.page.get_by_text("b", exact=True)).not_to_be_visible()
+    target.expect_not_to_have_value("a")
+    target.expect_not_to_have_value("b")
 
     r_str.value = "a"
-    expect(target.page.get_by_text("a", exact=True)).to_be_visible()
+    target.expect_to_have_value("a")
 
-    # page.wait()
     r_str.value = "b"
-    expect(target.page.get_by_text("b", exact=True)).to_be_visible()
+    target.expect_to_have_value("b")
 
-    # page.wait()
     r_str.value = ""
-    expect(target.page.get_by_text("a", exact=True)).not_to_be_visible()
-    expect(target.page.get_by_text("b", exact=True)).not_to_be_visible()
+    target.expect_not_to_have_value("a")
+    target.expect_not_to_have_value("b")
 
 
 def test_clearable(page: ScreenPage, page_path: str):
@@ -53,13 +51,13 @@ def test_clearable(page: ScreenPage, page_path: str):
     page.open(page_path)
     target = SelectUtils(page, "target")
 
-    expect(target.page.get_by_text("a", exact=True)).to_be_visible()
+    target.expect_to_have_value("a")
 
-    page.wait()
     target.click_cancel()
 
-    expect(target.page.get_by_text("a", exact=True)).not_to_be_visible()
-    expect(target.page.get_by_text("b", exact=True)).not_to_be_visible()
+    target.expect_not_to_have_value("a")
+    target.expect_not_to_have_value("b")
+
     assert r_str.value is None
 
 
@@ -75,14 +73,15 @@ def test_option_change(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.switch("has data", value=r_has_data).props('data-testid="switch"')
+        set_test_id(rxui.switch("has data", value=r_has_data), "switch")
         set_test_id(rxui.select(cp_data, value=r_str), "target")
 
     page.open(page_path)
     target = SelectUtils(page, "target")
+    switch = SwitchUtils(page, "switch")
 
     page.wait()
-    page._page.get_by_test_id("switch").locator("div").nth(2).click()
+    switch.click()
 
     target.click_and_select("a")
 
@@ -102,15 +101,12 @@ def test_multiple_list_opts(page: ScreenPage, page_path: str):
     page.open(page_path)
     target = SelectUtils(page, "target")
 
-    assert target.get_input_value() == "a, b"
+    target.expect_to_have_value("a, b")
 
-    page.wait()
     target.click_and_select("d")
 
-    page.wait()
-    assert target.get_input_value() == "a, b, d"
+    target.expect_to_have_value("a, b, d")
 
-    # page.wait()
     assert r_value.value == ["a", "b", "d"]
 
 
@@ -127,15 +123,10 @@ def test_multiple_dict_opts(page: ScreenPage, page_path: str):
     page.open(page_path)
     target = SelectUtils(page, "target")
 
-    assert target.get_input_value() == "a, b"
+    target.expect_to_have_value("a, b")
 
-    page.wait()
     target.click_and_select("d")
-
-    page.wait()
-    assert target.get_input_value() == "a, b, d"
-
-    # page.wait()
+    target.expect_to_have_value("a, b, d")
     assert r_value.value == [1, 2, 4]
 
 
@@ -170,3 +161,50 @@ def test_new_value_mode(page: ScreenPage, page_path: str):
     assert r_str.value is None
 
     assert r_opts.value == ["a", "other"]
+
+
+def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
+    data = {
+        "opts1": list("abcd"),
+        "opts2": list("mnxy"),
+    }
+
+    value1 = to_ref("opts1")
+    value2 = to_ref("")
+
+    @ui.page(page_path)
+    def _():
+        @ref_computed
+        def opts2():
+            return data[value1.value]
+
+        @effect
+        def _():
+            value2.value = opts2.value[0]
+
+        select = rxui.select(opts2, value=value2)
+
+        def onclick():
+            value1.value = "opts2"
+
+        btn = ui.button("change opt2", on_click=onclick)
+
+        set_test_id(
+            select,
+            "target",
+        )
+
+        set_test_id(
+            btn,
+            "button",
+        )
+
+    page.open(page_path)
+
+    target = SelectUtils(page, "target")
+    button = ButtonUtils(page, "button")
+
+    target.expect_to_have_value("a")
+
+    button.click()
+    target.expect_to_have_value("m")
