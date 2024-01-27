@@ -13,6 +13,7 @@ from ex4nicegui.utils.signals import (
     to_ref,
 )
 from nicegui import ui
+from nicegui.events import handle_event
 from .base import SingleValueBindableUi
 from .utils import _convert_kws_ref2value
 
@@ -90,7 +91,7 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         def inject_on_change(e):
             color_ref.value = e.color
             if on_pick:
-                on_pick(e)
+                handle_event(on_pick, e)
 
         value_kws.update({"on_pick": inject_on_change})
 
@@ -111,7 +112,7 @@ class ColorPickerLazyBindableUi(ColorPickerBindableUi):
             self._ref.value = e.args  # type: ignore
 
             if on_pick:
-                on_pick()
+                handle_event(on_pick, e)
 
         ele.on("change", handler=onModelValueChanged)
 

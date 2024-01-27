@@ -16,6 +16,7 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
+from nicegui.events import handle_event
 from .base import SingleValueBindableUi, DisableableMixin
 from .utils import _convert_kws_ref2value
 
@@ -79,7 +80,7 @@ class SliderBindableUi(
         def inject_on_change(e):
             value_ref.value = e.value
             if on_change:
-                on_change(e)
+                handle_event(on_change, e)
 
         value_kws.update({"on_change": inject_on_change})
 
@@ -101,8 +102,10 @@ class LazySliderBindableUi(SliderBindableUi):
         def _():
             ele.value = self.value
 
-        def onValueChanged():
+        def onValueChanged(e):
             self._ref.value = ele.value
+            if on_change:
+                handle_event(on_change, e)
 
         ele.on("change", onValueChanged)
 

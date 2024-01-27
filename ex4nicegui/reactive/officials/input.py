@@ -11,6 +11,7 @@ from ex4nicegui.utils.signals import (
 )
 
 from nicegui import ui
+from nicegui.events import handle_event
 from .base import SingleValueBindableUi, DisableableMixin
 from .utils import _convert_kws_ref2value
 
@@ -62,7 +63,7 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
         def inject_on_change(e):
             value_ref.value = e.value
             if on_change:
-                on_change()
+                handle_event(on_change, e)
 
         value_kws.update({"on_change": inject_on_change})
 

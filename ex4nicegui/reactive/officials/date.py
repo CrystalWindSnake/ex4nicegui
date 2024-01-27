@@ -9,6 +9,7 @@ from ex4nicegui.utils.signals import (
     to_ref,
 )
 from nicegui import ui
+from nicegui.events import handle_event
 from .base import SingleValueBindableUi
 from .utils import _convert_kws_ref2value
 
@@ -55,7 +56,7 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         def inject_on_change(e):
             value_ref.value = e.value
             if on_change:
-                on_change(e)
+                handle_event(on_change, e)
 
         value_kws.update({"on_change": inject_on_change})
 
