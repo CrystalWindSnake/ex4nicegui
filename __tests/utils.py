@@ -1,5 +1,4 @@
 from __future__ import annotations
-from re import Pattern
 
 from typing import List, Optional, Any, Callable, Union
 from playwright.sync_api import expect, Locator
@@ -80,13 +79,23 @@ class BaseUiUtils:
     def get_style_attr_value(self) -> str:
         return self.target_locator.evaluate("element => element.getAttribute('style')")
 
+    def get_style(self, name: str):
+        return self.target_locator.evaluate(f"node=> node.style.{name}")
+
     def expect_to_be_visible(self):
         expect(self.target_locator).to_be_visible()
+
+    def expect_to_have_text(self, text: str):
+        expect(self.target_locator).to_have_text(text)
 
 
 class SelectUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
+
+        self.target_box = self.page.locator("css=label.q-select").filter(
+            has=self.page.get_by_test_id(test_id)
+        )
 
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
@@ -353,17 +362,17 @@ class LabelUtils(BaseUiUtils):
     def expect_contain_text(self, expected):
         return expect(self.target_locator).to_contain_text(expected)
 
-    def expect_text(self, text: str):
-        assert self.get_text() == text
-
 
 class InputUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: ScreenPage, test_id: str, target_box=None) -> None:
         super().__init__(screen_page, test_id)
 
-        self.target_box = self.page.locator("css=label.q-input").filter(
+        self.target_box = target_box or self.page.locator("css=label.q-input").filter(
             has=self.page.get_by_test_id(test_id)
         )
+
+    def expect_to_have_text(self, text: str):
+        return expect(self.target_box).to_have_value(text)
 
     def click(self):
         self.target_locator.click(position={"x": 5, "y": 5})
@@ -406,6 +415,15 @@ class InputNumberUtils(InputUtils):
         super().__init__(screen_page, test_id)
 
 
+class TextareaUtils(InputUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        page = screen_page._page
+        target_box = page.locator("css=label.q-textarea").filter(
+            has=page.get_by_test_id(test_id)
+        )
+        super().__init__(screen_page, test_id, target_box)
+
+
 class SwitchUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
@@ -431,3 +449,14 @@ class ImageUtils(BaseUiUtils):
 
     def expect_load_image(self):
         expect(self.get_image()).to_be_visible()
+
+
+class CheckboxUtils(BaseUiUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        super().__init__(screen_page, test_id)
+
+    def is_checked(self):
+        return self.target_locator.is_checked()
+
+    def click(self):
+        return self.target_locator.click()

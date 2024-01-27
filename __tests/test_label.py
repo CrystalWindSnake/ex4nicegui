@@ -1,28 +1,32 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import ScreenPage
+from .utils import LabelUtils, set_test_id
 
 
-def test_const_str(page: ScreenPage, page_path: str):
-    @ui.page(page_path)
-    def _():
-        rxui.label("test label")
-
-    page.open(page_path)
-    page.should_contain("test label")
-
-
-def test_ref_str(page: ScreenPage, page_path: str):
-    r_str = to_ref("test label")
+def test_display(page: ScreenPage, page_path: str):
+    r_str = to_ref("ref label")
+    r_bool = to_ref("init")
 
     @ui.page(page_path)
     def _():
-        rxui.label(r_str)
+        set_test_id(rxui.label("test label"), "target")
+        set_test_id(rxui.label(r_str), "ref target")
+
+        r_bool.value = True  # type: ignore
+        set_test_id(rxui.label(r_bool), "bool ref target")
 
     page.open(page_path)
-    page.should_contain("test label")
+
+    target_const = LabelUtils(page, "target")
+    target_const.expect_to_have_text("test label")
+
+    target_ref = LabelUtils(page, "ref target")
+    target_ref.expect_to_have_text("ref label")
+
+    target_bool_ref = LabelUtils(page, "bool ref target")
+    target_bool_ref.expect_to_have_text("True")
 
 
 def test_ref_str_change_value(page: ScreenPage, page_path: str):
@@ -30,16 +34,16 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.label(r_str)
+        set_test_id(rxui.label(r_str), "target")
 
     page.open(page_path)
-    page.should_contain("old")
 
-    page.wait()
+    target = LabelUtils(page, "target")
+    target.expect_to_have_text("old")
+
     r_str.value = "new"
 
-    page.wait()
-    page.should_contain("new")
+    target.expect_to_have_text("new")
 
 
 def test_bind_color(page: ScreenPage, page_path: str):
@@ -47,25 +51,15 @@ def test_bind_color(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.label("label").bind_color(r_color)
+        label = rxui.label("label")
+        label.bind_color(r_color)
+        set_test_id(label, "target")
 
     page.open(page_path)
+    target = LabelUtils(page, "target")
 
-    assert page.get_ele("label").evaluate("node=> node.style.color=='red'")
+    assert target.get_style("color") == "red"
 
-
-def test_bind_color_changed(page: ScreenPage, page_path: str):
-    r_color = to_ref("red")
-
-    @ui.page(page_path)
-    def _():
-        rxui.label("label").bind_color(r_color)
-
-    page.open(page_path)
-
-    assert page.get_ele("label").evaluate("node=> node.style.color=='red'")
-
-    page.wait()
     r_color.value = "green"
     page.wait()
-    assert page.get_ele("label").evaluate("node=> node.style.color=='green'")
+    assert target.get_style("color") == "green"

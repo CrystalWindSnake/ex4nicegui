@@ -1,9 +1,7 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, effect
 from .screen import ScreenPage
-from playwright.sync_api import expect
 import pandas as pd
 from .utils import TableUtils, set_test_id
 

@@ -1,45 +1,28 @@
-import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import ScreenPage
+from .utils import TextareaUtils, LabelUtils, set_test_id
 
 
-def test_const_str(page: ScreenPage, page_path: str):
-    @ui.page(page_path)
-    def _():
-        rxui.textarea(value="const value").props('data-testid="target"')
-
-    page.open(page_path)
-    page.should_contain_text("target", "const value")
-
-
-def test_ref_str(page: ScreenPage, page_path: str):
+def test_display(page: ScreenPage, page_path: str):
     r_str = to_ref("ref value")
 
     @ui.page(page_path)
     def _():
-        rxui.textarea(value=r_str).props('data-testid="target"')
+        set_test_id(rxui.textarea(value="const value"), "const input")
+        set_test_id(rxui.textarea(value=r_str), "ref input")
 
     page.open(page_path)
-    page.should_contain_text("target", "ref value")
+    target_const = TextareaUtils(page, "const input")
+    target_const.expect_to_have_text("const value")
 
+    target_ref = TextareaUtils(page, "ref input")
+    target_ref.expect_to_have_text("ref value")
 
-def test_ref_str_change_value(page: ScreenPage, page_path: str):
-    r_str = to_ref("old")
-
-    @ui.page(page_path)
-    def _():
-        rxui.textarea(value=r_str).props('data-testid="target"')
-
-    page.open(page_path)
-    page.should_contain_text("target", "old")
-
-    page.wait()
     r_str.value = "new"
-
     page.wait()
-    page.should_contain_text("target", "new")
+    target_ref.expect_to_have_text("new")
 
 
 def test_input_change_value(page: ScreenPage, page_path: str):
@@ -47,14 +30,14 @@ def test_input_change_value(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        rxui.textarea(value=r_str).props('data-testid="target"')
-        rxui.label(r_str).props('data-testid="label"')
+        set_test_id(rxui.textarea(value=r_str), "target")
+        set_test_id(rxui.label(r_str), "label")
 
     page.open(page_path)
 
-    page.wait()
-    # page.pause()
-    page.fill("target", "new value")
+    input = TextareaUtils(page, "target")
+    label = LabelUtils(page, "label")
 
-    page.wait()
-    assert page.get_by_test_id("label").inner_text() == "new value"
+    input.fill_text("new value")
+
+    label.expect_to_have_text("new value")

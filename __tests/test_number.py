@@ -2,7 +2,7 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import ScreenPage
-from .utils import InputNumberUtils, set_test_id, fn
+from .utils import InputNumberUtils, set_test_id
 
 
 def test_const(page: ScreenPage, page_path: str):
@@ -14,7 +14,7 @@ def test_const(page: ScreenPage, page_path: str):
 
     target = InputNumberUtils(page, "target")
 
-    assert target.get_input_value() == "1.0"
+    target.expect_to_have_text("1.0")
 
 
 def test_ref(page: ScreenPage, page_path: str):
@@ -22,30 +22,25 @@ def test_ref(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.number(value=r_value), "target")
+        set_test_id(rxui.number(value=r_value), "target")  # type: ignore
 
     page.open(page_path)
 
     target = InputNumberUtils(page, "target")
 
-    assert target.get_input_value() == "1.0"
+    target.expect_to_have_text("1.0")
 
-    page.wait()
     r_value.value = 3.11
-
-    page.wait()
-    assert target.get_input_value() == "3.11"
+    target.expect_to_have_text("3.11")
 
     # type input number
     target.input_text("66")
-
     page.wait()
     assert r_value.value == 3.1166
 
     # type replace
     target.click()
     target.dbclick()
-
     target.input_text("66")
 
     page.wait()
@@ -67,8 +62,8 @@ def test_on_change(page: ScreenPage, page_path: str):
 
     target = InputNumberUtils(page, "target")
 
-    page.wait(1000)
     target.input_text("1111")
+    page.wait(1000)
     assert value_on_change == 1111.0
 
 
@@ -83,4 +78,4 @@ def test_with_format(page: ScreenPage, page_path: str):
 
     page.wait(1000)
     target.input_text("1111")
-    assert target.get_input_value() == "1111"
+    target.expect_to_have_text("1111")
