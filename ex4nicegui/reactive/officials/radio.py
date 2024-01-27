@@ -17,6 +17,7 @@ from ex4nicegui.utils.signals import (
     to_ref,
 )
 from nicegui import ui
+from nicegui.events import handle_event
 from nicegui.elements.mixins.value_element import ValueElement
 from .base import SingleValueBindableUi
 from .utils import _convert_kws_ref2value
@@ -25,22 +26,6 @@ T = TypeVar("T")
 
 
 class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
-    @staticmethod
-    def _setup_(binder: "RadioBindableUi"):
-        # def onValueChanged(e):
-        #     opts_values = (
-        #         list(binder.element.options.keys())
-        #         if isinstance(binder.element.options, Dict)
-        #         else binder.element.options
-        #     )
-        #     binder._ref.value = opts_values[e.args]  # type: ignore
-
-        @effect
-        def _():
-            binder.element.value = binder.value
-
-        # binder.element.on("update:modelValue", handler=onValueChanged)
-
     def __init__(
         self,
         options: Union[TMaybeRef[List], TMaybeRef[Dict]],
@@ -56,7 +41,7 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         def inject_on_change(e):
             value_ref.value = e.value
             if on_change:
-                on_change(e)
+                handle_event(on_change, e)
 
         value_kws.update({"value": None, "on_change": inject_on_change})
 
@@ -89,6 +74,5 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         @effect
         def _():
             cast(ValueElement, self.element).set_value(ref_ui.value)
-            # self.element.update()
 
         return self

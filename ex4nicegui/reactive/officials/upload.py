@@ -9,6 +9,7 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
+from nicegui.events import handle_event
 from .base import SingleValueBindableUi
 from .utils import _convert_kws_ref2value
 
@@ -62,7 +63,7 @@ class UploadBindableUi(SingleValueBindableUi[UploadResult, ui.upload]):
 
         def _on_upload(e: ng_events.UploadEventArguments):
             for fn in self._on_upload_callbacks:
-                fn(e)
+                handle_event(fn, e)
 
         if on_upload:
             self._on_upload_callbacks.append(on_upload)
