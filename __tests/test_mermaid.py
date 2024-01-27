@@ -33,5 +33,5 @@ flowchart TD
 
     target.assert_svg_exists()
     target.click_node("A")
-
+    page.wait(1000)
     assert event_spy.calledTimes == 1
