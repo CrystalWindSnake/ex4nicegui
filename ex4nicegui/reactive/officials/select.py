@@ -91,7 +91,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_options(self, ref_ui: ReadonlyRef):
-        @effect
+        @effect(priority_level=0)
         def _():
             self.element.options = ref_ui.value
             self.element.update()
