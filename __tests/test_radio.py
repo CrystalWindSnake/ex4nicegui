@@ -19,10 +19,12 @@ def test_display(page: ScreenPage, page_path: str):
         assert not radio_utils.is_checked_by_label("b")
 
         radio_utils.check_by_label("a")
+        page.wait()
         assert radio_utils.is_checked_by_label("a")
         assert not radio_utils.is_checked_by_label("b")
 
         radio_utils.check_by_label("b")
+        page.wait()
         assert not radio_utils.is_checked_by_label("a")
         assert radio_utils.is_checked_by_label("b")
 
