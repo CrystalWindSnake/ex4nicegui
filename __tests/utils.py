@@ -79,6 +79,9 @@ class BaseUiUtils:
     def get_style_attr_value(self) -> str:
         return self.target_locator.evaluate("element => element.getAttribute('style')")
 
+    def get_style(self, name: str):
+        return self.target_locator.evaluate(f"node=> node.style.{name}")
+
     def expect_to_be_visible(self):
         expect(self.target_locator).to_be_visible()
 
@@ -360,10 +363,10 @@ class LabelUtils(BaseUiUtils):
 
 
 class InputUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: ScreenPage, test_id: str, target_box=None) -> None:
         super().__init__(screen_page, test_id)
 
-        self.target_box = self.page.locator("css=label.q-input").filter(
+        self.target_box = target_box or self.page.locator("css=label.q-input").filter(
             has=self.page.get_by_test_id(test_id)
         )
 
@@ -409,6 +412,15 @@ class InputUtils(BaseUiUtils):
 class InputNumberUtils(InputUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
         super().__init__(screen_page, test_id)
+
+
+class TextareaUtils(InputUtils):
+    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+        page = screen_page._page
+        target_box = page.locator("css=label.q-textarea").filter(
+            has=page.get_by_test_id(test_id)
+        )
+        super().__init__(screen_page, test_id, target_box)
 
 
 class SwitchUtils(BaseUiUtils):

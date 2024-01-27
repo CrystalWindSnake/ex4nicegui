@@ -5,42 +5,23 @@ from .screen import ScreenPage
 from .utils import InputUtils, LabelUtils, set_test_id
 
 
-def test_const_str(page: ScreenPage, page_path: str):
-    @ui.page(page_path)
-    def _():
-        set_test_id(rxui.input(value="const value"), "target")
-
-    page.open(page_path)
-    target = InputUtils(page, "target")
-    target.expect_to_have_text("const value")
-
-
-def test_ref_str(page: ScreenPage, page_path: str):
+def test_display(page: ScreenPage, page_path: str):
     r_str = to_ref("ref value")
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.input(value=r_str), "target")
+        set_test_id(rxui.input(value="const value"), "const target")
+        set_test_id(rxui.input(value=r_str), "ref target")
 
     page.open(page_path)
-    target = InputUtils(page, "target")
-    target.expect_to_have_text("ref value")
+    target_const = InputUtils(page, "const target")
+    target_const.expect_to_have_text("const value")
 
-
-def test_ref_str_change_value(page: ScreenPage, page_path: str):
-    r_str = to_ref("old")
-
-    @ui.page(page_path)
-    def _():
-        set_test_id(rxui.input(value=r_str), "target")
-
-    page.open(page_path)
-    target = InputUtils(page, "target")
-    target.expect_to_have_text("old")
+    target_ref = InputUtils(page, "ref target")
+    target_ref.expect_to_have_text("ref value")
 
     r_str.value = "new"
-
-    target.expect_to_have_text("new")
+    target_ref.expect_to_have_text("new")
 
 
 def test_input_change_value(page: ScreenPage, page_path: str):
