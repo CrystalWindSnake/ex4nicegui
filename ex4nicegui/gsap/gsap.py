@@ -19,18 +19,6 @@ class Gsap(
         self._props["defaults"] = defaults or {}
         self._props["tasks"] = []
 
-        # self._tasks: List[Callable] = []
-
-        # async def on_client_connect(
-        #     client: nicegui.Client,
-        # ) -> Any:
-        #     await client.connected()
-
-        #     for func in self._tasks:
-        #         func()
-
-        # ng_context.get_client().on_connect(on_client_connect)
-
     def set_defaults(
         self,
         defaults: Optional[Dict] = None,
