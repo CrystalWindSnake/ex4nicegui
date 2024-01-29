@@ -15,6 +15,7 @@ export default {
        */
       const tasks = this.tasks
       tasks.forEach(t => {
+        convertDynamicProperties(t.options, false)
         gsap[t.method](t.target, t.options)
       })
     })
