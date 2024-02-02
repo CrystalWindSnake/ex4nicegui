@@ -19,6 +19,7 @@ def test_base(page: ScreenPage, page_path: str):
     page.open(page_path)
     target_from = LabelUtils(page, "label from")
     target_to = LabelUtils(page, "label to")
+    page.wait(1500)
 
     assert target_from.get_style("transform") == "translate(0px, 0px)"
     assert target_to.get_style("transform") == "translate(10px, 0px)"
@@ -39,7 +40,7 @@ def test_run_script(page: ScreenPage, page_path: str):
 
     page.open(page_path)
     target = LabelUtils(page, "label")
-
+    page.wait(1500)
     assert target.get_style("transform") == "translate(0px, 60px)"
 
 
@@ -52,4 +53,5 @@ def test_run_script_with_file(page: ScreenPage, page_path: str):
     page.open(page_path)
     target = LabelUtils(page, "label")
 
+    page.wait(1500)
     assert target.get_style("transform") == "translate(0px, 20px)"
