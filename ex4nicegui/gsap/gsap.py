@@ -90,8 +90,8 @@ def new(
 def from_(targets: str, vars: Dict):
     """define where the values should START, and then it animates to the current state which is perfect for animating objects onto the screen because you can set them up the way you want them to look at the end and then animate in from elsewhere
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsap.from_
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsap.from_
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsapfrom_
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsapfrom_
 
 
     Args:
@@ -105,8 +105,8 @@ def from_(targets: str, vars: Dict):
 def to(targets: str, vars: Dict):
     """define the destination values (and most people think in terms of animating to certain values)
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsap.to
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsap.to
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsapto
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsapto
 
 
     Args:
@@ -120,8 +120,8 @@ def to(targets: str, vars: Dict):
 def run_script(script: Union[str, Path]):
     """Allows you to write animated js code directly
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsap.run_script
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsap.run_script
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsaprun_script
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsaprun_script
 
 
     Args:
