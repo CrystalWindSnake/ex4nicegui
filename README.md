@@ -282,6 +282,66 @@ rxui.echarts.register_map(
 )
 ```
 
+---
+
+### gsap
+js 动画库. [gsap文档](https://gsap.com/docs/v3/)
+
+```python
+from nicegui import ui
+from ex4nicegui import gsap
+```
+
+#### gsap.from_
+
+设置起始属性，动画将从设置的属性过渡到原始位置
+
+```python
+
+ui.label("test from").classes("target")
+gsap.from_(".target", {"x": 50,'duration':1})
+
+```
+
+画面加载后，文本起始位置在往右偏移 50px 处，在 1秒 内移动到原始位置上
+
+- 参数 `targets` 为 css 选择器
+- 参数 `vars` 为属性值，具体参考 gsap 文档
+
+---
+
+#### gsap.to
+
+设置结束属性，动画将从原始属性过渡到设置的属性
+
+```python
+
+ui.label("test to").classes("target")
+gsap.to(".target", {"x": 50,'duration':1})
+
+```
+
+画面加载后，文本在 1秒 内，从原始位置往后移动 50px
+
+- 参数 `targets` 为 css 选择器
+- 参数 `vars` 为属性值，具体参考 gsap 文档
+
+---
+#### gsap.run_script
+
+通过编写 js 设置动画
+
+```python
+
+gsap.run_script(
+            r"""function setGsap(gsap) {
+    gsap.to('.target',{"duration": 0.3,y:60})
+}
+""")
+```
+
+- 参数 `script` 可以为文本或 js 后缀的文件 `Path`
+- 定义的 js 函数名字并不影响运行，第一个参数为 gsap 对象
 
 ---
 
