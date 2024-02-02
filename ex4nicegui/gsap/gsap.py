@@ -61,7 +61,7 @@ class Gsap(
             tasks.append({"method": name, "targets": targets, "vars": vars})
 
 
-__instance_map: WeakKeyDictionary[nicegui.Client, Gsap] = WeakKeyDictionary()
+__instance_map = WeakKeyDictionary()
 
 
 def _get_instance():
