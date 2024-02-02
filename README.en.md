@@ -279,6 +279,69 @@ rxui.echarts.register_map(
 
 ---
 
+### gsap
+
+js animation library. [gsap documentation](https://gsap.com/docs/v3/)
+
+```python
+from nicegui import ui
+from ex4nicegui import gsap
+```
+
+#### gsap.from_
+
+Set the start property, the animation will transition from the set property to the original position
+
+```python
+
+ui.label("test from").classes("target")
+gsap.from_(".target", {"x": 50,'duration':1})
+
+```
+
+After the screen is loaded, the starting position of the text is shifted to the right by 50px, and then moved to the original position within 1 second.
+
+- Arguments `targets` are css selectors.
+- Arguments `targets` are css selectors. Arguments `vars` are attribute values
+
+---
+
+#### gsap.to
+
+Set the end property, the animation will transition from the original property to the set property.
+
+```python
+
+ui.label("test to").classes("target")
+gsap.to(".target", {"x": 50,'duration':1})
+
+```
+
+After loading the screen, the text will be moved back 50px from the original position within 1 second.
+
+- Arguments `targets` are css selectors.
+- Arguments `vars` are attribute values
+
+---
+
+#### gsap.run_script
+
+Setting up animations by writing js
+
+```python
+
+gsap.run_script(
+            r"""function setGsap(gsap) {
+    gsap.to('.target',{"duration": 0.3,y:60})
+}
+""")
+```
+
+- The parameter `script` can be text or a file with a js extension `Path`.
+- The name of the defined js function doesn't matter, the first argument is a gsap object.
+
+---
+
 ## responsive
 
 ```python
