@@ -15,8 +15,7 @@ export default {
        */
       const tasks = this.tasks
       tasks.forEach(t => {
-        convertDynamicProperties(t.options, false)
-        gsap[t.method](t.target, t.options)
+        this[t.method](t.targets, t.options)
       })
 
       this.scriptTasks.forEach(script => {
@@ -28,13 +27,13 @@ export default {
   },
 
   methods: {
-    from(target, options) {
+    from(targets, options) {
       convertDynamicProperties(options, false)
-      gsap.from(target, options)
+      gsap.from(targets, options)
     },
-    to(target, options) {
+    to(targets, options) {
       convertDynamicProperties(options, false)
-      gsap.to(target, options)
+      gsap.to(targets, options)
     },
     runScript(script) {
       const fn = new Function('return ' + script)()

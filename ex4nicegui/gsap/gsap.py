@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
 from nicegui.element import Element
 from nicegui import context as ng_context
 import nicegui
@@ -27,12 +28,12 @@ class Gsap(
         self._props["defaults"] = defaults or {}
         return self
 
-    def from_(self, target: str, options: Dict):
-        self.__try_run_task("from", target, options)
+    def from_(self, targets: str, options: Dict):
+        self.__try_run_task("from", targets, options)
         return self
 
-    def to(self, target: str, options: Dict):
-        self.__try_run_task("to", target, options)
+    def to(self, targets: str, options: Dict):
+        self.__try_run_task("to", targets, options)
         return self
 
     def run_script(self, script: str):
@@ -49,15 +50,15 @@ class Gsap(
             tasks = self._props["scriptTasks"]
             tasks.append(script)
 
-    def __try_run_task(self, name: str, target: str, options: Dict):
+    def __try_run_task(self, name: str, targets: str, options: Dict):
         def fn():
-            self.run_method(name, target, options)
+            self.run_method(name, targets, options)
 
         if ng_context.get_client().has_socket_connection:
             fn()
         else:
             tasks = self._props["tasks"]
-            tasks.append({"method": name, "target": target, "options": options})
+            tasks.append({"method": name, "targets": targets, "options": options})
 
 
 __instance_map: WeakKeyDictionary[nicegui.Client, Gsap] = WeakKeyDictionary()
@@ -86,13 +87,47 @@ def new(
     return Gsap(defaults)
 
 
-def from_(target: str, options: Dict):
-    return _get_instance().from_(target, options)
+def from_(targets: str, options: Dict):
+    """define where the values should START, and then it animates to the current state which is perfect for animating objects onto the screen because you can set them up the way you want them to look at the end and then animate in from elsewhere
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsap.from_
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsap.from_
 
 
-def to(target: str, options: Dict):
-    return _get_instance().to(target, options)
+    Args:
+        targets (str): The object(s) whose properties you want to animate. This can be selector text like ".class", "#id", etc. (GSAP uses document.querySelectorAll() internally)
+        options (Dict): An object containing all the properties/values you want to animate, along with any special properties like ease, duration, delay, or onComplete (listed below)
+
+    """
+    return _get_instance().from_(targets, options)
 
 
-def run_script(script: str):
-    return _get_instance().run_script(script)
+def to(targets: str, options: Dict):
+    """define the destination values (and most people think in terms of animating to certain values)
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsap.to
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsap.to
+
+
+    Args:
+        targets (str): The object(s) whose properties you want to animate. This can be selector text like ".class", "#id", etc. (GSAP uses document.querySelectorAll() internally)
+        options (Dict): An object containing all the properties/values you want to animate, along with any special properties like ease, duration, delay, or onComplete (listed below)
+    """
+
+    return _get_instance().to(targets, options)
+
+
+def run_script(script: Union[str, Path]):
+    """Allows you to write animated js code directly
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#gsap.run_script
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#gsap.run_script
+
+
+    Args:
+        script (Union[str, Path]): Text of the js code. If it is of type `Path` reads the text of the file.
+
+
+    """
+    script = Path(script)
+    return _get_instance().run_script(script.read_text("utf8"))
