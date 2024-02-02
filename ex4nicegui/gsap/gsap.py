@@ -129,5 +129,7 @@ def run_script(script: Union[str, Path]):
 
 
     """
-    script = Path(script)
-    return _get_instance().run_script(script.read_text("utf8"))
+
+    if isinstance(script, Path):
+        script = script.read_text("utf8")
+    return _get_instance().run_script(script)
