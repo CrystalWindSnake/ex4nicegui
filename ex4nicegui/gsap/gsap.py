@@ -18,6 +18,7 @@ class Gsap(
         super().__init__()
         self._props["defaults"] = defaults or {}
         self._props["tasks"] = []
+        self._props["scriptTasks"] = []
 
     def set_defaults(
         self,
@@ -33,6 +34,20 @@ class Gsap(
     def to(self, target: str, options: Dict):
         self.__try_run_task("to", target, options)
         return self
+
+    def run_script(self, script: str):
+        self.__try_run_script_task(script)
+        return self
+
+    def __try_run_script_task(self, script: str):
+        def fn():
+            self.run_method("runScript", script)
+
+        if ng_context.get_client().has_socket_connection:
+            fn()
+        else:
+            tasks = self._props["scriptTasks"]
+            tasks.append(script)
 
     def __try_run_task(self, name: str, target: str, options: Dict):
         def fn():
@@ -77,3 +92,7 @@ def from_(target: str, options: Dict):
 
 def to(target: str, options: Dict):
     return _get_instance().to(target, options)
+
+
+def run_script(script: str):
+    return _get_instance().run_script(script)

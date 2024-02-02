@@ -18,6 +18,12 @@ export default {
         convertDynamicProperties(t.options, false)
         gsap[t.method](t.target, t.options)
       })
+
+      this.scriptTasks.forEach(script => {
+        const fn = new Function('return ' + script)()
+        fn(gsap)
+      })
+
     })
   },
 
@@ -29,10 +35,15 @@ export default {
     to(target, options) {
       convertDynamicProperties(options, false)
       gsap.to(target, options)
+    },
+    runScript(script) {
+      const fn = new Function('return ' + script)()
+      fn(gsap)
     }
   },
   props: {
     defaults: Object,
     tasks: Array,
+    scriptTasks: Array,
   },
 };
