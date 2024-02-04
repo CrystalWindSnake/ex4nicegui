@@ -249,6 +249,44 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 ### rxui.echarts
 使用 echarts 制作图表
 
+#### rxui.echarts.from_javascript
+从 javascript 代码创建 echart
+
+```python
+from pathlib import Path
+
+rxui.echarts.from_javascript(Path("code.js"))
+# or
+rxui.echarts.from_javascript(
+    """
+(myChart) => {
+
+    option = {
+        xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                data: [120, 200, 150, 80, 70, 110, 130],
+                type: 'bar'
+            }
+        ]
+    };
+
+    myChart.setOption(option);
+}
+"""
+)
+```
+
+- 函数第一个参数为 echart 实例对象.你需要在函数中通过 `setOption` 完成图表配置
+
+---
+
 #### rxui.echarts.register_map
 注册地图.
 

@@ -244,6 +244,44 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 ### rxui.echarts
 Charting with echarts
 
+#### rxui.echarts.from_javascript
+Create echart from javascript code
+
+```python
+from pathlib import Path
+
+rxui.echarts.from_javascript(Path("code.js"))
+# or
+rxui.echarts.from_javascript(
+    """
+(myChart) => {
+
+    option = {
+        xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                data: [120, 200, 150, 80, 70, 110, 130],
+                type: 'bar'
+            }
+        ]
+    };
+
+    myChart.setOption(option);
+}
+"""
+)
+```
+
+- The first parameter of the function is the echart instance object. You need to configure the chart in the function with `setOption`.
+
+---
+
 #### rxui.echarts.register_map
 Register a map.
 

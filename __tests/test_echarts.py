@@ -1,3 +1,4 @@
+from pathlib import Path
 from ex4nicegui.reactive import rxui
 from nicegui import ui, app
 from ex4nicegui import ref_computed, to_ref
@@ -70,16 +71,24 @@ def test_chart_display(page: ScreenPage, page_path: str):
         # i.g. https://github.com/CrystalWindSnake/ex4nicegui/issues/77
         target2 = rxui.echarts.from_pyecharts(chart_opts)
 
+        # from js
+        target3 = rxui.echarts.from_javascript(
+            Path(__file__).parent / "files/echarts_code.js"
+        )
+
         set_test_id(target1, "target1")
         set_test_id(target2, "target2")
+        set_test_id(target3, "target3")
 
     page.open(page_path)
 
     target1 = EChartsUtils(page, "target1")
     target2 = EChartsUtils(page, "target2")
+    target3 = EChartsUtils(page, "target3")
 
-    target1.assert_canvas_exists()
+    target1.assert_echarts_attachment()
     target2.assert_echarts_attachment()
+    target3.assert_echarts_attachment()
 
 
 def test_js_function_opt(page: ScreenPage, page_path: str):

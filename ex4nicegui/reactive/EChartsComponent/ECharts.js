@@ -17,7 +17,7 @@ function retry(fn, options = {}) {
     isDone = true
   }
 
-  const task = setInterval(() => {
+  function callback() {
     tryTimes += 1
 
     if (tryTimes <= options.tryMaxTimes) {
@@ -32,8 +32,10 @@ function retry(fn, options = {}) {
       clearInterval(task)
     }
 
+  }
 
-  }, options.intervalMs);
+  callback();
+  const task = setInterval(callback, options.intervalMs);
 }
 
 
@@ -43,7 +45,14 @@ export default {
 
     function initChart() {
       this.chart = echarts.init(this.$el, this.theme);
-      this.update_chart();
+
+      if (this.options) {
+        this.update_chart();
+      } else {
+        const fn = new Function('return ' + this.code)()
+        fn(this.chart)
+        this.$emit("__update_options_from_client", this.chart.getOption())
+      }
       this.chart.getZr().on("click", (e) => {
         if (!e.target) {
           this.$emit("clickBlank")
@@ -64,7 +73,6 @@ export default {
           echarts.dispose(this.chart)
           return
         } else {
-          clearInterval(tryInit)
           done()
           throw e;
         }
@@ -124,7 +132,8 @@ export default {
     },
   },
   props: {
-    options: Object,
-    theme: String | Object | undefined
+    options: Object | undefined,
+    theme: String | Object | undefined,
+    code: String | undefined,
   },
 };
