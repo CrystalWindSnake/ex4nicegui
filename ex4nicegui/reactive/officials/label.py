@@ -1,3 +1,4 @@
+from typing import Any
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
@@ -9,10 +10,10 @@ from .base import SingleValueBindableUi
 from .utils import _convert_kws_ref2value
 
 
-class LabelBindableUi(SingleValueBindableUi[str, ui.label]):
+class LabelBindableUi(SingleValueBindableUi[Any, ui.label]):
     def __init__(
         self,
-        text: TMaybeRef[str] = "",
+        text: TMaybeRef[Any] = "",
     ) -> None:
         kws = {
             "text": text,
