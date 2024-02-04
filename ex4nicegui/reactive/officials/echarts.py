@@ -107,6 +107,16 @@ class EChartsBindableUi(BindableUi[echarts]):
 
     @classmethod
     def from_javascript(cls, code: Union[str, Path]):
+        """Create echart from javascript code.
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#rxuiechartsfrom_javascript
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#rxuiechartsfrom_javascript
+
+
+        Args:
+            code (Union[str, Path]): Text of the js code. If it is of type `Path` reads the text of the file.
+
+        """
         if isinstance(code, Path):
             code = code.read_text("utf8")
         return cls(code=code)
