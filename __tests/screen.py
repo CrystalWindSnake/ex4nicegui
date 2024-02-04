@@ -10,6 +10,9 @@ class Screen:
     def __init__(self, browser: Browser) -> None:
         self.server_thread = None
         self.browser = browser
+
+        self._context = browser.new_context()
+        self._context.set_default_timeout(5000)
         self.ui_run_kwargs = {"port": PORT, "show": False, "reload": False}
 
     def start_server(self) -> None:
@@ -37,12 +40,12 @@ class Screen:
 class ScreenPage:
     def __init__(self, screen: Screen) -> None:
         self.__screen = screen
-        self._page = self.__screen.browser.new_page()
-        self._page.set_default_timeout(5000)
+        self._page = self.__screen._context.new_page()
+        # self._page.set_default_timeout(5000)
 
     def open(self, path: str):
-        self._page.wait_for_selector("body", timeout=10000)
-        self._page.goto(f"http://localhost:{PORT}{path}")
+        # self._page.wait_for_selector("body", timeout=10000)
+        self._page.goto(f"http://localhost:{PORT}{path}", wait_until="domcontentloaded")
 
     def is_checked_by_label(self, target_test_id: str, label: str):
         assert self.get_by_test_id(target_test_id).get_by_label(label).is_checked()
