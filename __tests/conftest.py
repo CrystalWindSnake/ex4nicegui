@@ -54,7 +54,7 @@ def page(screen: Screen, request: pytest.FixtureRequest):
 
     yield test_page
 
-    test_page.close()
+    # test_page.close()
 
 
 URL_COUNTER = 0
