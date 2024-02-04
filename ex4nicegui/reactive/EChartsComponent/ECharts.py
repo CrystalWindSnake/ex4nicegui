@@ -1,3 +1,4 @@
+import os
 from typing import (
     Any,
     Callable,
@@ -67,9 +68,26 @@ _T_mouse_event_name = Literal[
 
 
 class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ignore
-    def __init__(self, options: dict) -> None:
+    def __init__(
+        self,
+        options: Optional[dict] = None,
+        code: Optional[str] = None,
+    ) -> None:
         super().__init__()
+
+        if (options is None) and (bool(code) is False):
+            raise ValueError("At least one of options and code must be valid.")
+
+        if code:
+            code = os.linesep.join([s for s in code.splitlines() if s])
+
+            def on__update_options_from_client(e):
+                self._props["options"] = e.args
+
+            self.on("__update_options_from_client", on__update_options_from_client)
+
         self._props["options"] = options
+        self._props["code"] = code
 
         self._echarts_on_tasks: List[Callable] = []
         self._echarts_on_callback_map: Dict[str, _T_echats_on_callback] = {}

@@ -37,11 +37,12 @@ class EChartsBindableUi(BindableUi[echarts]):
     EChartsMouseEventArguments = EChartsMouseEventArguments
 
     def __init__(
-        self, options: TMaybeRef[Dict], not_merge: TMaybeRef[Union[bool, None]] = None
+        self,
+        options: TMaybeRef[Union[Dict, None]] = None,
+        not_merge: TMaybeRef[Union[bool, None]] = None,
+        code: Optional[str] = None,
     ) -> None:
-        kws = {
-            "options": options,
-        }
+        kws = {"options": options, "code": code}
 
         value_kws = _convert_kws_ref2value(kws)
         element = echarts(**value_kws).classes("grow self-stretch h-[16rem]")
@@ -103,6 +104,12 @@ class EChartsBindableUi(BindableUi[echarts]):
             return EChartsBindableUi(chart_opt)
 
         return EChartsBindableUi(EChartsBindableUi._pyecharts2opts(chart))
+
+    @classmethod
+    def from_javascript(cls, code: Union[str, Path]):
+        if isinstance(code, Path):
+            code = code.read_text("utf8")
+        return cls(code=code)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "options":
