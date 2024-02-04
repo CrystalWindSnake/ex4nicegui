@@ -1,6 +1,6 @@
 from functools import partial
 import types
-from weakref import WeakKeyDictionary
+from weakref import WeakValueDictionary
 from signe import batch as signe_batch, effect as signe_effect, computed, on as signe_on
 from signe.core.signal import Signal, SignalOption
 from signe.core.effect import Effect
@@ -278,16 +278,17 @@ class ref_computed_method(Generic[T]):
         fget: Callable[[Any], T],
     ) -> None:
         self._fget = fget
-        self.__instance_map: WeakKeyDictionary[
-            object, ReadonlyRef
-        ] = WeakKeyDictionary()
+        self._instance_map: WeakValueDictionary[
+            int, ReadonlyRef
+        ] = WeakValueDictionary()
 
     def __get_computed(self, instance):
-        if instance not in self.__instance_map:
+        ins_id = id(instance)
+        if ins_id not in self._instance_map:
             cp = ref_computed(partial(self._fget, instance))
-            self.__instance_map[instance] = cp
+            self._instance_map[ins_id] = cp
 
-        return self.__instance_map[instance]
+        return self._instance_map[ins_id]
 
     def __get__(self, __instance: Any, __owner: Optional[type] = None):
         return cast(ReadonlyRef[T], self.__get_computed(__instance))
