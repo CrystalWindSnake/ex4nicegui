@@ -38,7 +38,7 @@ class EChartsBindableUi(BindableUi[echarts]):
 
     def __init__(
         self,
-        options: TMaybeRef[Union[Dict, None]] = None,
+        options: Optional[TMaybeRef[Dict]] = None,
         not_merge: TMaybeRef[Union[bool, None]] = None,
         code: Optional[str] = None,
     ) -> None:
