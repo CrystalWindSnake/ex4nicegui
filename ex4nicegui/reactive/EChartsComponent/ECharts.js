@@ -17,7 +17,7 @@ function retry(fn, options = {}) {
     isDone = true
   }
 
-  const task = setInterval(() => {
+  function callback() {
     tryTimes += 1
 
     if (tryTimes <= options.tryMaxTimes) {
@@ -32,8 +32,10 @@ function retry(fn, options = {}) {
       clearInterval(task)
     }
 
+  }
 
-  }, options.intervalMs);
+  callback();
+  const task = setInterval(callback, options.intervalMs);
 }
 
 
@@ -49,7 +51,6 @@ export default {
       } else {
         const fn = new Function('return ' + this.code)()
         fn(this.chart)
-        // this.options = this.chart.getOption();
         this.$emit("__update_options_from_client", this.chart.getOption())
       }
       this.chart.getZr().on("click", (e) => {
