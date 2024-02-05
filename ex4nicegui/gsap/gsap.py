@@ -127,6 +127,15 @@ def run_script(script: Union[str, Path]):
     Args:
         script (Union[str, Path]): Text of the js code. If it is of type `Path` reads the text of the file.
 
+    ## Examples
+
+    ```python
+    gsap.run_script(
+        r'''(gsap)=> {
+        gsap.to('.target',{"duration": 0.3,y:60})
+    }
+    ''')
+    ```
 
     """
 

@@ -116,6 +116,17 @@ class EChartsBindableUi(BindableUi[echarts]):
         Args:
             code (Union[str, Path]): Text of the js code. If it is of type `Path` reads the text of the file.
 
+        ## Examples
+
+        ```python
+        rxui.echarts.from_javascript(
+            r'''(myChart) => {
+                option = {...};
+                myChart.setOption(option);
+            }
+        ''')
+        ```
+
         """
         if isinstance(code, Path):
             code = code.read_text("utf8")

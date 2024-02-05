@@ -249,6 +249,8 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 ### rxui.echarts
 使用 echarts 制作图表
 
+---
+
 #### rxui.echarts.from_javascript
 从 javascript 代码创建 echart
 

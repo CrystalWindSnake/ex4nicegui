@@ -244,6 +244,8 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 ### rxui.echarts
 Charting with echarts
 
+---
+
 #### rxui.echarts.from_javascript
 Create echart from javascript code
 
@@ -340,7 +342,7 @@ gsap.from_(".target", {"x": 50,'duration':1})
 After the screen is loaded, the starting position of the text is shifted to the right by 50px, and then moved to the original position within 1 second.
 
 - Arguments `targets` are css selectors.
-- Arguments `targets` are css selectors. Arguments `vars` are attribute values
+- Arguments `vars` are attribute values
 
 ---
 
