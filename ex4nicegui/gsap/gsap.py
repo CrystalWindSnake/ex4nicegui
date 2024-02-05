@@ -1,17 +1,16 @@
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Dict, Optional, Union
 from nicegui.element import Element
 from nicegui import context as ng_context
-import nicegui
 from weakref import WeakKeyDictionary
 
 
 class Gsap(
     Element,
     component="wrapGsap.js",
-    exposed_libraries=["libs/gsap.mjs"],
-    extra_libraries=["libs/*.js", "libs/utils/*.js"],
+    exposed_libraries=["../libs/gsap/gsap.mjs"],
+    extra_libraries=["../libs/gsap/*.js", "../libs/gsap/utils/*.js"],
 ):
     def __init__(
         self,
