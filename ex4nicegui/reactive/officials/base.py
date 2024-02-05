@@ -106,6 +106,23 @@ class BindableUi(Generic[TWidget]):
         """Delete the element."""
         self.element.delete()
 
+    def move(
+        self, target_container: Optional[ui.element] = None, target_index: int = -1
+    ):
+        """Move the element to another container.
+
+        :param target_container: container to move the element to (default: the parent container)
+        :param target_index: index within the target slot (default: append to the end)
+        """
+        return self.element.move(target_container, target_index)
+
+    def remove(self, element: Union[ui.element, int]) -> None:
+        """Remove a child element.
+
+        :param element: either the element instance or its ID
+        """
+        return self.element.remove(element)
+
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "visible":
             return self.bind_visible(ref_ui)
