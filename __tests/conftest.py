@@ -46,7 +46,7 @@ def screen(playwright: Playwright, request: pytest.FixtureRequest):
     screen.stop_server()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def page(screen: Screen, request: pytest.FixtureRequest):
     if "noautofixt" in request.keywords:
         return
@@ -54,7 +54,7 @@ def page(screen: Screen, request: pytest.FixtureRequest):
 
     yield test_page
 
-    # test_page.close()
+    test_page.close()
 
 
 URL_COUNTER = 0
