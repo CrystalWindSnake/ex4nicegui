@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 from nicegui.element import Element
@@ -37,6 +38,7 @@ class Gsap(
         return self
 
     def run_script(self, script: str):
+        script = os.linesep.join([s for s in script.splitlines() if s])
         self.__try_run_script_task(script)
         return self
 

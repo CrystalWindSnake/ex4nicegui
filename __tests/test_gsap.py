@@ -32,7 +32,8 @@ def test_run_script(page: ScreenPage, page_path: str):
         set_test_id(ui.label("test").classes("target"), "label")
 
         gsap.run_script(
-            r"""function setGsap(gsap) {
+            r"""
+            function setGsap(gsap) {
     gsap.to('.target',{"duration": 0.3,y:60})
 }
 """
