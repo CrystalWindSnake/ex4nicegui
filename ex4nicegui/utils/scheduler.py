@@ -1,8 +1,9 @@
 from signe import utils as signe_utils
 import asyncio
+from typing import Literal
 
 
-class EventDelayExecutionScheduler(signe_utils.BatchExecutionScheduler):
+class PostEventExecutionScheduler(signe_utils.BatchExecutionScheduler):
     def __init__(self) -> None:
         super().__init__()
         self.__has_callback = False
@@ -20,3 +21,17 @@ class EventDelayExecutionScheduler(signe_utils.BatchExecutionScheduler):
     ):
         super().run_batch()
         self.__has_callback = False
+
+
+_T_Scheduler = Literal["default", "post-event"]
+
+
+def reset_execution_scheduler(type: _T_Scheduler):
+    if type == "post-event":
+        signe_utils.get_current_executor().set_default_execution_scheduler(
+            PostEventExecutionScheduler()
+        )
+    else:
+        signe_utils.get_current_executor().set_default_execution_scheduler(
+            signe_utils.ExecutionScheduler()
+        )

@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from functools import partial
 import types
 from weakref import WeakValueDictionary
@@ -20,15 +21,10 @@ from typing import (
     Union,
     Sequence,
 )
-from .scheduler import EventDelayExecutionScheduler
+from .scheduler import reset_execution_scheduler
 from nicegui import ui
 
 T = TypeVar("T")
-
-
-signe_utils.get_current_executor().set_default_execution_scheduler(
-    EventDelayExecutionScheduler()
-)
 
 
 _CLIENT_SCOPE_MANAGER = NgClientScopeManager()
@@ -127,12 +123,9 @@ def ref(value: T):
         False
         if not isinstance(
             value,
-            (
-                str,
-                int,
-                float,
-            ),
+            (str, int, float, date, datetime),
         )
+        and (value is not None)
         else None
     )
     # getter, setter = createSignal(value, comp)
@@ -251,7 +244,9 @@ def ref_computed(
 
     if fn:
         if _is_class_define_method(fn):
-            return cast(ref_computed_method[T], ref_computed_method(fn))  # type: ignore
+            return cast(
+                ref_computed_method[T], ref_computed_method(fn, computed_args=kws)
+            )  # type: ignore
 
         getter = computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
         return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
@@ -280,11 +275,9 @@ def _is_class_define_method(fn: Callable):
 class ref_computed_method(Generic[T]):
     __isabstractmethod__: bool
 
-    def __init__(
-        self,
-        fget: Callable[[Any], T],
-    ) -> None:
+    def __init__(self, fget: Callable[[Any], T], computed_args: Dict) -> None:
         self._fget = fget
+        self._computed_args = computed_args
         self._instance_map: WeakValueDictionary[
             int, ReadonlyRef
         ] = WeakValueDictionary()
@@ -292,7 +285,7 @@ class ref_computed_method(Generic[T]):
     def __get_computed(self, instance):
         ins_id = id(instance)
         if ins_id not in self._instance_map:
-            cp = ref_computed(partial(self._fget, instance))
+            cp = ref_computed(partial(self._fget, instance), **self._computed_args)
             self._instance_map[ins_id] = cp
 
         return self._instance_map[ins_id]
