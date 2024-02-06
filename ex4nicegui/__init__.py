@@ -10,6 +10,7 @@ from ex4nicegui.utils.signals import (
     ref,
     on,
     event_batch,
+    reset_execution_scheduler,
     _TMaybeRef as TMaybeRef,
 )
 from ex4nicegui import tools

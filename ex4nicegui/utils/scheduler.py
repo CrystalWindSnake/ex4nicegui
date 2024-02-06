@@ -23,7 +23,7 @@ class PostEventExecutionScheduler(signe_utils.BatchExecutionScheduler):
         self.__has_callback = False
 
 
-_T_Scheduler = Literal["default", "post-event"]
+_T_Scheduler = Literal["sync", "post-event"]
 
 
 def reset_execution_scheduler(type: _T_Scheduler):
@@ -31,7 +31,7 @@ def reset_execution_scheduler(type: _T_Scheduler):
         signe_utils.get_current_executor().set_default_execution_scheduler(
             PostEventExecutionScheduler()
         )
-    else:
+    elif type == "sync":
         signe_utils.get_current_executor().set_default_execution_scheduler(
             signe_utils.ExecutionScheduler()
         )

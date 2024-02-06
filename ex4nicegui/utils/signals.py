@@ -245,7 +245,8 @@ def ref_computed(
     if fn:
         if _is_class_define_method(fn):
             return cast(
-                ref_computed_method[T], ref_computed_method(fn, computed_args=kws)
+                ref_computed_method[T],
+                ref_computed_method(fn, computed_args=kws),  # type: ignore
             )  # type: ignore
 
         getter = computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())

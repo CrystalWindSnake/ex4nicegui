@@ -1,7 +1,7 @@
 from nicegui import ui
-from ex4nicegui import to_ref, on, effect, event_batch
+from ex4nicegui import to_ref, on, effect, event_batch, reset_execution_scheduler
 from .screen import ScreenPage
-from .utils import fn
+from .utils import fn, ButtonUtils, set_test_id
 
 
 def test_on_priority_level():
@@ -63,3 +63,61 @@ def test_batch_event(page: ScreenPage, page_path: str):
 
     assert fn_on_times.calledTimes == 1
     assert fn_effect.calledTimes == 2
+
+
+def test_sync_scheduler(page: ScreenPage, page_path: str):
+    reset_execution_scheduler("sync")
+
+    a = to_ref(0)
+    dummy = []
+
+    @ui.page(page_path)
+    def _():
+        @on(a, onchanges=True)
+        def _():
+            a.value
+            dummy.append("effect")
+
+        def when_click():
+            dummy.append("start")
+            a.value += 1
+            dummy.append("end")
+
+        set_test_id(ui.button("change", on_click=when_click), "target")
+
+    page.open(page_path)
+
+    btn = ButtonUtils(page, "target")
+    btn.click()
+
+    page.wait(1500)
+    assert dummy == ["start", "effect", "end"]
+
+
+def test_post_event_scheduler(page: ScreenPage, page_path: str):
+    reset_execution_scheduler("post-event")
+
+    a = to_ref(0)
+    dummy = []
+
+    @ui.page(page_path)
+    def _():
+        @on(a, onchanges=True)
+        def _():
+            a.value
+            dummy.append("effect")
+
+        def when_click():
+            dummy.append("start")
+            a.value += 1
+            dummy.append("end")
+
+        set_test_id(ui.button("change", on_click=when_click), "target")
+
+    page.open(page_path)
+
+    btn = ButtonUtils(page, "target")
+    btn.click()
+
+    page.wait(1500)
+    assert dummy == ["start", "end", "effect"]
