@@ -121,3 +121,5 @@ def test_post_event_scheduler(page: ScreenPage, page_path: str):
 
     page.wait(1500)
     assert dummy == ["start", "end", "effect"]
+
+    reset_execution_scheduler("sync")
