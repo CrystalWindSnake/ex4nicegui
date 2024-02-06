@@ -1,165 +1,197 @@
-from typing import List
+from typing import Any, List, Protocol
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from .screen import ScreenPage
 from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
 from playwright.sync_api import expect
+import pytest
+from dataclasses import dataclass
 
 
-def _todo_with_dict():
-    pass
+class TestTodosExample:
+    @dataclass
+    class TodoItem:
+        title: str
+        done: bool
 
+    class TodoProto(Protocol):
+        def get(self, obj, attr: str) -> Any:
+            ...
 
-def test_todos_example(page: ScreenPage, page_path: str):
-    @ui.page(page_path)
-    def _():
-        ui.row.default_classes("flex-center")
+        def new(self, title: str, done: bool) -> Any:
+            ...
 
-        todos = to_ref([])
-        input = to_ref("")
+        def set(self, obj: Any, attr: str, value: Any):
+            ...
 
-        @ref_computed
-        def total_done():
-            return sum(todo["done"] for todo in todos.value)
+    class DictTodo(TodoProto):
+        def get(self, obj, attr: str) -> Any:
+            return obj[attr]
 
-        @ref_computed
-        def totals():
-            return len(todos.value)
+        def set(self, obj: Any, attr: str, value: Any):
+            obj[attr] = value
 
-        @ref_computed
-        def btn_enabled():
-            todos_text = set(todo["title"] for todo in todos.value)
-            return len(input.value) > 0 and (input.value not in todos_text)
+        def new(self, title: str, done: bool) -> Any:
+            return {"title": title, "done": done}
 
-        def new_todo(text: str):
-            todos.value.append({"title": text, "done": False})
-            todos.value = todos.value
-            input.value = ""
+    class DataclassTodo(TodoProto):
+        def get(self, obj, attr: str) -> Any:
+            return getattr(obj, attr)
 
-        def del_todo(task_index: int):
-            target = [
-                todo for idx, todo in enumerate(todos.value) if idx == task_index
-            ][0]
-            todos.value.remove(target)
-            todos.value = todos.value
+        def set(self, obj: Any, attr: str, value: Any):
+            setattr(obj, attr, value)
 
-        def all_done():
-            for todo in todos.value:
-                todo["done"] = True
+        def new(self, title: str, done: bool) -> Any:
+            return TodoItem(title, done)
 
-            todos.value = todos.value
+    @pytest.mark.parametrize("todo_proto", [DictTodo(), DataclassTodo()])
+    def test_todos_example(
+        self, page: ScreenPage, page_path: str, todo_proto: TodoProto
+    ):
+        @ui.page(page_path)
+        def _():
+            ui.row.default_classes("flex-center")
 
-        def swap(a: int, b: int):
-            todos.value[a], todos.value[b] = todos.value[b], todos.value[a]
-            todos.value = todos.value
+            todos = to_ref([])
+            input = to_ref("")
 
-        with ui.row():
-            set_test_id(rxui.input(value=input), "input")
-            set_test_id(
-                rxui.button("add", on_click=lambda: new_todo(input.value)).bind_enabled(
-                    btn_enabled
-                ),
-                "btn add",
-            )
-            set_test_id(
-                rxui.button("all done", on_click=lambda: all_done()), "btn all done"
-            )
-            set_test_id(rxui.button("swap", on_click=lambda: swap(0, -1)), "btn swap")
+            @ref_computed
+            def total_done():
+                return sum(todo_proto.get(todo, "done") for todo in todos.value)
+
+            @ref_computed
+            def totals():
+                return len(todos.value)
+
+            def new_todo(text: str):
+                todos.value.append(todo_proto.new(**{"title": text, "done": False}))
+                todos.value = todos.value
+                input.value = ""
+
+            def del_todo(task_index: int):
+                target = [
+                    todo for idx, todo in enumerate(todos.value) if idx == task_index
+                ][0]
+                todos.value.remove(target)
+                todos.value = todos.value
+
+            def all_done():
+                for todo in todos.value:
+                    todo_proto.set(todo, "done", True)
+
+                todos.value = todos.value
+
+            def swap(a: int, b: int):
+                todos.value[a], todos.value[b] = todos.value[b], todos.value[a]
+                todos.value = todos.value
 
             with ui.row():
-                ui.label("done count:")
-                set_test_id(rxui.label(total_done), "label done")
+                set_test_id(rxui.input(value=input), "input")
+                set_test_id(
+                    rxui.button("add", on_click=lambda: new_todo(input.value)),
+                    "btn add",
+                )
+                set_test_id(
+                    rxui.button("all done", on_click=lambda: all_done()), "btn all done"
+                )
+                set_test_id(
+                    rxui.button("swap", on_click=lambda: swap(0, -1)), "btn swap"
+                )
 
-            with ui.row():
-                ui.label("totals count:")
-                set_test_id(rxui.label(totals), "label totals")
+                with ui.row():
+                    ui.label("done count:")
+                    set_test_id(rxui.label(total_done), "label done")
 
-        with ui.column().classes("card_zone"):
+                with ui.row():
+                    ui.label("totals count:")
+                    set_test_id(rxui.label(totals), "label totals")
 
-            @rxui.vfor(todos)
-            def _(r: rxui.VforStore):
-                with ui.card().classes("w-full row-card"), ui.row():
-                    rxui.label(r.get("title")).classes("row-title")
-                    rxui.checkbox("done", value=r.get("done"))
-                    rxui.button(
-                        "del", on_click=lambda: del_todo(r.row_index)
-                    ).bind_enabled(r.get("done"))
+            with ui.column().classes("card_zone"):
 
-    page.open(page_path)
+                @rxui.vfor(todos)
+                def _(r: rxui.VforStore):
+                    with ui.card().classes("w-full row-card"), ui.row():
+                        rxui.label(r.get("title")).classes("row-title")
+                        rxui.checkbox("done", value=r.get("done"))
+                        rxui.button(
+                            "del", on_click=lambda: del_todo(r.row_index)
+                        ).bind_enabled(r.get("done"))
 
-    btn_add = ButtonUtils(page, "btn add")
-    btn_all_done = ButtonUtils(page, "btn all done")
-    btn_swap = ButtonUtils(page, "btn swap")
-    input = InputUtils(page, "input")
+        page.open(page_path)
 
-    label_done = LabelUtils(page, "label done")
-    label_totals = LabelUtils(page, "label totals")
+        btn_add = ButtonUtils(page, "btn add")
+        btn_all_done = ButtonUtils(page, "btn all done")
+        btn_swap = ButtonUtils(page, "btn swap")
+        input = InputUtils(page, "input")
 
-    locator_row_cards = page._page.locator(".row-card")
-    locator_row_titles = locator_row_cards.locator(".row-title")
-    locator_row_checkboxs = locator_row_cards.get_by_role("checkbox")
-    locator_row_btns = locator_row_cards.get_by_role("button")
+        label_done = LabelUtils(page, "label done")
+        label_totals = LabelUtils(page, "label totals")
 
-    def expect_titles(titles: List[str]):
-        for title, element in zip(titles, locator_row_titles.all()):
-            expect(element).to_have_text(title)
+        locator_row_cards = page._page.locator(".row-card")
+        locator_row_titles = locator_row_cards.locator(".row-title")
+        locator_row_checkboxs = locator_row_cards.get_by_role("checkbox")
+        locator_row_btns = locator_row_cards.get_by_role("button")
 
-    def expect_checkboxs(values: List[bool]):
-        for value, element in zip(values, locator_row_checkboxs.all()):
-            expect(element).to_be_checked(checked=value)
+        def expect_titles(titles: List[str]):
+            for title, element in zip(titles, locator_row_titles.all()):
+                expect(element).to_have_text(title)
 
-    def get_checkbox(index: int):
-        return locator_row_checkboxs.all()[index]
+        def expect_checkboxs(values: List[bool]):
+            for value, element in zip(values, locator_row_checkboxs.all()):
+                expect(element).to_be_checked(checked=value)
 
-    def get_del_btn(index: int):
-        return locator_row_btns.all()[index]
+        def get_checkbox(index: int):
+            return locator_row_checkboxs.all()[index]
 
-    # first input
-    input.fill_text("test1")
-    btn_add.click()
+        def get_del_btn(index: int):
+            return locator_row_btns.all()[index]
 
-    expect(locator_row_cards).to_have_count(1)
-    expect_titles(["test1"])
-    expect_checkboxs([False])
+        # first input
+        input.fill_text("test1")
+        btn_add.click()
 
-    label_done.expect_to_have_text("0")
-    label_totals.expect_to_have_text("1")
+        expect(locator_row_cards).to_have_count(1)
+        expect_titles(["test1"])
+        expect_checkboxs([False])
 
-    # click check box
-    get_checkbox(0).set_checked(True)
-    label_done.expect_to_have_text("1")
+        label_done.expect_to_have_text("0")
+        label_totals.expect_to_have_text("1")
 
-    # more todos
-    input.fill_text("test2")
-    btn_add.click()
+        # click check box
+        get_checkbox(0).set_checked(True)
+        label_done.expect_to_have_text("1")
 
-    input.fill_text("test3")
-    btn_add.click()
+        # more todos
+        input.fill_text("test2")
+        btn_add.click()
 
-    label_done.expect_to_have_text("1")
-    label_totals.expect_to_have_text("3")
+        input.fill_text("test3")
+        btn_add.click()
 
-    #
-    get_checkbox(2).set_checked(True)
-    get_del_btn(0).click()
+        label_done.expect_to_have_text("1")
+        label_totals.expect_to_have_text("3")
 
-    label_done.expect_to_have_text("1")
-    label_totals.expect_to_have_text("2")
+        #
+        get_checkbox(2).set_checked(True)
+        get_del_btn(0).click()
 
-    # swap
-    btn_swap.click()
+        label_done.expect_to_have_text("1")
+        label_totals.expect_to_have_text("2")
 
-    expect_titles(["test3", "test2"])
-    expect_checkboxs([True, False])
+        # swap
+        btn_swap.click()
 
-    #
-    btn_all_done.click()
-    label_done.expect_to_have_text("2")
-    label_totals.expect_to_have_text("2")
+        expect_titles(["test3", "test2"])
+        expect_checkboxs([True, False])
 
-    # del all
-    get_del_btn(0).click()
-    get_del_btn(0).click()
-    label_done.expect_to_have_text("0")
-    label_totals.expect_to_have_text("0")
+        #
+        btn_all_done.click()
+        label_done.expect_to_have_text("2")
+        label_totals.expect_to_have_text("2")
+
+        # del all
+        get_del_btn(0).click()
+        get_del_btn(0).click()
+        label_done.expect_to_have_text("0")
+        label_totals.expect_to_have_text("0")
