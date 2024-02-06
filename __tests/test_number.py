@@ -62,8 +62,7 @@ def test_on_change(page: ScreenPage, page_path: str):
 
     target = InputNumberUtils(page, "target")
 
-    target.input_text("1111")
-    page.wait(1500)
+    target.fill_text("1111")
     assert value_on_change == 1111.0
 
 
