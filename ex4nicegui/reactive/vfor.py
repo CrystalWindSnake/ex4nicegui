@@ -100,8 +100,9 @@ class vfor(Generic[_T]):
                             build_element(idx, store)
                             continue
 
-                        if value != store.get().value:
-                            store.update_item(value)
+                        # `data` may have changed the value of a dictionary item,
+                        # so should update the values in the store one by one.
+                        store.update_item(value)
 
                     for element in will_dels:
                         element.delete()

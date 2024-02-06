@@ -7,7 +7,7 @@ from .utils import ButtonUtils, InputUtils, CheckboxUtils, LabelUtils, set_test_
 from playwright.sync_api import expect
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_todos_example(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
         ui.row.default_classes("flex-center")
@@ -40,13 +40,22 @@ def test_base(page: ScreenPage, page_path: str):
             todos.value.remove(target)
             todos.value = todos.value
 
+        def all_done():
+            for todo in todos.value:
+                todo["done"] = True
+
+            todos.value = todos.value
+
         with ui.row():
             set_test_id(rxui.input(value=input), "input")
             set_test_id(
                 rxui.button("add", on_click=lambda: new_todo(input.value)).bind_enabled(
                     btn_enabled
                 ),
-                "add",
+                "btn add",
+            )
+            set_test_id(
+                rxui.button("all done", on_click=lambda: all_done()), "btn all done"
             )
 
             with ui.row():
@@ -71,7 +80,8 @@ def test_base(page: ScreenPage, page_path: str):
 
     page.open(page_path)
 
-    btn_add = ButtonUtils(page, "add")
+    btn_add = ButtonUtils(page, "btn add")
+    btn_all_done = ButtonUtils(page, "btn all done")
     input = InputUtils(page, "input")
 
     label_done = LabelUtils(page, "label done")
@@ -129,7 +139,7 @@ def test_base(page: ScreenPage, page_path: str):
     label_totals.expect_to_have_text("2")
 
     #
-    get_checkbox(0).set_checked(True)
+    btn_all_done.click()
     label_done.expect_to_have_text("2")
     label_totals.expect_to_have_text("2")
 
