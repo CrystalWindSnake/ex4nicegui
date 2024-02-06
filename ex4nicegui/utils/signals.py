@@ -20,9 +20,16 @@ from typing import (
     Union,
     Sequence,
 )
+from .scheduler import EventDelayExecutionScheduler
 from nicegui import ui
 
 T = TypeVar("T")
+
+
+signe_utils.get_current_executor().set_default_execution_scheduler(
+    EventDelayExecutionScheduler()
+)
+
 
 _CLIENT_SCOPE_MANAGER = NgClientScopeManager()
 
@@ -130,7 +137,7 @@ def ref(value: T):
     )
     # getter, setter = createSignal(value, comp)
 
-    s = Signal(signe_utils.exec, value, SignalOption(comp))
+    s = Signal(signe_utils.get_current_executor(), value, SignalOption(comp))
 
     return cast(Ref[T], Ref(s.getValue, s.setValue, s))
 
