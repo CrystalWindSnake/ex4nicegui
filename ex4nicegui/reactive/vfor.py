@@ -3,7 +3,6 @@ from nicegui import ui
 from signe import batch
 from ex4nicegui.utils.signals import Ref, on, to_ref
 from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Generic, Union
-from itertools import zip_longest
 from weakref import WeakValueDictionary
 from functools import partial
 from dataclasses import dataclass
@@ -95,13 +94,15 @@ class vfor(Generic[_T]):
         )
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
-    def __call__(self, fn: Callable[[VforStore], ui.element]):
+    def __call__(self, fn: Callable[[VforStore], None]):
         def build_element(index: int, value):
             key = self._get_key(index, value)
             store = VforStore.create_from_ref(to_ref(value), self._data, index)
-            element = fn(store)
-            element._props["data-vfor-key"] = f"{key}"
-            element.update()
+
+            with VforContainer() as element:
+                fn(store)
+            # element._props["data-vfor-key"] = f"{key}"
+            # element.update()
             return (key, store, element)
 
         with self._container:
