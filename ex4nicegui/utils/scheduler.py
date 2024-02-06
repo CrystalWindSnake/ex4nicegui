@@ -27,6 +27,13 @@ _T_Scheduler = Literal["sync", "post-event"]
 
 
 def reset_execution_scheduler(type: _T_Scheduler):
+    """Reset responsive scheduler type
+
+    Args:
+        type (Literal["sync", "post-event"]):
+            `sync`: triggers the relevant computation as soon as the ref is assigned.
+            `post-event`: performs other trigger calculations after the event loop in which the ref is assigned.
+    """
     if type == "post-event":
         signe_utils.get_current_executor().set_default_execution_scheduler(
             PostEventExecutionScheduler()
