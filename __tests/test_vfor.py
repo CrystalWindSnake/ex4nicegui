@@ -7,9 +7,9 @@ from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
 from playwright.sync_api import expect
 
 
-
 def _todo_with_dict():
     pass
+
 
 def test_todos_example(page: ScreenPage, page_path: str):
     @ui.page(page_path)
@@ -74,13 +74,12 @@ def test_todos_example(page: ScreenPage, page_path: str):
 
             @rxui.vfor(todos)
             def _(r: rxui.VforStore):
-                with ui.card().classes("w-full row-card") as box, ui.row():
+                with ui.card().classes("w-full row-card"), ui.row():
                     rxui.label(r.get("title")).classes("row-title")
                     rxui.checkbox("done", value=r.get("done"))
                     rxui.button(
                         "del", on_click=lambda: del_todo(r.row_index)
                     ).bind_enabled(r.get("done"))
-                return box
 
     page.open(page_path)
 
