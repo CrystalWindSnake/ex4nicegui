@@ -16,32 +16,36 @@ class VforStore(Generic[_T]):
     def __init__(self, r: Ref[_T], source: Ref[List[Any]], index: int) -> None:
         self._ref = r
         self._source = source
-        self._index = index
+        self._data_index = index
         self._attr_cache: WeakValueDictionary[str, Ref] = WeakValueDictionary()
 
     @property
     def row_index(self):
-        return self._index
+        return self._data_index
 
     def get(self, attr: Optional[str] = None):
         if attr:
             ref = self._attr_cache.get(attr)
             if ref is None:
-                ref = to_ref(self._ref.value[attr])  # type: ignore
+                value = _get_attribute(self._ref.value, attr)
+                ref = to_ref(value)  # type: ignore
                 self._attr_cache[attr] = ref
 
                 @on(ref, onchanges=True)
                 def _():
-                    self._source.value[self._index][attr] = ref.value
+                    _set_attribute(
+                        self._source.value[self._data_index], attr, ref.value
+                    )
                     self._source.value = self._source.value
 
             return ref
         return self._ref
 
-    def update_item(self, item):
-        if isinstance(item, dict):
-            for attr, ref in self._attr_cache.items():
-                ref.value = item[attr]
+    def update_item(self, item, index: int):
+        self._data_index = index
+
+        for attr, ref in self._attr_cache.items():
+            ref.value = _get_attribute(item, attr)
 
         self._ref.value = item  # type: ignore
 
@@ -59,6 +63,13 @@ class StoreItem:
 
 class VforContainer(Element, component="vfor.js"):
     pass
+
+
+def _set_attribute(obj: Union[object, Mapping], name: str, value: Any) -> None:
+    if isinstance(obj, dict):
+        obj[name] = value
+    else:
+        setattr(obj, name, value)
 
 
 def _get_attribute(obj: Union[object, Mapping], name: str) -> Any:
@@ -80,9 +91,7 @@ class vfor(Generic[_T]):
         self._container = VforContainer()
         self._data = data
         self._get_key = (
-            _get_key_with_index
-            if key is None
-            else partial(_get_key_with_getter, attr=key)
+            _get_key_with_index if key is None else partial(_get_key_with_getter, key)
         )
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
@@ -123,7 +132,7 @@ class vfor(Generic[_T]):
                         if store_item:
                             # `data` may have changed the value of a dictionary item,
                             # so should update the values in the store one by one.
-                            store_item.store.update_item(value)
+                            store_item.store.update_item(value, idx)
                             element = element_map.get(store_item.elementId)
                             assert element
                             element.move(self._container)
