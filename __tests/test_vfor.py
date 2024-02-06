@@ -7,6 +7,10 @@ from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
 from playwright.sync_api import expect
 
 
+
+def _todo_with_dict():
+    pass
+
 def test_todos_example(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
