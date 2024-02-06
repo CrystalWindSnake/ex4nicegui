@@ -2,9 +2,12 @@ from nicegui.element import Element
 from nicegui import ui
 from signe import batch
 from ex4nicegui.utils.signals import Ref, on, to_ref
-from typing import Any, Callable, List, Optional, TypeVar, Generic
+from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Generic, Union
 from itertools import zip_longest
 from weakref import WeakValueDictionary
+from functools import partial
+from dataclasses import dataclass
+
 
 _T = TypeVar("_T")
 
@@ -47,68 +50,92 @@ class VforStore(Generic[_T]):
         return cls(ref, source, index)
 
 
+@dataclass
+class StoreItem:
+    __slot__ = ["store", "elementId"]
+    store: VforStore
+    elementId: int
+
+
 class VforContainer(Element, component="vfor.js"):
     pass
 
 
+def _get_attribute(obj: Union[object, Mapping], name: str) -> Any:
+    if isinstance(obj, Mapping):
+        return obj[name]
+    return getattr(obj, name)
+
+
+def _get_key_with_index(idx: int, data: Any):
+    return idx
+
+
+def _get_key_with_getter(attr: str, idx: int, data: Any):
+    return _get_attribute(data, attr)
+
+
 class vfor(Generic[_T]):
     def __init__(self, data: Ref[List[_T]], key: Optional[str] = None) -> None:
-        self._box = VforContainer()
+        self._container = VforContainer()
         self._data = data
+        self._get_key = (
+            _get_key_with_index
+            if key is None
+            else partial(_get_key_with_getter, attr=key)
+        )
+        self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
     def __call__(self, fn: Callable[[VforStore], ui.element]):
-        clone_stores = [
-            VforStore.create_from_ref(to_ref(d), self._data, idx)
-            for idx, d in enumerate(self._data.value)
-        ]
+        def build_element(index: int, value):
+            key = self._get_key(index, value)
+            store = VforStore.create_from_ref(to_ref(value), self._data, index)
+            element = fn(store)
+            element._props["data-vfor-key"] = f"{key}"
+            element.update()
+            return (key, store, element)
 
-        def build_element(idx, store: VforStore):
-            ele = fn(store)
-            ele._props["data-vfor-key"] = f"{idx}"
-            ele.update()
-
-        with self._box:
-            for idx, store in enumerate(clone_stores):
-                build_element(idx, store)
+        with self._container:
+            for idx, value in enumerate(self._data.value):
+                key, store, element = build_element(idx, value)
+                self._store_map[key] = StoreItem(store, element.id)
 
         @on(self._data)
         def _():
-            elements = list(self._box)
+            data_map = {
+                self._get_key(idx, d): d for idx, d in enumerate(self._data.value)
+            }
 
-            will_dels: List[ui.element] = []
-            will_del_clones = []
+            @batch
+            def _():
+                temp_box = ui.element("div")
 
-            will_add_clone_refs = []
+                element_map: Dict[int, ui.element] = {}
+                for element in list(self._container):
+                    element.move(temp_box)
+                    element_map[element.id] = element
 
-            with self._box:
+                new_store_map: Dict[Union[Any, int], StoreItem] = {}
 
-                @batch
-                def _():
-                    for idx, (value, element, store) in enumerate(
-                        zip_longest(self._data.value, elements, clone_stores)
-                    ):
-                        if value is None:
-                            will_dels.append(element)
-                            will_del_clones.append(store)
-                            continue
+                with self._container:
+                    for idx, (key, value) in enumerate(data_map.items()):
+                        store_item = self._store_map.get(key)
+                        if store_item:
+                            # `data` may have changed the value of a dictionary item,
+                            # so should update the values in the store one by one.
+                            store_item.store.update_item(value)
+                            element = element_map.get(store_item.elementId)
+                            assert element
+                            element.move(self._container)
 
-                        if element is None:
-                            store = VforStore.create_from_ref(
-                                to_ref(value), self._data, idx
-                            )
-                            will_add_clone_refs.append((idx, store))
-                            build_element(idx, store)
-                            continue
+                            new_store_map[key] = store_item
+                        else:
+                            # new row item
+                            key, store, element = build_element(idx, value)
+                            store_item = StoreItem(store, element.id)
+                            element.move(self._container)
+                            new_store_map[key] = store_item
 
-                        # `data` may have changed the value of a dictionary item,
-                        # so should update the values in the store one by one.
-                        store.update_item(value)
-
-                    for element in will_dels:
-                        element.delete()
-
-                    for idx, store in will_add_clone_refs:
-                        clone_stores.append(store)
-
-                    for store in will_del_clones:
-                        clone_stores.remove(store)
+                self._store_map.clear()
+                self._store_map = new_store_map
+                temp_box.delete()
