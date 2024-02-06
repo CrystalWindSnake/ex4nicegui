@@ -118,17 +118,29 @@ def to_ref(maybe_ref: _TMaybeRef[T]):
     return cast(Ref[T], ref(maybe_ref))
 
 
-def ref(value: T):
-    comp = (
-        False
-        if not isinstance(
-            value,
-            (str, int, float, date, datetime),
-        )
-        and (value is not None)
-        else None
+def _is_comp_values(value):
+    return isinstance(
+        value,
+        (str, int, float, date, datetime),
     )
-    # getter, setter = createSignal(value, comp)
+
+
+def _ref_comp_with_None(old, new):
+    # Prevent Constant Repeated Assignment of None
+    if old is None and new is None:
+        return True
+
+    return False
+
+
+def ref(value: T):
+    comp = False  # Default never equal
+
+    if _is_comp_values(value):
+        comp = None  # comparison of `==`
+
+    if value is None:
+        comp = _ref_comp_with_None
 
     s = Signal(signe_utils.get_current_executor(), value, SignalOption(comp))
 
