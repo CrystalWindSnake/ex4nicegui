@@ -50,6 +50,10 @@ def test_todos_example(page: ScreenPage, page_path: str):
 
             todos.value = todos.value
 
+        def swap(a: int, b: int):
+            todos.value[a], todos.value[b] = todos.value[b], todos.value[a]
+            todos.value = todos.value
+
         with ui.row():
             set_test_id(rxui.input(value=input), "input")
             set_test_id(
@@ -61,6 +65,7 @@ def test_todos_example(page: ScreenPage, page_path: str):
             set_test_id(
                 rxui.button("all done", on_click=lambda: all_done()), "btn all done"
             )
+            set_test_id(rxui.button("swap", on_click=lambda: swap(0, -1)), "btn swap")
 
             with ui.row():
                 ui.label("done count:")
@@ -85,6 +90,7 @@ def test_todos_example(page: ScreenPage, page_path: str):
 
     btn_add = ButtonUtils(page, "btn add")
     btn_all_done = ButtonUtils(page, "btn all done")
+    btn_swap = ButtonUtils(page, "btn swap")
     input = InputUtils(page, "input")
 
     label_done = LabelUtils(page, "label done")
@@ -140,6 +146,12 @@ def test_todos_example(page: ScreenPage, page_path: str):
 
     label_done.expect_to_have_text("1")
     label_totals.expect_to_have_text("2")
+
+    # swap
+    btn_swap.click()
+
+    expect_titles(["test3", "test2"])
+    expect_checkboxs([True, False])
 
     #
     btn_all_done.click()
