@@ -109,7 +109,7 @@ class TestTodosExample:
 
             with ui.column().classes("card_zone"):
 
-                @rxui.vfor(todos)
+                @rxui.vfor(todos, key="title")
                 def _(r: rxui.VforStore):
                     with ui.card().classes("w-full row-card"), ui.row():
                         rxui.label(r.get("title")).classes("row-title")

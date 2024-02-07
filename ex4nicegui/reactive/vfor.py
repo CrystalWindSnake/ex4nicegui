@@ -22,7 +22,7 @@ class VforStore(Generic[_T]):
     def row_index(self):
         return self._data_index
 
-    def get(self, attr: Optional[str] = None):
+    def get(self, attr: Optional[str] = None) -> Ref[_T]:
         if attr:
             ref = self._attr_cache.get(attr)
             if ref is None:
@@ -86,7 +86,40 @@ def _get_key_with_getter(attr: str, idx: int, data: Any):
 
 
 class vfor(Generic[_T]):
-    def __init__(self, data: Ref[List[_T]], key: Optional[str] = None) -> None:
+    """render a list of items based on an array.
+
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#vfor
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#vfor
+
+
+    ## Examples
+    ```python
+    from ex4nicegui.reactive import rxui
+    from ex4nicegui import to_ref
+    items = to_ref(
+        [
+            {"message": "foo", "done": False},
+            {"message": "bar", "done": True},
+        ]
+    )
+
+
+    @rxui.vfor(items,key='message')
+    def _(store: rxui.VforStore):
+        msg_ref = store.get("message")  # this is ref object
+
+        # type text into the input box and
+        # the title of the checkbox changes sync
+        with ui.card():
+            rxui.input(value=msg_ref)
+            rxui.checkbox(text=msg_ref, value=store.get("done"))
+
+    ```
+
+    """
+
+    def __init__(self, data: Ref[List[_T]], *, key: Optional[str] = None) -> None:
         self._container = VforContainer()
         self._data = data
         self._get_key = (
