@@ -214,6 +214,8 @@ ui.button("change", on_click=change_value)
 
 首次执行 effect ,函数`auto_run_when_ref_value`将被执行一次.之后点击按钮,改变 `a` 的值(通过 `a.value`),函数`auto_run_when_ref_value`再次执行
 
+> 切忌把大量数据处理逻辑分散在多个 `on` 或 `effect` 中，`on` 或 `effect` 中应该大部分为界面操作逻辑，而非响应式数据处理逻辑
+
 ---
 
 ### `ref_computed`
@@ -308,6 +310,9 @@ ui.button("change b", on_click=change_b)
 
 - 参数 `onchanges` 为 True 时(默认值为 False),指定的函数不会在绑定时执行 
 
+
+> 切忌把大量数据处理逻辑分散在多个 `on` 或 `effect` 中，`on` 或 `effect` 中应该大部分为界面操作逻辑，而非响应式数据处理逻辑
+
 ---
 
 
@@ -319,15 +324,22 @@ ui.button("change b", on_click=change_b)
 ```python
 from nicegui import ui
 from ex4nicegui.reactive import rxui
-from ex4nicegui import to_ref
+from ex4nicegui import to_ref, ref_computed
 
+# refs
 items = to_ref(
     [
-        {"id":1,"message": "foo", "done": False},
-        {"id":2,"message": "bar", "done": True},
+        {"id": 1, "message": "foo", "done": False},
+        {"id": 2, "message": "bar", "done": True},
     ]
 )
 
+# ref_computeds
+@ref_computed
+def done_count_info():
+    return f"done count:{sum(item['done'] for item in items.value)}"
+
+# method
 def check():
     for item in items.value:
         item["done"] = not item["done"]
@@ -335,16 +347,17 @@ def check():
 
 
 # ui
-ui.button('check',on_click=check)
+rxui.label(done_count_info)
+ui.button("check", on_click=check)
 
-@rxui.vfor(items,key='id')
+@rxui.vfor(items, key="id")
 def _(store: rxui.VforStore):
     # 函数中构建每一行数据的界面
     msg_ref = store.get("message")  # 通过 store.get 获取对应行的属性响应式对象
 
     # 输入框输入内容，可以看到单选框的标题同步变化
     with ui.card():
-        rxui.input(value=msg_ref) 
+        rxui.input(value=msg_ref)
         rxui.checkbox(text=msg_ref, value=store.get("done"))
 
 ```
@@ -353,9 +366,32 @@ def _(store: rxui.VforStore):
     - 第一个参数传入响应式列表。列表中每一项可以是字典或其他对象(`dataclasses` 等等)
     - 第二个参数 `key`: 为了可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你可以为每个元素对应的块提供一个唯一的 key 。默认情况使用列表元素索引。
 - 自定义函数带有一个参数。通过 `store.get` 可以获取当前行对应的属性，此为响应式对象
-- 组件与数据源之间仍然是双向同步
 
 > vfor 渲染的项目，只有在新增数据时，才会创建
+
+上述的例子中，你会发现，当点击 checkbox 时，完成数量的文本(`done_count_info`)并没有同步变化
+
+因为 `vfor` 函数中对响应式数据修改，不会影响数据源列表。这是为了防止写出过于复杂的双向数据流响应逻辑而限制。
+
+我们应该在函数中通过事件，对数据源列表做修改
+
+```python
+...
+
+@rxui.vfor(items, key="id")
+def _(store: rxui.VforStore):
+    msg_ref = store.get("message")
+
+    def on_check_change(e):
+        items.value[store.row_index]["done"] = e.value
+        items.value = items.value
+
+    with ui.card():
+        rxui.input(value=msg_ref)
+        rxui.checkbox(text=msg_ref, value=store.get("done"),on_change=on_check_change)
+
+```
+
 
 ---
 

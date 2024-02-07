@@ -1,7 +1,7 @@
 from nicegui.element import Element
 from nicegui import ui
 from signe import batch
-from ex4nicegui.utils.signals import Ref, on, to_ref
+from ex4nicegui.utils.signals import ReadonlyRef, Ref, on, to_ref
 from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Generic, Union
 from weakref import WeakValueDictionary
 from functools import partial
@@ -9,10 +9,11 @@ from dataclasses import dataclass
 
 
 _T = TypeVar("_T")
+_T_data = ReadonlyRef[List[Any]]
 
 
 class VforStore(Generic[_T]):
-    def __init__(self, r: Ref[_T], source: Ref[List[Any]], index: int) -> None:
+    def __init__(self, r: Ref[_T], source: _T_data, index: int) -> None:
         self._ref = r
         self._source = source
         self._data_index = index
@@ -30,12 +31,12 @@ class VforStore(Generic[_T]):
                 ref = to_ref(value)  # type: ignore
                 self._attr_cache[attr] = ref
 
-                @on(ref, onchanges=True)
-                def _():
-                    _set_attribute(
-                        self._source.value[self._data_index], attr, ref.value
-                    )
-                    self._source.value = self._source.value
+                # @on(ref, onchanges=True)
+                # def _():
+                #     _set_attribute(
+                #         self._source.value[self._data_index], attr, ref.value
+                #     )
+                #     self._source.value = self._source.value
 
             return ref
         return self._ref
@@ -49,7 +50,7 @@ class VforStore(Generic[_T]):
         self._ref.value = item  # type: ignore
 
     @classmethod
-    def create_from_ref(cls, ref: Ref[_T], source: Ref[List], index: int):
+    def create_from_ref(cls, ref: Ref[_T], source: _T_data, index: int):
         return cls(ref, source, index)
 
 
@@ -119,7 +120,12 @@ class vfor(Generic[_T]):
 
     """
 
-    def __init__(self, data: Ref[List[_T]], *, key: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        data: _T_data,
+        *,
+        key: Optional[str] = None,
+    ) -> None:
         self._container = VforContainer()
         self._data = data
         self._get_key = (
@@ -134,8 +140,7 @@ class vfor(Generic[_T]):
 
             with VforContainer() as element:
                 fn(store)
-            # element._props["data-vfor-key"] = f"{key}"
-            # element.update()
+
             return (key, store, element)
 
         with self._container:
@@ -145,40 +150,46 @@ class vfor(Generic[_T]):
 
         @on(self._data)
         def _():
+            self._data.value
+
+            @batch
+            def _():
+                self._data.value
+
+        @on(self._data)
+        def _():
             data_map = {
                 self._get_key(idx, d): d for idx, d in enumerate(self._data.value)
             }
 
-            @batch
-            def _():
-                temp_box = ui.element("div")
+            temp_box = ui.element("div")
 
-                element_map: Dict[int, ui.element] = {}
-                for element in list(self._container):
-                    element.move(temp_box)
-                    element_map[element.id] = element
+            element_map: Dict[int, ui.element] = {}
+            for element in list(self._container):
+                element.move(temp_box)
+                element_map[element.id] = element
 
-                new_store_map: Dict[Union[Any, int], StoreItem] = {}
+            new_store_map: Dict[Union[Any, int], StoreItem] = {}
 
-                with self._container:
-                    for idx, (key, value) in enumerate(data_map.items()):
-                        store_item = self._store_map.get(key)
-                        if store_item:
-                            # `data` may have changed the value of a dictionary item,
-                            # so should update the values in the store one by one.
-                            store_item.store.update_item(value, idx)
-                            element = element_map.get(store_item.elementId)
-                            assert element
-                            element.move(self._container)
+            with self._container:
+                for idx, (key, value) in enumerate(data_map.items()):
+                    store_item = self._store_map.get(key)
+                    if store_item:
+                        # `data` may have changed the value of a dictionary item,
+                        # so should update the values in the store one by one.
+                        store_item.store.update_item(value, idx)
+                        element = element_map.get(store_item.elementId)
+                        assert element
+                        element.move(self._container)
 
-                            new_store_map[key] = store_item
-                        else:
-                            # new row item
-                            key, store, element = build_element(idx, value)
-                            store_item = StoreItem(store, element.id)
-                            element.move(self._container)
-                            new_store_map[key] = store_item
+                        new_store_map[key] = store_item
+                    else:
+                        # new row item
+                        key, store, element = build_element(idx, value)
+                        store_item = StoreItem(store, element.id)
+                        element.move(self._container)
+                        new_store_map[key] = store_item
 
-                self._store_map.clear()
-                self._store_map = new_store_map
-                temp_box.delete()
+            self._store_map.clear()
+            self._store_map = new_store_map
+            temp_box.delete()
