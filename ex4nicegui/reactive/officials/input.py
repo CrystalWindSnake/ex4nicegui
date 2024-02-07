@@ -62,8 +62,7 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
     ):
         def inject_on_change(e):
             value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
+            handle_event(on_change, e)
 
         value_kws.update({"on_change": inject_on_change})
 
@@ -80,10 +79,6 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
             self.element.update()
 
         return self
-
-
-def _nothing():
-    pass
 
 
 class LazyInputBindableUi(InputBindableUi):
@@ -110,21 +105,21 @@ class LazyInputBindableUi(InputBindableUi):
             validation=validation,
         )
 
-        on_change = on_change or _nothing
-
         ele = self.element
 
         @effect
         def _():
             ele.value = self.value
 
-        def onValueChanged():
+        def onValueChanged(e):
+            has_change = self._ref.value != ele.value
             self._ref.value = ele.value or ""
-            on_change()
 
-        def on_clear(_):
+            if has_change:
+                handle_event(on_change, e)
+
+        def on_clear(e):
             self._ref.value = ""
-            on_change()
 
         ele.on("blur", onValueChanged)
         ele.on("keyup.enter", onValueChanged)
