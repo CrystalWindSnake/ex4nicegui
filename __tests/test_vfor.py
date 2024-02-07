@@ -163,7 +163,7 @@ class TestTodosExample:
         label_totals.expect_to_have_text("1")
 
         # click check box
-        get_checkbox(0).set_checked(True)
+        get_checkbox(0).click()
         label_done.expect_to_have_text("1")
 
         # more todos
@@ -177,7 +177,7 @@ class TestTodosExample:
         label_totals.expect_to_have_text("3")
 
         #
-        get_checkbox(2).set_checked(True)
+        get_checkbox(2).click()
         get_del_btn(0).click()
 
         label_done.expect_to_have_text("1")
