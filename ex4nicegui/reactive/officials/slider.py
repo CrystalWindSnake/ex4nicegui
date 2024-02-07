@@ -33,10 +33,10 @@ class SliderBindableUi(
         min: TMaybeRef[_TSliderValue],
         max: TMaybeRef[_TSliderValue],
         step: TMaybeRef[_TSliderValue] = 1.0,
-        value: TMaybeRef[Union[_TSliderValue, None]] = None,
+        value: TMaybeRef[_TSliderValue] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        value_ref = to_ref(to_value(value) or 0)
+        value_ref = to_ref(0 if value is None else value)  # type: ignore
         kws = {
             "min": min,
             "max": max,
@@ -47,7 +47,7 @@ class SliderBindableUi(
 
         value_kws = _convert_kws_ref2value(kws)
 
-        self._setup_on_change(value_ref, value_kws, on_change)
+        self._setup_on_change(value_ref, value_kws, on_change)  # type: ignore
 
         element = ui.slider(**value_kws).props("label label-always switch-label-side")
 
@@ -73,7 +73,7 @@ class SliderBindableUi(
 
     def _setup_on_change(
         self,
-        value_ref: Ref[float],
+        value_ref: Ref[_TSliderValue],
         value_kws: dict,
         on_change: Optional[Callable[..., Any]] = None,
     ):
