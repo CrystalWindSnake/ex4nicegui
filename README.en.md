@@ -156,6 +156,202 @@ ui.run()
 ```
 ---
 
+
+## responsive
+
+```python
+from ex4nicegui import (
+    to_ref,
+    ref_computed,
+    on,
+    effect,
+    effect_refreshable,
+    batch,
+    event_batch,
+)
+```
+Commonly used `to_ref`, `effect`, `ref_computed`, `on`.
+
+### `to_ref`
+Defines responsive objects, read and written by `.value`.
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+a.value =2
+b.value = 'new text'
+
+print(a.value)
+```
+
+---
+
+### `effect`
+Accepts a function and automatically monitors changes to the responsive objects used in the function to automatically execute the function.
+
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+
+@effect
+def auto_run_when_ref_value():
+    print(f"a:{a.value}")
+
+
+def change_value():
+    a.value = 2
+    b.value = "new text"
+
+
+ui.button("change", on_click=change_value)
+```
+
+The first time the effect is executed, the function `auto_run_when_ref_value` will be executed once. After that, clicking on the button changes the value of `a` (via `a.value`) and the function `auto_run_when_ref_value` is executed again.
+
+---
+
+### `ref_computed`
+As with `effect`, `ref_computed` can also return results from functions. Typically used for secondary computation from `to_ref`.
+
+```python
+a = to_ref(1)
+a_square = ref_computed(lambda: a.value * 2)
+
+
+@effect
+def effect1():
+    print(f"a_square:{a_square.value}")
+
+
+def change_value():
+    a.value = 2
+
+
+ui.button("change", on_click=change_value)
+```
+
+When the button is clicked, the value of `a.value` is modified, triggering a recalculation of `a_square`. As the value of `a_square` is read in `effect1`, it triggers `effect1` to execute the
+
+> `ref_computed` is read-only `to_ref`
+
+If you prefer to organize your code by class, ``ref_computed`` also supports acting on instance methods
+
+``python
+class MyState.
+    def __init__(self) -> None.
+        self.r_text = to_ref("")
+
+    @ref_computed
+    def post_text(self): return self.r_text.value
+        return self.r_text.value + "post"
+
+state = MyState()
+
+rxui.input(value=state.r_text)
+rxui.label(state.post_text)
+```
+
+---
+
+### `on`
+Similar to `effect`, but `on` needs to explicitly specify the responsive object to monitor.
+
+```python
+
+a1 = to_ref(1)
+a2 = to_ref(10)
+b = to_ref("text")
+
+
+@on(a1)
+def watch_a1_only():
+    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
+
+
+@on([a1, b], onchanges=True)
+def watch_a1_and_b():
+    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
+
+
+def change_a1():
+    a1.value += 1
+    ui.notify("change_a1")
+
+
+ui.button("change a1", on_click=change_a1)
+
+
+def change_a2():
+    a2.value += 1
+    ui.notify("change_a2")
+
+
+ui.button("change a2", on_click=change_a2)
+
+
+def change_b():
+    b.value += "x"
+    ui.notify("change_b")
+
+
+ui.button("change b", on_click=change_b)
+
+```
+
+- If the parameter `onchanges` is True (the default value is False), the specified function will not be executed at binding time.
+
+
+---
+
+### vfor
+Render list components based on list responsive data. Each component is updated on demand. Data items support dictionaries or objects of any type
+
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+from ex4nicegui import to_ref
+
+items = to_ref(
+    [
+        {"id":1,"message": "foo", "done": False},
+        {"id":2,"message": "bar", "done": True},
+    ]
+)
+
+def check():
+    for item in items.value:
+        item["done"] = not item["done"]
+    items.value = items.value
+
+
+# ui
+ui.button('check',on_click=check)
+
+@rxui.vfor(items,key='id')
+def _(store: rxui.VforStore):
+    # function to build the interface for each row of data
+    msg_ref = store.get("message")  # Get responsive object with `store.get`
+
+    # Enter the content of the input box, 
+    # you can see the title of the radio box changes synchronously
+    with ui.card():
+        rxui.input(value=msg_ref) 
+        rxui.checkbox(text=msg_ref, value=store.get("done"))
+
+```
+
+- `rxui.vfor` decorator to custom function
+    - The first argument is passed to the responsive list. Each item in the list can be a dictionary or other object (`dataclasses` etc.)
+    - Second parameter `key`: In order to be able to keep track of the identity of each node, and thus reuse and reorder existing elements, you can provide a unique key for the block corresponding to each element. The default(`None`) is to use the list element index.
+- The custom function takes one argument. The current row's attribute can be retrieved via `store.get`, which is a responsive object.
+- There is still bi-directional synchronization between the component and the data source Items rendered by 
+
+> vfor are created only when new data is added.
+
+---
+
+
 ## functionality
 
 ### Bind class names
@@ -379,153 +575,6 @@ gsap.run_script(
 
 - The parameter `script` can be text or a file with a js extension `Path`.
 - The name of the defined js function doesn't matter, the first argument is a gsap object.
-
----
-
-## responsive
-
-```python
-from ex4nicegui import (
-    to_ref,
-    ref_computed,
-    on,
-    effect,
-    effect_refreshable,
-    batch,
-    event_batch,
-)
-```
-Commonly used `to_ref`, `effect`, `ref_computed`, `on`.
-
-### `to_ref`
-Defines responsive objects, read and written by `.value`.
-```python
-a = to_ref(1)
-b = to_ref("text")
-
-a.value =2
-b.value = 'new text'
-
-print(a.value)
-```
-
----
-
-### `effect`
-Accepts a function and automatically monitors changes to the responsive objects used in the function to automatically execute the function.
-
-```python
-a = to_ref(1)
-b = to_ref("text")
-
-
-@effect
-def auto_run_when_ref_value():
-    print(f"a:{a.value}")
-
-
-def change_value():
-    a.value = 2
-    b.value = "new text"
-
-
-ui.button("change", on_click=change_value)
-```
-
-The first time the effect is executed, the function `auto_run_when_ref_value` will be executed once. After that, clicking on the button changes the value of `a` (via `a.value`) and the function `auto_run_when_ref_value` is executed again.
-
----
-
-### `ref_computed`
-As with `effect`, `ref_computed` can also return results from functions. Typically used for secondary computation from `to_ref`.
-
-```python
-a = to_ref(1)
-a_square = ref_computed(lambda: a.value * 2)
-
-
-@effect
-def effect1():
-    print(f"a_square:{a_square.value}")
-
-
-def change_value():
-    a.value = 2
-
-
-ui.button("change", on_click=change_value)
-```
-
-When the button is clicked, the value of `a.value` is modified, triggering a recalculation of `a_square`. As the value of `a_square` is read in `effect1`, it triggers `effect1` to execute the
-
-> `ref_computed` is read-only `to_ref`
-
-If you prefer to organize your code by class, ``ref_computed`` also supports acting on instance methods
-
-``python
-class MyState.
-    def __init__(self) -> None.
-        self.r_text = to_ref("")
-
-    @ref_computed
-    def post_text(self): return self.r_text.value
-        return self.r_text.value + "post"
-
-state = MyState()
-
-rxui.input(value=state.r_text)
-rxui.label(state.post_text)
-```
-
----
-
-### `on`
-Similar to `effect`, but `on` needs to explicitly specify the responsive object to monitor.
-
-```python
-
-a1 = to_ref(1)
-a2 = to_ref(10)
-b = to_ref("text")
-
-
-@on(a1)
-def watch_a1_only():
-    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
-
-
-@on([a1, b], onchanges=True)
-def watch_a1_and_b():
-    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
-
-
-def change_a1():
-    a1.value += 1
-    ui.notify("change_a1")
-
-
-ui.button("change a1", on_click=change_a1)
-
-
-def change_a2():
-    a2.value += 1
-    ui.notify("change_a2")
-
-
-ui.button("change a2", on_click=change_a2)
-
-
-def change_b():
-    b.value += "x"
-    ui.notify("change_b")
-
-
-ui.button("change b", on_click=change_b)
-
-```
-
-- If the parameter `onchanges` is True (the default value is False), the specified function will not be executed at binding time.
-
 
 ---
 

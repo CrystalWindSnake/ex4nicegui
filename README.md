@@ -157,9 +157,207 @@ bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
 
 ui.run()
 ```
+---
+
+
+## 响应式
+
+```python
+from ex4nicegui import (
+    to_ref,
+    ref_computed,
+    on,
+    effect,
+    effect_refreshable,
+    batch,
+    event_batch,
+)
+```
+常用 `to_ref`,`effect`,`ref_computed`,`on`
+
+---
+
+### `to_ref`
+定义响应式对象,通过 `.value` 读写
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+a.value =2
+b.value = 'new text'
+
+print(a.value)
+```
+
+---
+
+### `effect`
+接受一个函数,自动监控函数中使用到的响应式对象变化,从而自动执行函数
+
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+
+@effect
+def auto_run_when_ref_value():
+    print(f"a:{a.value}")
+
+
+def change_value():
+    a.value = 2
+    b.value = "new text"
+
+
+ui.button("change", on_click=change_value)
+```
+
+首次执行 effect ,函数`auto_run_when_ref_value`将被执行一次.之后点击按钮,改变 `a` 的值(通过 `a.value`),函数`auto_run_when_ref_value`再次执行
+
+---
+
+### `ref_computed`
+与 `effect` 具备一样的功能，`ref_computed` 还能从函数中返回结果。一般用于从 `to_ref` 中进行二次计算
+
+```python
+a = to_ref(1)
+a_square = ref_computed(lambda: a.value * 2)
+
+
+@effect
+def effect1():
+    print(f"a_square:{a_square.value}")
+
+
+def change_value():
+    a.value = 2
+
+
+ui.button("change", on_click=change_value)
+```
+
+点击按钮后，`a.value` 值被修改，从而触发 `a_square` 重新计算.由于 `effect1` 中读取了 `a_square` 的值，从而触发 `effect1` 执行
+
+> `ref_computed` 是只读的 `to_ref`
+
+
+如果你更喜欢通过类组织代码，`ref_computed` 同样支持作用到实例方法上
+
+```python
+class MyState:
+    def __init__(self) -> None:
+        self.r_text = to_ref("")
+
+    @ref_computed
+    def post_text(self):
+        return self.r_text.value + "post"
+
+state = MyState()
+
+rxui.input(value=state.r_text)
+rxui.label(state.post_text)
+```
+
+
+---
+
+### `on`
+类似 `effect` 的功能,但是 `on` 需要明确指定监控的响应式对象
+
+```python
+
+a1 = to_ref(1)
+a2 = to_ref(10)
+b = to_ref("text")
+
+
+@on(a1)
+def watch_a1_only():
+    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
+
+
+@on([a1, b], onchanges=True)
+def watch_a1_and_b():
+    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
+
+
+def change_a1():
+    a1.value += 1
+    ui.notify("change_a1")
+
+
+ui.button("change a1", on_click=change_a1)
+
+
+def change_a2():
+    a2.value += 1
+    ui.notify("change_a2")
+
+
+ui.button("change a2", on_click=change_a2)
+
+
+def change_b():
+    b.value += "x"
+    ui.notify("change_b")
+
+
+ui.button("change b", on_click=change_b)
+
+```
+
+- 参数 `onchanges` 为 True 时(默认值为 False),指定的函数不会在绑定时执行 
+
+---
 
 
 ## 组件功能
+
+### vfor
+基于列表响应式数据，渲染列表组件。每项组件按需更新。数据项支持字典或任意类型对象
+
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+from ex4nicegui import to_ref
+
+items = to_ref(
+    [
+        {"id":1,"message": "foo", "done": False},
+        {"id":2,"message": "bar", "done": True},
+    ]
+)
+
+def check():
+    for item in items.value:
+        item["done"] = not item["done"]
+    items.value = items.value
+
+
+# ui
+ui.button('check',on_click=check)
+
+@rxui.vfor(items,key='id')
+def _(store: rxui.VforStore):
+    # 函数中构建每一行数据的界面
+    msg_ref = store.get("message")  # 通过 store.get 获取对应行的属性响应式对象
+
+    # 输入框输入内容，可以看到单选框的标题同步变化
+    with ui.card():
+        rxui.input(value=msg_ref) 
+        rxui.checkbox(text=msg_ref, value=store.get("done"))
+
+```
+
+- `rxui.vfor` 装饰器到自定义函数
+    - 第一个参数传入响应式列表。列表中每一项可以是字典或其他对象(`dataclasses` 等等)
+    - 第二个参数 `key`: 为了可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你可以为每个元素对应的块提供一个唯一的 key 。默认情况使用列表元素索引。
+- 自定义函数带有一个参数。通过 `store.get` 可以获取当前行对应的属性，此为响应式对象
+- 组件与数据源之间仍然是双向同步
+
+> vfor 渲染的项目，只有在新增数据时，才会创建
+
+---
 
 ### 绑定类名
 
@@ -382,156 +580,6 @@ gsap.run_script(
 
 - 参数 `script` 可以为文本或 js 后缀的文件 `Path`
 - 定义的 js 函数名字并不影响运行，第一个参数为 gsap 对象
-
----
-
-## 响应式
-
-```python
-from ex4nicegui import (
-    to_ref,
-    ref_computed,
-    on,
-    effect,
-    effect_refreshable,
-    batch,
-    event_batch,
-)
-```
-常用 `to_ref`,`effect`,`ref_computed`,`on`
-
----
-
-### `to_ref`
-定义响应式对象,通过 `.value` 读写
-```python
-a = to_ref(1)
-b = to_ref("text")
-
-a.value =2
-b.value = 'new text'
-
-print(a.value)
-```
-
----
-
-### `effect`
-接受一个函数,自动监控函数中使用到的响应式对象变化,从而自动执行函数
-
-```python
-a = to_ref(1)
-b = to_ref("text")
-
-
-@effect
-def auto_run_when_ref_value():
-    print(f"a:{a.value}")
-
-
-def change_value():
-    a.value = 2
-    b.value = "new text"
-
-
-ui.button("change", on_click=change_value)
-```
-
-首次执行 effect ,函数`auto_run_when_ref_value`将被执行一次.之后点击按钮,改变 `a` 的值(通过 `a.value`),函数`auto_run_when_ref_value`再次执行
-
----
-
-### `ref_computed`
-与 `effect` 具备一样的功能，`ref_computed` 还能从函数中返回结果。一般用于从 `to_ref` 中进行二次计算
-
-```python
-a = to_ref(1)
-a_square = ref_computed(lambda: a.value * 2)
-
-
-@effect
-def effect1():
-    print(f"a_square:{a_square.value}")
-
-
-def change_value():
-    a.value = 2
-
-
-ui.button("change", on_click=change_value)
-```
-
-点击按钮后，`a.value` 值被修改，从而触发 `a_square` 重新计算.由于 `effect1` 中读取了 `a_square` 的值，从而触发 `effect1` 执行
-
-> `ref_computed` 是只读的 `to_ref`
-
-
-如果你更喜欢通过类组织代码，`ref_computed` 同样支持作用到实例方法上
-
-```python
-class MyState:
-    def __init__(self) -> None:
-        self.r_text = to_ref("")
-
-    @ref_computed
-    def post_text(self):
-        return self.r_text.value + "post"
-
-state = MyState()
-
-rxui.input(value=state.r_text)
-rxui.label(state.post_text)
-```
-
-
----
-
-### `on`
-类似 `effect` 的功能,但是 `on` 需要明确指定监控的响应式对象
-
-```python
-
-a1 = to_ref(1)
-a2 = to_ref(10)
-b = to_ref("text")
-
-
-@on(a1)
-def watch_a1_only():
-    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
-
-
-@on([a1, b], onchanges=True)
-def watch_a1_and_b():
-    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
-
-
-def change_a1():
-    a1.value += 1
-    ui.notify("change_a1")
-
-
-ui.button("change a1", on_click=change_a1)
-
-
-def change_a2():
-    a2.value += 1
-    ui.notify("change_a2")
-
-
-ui.button("change a2", on_click=change_a2)
-
-
-def change_b():
-    b.value += "x"
-    ui.notify("change_b")
-
-
-ui.button("change b", on_click=change_b)
-
-```
-
-- 参数 `onchanges` 为 True 时(默认值为 False),指定的函数不会在绑定时执行 
 
 ---
 
