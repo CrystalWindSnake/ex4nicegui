@@ -11,6 +11,7 @@ from typing import (
     Generic,
     Union,
     cast,
+    Literal,
 )
 from typing_extensions import Self
 from ex4nicegui.utils.signals import (
@@ -288,18 +289,45 @@ class DisableableMixin(Protocol):
 DisableableBindableUi = DisableableMixin
 
 
+_color_sys_type = Literal["QUASAR", "TAILWIND", "STYLE"]
+_color_attr_name = "data-ex4ng-color"
+
+
 def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: ReadonlyRef):
     @effect
     def _():
         ele = cast(TextColorElement, bindable_ui.element)
         color = ref_ui.value
 
+        # get exists color
+        # e.g 'QUASAR:red'
+        pre_color = ele._props.get(_color_attr_name)  # type: str | None
+        if pre_color:
+            color_sys, value = pre_color.split(":")  # type: ignore
+            color_sys: _color_sys_type
+
+            if color_sys == "QUASAR":
+                del ele._props[ele.TEXT_COLOR_PROP]
+            elif color_sys == "TAILWIND":
+                ele.classes(remove=value)
+            else:
+                del ele._style["color"]
+
+        cur_sys: _color_sys_type = "STYLE"
+        cur_color = color
+
         if color in QUASAR_COLORS:
             ele._props[ele.TEXT_COLOR_PROP] = color
+            cur_sys = "QUASAR"
         elif color in TAILWIND_COLORS:
-            ele.classes(replace=f"text-{color}")
+            cur_color = f"text-{color}"
+            ele.classes(replace=cur_color)
+            cur_sys = "TAILWIND"
         elif color is not None:
             ele._style["color"] = color
+
+        ele._props[_color_attr_name] = f"{cur_sys}:{color}"
+
         ele.update()
 
     return bindable_ui
