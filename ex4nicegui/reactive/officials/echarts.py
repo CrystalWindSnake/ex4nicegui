@@ -87,23 +87,19 @@ class EChartsBindableUi(BindableUi[echarts]):
         """
         )
 
-    @staticmethod
-    def _pyecharts2opts(chart):
-        return PyechartsUtils._chart2opts(chart)
-
-    @staticmethod
-    def from_pyecharts(chart: TMaybeRef):
+    @classmethod
+    def from_pyecharts(cls, chart: TMaybeRef):
         if is_ref(chart):
 
             @ref_computed
             def chart_opt():
                 if not bool(chart.value):
                     return {}
-                return EChartsBindableUi._pyecharts2opts(chart.value)
+                return PyechartsUtils._chart2opts(chart.value)
 
-            return EChartsBindableUi(chart_opt)
+            return cls(chart_opt)
 
-        return EChartsBindableUi(EChartsBindableUi._pyecharts2opts(chart))
+        return cls(PyechartsUtils._chart2opts(chart))
 
     @classmethod
     def from_javascript(cls, code: Union[str, Path]):
