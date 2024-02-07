@@ -209,6 +209,8 @@ ui.button("change", on_click=change_value)
 
 The first time the effect is executed, the function `auto_run_when_ref_value` will be executed once. After that, clicking on the button changes the value of `a` (via `a.value`) and the function `auto_run_when_ref_value` is executed again.
 
+> Never spread a lot of data processing logic across multiple `on`s or `effects`s, which should be mostly interface manipulation logic rather than responsive data processing logic
+
 ---
 
 ### `ref_computed`
@@ -237,7 +239,7 @@ When the button is clicked, the value of `a.value` is modified, triggering a rec
 
 If you prefer to organize your code by class, ``ref_computed`` also supports acting on instance methods
 
-``python
+```python
 class MyState.
     def __init__(self) -> None.
         self.r_text = to_ref("")
@@ -301,6 +303,7 @@ ui.button("change b", on_click=change_b)
 
 - If the parameter `onchanges` is True (the default value is False), the specified function will not be executed at binding time.
 
+> Never spread a lot of data processing logic across multiple `on`s or `effects`s, which should be mostly interface manipulation logic rather than responsive data processing logic
 
 ---
 
@@ -310,15 +313,22 @@ Render list components based on list responsive data. Each component is updated 
 ```python
 from nicegui import ui
 from ex4nicegui.reactive import rxui
-from ex4nicegui import to_ref
+from ex4nicegui import to_ref, ref_computed
 
+# refs
 items = to_ref(
     [
-        {"id":1,"message": "foo", "done": False},
-        {"id":2,"message": "bar", "done": True},
+        {"id": 1, "message": "foo", "done": False},
+        {"id": 2, "message": "bar", "done": True},
     ]
 )
 
+# ref_computeds
+@ref_computed
+def done_count_info():
+    return f"done count:{sum(item['done'] for item in items.value)}"
+
+# method
 def check():
     for item in items.value:
         item["done"] = not item["done"]
@@ -326,7 +336,9 @@ def check():
 
 
 # ui
-ui.button('check',on_click=check)
+rxui.label(done_count_info)
+ui.button("check", on_click=check)
+
 
 @rxui.vfor(items,key='id')
 def _(store: rxui.VforStore):
@@ -345,9 +357,32 @@ def _(store: rxui.VforStore):
     - The first argument is passed to the responsive list. Each item in the list can be a dictionary or other object (`dataclasses` etc.)
     - Second parameter `key`: In order to be able to keep track of the identity of each node, and thus reuse and reorder existing elements, you can provide a unique key for the block corresponding to each element. The default(`None`) is to use the list element index.
 - The custom function takes one argument. The current row's attribute can be retrieved via `store.get`, which is a responsive object.
-- There is still bi-directional synchronization between the component and the data source Items rendered by 
+
 
 > vfor are created only when new data is added.
+
+In the above example, you'll notice that when the checkbox is clicked, the text of the number of completed counts (`done_count_info`) doesn't change synchronously
+
+This is because responsive data changes in the `vfor` function do not affect the data source list. This is a restriction to prevent writing overly complex bi-directional data flow response logic.
+
+We should make changes to the data source list via events in the function
+
+```python
+...
+
+@rxui.vfor(items, key="id")
+def _(store: rxui.VforStore):
+    msg_ref = store.get("message")
+
+    def on_check_change(e):
+        items.value[store.row_index]["done"] = e.value
+        items.value = items.value
+
+    with ui.card():
+        rxui.input(value=msg_ref)
+        rxui.checkbox(text=msg_ref, value=store.get("done"),on_change=on_check_change)
+
+```
 
 ---
 
