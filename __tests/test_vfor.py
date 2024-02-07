@@ -80,6 +80,10 @@ class TestTodosExample:
                 todos.value.remove(target)
                 todos.value = todos.value
 
+            def change_done(task_index: int, done: bool):
+                todo_proto.set(todos.value[task_index], "done", done)
+                todos.value = todos.value
+
             def all_done():
                 for todo in todos.value:
                     todo_proto.set(todo, "done", True)
@@ -117,7 +121,11 @@ class TestTodosExample:
                 def _(r: rxui.VforStore):
                     with ui.card().classes("w-full row-card"), ui.row():
                         rxui.label(r.get("title")).classes("row-title")
-                        rxui.checkbox("done", value=r.get("done"))
+                        rxui.checkbox(
+                            "done",
+                            value=r.get("done"),
+                            on_change=lambda e: change_done(r.row_index, e.value),
+                        )
                         rxui.button(
                             "del", on_click=lambda: del_todo(r.row_index)
                         ).bind_enabled(r.get("done"))
