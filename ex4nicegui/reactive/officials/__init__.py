@@ -40,3 +40,4 @@ from .column import ColumnBindableUi as column
 from .number import NumberBindableUi as number
 from .grid import GridBindableUi as grid
 from .expansion import ExpansionBindableUi as expansion
+from .linear_progress import LinearProgressBindableUi as linear_progress
