@@ -9,42 +9,46 @@ import pytest
 from dataclasses import dataclass
 
 
+@dataclass
+class TodoItem:
+    title: str
+    done: bool
+
+
+class TodoProto(Protocol):
+    def get(self, obj, attr: str) -> Any:
+        ...
+
+    def new(self, title: str, done: bool) -> Any:
+        ...
+
+    def set(self, obj: Any, attr: str, value: Any):
+        ...
+
+
+class DictTodo(TodoProto):
+    def get(self, obj, attr: str) -> Any:
+        return obj[attr]
+
+    def set(self, obj: Any, attr: str, value: Any):
+        obj[attr] = value
+
+    def new(self, title: str, done: bool) -> Any:
+        return {"title": title, "done": done}
+
+
+class DataclassTodo(TodoProto):
+    def get(self, obj, attr: str) -> Any:
+        return getattr(obj, attr)
+
+    def set(self, obj: Any, attr: str, value: Any):
+        setattr(obj, attr, value)
+
+    def new(self, title: str, done: bool) -> Any:
+        return TodoItem(title, done)
+
+
 class TestTodosExample:
-    @dataclass
-    class TodoItem:
-        title: str
-        done: bool
-
-    class TodoProto(Protocol):
-        def get(self, obj, attr: str) -> Any:
-            ...
-
-        def new(self, title: str, done: bool) -> Any:
-            ...
-
-        def set(self, obj: Any, attr: str, value: Any):
-            ...
-
-    class DictTodo(TodoProto):
-        def get(self, obj, attr: str) -> Any:
-            return obj[attr]
-
-        def set(self, obj: Any, attr: str, value: Any):
-            obj[attr] = value
-
-        def new(self, title: str, done: bool) -> Any:
-            return {"title": title, "done": done}
-
-    class DataclassTodo(TodoProto):
-        def get(self, obj, attr: str) -> Any:
-            return getattr(obj, attr)
-
-        def set(self, obj: Any, attr: str, value: Any):
-            setattr(obj, attr, value)
-
-        def new(self, title: str, done: bool) -> Any:
-            return TodoItem(title, done)
-
     @pytest.mark.parametrize("todo_proto", [DictTodo(), DataclassTodo()])
     def test_todos_example(
         self, page: ScreenPage, page_path: str, todo_proto: TodoProto
