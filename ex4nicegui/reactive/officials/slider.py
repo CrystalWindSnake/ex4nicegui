@@ -33,7 +33,7 @@ class SliderBindableUi(
         min: TMaybeRef[_TSliderValue],
         max: TMaybeRef[_TSliderValue],
         step: TMaybeRef[_TSliderValue] = 1.0,
-        value: TMaybeRef[Union[_TSliderValue, None]] = None,
+        value: TMaybeRef[_TSliderValue] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
         value_ref = to_ref(0 if value is None else value)  # type: ignore
