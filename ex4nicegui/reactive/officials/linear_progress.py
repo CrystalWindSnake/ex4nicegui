@@ -11,7 +11,7 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 
-from .base import SingleValueBindableUi
+from .base import SingleValueBindableUi, _bind_color
 from .utils import _convert_kws_ref2value
 
 
@@ -56,7 +56,13 @@ class LinearProgressBindableUi(SingleValueBindableUi[float, ui.linear_progress])
         if prop == "value":
             return self.bind_value(ref_ui)
 
+        if prop == "color":
+            return self.bind_color(ref_ui)
+
         return super().bind_prop(prop, ref_ui)
+
+    def bind_color(self, ref_ui: ReadonlyRef):
+        return _bind_color(self, ref_ui)
 
     def bind_value(self, ref_ui: ReadonlyRef):
         @effect
