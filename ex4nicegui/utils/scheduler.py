@@ -2,6 +2,8 @@ from signe import utils as signe_utils
 import asyncio
 from typing import Literal
 
+from nicegui import context, Client
+
 
 class PostEventExecutionScheduler(signe_utils.BatchExecutionScheduler):
     def __init__(self) -> None:
@@ -11,16 +13,23 @@ class PostEventExecutionScheduler(signe_utils.BatchExecutionScheduler):
     def run(self):
         if not self.__has_callback:
             try:
-                asyncio.get_running_loop().call_soon(self.real_run)
+
+                def partial_run(client=context.get_client()):
+                    self.real_run(client)
+
+                asyncio.get_running_loop().call_soon(partial_run)
             except RuntimeError:
                 super().run_batch()
             self.__has_callback = True
 
-    def real_run(
-        self,
-    ):
-        super().run_batch()
-        self.__has_callback = False
+    def real_run(self, client: Client):
+        try:
+            if client.has_socket_connection:
+                super().run_batch()
+        except Exception as e:
+            raise e
+        finally:
+            self.__has_callback = False
 
 
 _T_Scheduler = Literal["sync", "post-event"]

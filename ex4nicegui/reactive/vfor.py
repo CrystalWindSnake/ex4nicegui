@@ -1,6 +1,5 @@
 from nicegui.element import Element
 from nicegui import ui
-from signe import batch
 from ex4nicegui.utils.signals import ReadonlyRef, Ref, on, to_ref
 from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Generic, Union
 from weakref import WeakValueDictionary
@@ -31,12 +30,14 @@ class VforStore(Generic[_T]):
                 ref = to_ref(value)  # type: ignore
                 self._attr_cache[attr] = ref
 
-                # @on(ref, onchanges=True)
-                # def _():
-                #     _set_attribute(
-                #         self._source.value[self._data_index], attr, ref.value
-                #     )
-                #     self._source.value = self._source.value
+                @on(ref, onchanges=True)
+                def _():
+                    _set_attribute(self._ref.value, attr, ref.value)
+
+                # _set_attribute(
+                #     self._source.value[self._data_index], attr, ref.value
+                # )
+                # self._source.value = self._source.value
 
             return ref
         return self._ref
@@ -147,14 +148,6 @@ class vfor(Generic[_T]):
             for idx, value in enumerate(self._data.value):
                 key, store, element = build_element(idx, value)
                 self._store_map[key] = StoreItem(store, element.id)
-
-        @on(self._data)
-        def _():
-            self._data.value
-
-            @batch
-            def _():
-                self._data.value
 
         @on(self._data)
         def _():
