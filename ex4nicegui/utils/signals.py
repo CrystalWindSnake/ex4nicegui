@@ -156,56 +156,57 @@ def ref(value: T):
     return cast(Ref[T], s)
 
 
-effect = signe.effect
-
-# @overload
-# def effect(
-#     fn: None = ...,
-#     *,
-#     priority_level=1,
-#     debug_trigger: Optional[Callable] = None,
-#     debug_name: Optional[str] = None,
-# ) -> signe_utils._TEffect_Fn[None]:
-#     """Runs a function immediately while reactively tracking its dependencies and re-runs it whenever the dependencies are changed.
-
-#     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#effect
-#     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#effect
+_TEffect_Fn = Callable[[Callable[..., T]], signe.Effect]
 
 
-#     Args:
-#         fn (None, optional): _description_. Defaults to ....
-#         priority_level (int, optional): _description_. Defaults to 1.
-#         debug_trigger (Optional[Callable], optional): _description_. Defaults to None.
-#         debug_name (Optional[str], optional): _description_. Defaults to None.
+@overload
+def effect(
+    fn: None = ...,
+    *,
+    priority_level=1,
+    debug_trigger: Optional[Callable] = None,
+    debug_name: Optional[str] = None,
+) -> _TEffect_Fn:
+    """Runs a function immediately while reactively tracking its dependencies and re-runs it whenever the dependencies are changed.
 
-#     """
-#     ...
-
-
-# @overload
-# def effect(
-#     fn: Callable[..., None],
-#     *,
-#     priority_level=1,
-#     debug_trigger: Optional[Callable] = None,
-#     debug_name: Optional[str] = None,
-# ) -> Effect[None]:
-#     ...
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#effect
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#effect
 
 
-# def effect(
-#     fn: Optional[Callable[..., None]] = None,
-#     *,
-#     priority_level=1,
-#     debug_trigger: Optional[Callable] = None,
-#     debug_name: Optional[str] = None,
-# ) -> Union[signe_utils._TEffect_Fn[None], Effect[None]]:
-#     kws = {
-#         "debug_trigger": debug_trigger,
-#         "priority_level": priority_level,
-#         "debug_name": debug_name,
-#     }
-#     return signe_effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+    Args:
+        fn (None, optional): _description_. Defaults to ....
+        priority_level (int, optional): _description_. Defaults to 1.
+        debug_trigger (Optional[Callable], optional): _description_. Defaults to None.
+        debug_name (Optional[str], optional): _description_. Defaults to None.
+
+    """
+    ...
+
+
+@overload
+def effect(
+    fn: Callable[..., None],
+    *,
+    priority_level=1,
+    debug_trigger: Optional[Callable] = None,
+    debug_name: Optional[str] = None,
+) -> signe.Effect[None]:
+    ...
+
+
+def effect(
+    fn: Optional[Callable[..., None]] = None,
+    *,
+    priority_level=1,
+    debug_trigger: Optional[Callable] = None,
+    debug_name: Optional[str] = None,
+) -> Union[signe.Effect[None], _TEffect_Fn]:
+    kws = {
+        "debug_trigger": debug_trigger,
+        "priority_level": priority_level,
+        "debug_name": debug_name,
+    }
+    return signe.effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
 
 
 # class TInstanceCall(Protocol[T]):
