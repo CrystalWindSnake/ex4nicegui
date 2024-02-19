@@ -206,7 +206,14 @@ def effect(
         "priority_level": priority_level,
         "debug_name": debug_name,
     }
-    return signe.effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+    if fn:
+        return signe.effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+    else:
+
+        def wrap(fn: Callable[..., None]):
+            return effect(fn, **kws)
+
+        return wrap
 
 
 class TInstanceCall(Protocol[T]):
