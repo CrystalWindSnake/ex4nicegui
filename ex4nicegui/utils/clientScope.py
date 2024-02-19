@@ -1,6 +1,7 @@
 from typing import Dict, List
 from signe.core.effect import Effect
 from signe.core.scope import IScope
+from signe.core.protocols import DisposableProtocol
 from nicegui import Client, context as ng_context
 
 
@@ -9,10 +10,10 @@ _TClientID = str
 
 class NgClientScope(IScope):
     def __init__(self) -> None:
-        self._effects: List[Effect] = []
+        self._effects: List[DisposableProtocol] = []
 
-    def add_effect(self, effect: Effect):
-        self._effects.append(effect)
+    def add_disposable(self, disposable: DisposableProtocol):
+        self._effects.append(disposable)
 
     def dispose(self):
         for effect in self._effects:

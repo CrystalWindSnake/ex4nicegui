@@ -209,81 +209,79 @@ def effect(
     return signe.effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
 
 
-# class TInstanceCall(Protocol[T]):
-#     def __call__(_, self) -> T:
-#         ...
+class TInstanceCall(Protocol[T]):
+    def __call__(_, self) -> T:
+        ...
 
 
-ref_computed = signe.computed
+@overload
+def ref_computed(
+    fn: Union[Callable[[], T], TInstanceCall[T]],
+    *,
+    desc="",
+    debug_trigger: Optional[Callable[..., None]] = None,
+    priority_level: int = 1,
+    debug_name: Optional[str] = None,
+) -> ReadonlyRef[T]:
+    """Takes a getter function and returns a readonly reactive ref object for the returned value from the getter. It can also take an object with get and set functions to create a writable ref object.
 
-# @overload
-# def ref_computed(
-#     fn: Union[Callable[[], T], TInstanceCall[T]],
-#     *,
-#     desc="",
-#     debug_trigger: Optional[Callable[..., None]] = None,
-#     priority_level: int = 1,
-#     debug_name: Optional[str] = None,
-# ) -> ReadonlyRef[T]:
-#     """Takes a getter function and returns a readonly reactive ref object for the returned value from the getter. It can also take an object with get and set functions to create a writable ref object.
-
-#     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ref_computed
-#     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ref_computed
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ref_computed
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ref_computed
 
 
-#     Args:
-#         fn (Callable[[], T]): _description_
-#         desc (str, optional): _description_. Defaults to "".
-#         debug_trigger (Optional[Callable[..., None]], optional): _description_. Defaults to None.
-#         priority_level (int, optional): _description_. Defaults to 1.
-#         debug_name (Optional[str], optional): _description_. Defaults to None.
+    Args:
+        fn (Callable[[], T]): _description_
+        desc (str, optional): _description_. Defaults to "".
+        debug_trigger (Optional[Callable[..., None]], optional): _description_. Defaults to None.
+        priority_level (int, optional): _description_. Defaults to 1.
+        debug_name (Optional[str], optional): _description_. Defaults to None.
 
-#     """
-#     ...
-
-
-# @overload
-# def ref_computed(
-#     fn=None,
-#     *,
-#     desc="",
-#     debug_trigger: Optional[Callable[..., None]] = None,
-#     priority_level: int = 1,
-#     debug_name: Optional[str] = None,
-# ) -> Callable[[Callable[..., T]], ReadonlyRef[T]]:
-#     ...
+    """
+    ...
 
 
-# def ref_computed(
-#     fn: Optional[Union[Callable[[], T], TInstanceCall[T]]] = None,
-#     *,
-#     desc="",
-#     debug_trigger: Optional[Callable[..., None]] = None,
-#     priority_level: int = 1,
-#     debug_name: Optional[str] = None,
-# ) -> Union[ReadonlyRef[T], Callable[[Callable[..., T]], ReadonlyRef[T]]]:
-#     kws = {
-#         "debug_trigger": debug_trigger,
-#         "priority_level": priority_level,
-#         "debug_name": debug_name,
-#     }
+@overload
+def ref_computed(
+    fn=None,
+    *,
+    desc="",
+    debug_trigger: Optional[Callable[..., None]] = None,
+    priority_level: int = 1,
+    debug_name: Optional[str] = None,
+) -> Callable[[Callable[..., T]], ReadonlyRef[T]]:
+    ...
 
-#     if fn:
-#         if _is_class_define_method(fn):
-#             return cast(
-#                 ref_computed_method[T],
-#                 ref_computed_method(fn, computed_args=kws),  # type: ignore
-#             )  # type: ignore
 
-#         getter = computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
-#         return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
+def ref_computed(
+    fn: Optional[Union[Callable[[], T], TInstanceCall[T]]] = None,
+    *,
+    desc="",
+    debug_trigger: Optional[Callable[..., None]] = None,
+    priority_level: int = 1,
+    debug_name: Optional[str] = None,
+) -> Union[ReadonlyRef[T], Callable[[Callable[..., T]], ReadonlyRef[T]]]:
+    kws = {
+        "debug_trigger": debug_trigger,
+        "priority_level": priority_level,
+        "debug_name": debug_name,
+    }
 
-#     else:
+    if fn:
+        if _is_class_define_method(fn):
+            return cast(
+                ref_computed_method[T],
+                ref_computed_method(fn, computed_args=kws),  # type: ignore
+            )  # type: ignore
 
-#         def wrap(fn: Callable[[], T]):
-#             return ref_computed(fn, **kws)
+        getter = signe.computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+        return cast(DescReadonlyRef[T], getter)
 
-#         return wrap
+    else:
+
+        def wrap(fn: Callable[[], T]):
+            return ref_computed(fn, **kws)
+
+        return wrap
 
 
 def _is_class_define_method(fn: Callable):
@@ -356,41 +354,44 @@ class effect_refreshable:
         return runner
 
 
-on = signe.on
-
-# def on(
-#     refs: Union[ReadonlyRef, Sequence[ReadonlyRef]],
-#     onchanges=False,
-#     priority_level=1,
-#     effect_kws: Optional[Dict[str, Any]] = None,
-# ):
-#     """Watches one or more reactive data sources and invokes a callback function when the sources change.
-
-#     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#on
-#     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#on
+# on = signe.on
 
 
-#     Args:
-#         refs (Union[ReadonlyRef, Sequence[ReadonlyRef]]): _description_
-#         onchanges (bool, optional): _description_. Defaults to False.
-#         priority_level (int, optional): _description_. Defaults to 1.
-#         effect_kws (Optional[Dict[str, Any]], optional): _description_. Defaults to None.
+def on(
+    refs: Union[ReadonlyRef, Sequence[ReadonlyRef]],
+    onchanges=False,
+    priority_level=1,
+    effect_kws: Optional[Dict[str, Any]] = None,
+):
+    """Watches one or more reactive data sources and invokes a callback function when the sources change.
 
-#     """
-#     effect_kws = effect_kws or {}
-#     if not isinstance(refs, Sequence):
-#         refs = [refs]
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#on
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#on
 
-#     getters = [getattr(r, "_ReadonlyRef___getter") for r in refs]
 
-#     effect_kws.update(
-#         {"scope": _CLIENT_SCOPE_MANAGER.get_scope(), "priority_level": priority_level}
-#     )
+    Args:
+        refs (Union[ReadonlyRef, Sequence[ReadonlyRef]]): _description_
+        onchanges (bool, optional): _description_. Defaults to False.
+        priority_level (int, optional): _description_. Defaults to 1.
+        effect_kws (Optional[Dict[str, Any]], optional): _description_. Defaults to None.
 
-#     def wrap(fn: Callable):
-#         return signe_on(getters, fn, onchanges=onchanges, effect_kws=effect_kws)
+    """
+    effect_kws = effect_kws or {}
+    if not isinstance(refs, Sequence):
+        refs = [refs]
 
-#     return wrap
+    effect_kws.update({"priority_level": priority_level})
+
+    def wrap(fn: Callable):
+        return signe.on(
+            refs,
+            fn,
+            onchanges=onchanges,
+            effect_kws=effect_kws,
+            scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+        )
+
+    return wrap
 
 
 def event_batch(event_fn: Callable[..., None]):
