@@ -105,54 +105,55 @@ WatchedState = signe.WatchedState
 
 #     return cast(T, maybe_ref)
 
-to_ref = signe.signal
-ref = signe.signal
-
-# def to_ref(maybe_ref: _TMaybeRef[T]):
-#     """Takes an inner value and returns a reactive and mutable ref object, which has a single property .value that points to the inner value.
-
-#     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#to_ref
-#     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#to_ref
+# to_ref = signe.signal
+# ref = signe.signal
 
 
-#     Args:
-#         maybe_ref (_TMaybeRef[T]): _description_
+def to_ref(maybe_ref: _TMaybeRef[T]):
+    """Takes an inner value and returns a reactive and mutable ref object, which has a single property .value that points to the inner value.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#to_ref
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#to_ref
 
 
-#     """
-#     if is_ref(maybe_ref):
-#         return cast(Ref[T], maybe_ref)
-
-#     return cast(Ref[T], ref(maybe_ref))
+    Args:
+        maybe_ref (_TMaybeRef[T]): _description_
 
 
-# def _is_comp_values(value):
-#     return isinstance(
-#         value,
-#         (str, int, float, date, datetime),
-#     )
+    """
+    if is_ref(maybe_ref):
+        return cast(Ref[T], maybe_ref)
+
+    return cast(Ref[T], ref(maybe_ref))
 
 
-# def _ref_comp_with_None(old, new):
-#     # Prevent Constant Repeated Assignment of None
-#     if old is None and new is None:
-#         return True
+def _is_comp_values(value):
+    return isinstance(
+        value,
+        (str, int, float, date, datetime),
+    )
 
-#     return False
+
+def _ref_comp_with_None(old, new):
+    # Prevent Constant Repeated Assignment of None
+    if old is None and new is None:
+        return True
+
+    return False
 
 
-# def ref(value: T):
-#     comp = False  # Default never equal
+def ref(value: T):
+    comp = False  # Default never equal
 
-#     if _is_comp_values(value):
-#         comp = None  # comparison of `==`
+    if _is_comp_values(value):
+        comp = None  # comparison of `==`
 
-#     if value is None:
-#         comp = _ref_comp_with_None
+    if value is None:
+        comp = _ref_comp_with_None
 
-#     s = Signal(signe_utils.get_current_executor(), value, SignalOption(comp))
+    s = signe.signal(value, comp)
 
-#     return cast(Ref[T], Ref(s.getValue, s.setValue, s))
+    return cast(Ref[T], s)
 
 
 effect = signe.effect

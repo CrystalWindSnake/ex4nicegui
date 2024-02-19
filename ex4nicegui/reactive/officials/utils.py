@@ -7,5 +7,5 @@ from ex4nicegui.utils.signals import (
 )
 
 
-def _convert_kws_ref2value(kws: Dict):
+def _convert_kws_ref2value(kws: Dict) -> Dict:
     return {key: to_value(value) for key, value in kws.items()}
