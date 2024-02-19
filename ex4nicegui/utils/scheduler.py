@@ -1,9 +1,10 @@
-from signe import utils as signe_utils
+from signe.core.runtime import BatchExecutionScheduler, ExecutionScheduler
+from signe.core.context import get_executor
 import asyncio
 from typing import Literal
 
 
-class PostEventExecutionScheduler(signe_utils.BatchExecutionScheduler):
+class PostEventExecutionScheduler(BatchExecutionScheduler):
     def __init__(self) -> None:
         super().__init__()
         self.__has_callback = False
@@ -35,10 +36,6 @@ def reset_execution_scheduler(type: _T_Scheduler):
             `post-event`: performs other trigger calculations after the event loop in which the ref is assigned.
     """
     if type == "post-event":
-        signe_utils.get_current_executor().set_default_execution_scheduler(
-            PostEventExecutionScheduler()
-        )
+        get_executor().set_default_execution_scheduler(PostEventExecutionScheduler())
     elif type == "sync":
-        signe_utils.get_current_executor().set_default_execution_scheduler(
-            signe_utils.ExecutionScheduler()
-        )
+        get_executor().set_default_execution_scheduler(ExecutionScheduler())

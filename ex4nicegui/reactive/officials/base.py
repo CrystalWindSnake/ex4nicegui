@@ -15,16 +15,16 @@ from typing import (
 )
 from typing_extensions import Self
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
-    Ref,
     to_ref,
     ref_computed,
     _TMaybeRef as TMaybeRef,
+    TRef,
+    TReadonlyRef,
     effect,
     to_value,
     is_ref,
+    WatchedState,
     on,
-    signe_utils,
 )
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.color_elements import (
@@ -38,11 +38,12 @@ from nicegui.elements.mixins.disableable_element import DisableableElement
 
 T = TypeVar("T")
 
+
 TWidget = TypeVar("TWidget", bound=ui.element)
 
 _T_bind_classes_type_dict = Dict[str, TMaybeRef[bool]]
-_T_bind_classes_type_ref_dict = ReadonlyRef[Dict[str, bool]]
-_T_bind_classes_type_array = List[Union[ReadonlyRef[str], Ref[str]]]
+_T_bind_classes_type_ref_dict = TRef[Dict[str, bool]]
+_T_bind_classes_type_array = List[TRef[str]]
 
 
 _T_bind_classes_type = Union[
@@ -124,7 +125,7 @@ class BindableUi(Generic[TWidget]):
         """
         return self.element.remove(element)
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TReadonlyRef[Any]):
         if prop == "visible":
             return self.bind_visible(ref_ui)
 
@@ -143,7 +144,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_visible(self, ref_ui: ReadonlyRef[bool]):
+    def bind_visible(self, ref_ui: TReadonlyRef[bool]):
         @effect
         def _():
             element = cast(ui.element, self.element)
@@ -151,7 +152,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_not_visible(self, ref_ui: ReadonlyRef[bool]):
+    def bind_not_visible(self, ref_ui: TRef[bool]):
         return self.bind_visible(ref_computed(lambda: not ref_ui.value))
 
     def on(
@@ -198,13 +199,13 @@ class BindableUi(Generic[TWidget]):
                     else:
                         self.classes(remove=name)
 
-        elif isinstance(classes, (Ref, ReadonlyRef)):
+        elif is_ref(classes):
             ref_obj = to_value(classes)
             assert isinstance(ref_obj, dict)
 
             @effect
             def _():
-                for name, value in to_value(classes).items():
+                for name, value in cast(Dict, to_value(classes)).items():
                     if value:
                         self.classes(add=name)
                     else:
@@ -214,14 +215,14 @@ class BindableUi(Generic[TWidget]):
                 if is_ref(ref_name):
 
                     @on(ref_name)
-                    def _(state: signe_utils.WatchedState):
+                    def _(state: WatchedState):
                         self.classes(add=state.current, remove=state.previous)
                 else:
                     self.classes(ref_name)  # type: ignore
 
         return self
 
-    def bind_style(self, style: Dict[str, Union[ReadonlyRef[str], Ref[str]]]):
+    def bind_style(self, style: Dict[str, TRef[str]]):
         """data binding is manipulating an element's style
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-style
@@ -249,12 +250,12 @@ class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
 
     @property
     def value(self) -> T:
-        return self._ref.value
+        return self._ref.value  # type: ignore
 
-    def bind_ref(self, ref: Ref[T]):
+    def bind_ref(self, ref: TRef[T]):
         @effect
         def _():
-            ref.value = self._ref.value
+            ref.value = self._ref.value  # type: ignore
 
         return self
 
@@ -267,7 +268,7 @@ class DisableableMixin(Protocol):
     def element(self) -> DisableableElement:
         ...
 
-    def bind_enabled(self, ref_ui: ReadonlyRef[bool]):
+    def bind_enabled(self, ref_ui: TReadonlyRef[bool]):
         @effect
         def _():
             value = ref_ui.value
@@ -276,7 +277,7 @@ class DisableableMixin(Protocol):
 
         return self
 
-    def bind_disable(self, ref_ui: ReadonlyRef[bool]):
+    def bind_disable(self, ref_ui: TReadonlyRef[bool]):
         @effect
         def _():
             value = not ref_ui.value
@@ -293,7 +294,7 @@ _color_sys_type = Literal["QUASAR", "TAILWIND", "STYLE"]
 _color_attr_name = "data-ex4ng-color"
 
 
-def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: ReadonlyRef):
+def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: TReadonlyRef):
     @effect
     def _():
         ele = cast(TextColorElement, bindable_ui.element)
