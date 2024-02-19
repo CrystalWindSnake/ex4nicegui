@@ -1,5 +1,4 @@
 from __future__ import annotations
-from collections.abc import Mapping
 
 from typing import (
     Any,
@@ -42,7 +41,7 @@ T = TypeVar("T")
 TWidget = TypeVar("TWidget", bound=ui.element)
 
 _T_bind_classes_type_dict = Dict[str, ReadonlyRef[bool]]
-_T_bind_classes_type_ref_dict = ReadonlyRef[Mapping[str, bool]]
+_T_bind_classes_type_ref_dict = ReadonlyRef[Dict[str, bool]]
 _T_bind_classes_type_array = List[Union[ReadonlyRef[str], Ref[str]]]
 
 
