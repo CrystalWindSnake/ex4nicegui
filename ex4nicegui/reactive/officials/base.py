@@ -268,10 +268,10 @@ class DisableableMixin(Protocol):
     def element(self) -> DisableableElement:
         ...
 
-    def bind_enabled(self, ref_ui: TReadonlyRef[bool]):
+    def bind_enabled(self, ref_ui: Callable[[], bool]):
         @effect
         def _():
-            value = ref_ui.value
+            value = ref_ui()
             self.element.set_enabled(value)
             self.element._handle_enabled_change(value)
 

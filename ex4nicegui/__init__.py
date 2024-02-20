@@ -13,6 +13,7 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     Ref,
     ReadonlyRef,
+    reactive,
 )
 from ex4nicegui import tools
 from signe import batch

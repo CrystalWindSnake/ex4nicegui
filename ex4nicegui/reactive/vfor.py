@@ -56,8 +56,8 @@ class VforStore(Generic[_T]):
 
 @dataclass
 class StoreItem:
-    __slot__ = ["store", "elementId"]
-    store: VforStore
+    __slot__ = ["elementId"]
+    # store: VforStore
     elementId: int
 
 
@@ -136,25 +136,26 @@ class vfor(Generic[_T]):
     def __call__(self, fn: Callable[[VforStore], None]):
         def build_element(index: int, value):
             key = self._get_key(index, value)
-            store = VforStore.create_from_ref(to_ref(value), self._data, index)
+            # store = VforStore.create_from_ref(to_ref(value), self._data, index)
 
             with VforContainer() as element:
-                fn(store)
+                fn(self._data.value[index])
 
-            return (key, store, element)
+            # return (key, store, element)
+            return key, element
 
         with self._container:
             for idx, value in enumerate(self._data.value):
-                key, store, element = build_element(idx, value)
-                self._store_map[key] = StoreItem(store, element.id)
+                key, element = build_element(idx, value)
+                self._store_map[key] = StoreItem(element.id)
 
-        @on(self._data)
-        def _():
-            self._data.value
+        # @on(self._data)
+        # def _():
+        #     self._data.value
 
-            @batch
-            def _():
-                self._data.value
+        #     @batch
+        #     def _():
+        #         self._data.value
 
         @on(self._data)
         def _():
@@ -177,7 +178,7 @@ class vfor(Generic[_T]):
                     if store_item:
                         # `data` may have changed the value of a dictionary item,
                         # so should update the values in the store one by one.
-                        store_item.store.update_item(value, idx)
+                        # store_item.store.update_item(value, idx)
                         element = element_map.get(store_item.elementId)
                         assert element
                         element.move(self._container)
@@ -185,8 +186,8 @@ class vfor(Generic[_T]):
                         new_store_map[key] = store_item
                     else:
                         # new row item
-                        key, store, element = build_element(idx, value)
-                        store_item = StoreItem(store, element.id)
+                        key, element = build_element(idx, value)
+                        store_item = StoreItem(element.id)
                         element.move(self._container)
                         new_store_map[key] = store_item
 

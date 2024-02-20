@@ -30,6 +30,8 @@ TReadonlyRef = signe.TGetterSignal[T]
 ReadonlyRef = TReadonlyRef[T]
 DescReadonlyRef = TReadonlyRef[T]
 
+reactive = signe.reactive
+
 # class ReadonlyRef(Generic[T]):
 #     def __init__(self, getter: TGetter[T]) -> None:
 #         self.___getter = getter
@@ -369,6 +371,7 @@ def on(
     onchanges=False,
     priority_level=1,
     effect_kws: Optional[Dict[str, Any]] = None,
+    deep: bool = True,
 ):
     """Watches one or more reactive data sources and invokes a callback function when the sources change.
 
@@ -384,8 +387,8 @@ def on(
 
     """
     effect_kws = effect_kws or {}
-    if not isinstance(refs, Sequence):
-        refs = [refs]
+    # if not isinstance(refs, Sequence):
+    #     refs = [refs]
 
     effect_kws.update({"priority_level": priority_level})
 
@@ -396,6 +399,7 @@ def on(
             onchanges=onchanges,
             effect_kws=effect_kws,
             scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+            deep=deep,
         )
 
     return wrap
