@@ -32,13 +32,18 @@ DescReadonlyRef = TReadonlyRef[T]
 
 TGetterOrReadonlyRef = signe.TGetter[T]
 
+
 reactive = signe.reactive
 
 
-class ValueGetter(Generic[T]):
-    __slot__ = ("_getter_fn",)
+class RefWrapper(Generic[T]):
+    __slot__ = ("_getter_fn", "_setter_fn")
 
-    def __init__(self, getter_or_ref: TGetterOrReadonlyRef[T]):
+    def __init__(
+        self,
+        getter_or_ref: TGetterOrReadonlyRef[T],
+        setter_or_ref: Optional[Callable[[T], None]] = None,
+    ):
         if signe.is_signal(getter_or_ref):
             self._getter_fn = lambda: getter_or_ref.value
 
@@ -48,13 +53,7 @@ class ValueGetter(Generic[T]):
             self._setter_fn = ref_setter
         elif isinstance(getter_or_ref, Callable):
             self._getter_fn = getter_or_ref
-
-            def reactive_obj_setter(v):
-                obj = self._getter_fn()
-                obj = v  # type: ignore
-
-            self._setter_fn = reactive_obj_setter
-
+            self._setter_fn = setter_or_ref or (lambda x: None)
         else:
             self._getter_fn = lambda: getter_or_ref
             self._setter_fn = lambda x: None
@@ -68,64 +67,11 @@ class ValueGetter(Generic[T]):
         return self._setter_fn(new_value)
 
 
-def to_value_getter(getter_or_ref: TGetterOrReadonlyRef[T]):
-    return ValueGetter(getter_or_ref)
-
-
-# class ReadonlyRef(Generic[T]):
-#     def __init__(self, getter: TGetter[T]) -> None:
-#         self.___getter = getter
-
-#     @property
-#     def value(self):
-#         return self.___getter()
-
-#     # def __repr__(self) -> str:
-#     #     return str(self.value)
-
-
-# class Ref(ReadonlyRef[T]):
-#     def __init__(
-#         self, getter: TGetter[T], setter: TSetter[T], signal: Optional[Signal] = None
-#     ) -> None:
-#         super().__init__(getter)
-#         self.___setter = setter
-#         self.___signal = signal
-
-#     @property
-#     def value(self):
-#         return super().value
-
-#     @value.setter
-#     def value(self, value: T):
-#         self.___setter(value)
-
-
-# class DescReadonlyRef(ReadonlyRef[T]):
-#     def __init__(self, getter: Callable[[], T], desc="") -> None:
-#         super().__init__(getter)
-#         self.__desc = desc
-
-#     @property
-#     def desc(self):
-#         return self.__desc
-
-
-# @overload
-# def ref_from_signal(getter: TGetter[T]) -> ReadonlyRef[T]:
-#     ...
-
-
-# @overload
-# def ref_from_signal(getter: TGetter[T], setter: TSetter[T]) -> Ref[T]:
-#     ...
-
-
-# def ref_from_signal(getter: TGetter[T], setter: Optional[TSetter[T]] = None):
-#     if setter is None:
-#         return cast(ReadonlyRef[T], ReadonlyRef(getter))
-
-#     return cast(Ref[T], Ref(getter, setter))
+def to_ref_wrapper(
+    getter_or_ref: TGetterOrReadonlyRef[T],
+    setter_or_ref: Optional[Callable[[T], None]] = None,
+):
+    return RefWrapper(getter_or_ref, setter_or_ref)
 
 
 _TMaybeRef = signe.TMaybeSignal[T]
@@ -134,7 +80,7 @@ Ref = TRef[T]
 
 
 def is_ref(obj):
-    return signe.is_signal(obj) or isinstance(obj, ValueGetter)
+    return signe.is_signal(obj) or isinstance(obj, RefWrapper)
 
 
 def to_value(obj):
@@ -145,19 +91,6 @@ def to_value(obj):
 
 
 WatchedState = signe.WatchedState
-
-# def is_ref(maybe_ref: _TMaybeRef):
-#     return isinstance(maybe_ref, ReadonlyRef)
-
-
-# def to_value(maybe_ref: _TMaybeRef[T]) -> T:
-#     if is_ref(maybe_ref):
-#         return cast(ReadonlyRef, maybe_ref).value
-
-#     return cast(T, maybe_ref)
-
-# to_ref = signe.signal
-# ref = signe.signal
 
 
 def to_ref(maybe_ref: _TMaybeRef[T]):
@@ -335,7 +268,7 @@ def ref_computed(
                 ref_computed_method(fn, computed_args=kws),  # type: ignore
             )  # type: ignore
 
-        getter = signe.computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+        getter = signe.computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())  # type: ignore
         return cast(DescReadonlyRef[T], getter)
 
     else:
@@ -414,9 +347,6 @@ class effect_refreshable:
             runner = on(self._refs)(runner)
 
         return runner
-
-
-# on = signe.on
 
 
 def on(
