@@ -200,3 +200,45 @@ class TestTodosExample:
         get_del_btn(0).click()
         label_done.expect_to_have_text("0")
         label_totals.expect_to_have_text("0")
+
+
+class TestBase:
+    def test_two_way_binding(self, page: ScreenPage, page_path: str):
+        @ui.page(page_path)
+        def _():
+            # refs
+            items = reactive_ref(
+                [
+                    {"id": 1, "message": "foo", "done": False},
+                    {"id": 2, "message": "bar", "done": True},
+                ]
+            )
+
+            # ref_computeds
+            @ref_computed
+            def total_count():
+                return sum(item["done"] for item in items.value)
+
+            # ui
+            set_test_id(rxui.label(total_count), "label totals")
+
+            @rxui.vfor(items, key="id")
+            def _(store: rxui.VforStore):
+                with ui.card().classes("row-card"):
+                    rxui.checkbox(text=store.get("message"), value=store.get("done"))
+
+        page.open(page_path)
+
+        label_totals = LabelUtils(page, "label totals")
+
+        locator_row_cards = page._page.locator(".row-card")
+        locator_row_checkboxs = locator_row_cards.get_by_role("checkbox")
+
+        def get_checkbox(index: int):
+            return locator_row_checkboxs.all()[index]
+
+        label_totals.expect_contain_text("1")
+
+        get_checkbox(0).click()
+
+        label_totals.expect_contain_text("2")
