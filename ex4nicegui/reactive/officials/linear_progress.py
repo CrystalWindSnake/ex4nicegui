@@ -67,7 +67,6 @@ class LinearProgressBindableUi(SingleValueBindableUi[float, ui.linear_progress])
     def bind_value(self, ref_ui: ReadonlyRef):
         @effect
         def _():
-            print(ref_ui.value)
             self.element.set_value(ref_ui.value)
             self.element.update()
 

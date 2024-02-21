@@ -30,7 +30,47 @@ TReadonlyRef = signe.TGetterSignal[T]
 ReadonlyRef = TReadonlyRef[T]
 DescReadonlyRef = TReadonlyRef[T]
 
+TGetterOrReadonlyRef = signe.TGetter[T]
+
 reactive = signe.reactive
+
+
+class ValueGetter(Generic[T]):
+    __slot__ = ("_getter_fn",)
+
+    def __init__(self, getter_or_ref: TGetterOrReadonlyRef[T]) -> types.NoneType:
+        if signe.is_signal(getter_or_ref):
+            self._getter_fn = lambda: getter_or_ref.value
+
+            def ref_setter(v):
+                getter_or_ref.value = v  # type: ignore
+
+            self._setter_fn = ref_setter
+        elif isinstance(getter_or_ref, Callable):
+            self._getter_fn = getter_or_ref
+
+            def reactive_obj_setter(v):
+                obj = self._getter_fn()
+                obj = v  # type: ignore
+
+            self._setter_fn = reactive_obj_setter
+
+        else:
+            self._getter_fn = lambda: getter_or_ref
+            self._setter_fn = lambda x: None
+
+    @property
+    def value(self) -> T:
+        return cast(T, self._getter_fn())
+
+    @value.setter
+    def value(self, new_value: T):
+        return self._setter_fn(new_value)
+
+
+def to_value_getter(getter_or_ref: TGetterOrReadonlyRef[T]):
+    return ValueGetter(getter_or_ref)
+
 
 # class ReadonlyRef(Generic[T]):
 #     def __init__(self, getter: TGetter[T]) -> None:
@@ -92,8 +132,17 @@ _TMaybeRef = signe.TMaybeSignal[T]
 TRef = signe.TSignal[T]
 Ref = TRef[T]
 
-is_ref = signe.is_signal
-to_value = signe.to_value
+
+def is_ref(obj):
+    return signe.is_signal(obj) or isinstance(obj, ValueGetter)
+
+
+def to_value(obj):
+    if is_ref(obj):
+        return obj.value
+
+    return obj
+
 
 WatchedState = signe.WatchedState
 
@@ -367,7 +416,7 @@ class effect_refreshable:
 
 
 def on(
-    refs: Union[ReadonlyRef, Sequence[ReadonlyRef]],
+    refs: Union[TGetterOrReadonlyRef, Sequence[TGetterOrReadonlyRef]],
     onchanges=False,
     priority_level=1,
     effect_kws: Optional[Dict[str, Any]] = None,
