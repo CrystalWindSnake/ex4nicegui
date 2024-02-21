@@ -38,7 +38,7 @@ reactive = signe.reactive
 class ValueGetter(Generic[T]):
     __slot__ = ("_getter_fn",)
 
-    def __init__(self, getter_or_ref: TGetterOrReadonlyRef[T]) -> types.NoneType:
+    def __init__(self, getter_or_ref: TGetterOrReadonlyRef[T]):
         if signe.is_signal(getter_or_ref):
             self._getter_fn = lambda: getter_or_ref.value
 
