@@ -1,9 +1,19 @@
+from __future__ import annotations
 from nicegui.element import Element
 from nicegui import ui
-from signe import batch
-from ex4nicegui.utils.signals import ReadonlyRef, Ref, on, to_ref
-from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Generic, Union
-from weakref import WeakValueDictionary
+from ex4nicegui.utils.signals import ReadonlyRef, on, to_value_getter
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    TypeVar,
+    Generic,
+    Union,
+    cast,
+)
 from functools import partial
 from dataclasses import dataclass
 
@@ -13,63 +23,35 @@ _T_data = ReadonlyRef[List[Any]]
 
 
 class VforStore(Generic[_T]):
-    def __init__(self, r: Ref[_T], source: _T_data, index: int) -> None:
-        self._ref = r
+    def __init__(self, source: _T_data, index: int) -> None:
         self._source = source
         self._data_index = index
-        self._attr_cache: WeakValueDictionary[str, Ref] = WeakValueDictionary()
 
     @property
     def row_index(self):
         return self._data_index
 
-    def get(self, attr: Optional[str] = None) -> Ref[_T]:
+    def get(self, attr: Optional[str] = None) -> _T:
+        item = self._source.value[self._data_index]
+
         if attr:
-            ref = self._attr_cache.get(attr)
-            if ref is None:
-                value = _get_attribute(self._ref.value, attr)
-                ref = to_ref(value)  # type: ignore
-                self._attr_cache[attr] = ref
+            return cast(_T, to_value_getter(lambda: _get_attribute(item, attr)))
 
-                # @on(ref, onchanges=True)
-                # def _():
-                #     _set_attribute(
-                #         self._source.value[self._data_index], attr, ref.value
-                #     )
-                #     self._source.value = self._source.value
+        return item
 
-            return ref
-        return self._ref
-
-    def update_item(self, item, index: int):
+    def update(self, index: int):
         self._data_index = index
-
-        for attr, ref in self._attr_cache.items():
-            ref.value = _get_attribute(item, attr)
-
-        self._ref.value = item  # type: ignore
-
-    @classmethod
-    def create_from_ref(cls, ref: Ref[_T], source: _T_data, index: int):
-        return cls(ref, source, index)
 
 
 @dataclass
 class StoreItem:
-    __slot__ = ["store", "elementId"]
+    __slot__ = ["elementId"]
     store: VforStore
     elementId: int
 
 
 class VforContainer(Element, component="vfor.js"):
     pass
-
-
-def _set_attribute(obj: Union[object, Mapping], name: str, value: Any) -> None:
-    if isinstance(obj, dict):
-        obj[name] = value
-    else:
-        setattr(obj, name, value)
 
 
 def _get_attribute(obj: Union[object, Mapping], name: str) -> Any:
@@ -133,30 +115,20 @@ class vfor(Generic[_T]):
         )
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
-    def __call__(self, fn: Callable[[VforStore], None]):
+    def __call__(self, fn: Callable[[Any], None]):
         def build_element(index: int, value):
             key = self._get_key(index, value)
-            store = VforStore.create_from_ref(to_ref(value), self._data, index)
-
             with VforContainer() as element:
+                store = VforStore(self._data, index)
                 fn(store)
-
-            return (key, store, element)
+            return key, element, store
 
         with self._container:
             for idx, value in enumerate(self._data.value):
-                key, store, element = build_element(idx, value)
+                key, element, store = build_element(idx, value)
                 self._store_map[key] = StoreItem(store, element.id)
 
-        @on(self._data)
-        def _():
-            self._data.value
-
-            @batch
-            def _():
-                self._data.value
-
-        @on(self._data)
+        @on(self._data, deep=True)
         def _():
             data_map = {
                 self._get_key(idx, d): d for idx, d in enumerate(self._data.value)
@@ -177,7 +149,7 @@ class vfor(Generic[_T]):
                     if store_item:
                         # `data` may have changed the value of a dictionary item,
                         # so should update the values in the store one by one.
-                        store_item.store.update_item(value, idx)
+                        store_item.store.update(idx)
                         element = element_map.get(store_item.elementId)
                         assert element
                         element.move(self._container)
@@ -185,7 +157,7 @@ class vfor(Generic[_T]):
                         new_store_map[key] = store_item
                     else:
                         # new row item
-                        key, store, element = build_element(idx, value)
+                        key, element, store = build_element(idx, value)
                         store_item = StoreItem(store, element.id)
                         element.move(self._container)
                         new_store_map[key] = store_item

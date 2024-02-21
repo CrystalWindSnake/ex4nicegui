@@ -2,6 +2,7 @@ from typing import Any, List, Protocol
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
+from ex4nicegui.utils.signals import reactive_ref
 from .screen import ScreenPage
 from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
 from playwright.sync_api import expect
@@ -57,7 +58,7 @@ class TestTodosExample:
         def _():
             ui.row.default_classes("flex-center")
 
-            todos = to_ref([])
+            todos = reactive_ref([])
             input = to_ref("")
 
             @ref_computed
@@ -70,29 +71,21 @@ class TestTodosExample:
 
             def new_todo(text: str):
                 todos.value.append(todo_proto.new(**{"title": text, "done": False}))
-                todos.value = todos.value
+
                 input.value = ""
 
-            def del_todo(task_index: int):
-                target = [
-                    todo for idx, todo in enumerate(todos.value) if idx == task_index
-                ][0]
-                todos.value.remove(target)
-                todos.value = todos.value
+            def del_todo(todo):
+                todos.value.remove(todo)
 
-            def change_done(task_index: int, done: bool):
-                todo_proto.set(todos.value[task_index], "done", done)
-                todos.value = todos.value
+            def change_done(todo, done: bool):
+                todo_proto.set(todo, "done", done)
 
             def all_done():
                 for todo in todos.value:
                     todo_proto.set(todo, "done", True)
 
-                todos.value = todos.value
-
             def swap(a: int, b: int):
                 todos.value[a], todos.value[b] = todos.value[b], todos.value[a]
-                todos.value = todos.value
 
             with ui.row():
                 set_test_id(rxui.input(value=input), "input")
@@ -118,17 +111,17 @@ class TestTodosExample:
             with ui.column().classes("card_zone"):
 
                 @rxui.vfor(todos, key="title")
-                def _(r: rxui.VforStore):
+                def _(store: rxui.VforStore):
                     with ui.card().classes("w-full row-card"), ui.row():
-                        rxui.label(r.get("title")).classes("row-title")
+                        rxui.label(store.get("title")).classes("row-title")
                         rxui.checkbox(
                             "done",
-                            value=r.get("done"),
-                            on_change=lambda e: change_done(r.row_index, e.value),
+                            value=store.get("done"),
+                            on_change=lambda e: change_done(store.get(), e.value),
                         )
                         rxui.button(
-                            "del", on_click=lambda: del_todo(r.row_index)
-                        ).bind_enabled(r.get("done"))
+                            "del", on_click=lambda: del_todo(store.get())
+                        ).bind_enabled(store.get("done"))
 
         page.open(page_path)
 

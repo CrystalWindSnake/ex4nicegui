@@ -2,12 +2,8 @@ from datetime import date, datetime
 from functools import partial
 import types
 from weakref import WeakValueDictionary
-from signe import batch as signe_batch, effect as signe_effect, computed, on as signe_on
-from signe.core.signal import Signal, SignalOption
-from signe.core.effect import Effect
-from signe import utils as signe_utils
+import signe
 from .clientScope import NgClientScopeManager
-from signe.types import TSetter, TGetter
 from typing import (
     Any,
     Dict,
@@ -30,74 +26,138 @@ T = TypeVar("T")
 _CLIENT_SCOPE_MANAGER = NgClientScopeManager()
 
 
-class ReadonlyRef(Generic[T]):
-    def __init__(self, getter: TGetter[T]) -> None:
-        self.___getter = getter
+TReadonlyRef = signe.TGetterSignal[T]
+ReadonlyRef = TReadonlyRef[T]
+DescReadonlyRef = TReadonlyRef[T]
+
+TGetterOrReadonlyRef = signe.TGetter[T]
+
+reactive = signe.reactive
+
+
+class ValueGetter(Generic[T]):
+    __slot__ = ("_getter_fn",)
+
+    def __init__(self, getter_or_ref: TGetterOrReadonlyRef[T]):
+        if signe.is_signal(getter_or_ref):
+            self._getter_fn = lambda: getter_or_ref.value
+
+            def ref_setter(v):
+                getter_or_ref.value = v  # type: ignore
+
+            self._setter_fn = ref_setter
+        elif isinstance(getter_or_ref, Callable):
+            self._getter_fn = getter_or_ref
+
+            def reactive_obj_setter(v):
+                obj = self._getter_fn()
+                obj = v  # type: ignore
+
+            self._setter_fn = reactive_obj_setter
+
+        else:
+            self._getter_fn = lambda: getter_or_ref
+            self._setter_fn = lambda x: None
 
     @property
-    def value(self):
-        return self.___getter()
-
-    # def __repr__(self) -> str:
-    #     return str(self.value)
-
-
-class Ref(ReadonlyRef[T]):
-    def __init__(
-        self, getter: TGetter[T], setter: TSetter[T], signal: Optional[Signal] = None
-    ) -> None:
-        super().__init__(getter)
-        self.___setter = setter
-        self.___signal = signal
-
-    @property
-    def value(self):
-        return super().value
+    def value(self) -> T:
+        return cast(T, self._getter_fn())
 
     @value.setter
-    def value(self, value: T):
-        self.___setter(value)
+    def value(self, new_value: T):
+        return self._setter_fn(new_value)
 
 
-class DescReadonlyRef(ReadonlyRef[T]):
-    def __init__(self, getter: Callable[[], T], desc="") -> None:
-        super().__init__(getter)
-        self.__desc = desc
-
-    @property
-    def desc(self):
-        return self.__desc
+def to_value_getter(getter_or_ref: TGetterOrReadonlyRef[T]):
+    return ValueGetter(getter_or_ref)
 
 
-@overload
-def ref_from_signal(getter: TGetter[T]) -> ReadonlyRef[T]:
-    ...
+# class ReadonlyRef(Generic[T]):
+#     def __init__(self, getter: TGetter[T]) -> None:
+#         self.___getter = getter
+
+#     @property
+#     def value(self):
+#         return self.___getter()
+
+#     # def __repr__(self) -> str:
+#     #     return str(self.value)
 
 
-@overload
-def ref_from_signal(getter: TGetter[T], setter: TSetter[T]) -> Ref[T]:
-    ...
+# class Ref(ReadonlyRef[T]):
+#     def __init__(
+#         self, getter: TGetter[T], setter: TSetter[T], signal: Optional[Signal] = None
+#     ) -> None:
+#         super().__init__(getter)
+#         self.___setter = setter
+#         self.___signal = signal
+
+#     @property
+#     def value(self):
+#         return super().value
+
+#     @value.setter
+#     def value(self, value: T):
+#         self.___setter(value)
 
 
-def ref_from_signal(getter: TGetter[T], setter: Optional[TSetter[T]] = None):
-    if setter is None:
-        return cast(ReadonlyRef[T], ReadonlyRef(getter))
+# class DescReadonlyRef(ReadonlyRef[T]):
+#     def __init__(self, getter: Callable[[], T], desc="") -> None:
+#         super().__init__(getter)
+#         self.__desc = desc
 
-    return cast(Ref[T], Ref(getter, setter))
-
-
-_TMaybeRef = Union[T, Union[Ref[T], ReadonlyRef[T]]]
-
-
-def is_ref(maybe_ref: _TMaybeRef):
-    return isinstance(maybe_ref, ReadonlyRef)
+#     @property
+#     def desc(self):
+#         return self.__desc
 
 
-def to_value(maybe_ref: _TMaybeRef[T]) -> T:
-    if is_ref(maybe_ref):
-        return cast(ReadonlyRef, maybe_ref).value
+# @overload
+# def ref_from_signal(getter: TGetter[T]) -> ReadonlyRef[T]:
+#     ...
 
-    return cast(T, maybe_ref)
+
+# @overload
+# def ref_from_signal(getter: TGetter[T], setter: TSetter[T]) -> Ref[T]:
+#     ...
+
+
+# def ref_from_signal(getter: TGetter[T], setter: Optional[TSetter[T]] = None):
+#     if setter is None:
+#         return cast(ReadonlyRef[T], ReadonlyRef(getter))
+
+#     return cast(Ref[T], Ref(getter, setter))
+
+
+_TMaybeRef = signe.TMaybeSignal[T]
+TRef = signe.TSignal[T]
+Ref = TRef[T]
+
+
+def is_ref(obj):
+    return signe.is_signal(obj) or isinstance(obj, ValueGetter)
+
+
+def to_value(obj):
+    if is_ref(obj):
+        return obj.value
+
+    return obj
+
+
+WatchedState = signe.WatchedState
+
+# def is_ref(maybe_ref: _TMaybeRef):
+#     return isinstance(maybe_ref, ReadonlyRef)
+
+
+# def to_value(maybe_ref: _TMaybeRef[T]) -> T:
+#     if is_ref(maybe_ref):
+#         return cast(ReadonlyRef, maybe_ref).value
+
+#     return cast(T, maybe_ref)
+
+# to_ref = signe.signal
+# ref = signe.signal
 
 
 def to_ref(maybe_ref: _TMaybeRef[T]):
@@ -133,7 +193,7 @@ def _ref_comp_with_None(old, new):
     return False
 
 
-def ref(value: T):
+def ref(value: T, is_shallow=True):
     comp = False  # Default never equal
 
     if _is_comp_values(value):
@@ -142,9 +202,16 @@ def ref(value: T):
     if value is None:
         comp = _ref_comp_with_None
 
-    s = Signal(signe_utils.get_current_executor(), value, SignalOption(comp))
+    s = signe.signal(value, comp, is_shallow=is_shallow)
 
-    return cast(Ref[T], Ref(s.getValue, s.setValue, s))
+    return cast(Ref[T], s)
+
+
+def reactive_ref(value: T) -> Ref[T]:
+    return ref(value, is_shallow=False)
+
+
+_TEffect_Fn = Callable[[Callable[..., T]], signe.Effect]
 
 
 @overload
@@ -154,7 +221,7 @@ def effect(
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
-) -> signe_utils._TEffect_Fn[None]:
+) -> _TEffect_Fn:
     """Runs a function immediately while reactively tracking its dependencies and re-runs it whenever the dependencies are changed.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#effect
@@ -178,7 +245,7 @@ def effect(
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
-) -> Effect[None]:
+) -> signe.Effect[None]:
     ...
 
 
@@ -188,13 +255,20 @@ def effect(
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
-) -> Union[signe_utils._TEffect_Fn[None], Effect[None]]:
+) -> Union[signe.Effect[None], _TEffect_Fn]:
     kws = {
         "debug_trigger": debug_trigger,
         "priority_level": priority_level,
         "debug_name": debug_name,
     }
-    return signe_effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+    if fn:
+        return signe.effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+    else:
+
+        def wrap(fn: Callable[..., None]):
+            return effect(fn, **kws)
+
+        return wrap
 
 
 class TInstanceCall(Protocol[T]):
@@ -261,8 +335,8 @@ def ref_computed(
                 ref_computed_method(fn, computed_args=kws),  # type: ignore
             )  # type: ignore
 
-        getter = computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
-        return cast(DescReadonlyRef[T], DescReadonlyRef(getter, desc))
+        getter = signe.computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
+        return cast(DescReadonlyRef[T], getter)
 
     else:
 
@@ -291,32 +365,28 @@ class ref_computed_method(Generic[T]):
     def __init__(self, fget: Callable[[Any], T], computed_args: Dict) -> None:
         self._fget = fget
         self._computed_args = computed_args
-        self._instance_map: WeakValueDictionary[
-            int, ReadonlyRef
-        ] = WeakValueDictionary()
+        self._instance_map: WeakValueDictionary[int, TRef[T]] = WeakValueDictionary()
 
     def __get_computed(self, instance):
         ins_id = id(instance)
         if ins_id not in self._instance_map:
             cp = ref_computed(partial(self._fget, instance), **self._computed_args)
-            self._instance_map[ins_id] = cp
+            self._instance_map[ins_id] = cp  # type: ignore
 
         return self._instance_map[ins_id]
 
     def __get__(self, __instance: Any, __owner: Optional[type] = None):
-        return cast(ReadonlyRef[T], self.__get_computed(__instance))
+        return cast(TRef[T], self.__get_computed(__instance))
 
 
 class effect_refreshable:
-    def __init__(
-        self, fn: Callable, refs: Union[ReadonlyRef, Sequence[ReadonlyRef]] = []
-    ) -> None:
+    def __init__(self, fn: Callable, refs: Union[TRef, Sequence[TRef]] = []) -> None:
         self._fn = fn
         self._refs = refs if isinstance(refs, Sequence) else [refs]
         self()
 
     @staticmethod
-    def on(refs: Union[ReadonlyRef, Sequence[ReadonlyRef]]):
+    def on(refs: Union[TRef, Sequence[TRef]]):
         def warp(
             fn: Callable,
         ):
@@ -339,18 +409,22 @@ class effect_refreshable:
             re_func.refresh()
 
         if len(self._refs) == 0:
-            runner = signe_effect(runner)
+            runner = effect(runner)
         else:
             runner = on(self._refs)(runner)
 
         return runner
 
 
+# on = signe.on
+
+
 def on(
-    refs: Union[ReadonlyRef, Sequence[ReadonlyRef]],
+    refs: Union[TGetterOrReadonlyRef, Sequence[TGetterOrReadonlyRef]],
     onchanges=False,
     priority_level=1,
     effect_kws: Optional[Dict[str, Any]] = None,
+    deep: bool = True,
 ):
     """Watches one or more reactive data sources and invokes a callback function when the sources change.
 
@@ -366,17 +440,20 @@ def on(
 
     """
     effect_kws = effect_kws or {}
-    if not isinstance(refs, Sequence):
-        refs = [refs]
+    # if not isinstance(refs, Sequence):
+    #     refs = [refs]
 
-    getters = [getattr(r, "_ReadonlyRef___getter") for r in refs]
-
-    effect_kws.update(
-        {"scope": _CLIENT_SCOPE_MANAGER.get_scope(), "priority_level": priority_level}
-    )
+    effect_kws.update({"priority_level": priority_level})
 
     def wrap(fn: Callable):
-        return signe_on(getters, fn, onchanges=onchanges, effect_kws=effect_kws)
+        return signe.on(
+            refs,
+            fn,
+            onchanges=onchanges,
+            effect_kws=effect_kws,
+            scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+            deep=deep,
+        )
 
     return wrap
 
@@ -410,7 +487,7 @@ def event_batch(event_fn: Callable[..., None]):
     """
 
     def wrap(*args, **kwargs):
-        @signe_batch
+        @signe.batch
         def _():
             event_fn(*args, **kwargs)
 

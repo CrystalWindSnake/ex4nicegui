@@ -1,4 +1,5 @@
 from typing import (
+    Any,
     Callable,
     List,
     Dict,
@@ -76,7 +77,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         options = {"columnDefs": columnDefs, "rowData": rowData}
         return AggridBindableUi(options, **org_kws)
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: ReadonlyRef[Any]):
         if prop == "options":
             return self.bind_options(ref_ui)
 

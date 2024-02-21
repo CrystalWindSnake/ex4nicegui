@@ -3,14 +3,9 @@ from dataclasses import dataclass
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
-from signe import createSignal, effect, batch
-from ex4nicegui.utils.signals import ref_from_signal
+from signe import signal, batch
 
-# from nicegui.dependencies import register_library
-# from pathlib import Path
-
-
-# register_library(Path(__file__).parent / "index-6543384e.js")
+from ex4nicegui.utils.signals import ReadonlyRef
 
 _Update_Args = [
     "x",
@@ -33,35 +28,30 @@ class UseMouse(Element, component="UseMouse.js"):
         if options:
             self._props["options"] = options
 
-        self.__x_getter, self.__x_setter = createSignal(0.0)
-        self.__x_readonly_ref = ref_from_signal(self.__x_getter)
-
-        self.__y_getter, self.__y_setter = createSignal(0.0)
-        self.__y_readonly_ref = ref_from_signal(self.__y_getter)
-
-        self.__sourceType_getter, self.__sourceType_setter = createSignal("sourceType")
-        self.__sourceType_readonly_ref = ref_from_signal(self.__sourceType_getter)
+        self.__x = signal(0.0)
+        self.__y = signal(0.0)
+        self.__sourceType = signal("sourceType")
 
         def update(args: UseMouseUpdateEventArguments):
             @batch
             def _():
-                self.__x_setter(args.x)
-                self.__y_setter(args.y)
-                self.__sourceType_setter(args.sourceType)
+                self.__x.value = args.x
+                self.__y.value = args.y
+                self.__sourceType.value = args.sourceType
 
         self.on_update(update)
 
     @property
     def x(self):
-        return self.__x_readonly_ref
+        return cast(ReadonlyRef[float], self.__x)
 
     @property
     def y(self):
-        return self.__y_readonly_ref
+        return cast(ReadonlyRef[float], self.__y)
 
     @property
     def sourceType(self):
-        return self.__sourceType_readonly_ref
+        return cast(ReadonlyRef[float], self.__sourceType)
 
     def on_update(self, handler: Optional[Callable[..., Any]]):
         def inner_handler(e):

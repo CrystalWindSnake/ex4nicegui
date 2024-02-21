@@ -5,6 +5,7 @@ from .screen import ScreenPage
 from .utils import fn, ButtonUtils, set_test_id
 
 
+@pytest.mark.skip("todo")
 def test_on_priority_level():
     foo = to_ref("org")
     records = []

@@ -1,20 +1,19 @@
 from typing import Any, Callable, Optional, cast, List
 from typing_extensions import Literal
-from signe import createSignal, effect, computed
+from signe import signal, effect, computed
 from nicegui import ui, Tailwind
 from pathlib import Path
 
-from signe.types import TGetter
 from ex4nicegui.utils.signals import Ref, effect_refreshable, ReadonlyRef
 
 
 SelectMode = Literal["dir", "file"]
 
 
-class LocalFilePickerResult(ReadonlyRef[str]):
-    def __init__(self, getter: Callable[[], str], open_fn: Callable[..., None]) -> None:
-        super().__init__(getter)
+class LocalFilePickerResult:
+    def __init__(self, ref: ReadonlyRef[str], open_fn: Callable[..., None]) -> None:
         self.__open_fn = open_fn
+        self._ref = ref
 
     def open(self):
         self.__open_fn()
@@ -22,7 +21,7 @@ class LocalFilePickerResult(ReadonlyRef[str]):
     def bind_ref(self, ref: Ref[str]):
         @effect
         def _():
-            ref.value = self.value
+            ref.value = self._ref.value
 
         return self
 
@@ -61,14 +60,14 @@ def local_file_picker(
     dir_path = Path(dir).absolute() if dir else Path("./").absolute()
 
     # 当前所在目录
-    cur_dir, set_cur_dir = createSignal(dir_path)
-    cur_name = computed(lambda: str(cur_dir().absolute()))
+    cur_dir = signal(dir_path)
+    cur_name = computed(lambda: str(cur_dir.value.absolute()))
 
     # 选中的路径
-    selected, set_selected = createSignal("")
+    selected = signal("")
 
     # 返回外部的结果路径
-    result, set_result = createSignal("")
+    result = signal("")
 
     no_ex_filter = ext is None
     ext_set = set(ext or [])
@@ -82,7 +81,7 @@ def local_file_picker(
     # 当前目录下的文件(或目录)的列表
     @computed
     def paths():
-        all_paths = sorted(cur_dir().glob("*"), key=lambda x: not x.is_dir())
+        all_paths = sorted(cur_dir.value.glob("*"), key=lambda x: not x.is_dir())
 
         all_paths = (p for p in all_paths if mode == "file" or p.is_dir())
         all_paths = [p for p in all_paths if filter_ex(p)]
@@ -109,7 +108,7 @@ def local_file_picker(
             # bind_from(ui_cur_dir, cur_name)
 
             def onenter():
-                set_cur_dir(Path(ui_cur_dir.value))
+                cur_dir.value = Path(ui_cur_dir.value)
 
             ui_cur_dir = ui.input(
                 "当前路径", validation={"无效路径": lambda value: Path(value).exists()}
@@ -122,15 +121,20 @@ def local_file_picker(
 
             @effect_refreshable
             def pre_btn():
-                dir = cur_dir()
+                dir = cur_dir.value
                 if dir.is_dir() and dir.parent.is_dir():
-                    ui.button("上一级", on_click=lambda: set_cur_dir(dir.parent))
+
+                    def onclick():
+                        cur_dir.value = dir.parent
+
+                    ui.button("上一级", on_click=onclick)
 
         # 文件或目录的表格
         @effect_refreshable
         def paths_table():
             rowData = [
-                {"名称": p.name, "类型": "文件夹" if p.is_dir() else "文件"} for p in paths()
+                {"名称": p.name, "类型": "文件夹" if p.is_dir() else "文件"}
+                for p in paths()
             ]
 
             grid = ui.aggrid(
@@ -156,22 +160,22 @@ def local_file_picker(
             # grid.tailwind("w-96")
 
             def dblClicked(e):
-                path = cur_dir() / Path(e.args["data"]["名称"])
+                path = cur_dir.value / Path(e.args["data"]["名称"])
 
                 if path.is_dir():
-                    set_cur_dir(path)
+                    cur_dir.value = path
                     return
 
                 if mode == "file" and path.is_file():
-                    set_result(str(path.absolute()))
+                    result.value = str(path.absolute())
                     dia.close()
 
             def clicked(e):
-                path = cur_dir() / Path(e.args["data"]["名称"])
+                path = cur_dir.value / Path(e.args["data"]["名称"])
 
                 if mode == "file" and path.is_dir():
                     return
-                set_selected(str(path))
+                selected.value = str(path)
 
             grid.on("cellDoubleClicked", handler=dblClicked)
             grid.on("cellClicked", handler=clicked)
@@ -182,14 +186,18 @@ def local_file_picker(
 
             @effect
             def _():
-                ui_selected_label.text = f"当前选择： {Path(selected()).name}"
+                ui_selected_label.text = f"当前选择： {Path(selected.value).name}"
 
-        ok_btn = ui.button("ok", on_click=lambda: (dia.close(), set_result(selected())))
+        def onclick_ok():
+            dia.close()
+            result.value = selected.value
+
+        ok_btn = ui.button("ok", on_click=onclick_ok)
 
         @effect
         def _():
-            ok_btn.set_enabled(len(selected()) > 0)
+            ok_btn.set_enabled(len(selected.value) > 0)
 
-    result = LocalFilePickerResult(result, dia.open)
+    file_picker_result = LocalFilePickerResult(result, dia.open)
 
-    return result
+    return file_picker_result
