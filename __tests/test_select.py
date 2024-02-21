@@ -206,5 +206,5 @@ def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
     target.expect_to_have_value("a")
 
     button.click()
-    page.wait()
+    page.wait(1000)
     target.expect_to_have_value("m")
