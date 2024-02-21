@@ -126,7 +126,7 @@ def _ref_comp_with_None(old, new):
     return False
 
 
-def ref(value: T, is_shallow=True):
+def ref(value: T, is_shallow=False):
     comp = False  # Default never equal
 
     if _is_comp_values(value):
