@@ -1,7 +1,7 @@
 from __future__ import annotations
 from nicegui.element import Element
 from nicegui import ui
-from ex4nicegui.utils.signals import ReadonlyRef, on, to_value_getter
+from ex4nicegui.utils.signals import ReadonlyRef, on, to_ref_wrapper
 from typing import (
     Any,
     Callable,
@@ -16,6 +16,7 @@ from typing import (
 )
 from functools import partial
 from dataclasses import dataclass
+from signe.core.reactive import DictProxy as signe_DictProxy
 
 
 _T = TypeVar("_T")
@@ -35,7 +36,23 @@ class VforStore(Generic[_T]):
         item = self._source.value[self._data_index]
 
         if attr:
-            return cast(_T, to_value_getter(lambda: _get_attribute(item, attr)))
+            setter = None
+            if isinstance(item, signe_DictProxy):
+
+                def base_setter(value):
+                    item[attr] = value
+
+                setter = base_setter
+            else:
+                setter = lambda x: _set_attribute(item, attr, x)  # noqa: E731
+
+            return cast(
+                _T,
+                to_ref_wrapper(
+                    lambda: _get_attribute(item, attr),
+                    setter,
+                ),
+            )
 
         return item
 
@@ -58,6 +75,13 @@ def _get_attribute(obj: Union[object, Mapping], name: str) -> Any:
     if isinstance(obj, Mapping):
         return obj[name]
     return getattr(obj, name)
+
+
+def _set_attribute(obj: Union[object, Mapping], name: str, value: Any) -> None:
+    if isinstance(obj, dict):
+        obj[name] = value
+    else:
+        setattr(obj, name, value)
 
 
 def _get_key_with_index(idx: int, data: Any):

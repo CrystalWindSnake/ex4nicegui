@@ -4,7 +4,6 @@ from ex4nicegui.utils.signals import (
     is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
-    to_value_getter,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi
