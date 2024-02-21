@@ -1,6 +1,6 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, effect
+from ex4nicegui import to_ref, effect, to_raw
 from .screen import ScreenPage
 import pandas as pd
 from .utils import TableUtils, set_test_id
@@ -62,7 +62,7 @@ def test_selection_ref(page: ScreenPage, page_path: str):
     target.click_checkbox(["a", 1])
     page.wait()
 
-    assert r_table.selection_ref.value == [{"name": "a", "age": 1}]
+    assert to_raw(r_table.selection_ref.value) == [{"name": "a", "age": 1}]
 
 
 def test_single_selection(page: ScreenPage, page_path: str):
@@ -86,13 +86,13 @@ def test_single_selection(page: ScreenPage, page_path: str):
     target.click_checkbox(["a", 1])
     page.wait()
 
-    assert r_select.value == [{"name": "a", "age": 1}]
+    assert to_raw(r_select.value) == [{"name": "a", "age": 1}]
 
     page.wait()
     target.click_checkbox(["b", 2])
     page.wait()
 
-    assert r_select.value == [{"name": "b", "age": 2}]
+    assert to_raw(r_select.value) == [{"name": "b", "age": 2}]
 
 
 def test_multiple_selection(page: ScreenPage, page_path: str):
@@ -116,7 +116,7 @@ def test_multiple_selection(page: ScreenPage, page_path: str):
     target.click_checkbox(["b", 2])
     page.wait()
 
-    assert r_select.value == [{"name": "a", "age": 1}, {"name": "b", "age": 2}]
+    assert to_raw(r_select.value) == [{"name": "a", "age": 1}, {"name": "b", "age": 2}]
 
 
 def test_columns_define(page: ScreenPage, page_path: str):

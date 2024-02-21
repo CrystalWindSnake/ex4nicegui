@@ -34,6 +34,7 @@ TGetterOrReadonlyRef = signe.TGetter[T]
 
 
 reactive = signe.reactive
+to_raw = signe.to_raw
 
 
 class RefWrapper(Generic[T]):

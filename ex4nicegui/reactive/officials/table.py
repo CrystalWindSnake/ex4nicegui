@@ -56,7 +56,14 @@ class TableBindableUi(BindableUi[ui.table]):
         self._selection_ref: ReadonlyRef[List[Any]] = to_ref([])
 
         def on_selection(_):
-            self._selection_ref.value = self.element.selected  # type: ignore
+            if not self.element.selected:
+                self._selection_ref.value.clear()
+                return
+            self._selection_ref.value = (
+                self.element.selected
+                if selection != "single"
+                else [self.element.selected[0]]
+            )  # type: ignore
 
         self.element.on("selection", on_selection)
 
