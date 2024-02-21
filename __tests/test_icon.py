@@ -47,4 +47,5 @@ def test_color(page: ScreenPage, page_path: str):
     assert get_color_value() == "rgb(88, 152, 212)"
 
     r_color.value = "rgba(224,52,52,1)"
+    page.wait()
     assert get_color_value() == "rgb(224, 52, 52)"

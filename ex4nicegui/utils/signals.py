@@ -193,7 +193,7 @@ def _ref_comp_with_None(old, new):
     return False
 
 
-def ref(value: T):
+def ref(value: T, is_shallow=True):
     comp = False  # Default never equal
 
     if _is_comp_values(value):
@@ -202,9 +202,13 @@ def ref(value: T):
     if value is None:
         comp = _ref_comp_with_None
 
-    s = signe.signal(value, comp)
+    s = signe.signal(value, comp, is_shallow=is_shallow)
 
     return cast(Ref[T], s)
+
+
+def reactive_ref(value: T) -> Ref[T]:
+    return ref(value, is_shallow=False)
 
 
 _TEffect_Fn = Callable[[Callable[..., T]], signe.Effect]

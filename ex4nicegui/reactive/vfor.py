@@ -1,7 +1,7 @@
 from __future__ import annotations
 from nicegui.element import Element
 from nicegui import ui
-from ex4nicegui.utils.signals import ReadonlyRef, Ref, on, to_ref, to_value_getter
+from ex4nicegui.utils.signals import ReadonlyRef, on, to_value_getter
 from typing import (
     Any,
     Callable,
@@ -14,7 +14,6 @@ from typing import (
     Union,
     cast,
 )
-from weakref import WeakValueDictionary
 from functools import partial
 from dataclasses import dataclass
 
@@ -53,13 +52,6 @@ class StoreItem:
 
 class VforContainer(Element, component="vfor.js"):
     pass
-
-
-def _set_attribute(obj: Union[object, Mapping], name: str, value: Any) -> None:
-    if isinstance(obj, dict):
-        obj[name] = value
-    else:
-        setattr(obj, name, value)
 
 
 def _get_attribute(obj: Union[object, Mapping], name: str) -> Any:
