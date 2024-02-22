@@ -3,15 +3,15 @@ from typing import (
     Callable,
     Optional,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_value,
 )
 from nicegui import ui
 from .base import SingleValueBindableUi, _bind_color, DisableableMixin
-from .utils import _convert_kws_ref2value
 
 
 class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
@@ -23,21 +23,16 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
         color: Optional[TMaybeRef[str]] = "primary",
         icon: Optional[TMaybeRef[str]] = None,
     ) -> None:
-        kws = {
-            "text": text,
-            "color": color,
-            "icon": icon,
-        }
+        pc = ParameterClassifier(
+            locals(), maybeRefs=["text", "color", "icon"], events=[]
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
-
-        element = ui.button(on_click=on_click, **value_kws)
+        element = ui.button(on_click=on_click, **pc.get_values_kws())
 
         super().__init__(text, element)
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "text":
@@ -56,7 +51,7 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
         @effect
         def _():
             ele = self.element
-            ele._props["label"] = ref_ui.value
+            ele._props["label"] = to_value(ref_ui)
             ele.update()
 
         return self
@@ -65,7 +60,7 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
         @effect
         def _():
             ele = self.element
-            ele._props["icon"] = ref_ui.value
+            ele._props["icon"] = to_value(ref_ui)
             ele.update()
 
         return self

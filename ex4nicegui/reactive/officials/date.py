@@ -1,5 +1,6 @@
 from typing import Any, Callable, List, Optional, TypeVar, cast
 from typing_extensions import TypedDict
+from ex4nicegui.reactive.utils import ParameterClassifier
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -7,6 +8,7 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     effect,
     to_ref,
+    to_value,
 )
 from nicegui import ui
 from nicegui.events import handle_event
@@ -44,13 +46,23 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         :param mask: the format of the date string (default: 'YYYY-MM-DD')
         :param on_change: callback to execute when changing the date
         """
-        value_ref = to_ref(value)
-        kws = {
-            "value": value_ref,
-            "mask": mask,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "label",
+                "value",
+                "placeholder",
+                "password",
+                "password_toggle_button",
+                "autocomplete",
+                "validation",
+            ],
+            events=["on_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        value_kws = pc.get_values_kws()
+
+        value_ref = to_ref(value)
 
         def inject_on_change(e):
             value_ref.value = e.value
@@ -60,12 +72,10 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         value_kws.update({"on_change": inject_on_change})
 
         element = ui.date(**value_kws)
-
         super().__init__(value_ref, element)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -76,7 +86,7 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
         @effect
         def _():
-            self.element.set_value(ref_ui.value)
+            self.element.set_value(to_value(ref_ui))
             self.element.update()
 
         return self

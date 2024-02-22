@@ -10,11 +10,12 @@ from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
     ref_computed,
+    to_value,
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
 from .base import BindableUi
-from .utils import _convert_kws_ref2value
+from ex4nicegui.reactive.utils import ParameterClassifier
 
 
 class AggridBindableUi(BindableUi[ui.aggrid]):
@@ -27,21 +28,18 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         auto_size_columns: bool = True,
         **org_kws,
     ) -> None:
-        kws = {
-            "options": options,
-            "html_columns": html_columns,
-            "theme": theme,
-            "auto_size_columns": auto_size_columns,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=["options", "html_columns", "theme", "auto_size_columns"],
+            events=[],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
-        element = ui.aggrid(**value_kws, **org_kws)
+        element = ui.aggrid(**pc.get_values_kws(), **org_kws)
 
         super().__init__(element)
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     @staticmethod
     def _get_columnDefs_from_dataframe(df, columns_define_fn: Callable[[str], Dict]):
@@ -87,7 +85,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         @effect
         def _():
             ele = self.element
-            data = ref_ui.value
+            data = to_value(ref_ui)
             ele._props["options"].update(data)
             ele.update()
 

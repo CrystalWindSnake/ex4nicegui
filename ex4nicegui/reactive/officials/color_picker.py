@@ -3,19 +3,19 @@ from typing import (
     Callable,
     Optional,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
-    is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
     to_ref,
+    to_value,
 )
 from nicegui import ui
 from nicegui.events import handle_event
 from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
 
 
 class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
@@ -33,15 +33,21 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
             on_pick (Optional[Callable[..., Any]], optional): callback to execute when a color is picked. Defaults to None.
             value (TMaybeRef[bool], optional): whether the menu is already opened. Defaults to False.
         """
-        color_ref = to_ref(color)
-        kws = {
-            "color": color_ref,
-            "value": value,
-        }
 
-        value_kws = _convert_kws_ref2value(kws)
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "color",
+                "value",
+            ],
+            events=["on_pick"],
+        )
 
-        self._setup_on_change(color_ref, value_kws, on_pick)
+        value_kws = pc.get_values_kws()
+
+        value_ref = to_ref(color)
+
+        self._setup_on_change(value_ref, value_kws, on_pick)
 
         with ui.card().tight():
             exclued_color = {**value_kws}
@@ -55,11 +61,10 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
 
             ui.button(on_click=element_menu.open, icon="colorize")
 
-        super().__init__(color_ref, element_menu)
+        super().__init__(value_ref, element_menu)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -70,14 +75,14 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
     def bind_color(self, ref_ui: ReadonlyRef[str]):
         @effect
         def _():
-            self.element.set_color(ref_ui.value)
+            self.element.set_color(to_value(ref_ui))
 
         return self
 
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
         @effect
         def _():
-            self.element.set_value(ref_ui.value)
+            self.element.set_value(to_value(ref_ui))
 
         return self
 
