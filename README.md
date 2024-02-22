@@ -171,9 +171,10 @@ from ex4nicegui import (
     effect_refreshable,
     batch,
     event_batch,
+    deep_ref,
 )
 ```
-常用 `to_ref`,`effect`,`ref_computed`,`on`
+常用 `to_ref`,`deep_ref`,`effect`,`ref_computed`,`on`
 
 ---
 
@@ -188,6 +189,62 @@ b.value = 'new text'
 
 print(a.value)
 ```
+
+当值为复杂对象时，默认不会保持嵌套对象的响应性。
+```python
+a = to_ref([1,2])
+
+@effect
+def _():
+    print('len:',len(a.value))
+
+# 不会触发 effect
+a.value.append(10)
+
+# 整个替换则会触发
+a.value = [1,2,10]
+```
+
+参数 `is_deep` 设置为 `True` 时，能得到深度响应能力
+
+```python
+a = to_ref([1,2],is_deep=True)
+
+@effect
+def _():
+    print('len:',len(a.value))
+
+# print 3
+a.value.append(10)
+
+```
+
+>  `deep_ref` 等价于 `is_deep` 设置为 `True` 时的 `to_ref`
+
+---
+
+### `deep_ref`
+等价于 `is_deep` 设置为 `True` 时的 `to_ref`。
+
+当数据源为列表、字典或自定义类时，特别有用。通过 `.value` 获取的对象为代理对象
+```python
+data = [1,2,3]
+data_ref = deep_ref(data)
+
+assert data_ref.value is not data
+```
+
+通过 `to_raw` 可以获取原始对象
+```python
+from ex4nicegui import to_raw, deep_ref
+
+data = [1, 2, 3]
+data_ref = deep_ref(data)
+
+assert data_ref.value is not data
+assert to_raw(data_ref.value) is data
+```
+
 
 ---
 

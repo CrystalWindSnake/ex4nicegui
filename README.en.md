@@ -168,9 +168,10 @@ from ex4nicegui import (
     effect_refreshable,
     batch,
     event_batch,
+    deep_ref,
 )
 ```
-Commonly used `to_ref`, `effect`, `ref_computed`, `on`.
+Commonly used `to_ref`,`deep_ref`,`effect`,`ref_computed`,`on`
 
 ### `to_ref`
 Defines responsive objects, read and written by `.value`.
@@ -182,6 +183,62 @@ a.value =2
 b.value = 'new text'
 
 print(a.value)
+```
+
+When the value is a complex object, responsiveness of nested objects is not maintained by default.
+
+```python
+a = to_ref([1,2])
+
+@effect
+def _().
+    print(len(a.value))
+
+# doesn't trigger the effect
+a.value.append(10)
+
+# the whole substitution will be triggered
+a.value = [1,2,10]
+```
+
+Depth responsiveness is obtained when `is_deep` is set to `True`.
+
+```python
+a = to_ref([1,2],is_deep=True)
+
+@effect
+def _():
+    print('len:',len(a.value))
+
+# print 3
+a.value.append(10)
+
+```
+
+> `deep_ref` is equivalent to `to_ref` if `is_deep` is set to `True`.
+---
+
+### `deep_ref`
+Equivalent to `to_ref` when `is_deep` is set to `True`.
+
+Especially useful when the data source is a list, dictionary or custom class. Objects obtained via `.value` are proxies
+
+```python
+data = [1,2,3]
+data_ref = deep_ref(data)
+
+assert data_ref.value is not data
+```
+
+You can get the raw object with `to_raw`.
+```python
+from ex4nicegui import to_raw, deep_ref
+
+data = [1, 2, 3]
+data_ref = deep_ref(data)
+
+assert data_ref.value is not data
+assert to_raw(data_ref.value) is data
 ```
 
 ---
