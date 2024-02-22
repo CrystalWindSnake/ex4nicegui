@@ -83,11 +83,13 @@ def is_ref(obj):
     return signe.is_signal(obj) or isinstance(obj, RefWrapper)
 
 
-def to_value(obj):
+def to_value(obj: TGetterOrReadonlyRef[T]) -> T:
     if is_ref(obj):
         return obj.value
+    if isinstance(obj, Callable):
+        return obj()
 
-    return obj
+    return cast(T, obj)
 
 
 WatchedState = signe.WatchedState

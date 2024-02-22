@@ -37,7 +37,6 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         kws = {
             "color": color_ref,
             "value": value,
-            "on_pick": on_pick,
         }
 
         value_kws = _convert_kws_ref2value(kws)

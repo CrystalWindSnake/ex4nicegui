@@ -15,11 +15,10 @@ from typing import (
 )
 from typing_extensions import Self
 from ex4nicegui.utils.signals import (
+    TGetterOrReadonlyRef,
     to_ref,
-    ref_computed,
     _TMaybeRef as TMaybeRef,
     TRef,
-    TReadonlyRef,
     effect,
     to_value,
     is_ref,
@@ -41,9 +40,9 @@ T = TypeVar("T")
 
 TWidget = TypeVar("TWidget", bound=ui.element)
 
-_T_bind_classes_type_dict = Dict[str, TMaybeRef[bool]]
-_T_bind_classes_type_ref_dict = TRef[Dict[str, bool]]
-_T_bind_classes_type_array = List[TRef[str]]
+_T_bind_classes_type_dict = Dict[str, TGetterOrReadonlyRef[bool]]
+_T_bind_classes_type_ref_dict = TGetterOrReadonlyRef[Dict[str, bool]]
+_T_bind_classes_type_array = List[TGetterOrReadonlyRef[str]]
 
 
 _T_bind_classes_type = Union[
@@ -125,7 +124,7 @@ class BindableUi(Generic[TWidget]):
         """
         return self.element.remove(element)
 
-    def bind_prop(self, prop: str, ref_ui: TReadonlyRef[Any]):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef[Any]):
         if prop == "visible":
             return self.bind_visible(ref_ui)
 
@@ -133,27 +132,27 @@ class BindableUi(Generic[TWidget]):
 
             @effect
             def _():
-                cast(TextElement, self.element).set_text(ref_ui.value)
+                cast(TextElement, self.element).set_text(to_value(ref_ui))
                 self.element.update()
 
         @effect
         def _():
             element = cast(ui.element, self.element)
-            element._props[prop] = ref_ui.value
+            element._props[prop] = to_value(ref_ui)
             element.update()
 
         return self
 
-    def bind_visible(self, ref_ui: TReadonlyRef[bool]):
+    def bind_visible(self, ref_ui: TGetterOrReadonlyRef[bool]):
         @effect
         def _():
             element = cast(ui.element, self.element)
-            element.set_visibility(ref_ui.value)
+            element.set_visibility(to_value(ref_ui))
 
         return self
 
-    def bind_not_visible(self, ref_ui: TRef[bool]):
-        return self.bind_visible(ref_computed(lambda: not ref_ui.value))
+    def bind_not_visible(self, ref_ui: TGetterOrReadonlyRef[bool]):
+        return self.bind_visible(lambda: not to_value(ref_ui))
 
     def on(
         self,
@@ -222,7 +221,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_style(self, style: Dict[str, TRef[str]]):
+    def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[str]]):
         """data binding is manipulating an element's style
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-style
@@ -237,7 +236,7 @@ class BindableUi(Generic[TWidget]):
 
                     @effect
                     def _(name=name, ref_obj=ref_obj):
-                        self.element._style[name] = ref_obj.value
+                        self.element._style[name] = to_value(ref_obj)
                         self.element.update()
 
         return self
@@ -268,19 +267,19 @@ class DisableableMixin(Protocol):
     def element(self) -> DisableableElement:
         ...
 
-    def bind_enabled(self, ref_ui: TReadonlyRef[bool]):
+    def bind_enabled(self, ref_ui: TGetterOrReadonlyRef[bool]):
         @effect
         def _():
-            value = ref_ui.value
+            value = to_value(ref_ui)
             self.element.set_enabled(value)
             self.element._handle_enabled_change(value)
 
         return self
 
-    def bind_disable(self, ref_ui: TReadonlyRef[bool]):
+    def bind_disable(self, ref_ui: TGetterOrReadonlyRef[bool]):
         @effect
         def _():
-            value = not ref_ui.value
+            value = not to_value(ref_ui)
             self.element.set_enabled(value)
             self.element._handle_enabled_change(value)
 
@@ -294,11 +293,11 @@ _color_sys_type = Literal["QUASAR", "TAILWIND", "STYLE"]
 _color_attr_name = "data-ex4ng-color"
 
 
-def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: TReadonlyRef):
+def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: TGetterOrReadonlyRef):
     @effect
     def _():
         ele = cast(TextColorElement, bindable_ui.element)
-        color = ref_ui.value
+        color = to_value(ref_ui)
 
         # get exists color
         # e.g 'QUASAR:red'

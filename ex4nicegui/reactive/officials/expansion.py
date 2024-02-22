@@ -17,18 +17,17 @@ class ExpansionBindableUi(SingleValueBindableUi[bool, ui.expansion]):
         *,
         icon: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[bool] = False,
-        on_value_change: Optional[Callable[..., None]] = None
+        on_value_change: Optional[Callable[..., None]] = None,
     ) -> None:
         kws = {
             "text": text,
             "icon": icon,
             "value": value,
-            "on_value_change": on_value_change,
         }
 
         value_kws = _convert_kws_ref2value(kws)
 
-        element = ui.expansion(**value_kws)
+        element = ui.expansion(on_value_change=on_value_change, **value_kws)
 
         super().__init__(value, element)
 

@@ -34,7 +34,6 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
             "placeholder": placeholder,
             "value": value_ref,
             "validation": validation,
-            "on_change": on_change,
         }
 
         value_kws = _convert_kws_ref2value(kws)

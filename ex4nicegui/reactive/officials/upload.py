@@ -52,7 +52,6 @@ class UploadBindableUi(SingleValueBindableUi[UploadResult, ui.upload]):
             "max_file_size": max_file_size,
             "max_total_size": max_total_size,
             "max_files": max_files,
-            "on_rejected": on_rejected,
             "label": label,
             "auto_upload": auto_upload,
         }
@@ -68,7 +67,7 @@ class UploadBindableUi(SingleValueBindableUi[UploadResult, ui.upload]):
         if on_upload:
             self._on_upload_callbacks.append(on_upload)
 
-        element = ui.upload(**value_kws, on_upload=_on_upload)
+        element = ui.upload(on_rejected=on_rejected, **value_kws, on_upload=_on_upload)
 
         super().__init__(UploadResult(), element)  # type: ignore
 

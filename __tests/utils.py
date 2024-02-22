@@ -94,6 +94,10 @@ class BaseUiUtils:
     def expect_not_to_have_value(self, value: str):
         return expect(self.target_locator).not_to_have_value(value)
 
+    @property
+    def expect(self):
+        return expect(self.target_locator)
+
 
 class SelectUtils(BaseUiUtils):
     def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
@@ -359,6 +363,9 @@ class ButtonUtils(BaseUiUtils):
 
     def click(self):
         self.target_locator.click()
+
+    def expect_enabled(self):
+        expect(self.target_locator).to_be_enabled()
 
 
 class LabelUtils(BaseUiUtils):

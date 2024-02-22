@@ -27,12 +27,11 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
             "text": text,
             "color": color,
             "icon": icon,
-            "on_click": on_click,
         }
 
         value_kws = _convert_kws_ref2value(kws)
 
-        element = ui.button(**value_kws)
+        element = ui.button(on_click=on_click, **value_kws)
 
         super().__init__(text, element)
 
