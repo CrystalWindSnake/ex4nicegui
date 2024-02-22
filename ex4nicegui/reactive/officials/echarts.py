@@ -43,11 +43,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         code: Optional[str] = None,
     ) -> None:
         pc = ParameterClassifier(
-            locals(),
-            maybeRefs=[
-                "options",
-                "code",
-            ],
+            locals(), maybeRefs=["options", "code"], exclude=["not_merge"]
         )
 
         value_kws = pc.get_values_kws()

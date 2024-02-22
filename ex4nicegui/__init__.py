@@ -1,4 +1,4 @@
-from ex4nicegui.reactive import rxui
+from ex4nicegui import reactive as rxui
 from ex4nicegui.utils.signals import (
     ref_computed,
     effect,
