@@ -83,7 +83,7 @@ to_raw = signe.to_raw
 
 
 def is_setter_ref(obj):
-    return isinstance(obj, signe.Signal)
+    return isinstance(obj, (signe.Signal, RefWrapper))
 
 
 def is_ref(obj):
