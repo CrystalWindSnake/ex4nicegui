@@ -2,6 +2,7 @@ from typing import (
     Any,
     Callable,
     Optional,
+    cast,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
 
@@ -10,15 +11,16 @@ from ex4nicegui.utils.signals import (
     Ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    is_setter_ref,
     to_ref,
     to_value,
 )
 from nicegui import ui
 from nicegui.events import handle_event
-from .base import SingleValueBindableUi
+from .base import BindableUi
 
 
-class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
+class ColorPickerBindableUi(BindableUi[ui.color_picker]):
     def __init__(
         self,
         color: TMaybeRef[str] = "",
@@ -40,14 +42,12 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
                 "color",
                 "value",
             ],
+            v_model=("color", "on_pick"),
+            v_model_arg_getter=lambda e: e.color,
             events=["on_pick"],
         )
 
         value_kws = pc.get_values_kws()
-
-        value_ref = to_ref(color)
-
-        self._setup_on_change(value_ref, value_kws, on_pick)
 
         with ui.card().tight():
             exclued_color = {**value_kws}
@@ -61,7 +61,7 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
 
             ui.button(on_click=element_menu.open, icon="colorize")
 
-        super().__init__(value_ref, element_menu)  # type: ignore
+        super().__init__(element_menu)  # type: ignore
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
@@ -86,19 +86,6 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
 
         return self
 
-    def _setup_on_change(
-        self,
-        color_ref: Ref[str],
-        value_kws: dict,
-        on_pick: Optional[Callable[..., Any]] = None,
-    ):
-        def inject_on_change(e):
-            color_ref.value = e.color
-            if on_pick:
-                handle_event(on_pick, e)
-
-        value_kws.update({"on_pick": inject_on_change})
-
 
 class ColorPickerLazyBindableUi(ColorPickerBindableUi):
     def __init__(
@@ -108,22 +95,22 @@ class ColorPickerLazyBindableUi(ColorPickerBindableUi):
         on_pick: Optional[Callable[..., Any]] = None,
         value: TMaybeRef[bool] = False,
     ) -> None:
+        org_value = value
+        is_setter_value = is_setter_ref(value)
+        if is_setter_value:
+            value = to_value(value)
+
         super().__init__(color, on_pick=None, value=value)
 
-        ele = self._element_picker
+        if is_setter_value:
+            ref = cast(Ref, org_value)
 
-        def onModelValueChanged(e):
-            self._ref.value = e.args  # type: ignore
+            ele = self._element_picker
 
-            if on_pick:
-                handle_event(on_pick, e)
+            def onModelValueChanged(e):
+                ref.value = e.args  # type: ignore
 
-        ele.on("change", handler=onModelValueChanged)
+                if on_pick:
+                    handle_event(on_pick, e)
 
-    def _setup_on_change(
-        self,
-        color_ref: Ref[str],
-        value_kws: dict,
-        on_pick: Optional[Callable[..., Any]] = None,
-    ):
-        pass
+            ele.on("change", handler=onModelValueChanged)

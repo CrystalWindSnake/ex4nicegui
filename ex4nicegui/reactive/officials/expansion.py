@@ -8,10 +8,10 @@ from ex4nicegui.utils.signals import (
     to_ref,
     to_value,
 )
-from .base import SingleValueBindableUi
+from .base import BindableUi
 
 
-class ExpansionBindableUi(SingleValueBindableUi[bool, ui.expansion]):
+class ExpansionBindableUi(BindableUi[ui.expansion]):
     def __init__(
         self,
         text: Optional[TMaybeRef[str]] = None,
@@ -31,22 +31,14 @@ class ExpansionBindableUi(SingleValueBindableUi[bool, ui.expansion]):
                 "group",
                 "value",
             ],
+            v_model=("value", "on_value_change"),
             events=["on_value_change"],
         )
 
         value_kws = pc.get_values_kws()
 
-        value_ref = to_ref(value)
-
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_value_change:
-                handle_event(on_value_change, e)
-
-        value_kws.update({"on_value_change": inject_on_change})
-
         element = ui.expansion(**value_kws)
-        super().__init__(value_ref, element)  # type: ignore
+        super().__init__(element)  # type: ignore
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore

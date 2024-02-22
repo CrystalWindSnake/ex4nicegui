@@ -10,7 +10,7 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 from nicegui.events import handle_event
-from .base import SingleValueBindableUi
+from .base import BindableUi
 from .utils import _convert_kws_ref2value
 
 
@@ -28,13 +28,14 @@ class UploadResult:
         return len(self.content) > 0
 
 
-class UploadBindableUi(SingleValueBindableUi[UploadResult, ui.upload]):
+class UploadBindableUi(BindableUi[ui.upload]):
     @staticmethod
     def _setup_(binder: "UploadBindableUi"):
-        def on_upload(e: ng_events.UploadEventArguments):
-            binder._ref.value = UploadResult(e.content.read(), e.name, e.type)
+        pass
+        # def on_upload(e: ng_events.UploadEventArguments):
+        #     binder._ref.value = UploadResult(e.content.read(), e.name, e.type)
 
-        binder._on_upload_callbacks.append(on_upload)
+        # binder._on_upload_callbacks.append(on_upload)
 
     def __init__(
         self,

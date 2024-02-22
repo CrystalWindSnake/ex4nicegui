@@ -2,23 +2,22 @@ from typing import (
     Optional,
     cast,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
-    to_ref,
+    to_value,
 )
 from nicegui import ui
 from nicegui.elements.mixins.color_elements import (
     TextColorElement,
 )
-from .base import SingleValueBindableUi, _bind_color
-from .utils import _convert_kws_ref2value
+from .base import BindableUi, _bind_color
 
 
-class IconBindableUi(SingleValueBindableUi[str, ui.icon]):
+class IconBindableUi(BindableUi[ui.icon]):
     def __init__(
         self,
         name: TMaybeRef[str],
@@ -26,22 +25,15 @@ class IconBindableUi(SingleValueBindableUi[str, ui.icon]):
         size: Optional[TMaybeRef[str]] = None,
         color: Optional[TMaybeRef[str]] = None,
     ) -> None:
-        name_ref = to_ref(name)
-        kws = {
-            "name": name_ref,
-            "size": size,
-            "color": color,
-        }
+        pc = ParameterClassifier(
+            locals(), maybeRefs=["name", "size", "color"], events=[]
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        element = ui.icon(**pc.get_values_kws())
+        super().__init__(element)
 
-        element = ui.icon(**value_kws)
-
-        super().__init__(name_ref, element)
-
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "name":
@@ -59,7 +51,7 @@ class IconBindableUi(SingleValueBindableUi[str, ui.icon]):
         @effect
         def _():
             ele = cast(TextColorElement, self.element)
-            ele._props["name"] = ref_ui.value
+            ele._props["name"] = to_value(ref_ui)
             ele.update()
 
         return self

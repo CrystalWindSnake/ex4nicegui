@@ -15,6 +15,7 @@ from ex4nicegui.utils.signals import (
     ReadonlyRef,
     reactive,
     deep_ref,
+    is_setter_ref,
 )
 from ex4nicegui import tools
 from signe import batch
@@ -41,6 +42,7 @@ __all__ = [
     "deep_ref",
     "batch",
     "to_raw",
+    "is_setter_ref",
 ]
 
 __version__ = "0.4.13"

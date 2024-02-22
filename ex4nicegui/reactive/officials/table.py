@@ -6,6 +6,7 @@ from typing import (
     Dict,
 )
 from typing_extensions import Literal
+from ex4nicegui.reactive.utils import ParameterClassifier
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -14,6 +15,7 @@ from ex4nicegui.utils.signals import (
     to_ref,
     effect,
     _TMaybeRef as TMaybeRef,
+    to_value,
 )
 from nicegui import ui
 from .base import BindableUi
@@ -30,25 +32,28 @@ class TableBindableUi(BindableUi[ui.table]):
         selection: Optional[TMaybeRef[Literal["single", "multiple"]]] = None,
         pagination: Optional[TMaybeRef[int]] = 15,
         on_select: Optional[Callable[..., Any]] = None,
+        on_pagination_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        kws = {
-            "columns": columns,
-            "rows": rows,
-            "row_key": row_key,
-            "title": title,
-            "selection": selection,
-            "pagination": pagination,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "columns",
+                "rows",
+                "row_key",
+                "title",
+                "selection",
+                "pagination",
+            ],
+            events=["on_select", "on_pagination_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        value_kws = pc.get_values_kws()
 
-        element = ui.table(on_select=on_select, **value_kws)
+        element = ui.table(**value_kws)
+        super().__init__(element)  # type: ignore
 
-        super().__init__(element)
-
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
         self._arg_selection = selection
         self._arg_row_key = row_key
@@ -73,6 +78,7 @@ class TableBindableUi(BindableUi[ui.table]):
         selection: Optional[TMaybeRef[Literal["single", "multiple"]]] = None,
         pagination: Optional[TMaybeRef[int]] = 15,
         on_select: Optional[Callable[..., Any]] = None,
+        on_pagination_change: Optional[Callable[..., Any]] = None,
     ):
         columns_define_fn = columns_define_fn or (lambda x: {})
         other_kws = {
@@ -81,6 +87,7 @@ class TableBindableUi(BindableUi[ui.table]):
             "selection": selection,
             "pagination": pagination,
             "on_select": on_select,
+            "on_pagination_change": on_pagination_change,
         }
 
         if is_ref(df):
@@ -153,7 +160,7 @@ class TableBindableUi(BindableUi[ui.table]):
                 for col in cp_converted_df.value.columns
             ]
 
-        self.bind_rows(cp_rows).bind_columns(cp_cols)
+        self.bind_rows(cp_rows).bind_columns(cp_cols)  # type: ignore
 
         return self
 
@@ -161,7 +168,7 @@ class TableBindableUi(BindableUi[ui.table]):
         @effect
         def _():
             ele = self.element
-            ele._props["rows"] = ref_ui.value
+            ele._props["rows"] = to_value(ref_ui)
             ele.update()
 
         return self
@@ -170,7 +177,7 @@ class TableBindableUi(BindableUi[ui.table]):
         @effect
         def _():
             ele = self.element
-            ele._props["columns"] = ref_ui.value
+            ele._props["columns"] = to_value(ref_ui)
             ele.update()
 
         return self

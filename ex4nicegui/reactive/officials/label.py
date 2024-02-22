@@ -6,10 +6,10 @@ from ex4nicegui.utils.signals import (
     effect,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi
+from .base import BindableUi
 
 
-class LabelBindableUi(SingleValueBindableUi[Any, ui.label]):
+class LabelBindableUi(BindableUi[ui.label]):
     def __init__(
         self,
         text: TMaybeRef[Any] = "",
@@ -17,7 +17,7 @@ class LabelBindableUi(SingleValueBindableUi[Any, ui.label]):
         pc = ParameterClassifier(locals(), maybeRefs=["text"], events=[])
 
         element = ui.label(**pc.get_values_kws())
-        super().__init__(text, element)
+        super().__init__(element)
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore

@@ -31,7 +31,6 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         pc = ParameterClassifier(
             locals(),
             maybeRefs=["options", "html_columns", "theme", "auto_size_columns"],
-            events=[],
         )
 
         element = ui.aggrid(**pc.get_values_kws(), **org_kws)

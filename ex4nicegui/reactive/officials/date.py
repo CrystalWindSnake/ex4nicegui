@@ -12,7 +12,7 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 from nicegui.events import handle_event
-from .base import SingleValueBindableUi
+from .base import BindableUi
 from .utils import _convert_kws_ref2value
 
 
@@ -23,7 +23,7 @@ _TDateValue = TypeVar(
 )
 
 
-class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
+class DateBindableUi(BindableUi[ui.date]):
     def __init__(
         self,
         value: Optional[TMaybeRef[_TDateValue]] = None,
@@ -57,22 +57,13 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
                 "autocomplete",
                 "validation",
             ],
+            v_model=("value", "on_change"),
             events=["on_change"],
         )
 
         value_kws = pc.get_values_kws()
-
-        value_ref = to_ref(value)
-
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
-
         element = ui.date(**value_kws)
-        super().__init__(value_ref, element)  # type: ignore
+        super().__init__(element)  # type: ignore
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore

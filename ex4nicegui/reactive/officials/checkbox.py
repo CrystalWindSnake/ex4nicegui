@@ -3,7 +3,6 @@ from typing import (
     Callable,
     Optional,
     TypeVar,
-    cast,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
@@ -14,22 +13,12 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from nicegui.events import handle_event
-from nicegui.elements.mixins.value_element import ValueElement
-from .base import SingleValueBindableUi, DisableableMixin
+from .base import BindableUi, DisableableMixin
 
 T = TypeVar("T")
 
 
-class CheckboxBindableUi(SingleValueBindableUi[bool, ui.checkbox], DisableableMixin):
-    @staticmethod
-    def _setup_(binder: "CheckboxBindableUi"):
-        ele = cast(ValueElement, binder.element)
-
-        @effect
-        def _():
-            ele.value = binder.value
-
+class CheckboxBindableUi(BindableUi[ui.checkbox], DisableableMixin):
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -38,21 +27,16 @@ class CheckboxBindableUi(SingleValueBindableUi[bool, ui.checkbox], DisableableMi
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
         pc = ParameterClassifier(
-            locals(), maybeRefs=["text", "value"], events=["on_change"]
+            locals(),
+            maybeRefs=["text", "value"],
+            v_model=("value", "on_change"),
+            events=["on_change"],
         )
 
         value_kws = pc.get_values_kws()
 
-        value_ref = to_ref(value)
-
-        def inject_on_change(e):
-            value_ref.value = e.value
-            handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
-
         element = ui.checkbox(**value_kws)
-        super().__init__(value_ref, element)  # type: ignore
+        super().__init__(element)  # type: ignore
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore

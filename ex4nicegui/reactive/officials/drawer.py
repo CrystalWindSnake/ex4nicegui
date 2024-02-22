@@ -6,13 +6,13 @@ from typing_extensions import Literal
 from ex4nicegui.utils.signals import to_value, is_ref, _TMaybeRef as TMaybeRef, effect
 from nicegui import ui
 from nicegui.page_layout import Drawer
-from .base import SingleValueBindableUi
+from .base import BindableUi
 from .utils import _convert_kws_ref2value
 
 _TDrawerSide = Literal["left", "right"]
 
 
-class DrawerBindableUi(SingleValueBindableUi[bool, Drawer]):
+class DrawerBindableUi(BindableUi[Drawer]):
     def __init__(
         self,
         side: TMaybeRef[_TDrawerSide] = "left",

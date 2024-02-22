@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Dict
+from typing import Any, Callable, List, Optional, Dict, cast
 
 
 from ex4nicegui.utils.signals import (
@@ -6,17 +6,18 @@ from ex4nicegui.utils.signals import (
     Ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    is_setter_ref,
     to_ref,
     to_value,
 )
 
 from nicegui import ui
 from nicegui.events import handle_event
-from .base import SingleValueBindableUi, DisableableMixin
+from .base import BindableUi, DisableableMixin
 from ex4nicegui.reactive.utils import ParameterClassifier
 
 
-class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
+class InputBindableUi(BindableUi[ui.input], DisableableMixin):
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
@@ -40,32 +41,17 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
                 "autocomplete",
                 "validation",
             ],
+            v_model=("value", "on_change"),
             events=["on_change"],
         )
 
         value_kws = pc.get_values_kws()
 
-        value_ref = to_ref(value)
-
-        self._setup_on_change(value_ref, value_kws, on_change)
-
         element = ui.input(**value_kws)
-        super().__init__(value_ref, element)  # type: ignore
+        super().__init__(element)  # type: ignore
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
-
-    def _setup_on_change(
-        self,
-        value_ref: Ref[str],
-        value_kws: dict,
-        on_change: Optional[Callable[..., Any]] = None,
-    ):
-        def inject_on_change(e):
-            value_ref.value = e.value
-            handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -105,6 +91,11 @@ class LazyInputBindableUi(InputBindableUi):
         autocomplete: Optional[TMaybeRef[List[str]]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
+        org_value = value
+        is_setter_value = is_setter_ref(value)
+        if is_setter_value:
+            value = to_value(value)
+
         super().__init__(
             label,
             placeholder=placeholder,
@@ -116,30 +107,25 @@ class LazyInputBindableUi(InputBindableUi):
             validation=validation,
         )
 
-        ele = self.element
+        if is_setter_value:
+            ref = cast(Ref, org_value)
 
-        @effect
-        def _():
-            ele.value = self.value
+            ele = self.element
 
-        def onValueChanged(e):
-            has_change = self._ref.value != ele.value
-            self._ref.value = ele.value or ""
+            @effect
+            def _():
+                ele.value = ref.value
 
-            if has_change:
-                handle_event(on_change, e)
+            def onValueChanged(e):
+                has_change = ref.value != ele.value
+                ref.value = ele.value or ""
 
-        def on_clear(e):
-            self._ref.value = ""
+                if has_change:
+                    handle_event(on_change, e)
 
-        ele.on("blur", onValueChanged)
-        ele.on("keyup.enter", onValueChanged)
-        ele.on("clear", on_clear)
+            def on_clear(e):
+                ref.value = ""
 
-    def _setup_on_change(
-        self,
-        value_ref: Ref[str],
-        value_kws: dict,
-        on_change: Optional[Callable[..., Any]] = None,
-    ):
-        pass
+            ele.on("blur", onValueChanged)
+            ele.on("keyup.enter", onValueChanged)
+            ele.on("clear", on_clear)

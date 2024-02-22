@@ -82,13 +82,17 @@ Ref = TRef[T]
 to_raw = signe.to_raw
 
 
+def is_setter_ref(obj):
+    return isinstance(obj, signe.Signal)
+
+
 def is_ref(obj):
     return signe.is_signal(obj) or isinstance(obj, RefWrapper)
 
 
-def to_value(obj: TGetterOrReadonlyRef[T]) -> T:
+def to_value(obj: _TMaybeRef[T]) -> T:
     if is_ref(obj):
-        return obj.value
+        return obj.value  # type: ignore
     if isinstance(obj, Callable):
         return obj()
 

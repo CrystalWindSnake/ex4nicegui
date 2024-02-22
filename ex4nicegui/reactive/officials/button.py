@@ -11,10 +11,10 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi, _bind_color, DisableableMixin
+from .base import BindableUi, _bind_color, DisableableMixin
 
 
-class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
+class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -24,12 +24,12 @@ class ButtonBindableUi(SingleValueBindableUi[str, ui.button], DisableableMixin):
         icon: Optional[TMaybeRef[str]] = None,
     ) -> None:
         pc = ParameterClassifier(
-            locals(), maybeRefs=["text", "color", "icon"], events=[]
+            locals(), maybeRefs=["text", "color", "icon"], events=["on_click"]
         )
 
         element = ui.button(on_click=on_click, **pc.get_values_kws())
 
-        super().__init__(text, element)
+        super().__init__(element)
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore

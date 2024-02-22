@@ -1,6 +1,7 @@
 from typing import (
     Optional,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -8,14 +9,15 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     effect,
     to_ref,
+    to_value,
 )
 from nicegui import ui
 
-from .base import SingleValueBindableUi, _bind_color
+from .base import BindableUi, _bind_color
 from .utils import _convert_kws_ref2value
 
 
-class LinearProgressBindableUi(SingleValueBindableUi[float, ui.linear_progress]):
+class LinearProgressBindableUi(BindableUi[ui.linear_progress]):
     def __init__(
         self,
         value: TMaybeRef[float] = 0.0,
@@ -34,23 +36,15 @@ class LinearProgressBindableUi(SingleValueBindableUi[float, ui.linear_progress])
         :param show_value: whether to show a value label in the center (default: `True`)
         :param color: color (either a Quasar, Tailwind, or CSS color or `None`, default: "primary")
         """
-        value_ref = to_ref(value)
-        kws = {
-            "value": value_ref,
-            "size": size,
-            "show_value": show_value,
-            "color": color,
-        }
+        pc = ParameterClassifier(
+            locals(), maybeRefs=["value", "size", "show_value", "color"], events=[]
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        element = ui.linear_progress(**pc.get_values_kws())
+        super().__init__(element)
 
-        element = ui.linear_progress(**value_kws)
-
-        super().__init__(value_ref, element)
-
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -67,7 +61,7 @@ class LinearProgressBindableUi(SingleValueBindableUi[float, ui.linear_progress])
     def bind_value(self, ref_ui: ReadonlyRef):
         @effect
         def _():
-            self.element.set_value(ref_ui.value)
+            self.element.set_value(to_value(ref_ui))
             self.element.update()
 
         return self

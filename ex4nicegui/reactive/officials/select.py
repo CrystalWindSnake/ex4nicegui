@@ -8,6 +8,7 @@ from typing import (
     Dict,
     Union,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -15,17 +16,18 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     effect,
     to_ref,
+    to_value,
 )
 from nicegui import ui
 from nicegui.events import handle_event
 from nicegui.elements.mixins.value_element import ValueElement
-from .base import SingleValueBindableUi
+from .base import BindableUi
 from .utils import _convert_kws_ref2value
 
 T = TypeVar("T")
 
 
-class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
+class SelectBindableUi(BindableUi[ui.select]):
     def __init__(
         self,
         options: Union[TMaybeRef[List], TMaybeRef[Dict]],
@@ -50,35 +52,27 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
         :param multiple: whether to allow multiple selections
         :param clearable: whether to add a button to clear the selection
         """
-        value_ref = to_ref(value)
-        kws = {
-            "options": options,
-            "label": label,
-            "value": value_ref,
-            "with_input": with_input,
-            "multiple": multiple,
-            "clearable": clearable,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "options",
+                "label",
+                "value",
+                "with_input",
+                "multiple",
+                "clearable",
+            ],
+            v_model=("value", "on_change"),
+            events=["on_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        value_kws = pc.get_values_kws()
 
-        value_kws.update(kwargs)
+        element = ui.number(**value_kws)
+        super().__init__(element)  # type: ignore
 
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
-
-        element = ui.select(**value_kws)
-        element.classes("min-w-[10rem]")
-
-        super().__init__(value_ref, element)
-
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -92,7 +86,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
     def bind_options(self, ref_ui: ReadonlyRef):
         @effect(priority_level=0)
         def _():
-            self.element.options = ref_ui.value
+            self.element.options = to_value(ref_ui)
             self.element.update()
 
         return self
@@ -100,7 +94,7 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
     def bind_value(self, ref_ui: ReadonlyRef):
         @effect
         def _():
-            cast(ValueElement, self.element).set_value(ref_ui.value or None)
+            cast(ValueElement, self.element).set_value(to_value(ref_ui) or None)
             self.element.update()
 
         return self
