@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, cast
 
 from ex4nicegui.utils.signals import is_ref, to_value, is_setter_ref
 from nicegui.events import handle_event
@@ -14,21 +14,36 @@ class ParameterClassifier:
         args: Dict,
         *,
         maybeRefs: Optional[Iterable[str]] = None,
-        events: Optional[Iterable[str]] = None,
+        events: Optional[List[str]] = None,
         v_model: Optional[Tuple[str, str]] = None,
         v_model_arg_getter: Optional[Callable[[Any], Any]] = None,
-        exclude: Optional[Iterable[str]] = None,
+        exclude: Optional[List[str]] = None,
+        extend_kws: Optional[str] = None,
     ) -> None:
         exclude = exclude or []
+        if extend_kws:
+            exclude.append(extend_kws)
+
         self._args = {
             k: v
             for k, v in args.items()
             if k != "self" and k[0] != "_" and (k not in exclude)
         }
+
         self.maybeRefs = maybeRefs or []
         self.events = events or []
         self.v_model = v_model
         self.v_model_arg_getter = v_model_arg_getter or (lambda e: getattr(e, "value"))
+
+        if extend_kws:
+            extend_args = cast(Dict, args.get(extend_kws))
+            self.events.extend(
+                k for k, v in extend_args.items() if isinstance(v, Callable)
+            )
+
+            self._args.update(
+                {k: v for k, v in extend_args.items() if not isinstance(v, Callable)}
+            )
 
     def get_values_kws(self) -> Dict:
         value_kws = _convert_kws_ref2value(

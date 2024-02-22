@@ -60,7 +60,7 @@ class SelectBindableUi(BindableUi[ui.select]):
             ],
             v_model=("value", "on_change"),
             events=["on_change"],
-            exclude=["kwargs"],
+            extend_kws="kwargs",
         )
 
         value_kws = pc.get_values_kws()
