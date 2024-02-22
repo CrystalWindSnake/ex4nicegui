@@ -64,11 +64,12 @@ class SelectBindableUi(BindableUi[ui.select]):
             ],
             v_model=("value", "on_change"),
             events=["on_change"],
+            exclude=["kwargs"],
         )
 
         value_kws = pc.get_values_kws()
 
-        element = ui.number(**value_kws)
+        element = ui.select(**value_kws)
         super().__init__(element)  # type: ignore
 
         for key, value in pc.get_bindings().items():

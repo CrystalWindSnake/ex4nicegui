@@ -17,8 +17,14 @@ class ParameterClassifier:
         events: Optional[Iterable[str]] = None,
         v_model: Optional[Tuple[str, str]] = None,
         v_model_arg_getter: Optional[Callable[[Any], Any]] = None,
+        exclude: Optional[Iterable[str]] = None,
     ) -> None:
-        self._args = {k: v for k, v in args.items() if k != "self" and k[0] != "_"}
+        exclude = exclude or []
+        self._args = {
+            k: v
+            for k, v in args.items()
+            if k != "self" and k[0] != "_" and (k not in exclude)
+        }
         self.maybeRefs = maybeRefs or []
         self.events = events or []
         self.v_model = v_model

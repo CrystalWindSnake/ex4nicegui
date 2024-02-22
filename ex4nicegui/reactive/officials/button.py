@@ -27,7 +27,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
             locals(), maybeRefs=["text", "color", "icon"], events=["on_click"]
         )
 
-        element = ui.button(on_click=on_click, **pc.get_values_kws())
+        element = ui.button(**pc.get_values_kws())
 
         super().__init__(element)
 
