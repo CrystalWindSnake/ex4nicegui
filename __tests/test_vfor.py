@@ -2,7 +2,7 @@ from typing import Any, List, Protocol
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
-from ex4nicegui.utils.signals import reactive_ref
+from ex4nicegui.utils.signals import deep_ref
 from .screen import ScreenPage
 from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
 from playwright.sync_api import expect
@@ -58,7 +58,7 @@ class TestTodosExample:
         def _():
             ui.row.default_classes("flex-center")
 
-            todos = reactive_ref([])
+            todos = deep_ref([])
             input = to_ref("")
 
             @ref_computed
@@ -207,7 +207,7 @@ class TestBase:
         @ui.page(page_path)
         def _():
             # refs
-            items = reactive_ref(
+            items = deep_ref(
                 [
                     {"id": 1, "message": "foo", "done": False},
                     {"id": 2, "message": "bar", "done": True},

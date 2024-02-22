@@ -14,7 +14,7 @@ from ex4nicegui.utils.signals import (
     Ref,
     ReadonlyRef,
     reactive,
-    reactive_ref,
+    deep_ref,
 )
 from ex4nicegui import tools
 from signe import batch
@@ -38,7 +38,7 @@ __all__ = [
     "Ref",
     "ReadonlyRef",
     "reactive",
-    "reactive_ref",
+    "deep_ref",
     "batch",
 ]
 

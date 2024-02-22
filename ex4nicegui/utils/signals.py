@@ -142,7 +142,7 @@ def ref(value: T, is_shallow=True):
     return cast(Ref[T], s)
 
 
-def reactive_ref(value: T) -> Ref[T]:
+def deep_ref(value: T) -> Ref[T]:
     return ref(value, is_shallow=False)
 
 

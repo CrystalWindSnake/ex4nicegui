@@ -1,7 +1,7 @@
 from __future__ import annotations
 from nicegui.element import Element
 from nicegui import ui
-from ex4nicegui.utils.signals import ReadonlyRef, on, to_ref_wrapper
+from ex4nicegui.utils.signals import ReadonlyRef, on, to_ref, to_ref_wrapper
 from typing import (
     Any,
     Callable,
@@ -26,14 +26,14 @@ _T_data = ReadonlyRef[List[Any]]
 class VforStore(Generic[_T]):
     def __init__(self, source: _T_data, index: int) -> None:
         self._source = source
-        self._data_index = index
+        self._data_index = to_ref(index)
 
     @property
     def row_index(self):
         return self._data_index
 
     def get(self, attr: Optional[str] = None) -> _T:
-        item = self._source.value[self._data_index]
+        item = self._source.value[self._data_index.value]
 
         if attr:
             setter = None
@@ -57,7 +57,7 @@ class VforStore(Generic[_T]):
         return item
 
     def update(self, index: int):
-        self._data_index = index
+        self._data_index.value = index
 
 
 @dataclass
