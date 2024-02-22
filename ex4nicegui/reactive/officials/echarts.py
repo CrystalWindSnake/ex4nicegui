@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, cast, Optional
 from typing_extensions import Literal
+from ex4nicegui.reactive.utils import ParameterClassifier
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -8,9 +9,9 @@ from ex4nicegui.utils.signals import (
     ref_computed,
     _TMaybeRef as TMaybeRef,
     effect,
+    to_value,
 )
 from .base import BindableUi
-from .utils import _convert_kws_ref2value
 from ex4nicegui.reactive.EChartsComponent.ECharts import (
     echarts,
     EChartsMouseEventArguments,
@@ -18,7 +19,6 @@ from ex4nicegui.reactive.EChartsComponent.ECharts import (
 
 from nicegui.awaitable_response import AwaitableResponse
 from nicegui import ui, app
-import orjson as json
 
 _TEventName = Literal[
     "click",
@@ -42,20 +42,25 @@ class EChartsBindableUi(BindableUi[echarts]):
         not_merge: TMaybeRef[Union[bool, None]] = None,
         code: Optional[str] = None,
     ) -> None:
-        kws = {"options": options, "code": code}
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "options",
+                "code",
+            ],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        value_kws = pc.get_values_kws()
+
         element = echarts(**value_kws).classes("grow self-stretch h-[16rem]")
-
-        super().__init__(element)
+        super().__init__(element)  # type: ignore
 
         self.__update_setting = None
         if not_merge is not None:
             self.__update_setting = {"notMerge": not_merge}
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     @classmethod
     def register_map(cls, map_name: str, src: Union[str, Path]):
@@ -138,7 +143,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         @effect
         def _():
             ele = self.element
-            ele.update_options(ref_ui.value, self.__update_setting)
+            ele.update_options(to_value(ref_ui), self.__update_setting)
             ele.update()
 
         return self
