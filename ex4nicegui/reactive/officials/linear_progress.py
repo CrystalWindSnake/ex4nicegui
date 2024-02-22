@@ -5,16 +5,13 @@ from ex4nicegui.reactive.utils import ParameterClassifier
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
-    to_ref,
     to_value,
 )
 from nicegui import ui
 
 from .base import BindableUi, _bind_color
-from .utils import _convert_kws_ref2value
 
 
 class LinearProgressBindableUi(BindableUi[ui.linear_progress]):

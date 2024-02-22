@@ -9,17 +9,14 @@ from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
-    is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
     is_setter_ref,
-    to_ref,
     to_value,
 )
 from nicegui import ui
 from nicegui.events import handle_event
 from .base import BindableUi
-from .utils import _convert_kws_ref2value
 
 
 class TextareaBindableUi(BindableUi[ui.textarea]):

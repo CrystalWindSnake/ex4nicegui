@@ -9,7 +9,6 @@ from ex4nicegui.utils.signals import (
     ReadonlyRef,
     _TMaybeRef as TMaybeRef,
     effect,
-    to_ref,
     to_value,
 )
 from nicegui import ui

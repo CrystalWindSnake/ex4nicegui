@@ -12,7 +12,6 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     effect,
     is_setter_ref,
-    to_ref,
     to_value,
 )
 from nicegui import ui

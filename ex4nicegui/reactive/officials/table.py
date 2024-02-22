@@ -19,7 +19,6 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 from .base import BindableUi
-from .utils import _convert_kws_ref2value
 
 
 class TableBindableUi(BindableUi[ui.table]):

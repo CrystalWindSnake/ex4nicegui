@@ -1,11 +1,9 @@
 from typing import Any, Optional, Callable
 from nicegui import ui
-from nicegui.events import handle_event
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     effect,
-    to_ref,
     to_value,
 )
 from .base import BindableUi
