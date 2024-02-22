@@ -29,7 +29,7 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
         value_ref = to_ref(value)
-        kws = {"text": text, "value": value_ref, "on_change": on_change}
+        kws = {"text": text, "value": value_ref}
 
         value_kws = _convert_kws_ref2value(kws)
 

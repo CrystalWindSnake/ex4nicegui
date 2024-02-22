@@ -42,7 +42,6 @@ class SliderBindableUi(
             "max": max,
             "step": step,
             "value": value_ref,
-            "on_change": on_change,
         }
 
         value_kws = _convert_kws_ref2value(kws)

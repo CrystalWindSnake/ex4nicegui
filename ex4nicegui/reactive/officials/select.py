@@ -55,7 +55,6 @@ class SelectBindableUi(SingleValueBindableUi[T, ui.select]):
             "options": options,
             "label": label,
             "value": value_ref,
-            "on_change": on_change,
             "with_input": with_input,
             "multiple": multiple,
             "clearable": clearable,

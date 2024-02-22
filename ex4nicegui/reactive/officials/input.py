@@ -37,7 +37,6 @@ class InputBindableUi(SingleValueBindableUi[str, ui.input], DisableableMixin):
             "password_toggle_button": password_toggle_button,
             "autocomplete": autocomplete,
             "validation": validation,
-            "on_change": on_change,
         }
 
         value_kws = _convert_kws_ref2value(kws)

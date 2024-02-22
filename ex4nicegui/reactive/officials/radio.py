@@ -34,7 +34,7 @@ class RadioBindableUi(SingleValueBindableUi[bool, ui.radio]):
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
         value_ref = to_ref(value)
-        kws = {"options": options, "value": value_ref, "on_change": on_change}
+        kws = {"options": options, "value": value_ref}
 
         value_kws = _convert_kws_ref2value(kws)
 

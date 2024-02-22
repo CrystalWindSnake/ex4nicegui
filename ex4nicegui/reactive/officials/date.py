@@ -48,7 +48,6 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         kws = {
             "value": value_ref,
             "mask": mask,
-            "on_change": on_change,
         }
 
         value_kws = _convert_kws_ref2value(kws)

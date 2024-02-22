@@ -49,7 +49,6 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
             "prefix": prefix,
             "suffix": suffix,
             "format": format,
-            "on_change": on_change,
             "validation": validation,
         }
 

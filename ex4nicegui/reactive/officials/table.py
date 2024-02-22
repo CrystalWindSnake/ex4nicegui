@@ -38,12 +38,11 @@ class TableBindableUi(BindableUi[ui.table]):
             "title": title,
             "selection": selection,
             "pagination": pagination,
-            "on_select": on_select,
         }
 
         value_kws = _convert_kws_ref2value(kws)
 
-        element = ui.table(**value_kws)
+        element = ui.table(on_select=on_select, **value_kws)
 
         super().__init__(element)
 
