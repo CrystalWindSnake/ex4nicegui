@@ -109,7 +109,7 @@ def test_ref_value_dict_options(page: ScreenPage, page_path: str):
 
     assert not target.is_checked_by_label("a value")
     assert not target.is_checked_by_label("b value")
-    assert r_value.value == ""
+    assert r_value.value is None
 
     page.wait()
     target.check_by_label("a value")

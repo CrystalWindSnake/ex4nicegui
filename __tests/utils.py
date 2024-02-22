@@ -108,7 +108,7 @@ class SelectUtils(BaseUiUtils):
         )
 
     def click(self):
-        self.target_locator.click(position={"x": 5, "y": 5})
+        self.target_locator.click()
 
     def get_options_values(self):
         return self.page.locator(
