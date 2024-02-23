@@ -381,9 +381,9 @@ def event_batch(event_fn: Callable[..., None]):
     """
 
     def wrap(*args, **kwargs):
-        def event_fn():
+        def real_event_fn():
             event_fn(*args, **kwargs)
 
-        signe.batch(event_fn, scheduler=get_uiScheduler())
+        signe.batch(real_event_fn, scheduler=get_uiScheduler())
 
     return wrap
