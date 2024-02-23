@@ -1,9 +1,10 @@
+from collections import deque
 from datetime import date, datetime
 from functools import partial
 import types
 from weakref import WeakValueDictionary
 import signe
-from .clientScope import NgClientScopeManager
+from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
     Dict,
@@ -17,13 +18,11 @@ from typing import (
     Union,
     Sequence,
 )
-from .scheduler import reset_execution_scheduler
 from nicegui import ui
+from .effect import effect
+from .scheduler import get_uiScheduler
 
 T = TypeVar("T")
-
-
-_CLIENT_SCOPE_MANAGER = NgClientScopeManager()
 
 
 TReadonlyRef = signe.TGetterSignal[T]
@@ -33,7 +32,8 @@ DescReadonlyRef = TReadonlyRef[T]
 TGetterOrReadonlyRef = signe.TGetter[T]
 
 
-reactive = signe.reactive
+def reactive(obj: T) -> T:
+    return signe.reactive(obj, get_uiScheduler())
 
 
 class RefWrapper(Generic[T]):
@@ -144,7 +144,7 @@ def ref(value: T, is_deep=False):
     if value is None:
         comp = _ref_comp_with_None
 
-    s = signe.signal(value, comp, is_shallow=not is_deep)
+    s = signe.signal(value, comp, is_shallow=not is_deep, scheduler=get_uiScheduler())
 
     return cast(Ref[T], s)
 
@@ -160,66 +160,6 @@ def deep_ref(value: T) -> Ref[T]:
 
     """
     return to_ref(value, is_deep=True)
-
-
-_TEffect_Fn = Callable[[Callable[..., T]], signe.Effect]
-
-
-@overload
-def effect(
-    fn: None = ...,
-    *,
-    priority_level=1,
-    debug_trigger: Optional[Callable] = None,
-    debug_name: Optional[str] = None,
-) -> _TEffect_Fn:
-    """Runs a function immediately while reactively tracking its dependencies and re-runs it whenever the dependencies are changed.
-
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#effect
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#effect
-
-
-    Args:
-        fn (None, optional): _description_. Defaults to ....
-        priority_level (int, optional): _description_. Defaults to 1.
-        debug_trigger (Optional[Callable], optional): _description_. Defaults to None.
-        debug_name (Optional[str], optional): _description_. Defaults to None.
-
-    """
-    ...
-
-
-@overload
-def effect(
-    fn: Callable[..., None],
-    *,
-    priority_level=1,
-    debug_trigger: Optional[Callable] = None,
-    debug_name: Optional[str] = None,
-) -> signe.Effect[None]:
-    ...
-
-
-def effect(
-    fn: Optional[Callable[..., None]] = None,
-    *,
-    priority_level=1,
-    debug_trigger: Optional[Callable] = None,
-    debug_name: Optional[str] = None,
-) -> Union[signe.Effect[None], _TEffect_Fn]:
-    kws = {
-        "debug_trigger": debug_trigger,
-        "priority_level": priority_level,
-        "debug_name": debug_name,
-    }
-    if fn:
-        return signe.effect(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())
-    else:
-
-        def wrap(fn: Callable[..., None]):
-            return effect(fn, **kws)
-
-        return wrap
 
 
 class TInstanceCall(Protocol[T]):
@@ -286,7 +226,12 @@ def ref_computed(
                 ref_computed_method(fn, computed_args=kws),  # type: ignore
             )  # type: ignore
 
-        getter = signe.computed(fn, **kws, scope=_CLIENT_SCOPE_MANAGER.get_scope())  # type: ignore
+        getter = signe.computed(
+            fn,
+            **kws,
+            scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+            scheduler=get_uiScheduler(),
+        )  # type: ignore
         return cast(DescReadonlyRef[T], getter)
 
     else:
@@ -401,6 +346,7 @@ def on(
             effect_kws=effect_kws,
             scope=_CLIENT_SCOPE_MANAGER.get_scope(),
             deep=deep,
+            scheduler=get_uiScheduler(),
         )
 
     return wrap
@@ -435,8 +381,9 @@ def event_batch(event_fn: Callable[..., None]):
     """
 
     def wrap(*args, **kwargs):
-        @signe.batch
-        def _():
+        def event_fn():
             event_fn(*args, **kwargs)
+
+        signe.batch(event_fn, scheduler=get_uiScheduler())
 
     return wrap

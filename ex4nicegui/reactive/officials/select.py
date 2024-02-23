@@ -9,6 +9,7 @@ from typing import (
     Union,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -81,17 +82,15 @@ class SelectBindableUi(BindableUi[ui.select]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_options(self, ref_ui: ReadonlyRef):
-        @effect(priority_level=0)
+        @ui_effect()
         def _():
-            self.element.options = to_value(ref_ui)
-            self.element.update()
+            self.element.set_options(to_value(ref_ui))
 
         return self
 
     def bind_value(self, ref_ui: ReadonlyRef):
-        @effect
+        @ui_effect()
         def _():
             cast(ValueElement, self.element).set_value(to_value(ref_ui) or None)
-            self.element.update()
 
         return self
