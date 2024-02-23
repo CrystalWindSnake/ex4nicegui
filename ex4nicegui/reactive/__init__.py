@@ -14,7 +14,7 @@ from .officials.date import DateBindableUi as date
 from .officials.drawer import DrawerBindableUi as drawer
 
 from .officials.echarts import EChartsBindableUi as echarts
-from .officials.html import HtmlBindableUi as html
+from .officials.html import html
 from .officials.icon import IconBindableUi as icon
 from .officials.image import ImageBindableUi as image
 from .officials.input import (
