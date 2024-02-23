@@ -39,13 +39,8 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
             return self.bind_text(ref_ui)
         if prop == "icon":
             return self.bind_icon(ref_ui)
-        if prop == "color":
-            return self.bind_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
-
-    def bind_color(self, ref_ui: ReadonlyRef):
-        return _bind_color(self, ref_ui)
 
     def bind_text(self, ref_ui: ReadonlyRef):
         @ui_effect
