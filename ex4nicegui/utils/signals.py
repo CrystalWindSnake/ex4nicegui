@@ -84,6 +84,7 @@ to_raw = signe.to_raw
 def is_setter_ref(obj):
     return isinstance(obj, (signe.Signal, RefWrapper))
 
+
 def is_ref(obj):
     return signe.is_signal(obj) or isinstance(obj, RefWrapper)
 
@@ -148,16 +149,6 @@ def ref(value: T, is_deep=False):
 
 def deep_ref(value: T) -> Ref[T]:
     """Deep response version of `to_ref`.
-
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#deep_ref
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#deep_ref
-
-    >>> deep_ref(1)
-    >>> deep_ref([1,2,3])
-
-    """
-    return to_ref(value, is_deep=True)
-
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#deep_ref
     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#deep_ref
