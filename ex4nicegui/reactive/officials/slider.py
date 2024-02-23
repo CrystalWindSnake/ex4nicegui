@@ -3,14 +3,17 @@ from typing import (
     Callable,
     Optional,
     TypeVar,
+    cast,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
     _TMaybeRef as TMaybeRef,
     effect,
+    is_setter_ref,
     to_value,
 )
 from nicegui import ui
@@ -46,13 +49,17 @@ class SliderBindableUi(
         )
 
         value_kws = pc.get_values_kws()
-        value_kws.update({"value": 0 if value is None else value})
+        value_kws.update({"value": 0 if value is None else value_kws.get("value")})
 
         element = ui.slider(**value_kws).props("label label-always switch-label-side")
         super().__init__(element)  # type: ignore
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
+
+    @property
+    def value(self):
+        return self.element.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -61,25 +68,12 @@ class SliderBindableUi(
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: ReadonlyRef[float]):
-        @effect
+        @ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
             self.element.update()
 
         return self
-
-    def _setup_on_change(
-        self,
-        value_ref: Ref[_TSliderValue],
-        value_kws: dict,
-        on_change: Optional[Callable[..., Any]] = None,
-    ):
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
 
 
 class LazySliderBindableUi(SliderBindableUi):
@@ -91,25 +85,24 @@ class LazySliderBindableUi(SliderBindableUi):
         value: Optional[TMaybeRef[_TSliderValue]] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
+        org_value = value
+        is_setter_value = is_setter_ref(value)
+        if is_setter_value:
+            value = to_value(value)
+
         super().__init__(min, max, step, value, on_change)
 
-        ele = self.element
+        if is_setter_value:
+            ref = cast(Ref, org_value)
+            ele = self.element
 
-        @effect
-        def _():
-            ele.value = self.value
+            @ui_effect
+            def _():
+                ele.value = ref.value
 
-        def onValueChanged(e):
-            self._ref.value = ele.value
-            if on_change:
-                handle_event(on_change, e)
+            def onValueChanged(e):
+                ref.value = ele.value
+                if on_change:
+                    handle_event(on_change, e)
 
-        ele.on("change", onValueChanged)
-
-    def _setup_on_change(
-        self,
-        value_ref: Ref[float],
-        value_kws: dict,
-        on_change: Optional[Callable[..., Any]] = None,
-    ):
-        pass
+            ele.on("change", onValueChanged)

@@ -3,6 +3,7 @@ from typing import (
     cast,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -48,7 +49,7 @@ class IconBindableUi(BindableUi[ui.icon]):
         return _bind_color(self, ref_ui)
 
     def bind_name(self, ref_ui: ReadonlyRef):
-        @effect
+        @ui_effect
         def _():
             ele = cast(TextColorElement, self.element)
             ele._props["name"] = to_value(ref_ui)

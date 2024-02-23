@@ -13,6 +13,7 @@ from ex4nicegui.utils.signals import (
     to_value,
     _TMaybeRef as TMaybeRef,
 )
+from ex4nicegui.utils.apiEffect import ui_effect
 from nicegui import ui
 from .base import BindableUi
 from ex4nicegui.reactive.utils import ParameterClassifier
@@ -82,7 +83,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_options(self, ref_ui: ReadonlyRef[List[Dict]]):
-        @effect
+        @ui_effect
         def _():
             ele = self.element
             data = to_value(ref_ui)

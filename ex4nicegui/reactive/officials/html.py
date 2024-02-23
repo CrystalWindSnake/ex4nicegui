@@ -1,5 +1,6 @@
 import asyncio
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
@@ -53,7 +54,7 @@ class HtmlBindableUi(BindableUi[ui.html]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_color(self, ref_ui: TMaybeRef):
-        @effect
+        @ui_effect
         def _():
             ele = self.element
             color = to_value(ref_ui)

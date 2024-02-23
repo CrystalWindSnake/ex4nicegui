@@ -3,6 +3,7 @@ from typing import (
     Union,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -34,6 +35,6 @@ class ImageBindableUi(BindableUi[ui.image]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_source(self, ref_ui: ReadonlyRef[Union[str, Path]]):
-        @effect
+        @ui_effect
         def _():
             self.element.set_source(to_value(ref_ui))

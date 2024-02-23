@@ -5,6 +5,7 @@ from typing import (
     TypeVar,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -52,9 +53,8 @@ class SwitchBindableUi(BindableUi[ui.switch]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
-        @effect
+        @ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
-            self.element.update()
 
         return self

@@ -7,6 +7,7 @@ from typing import (
 )
 from typing_extensions import Literal
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -164,7 +165,7 @@ class TableBindableUi(BindableUi[ui.table]):
         return self
 
     def bind_rows(self, ref_ui: ReadonlyRef[List[Dict]]):
-        @effect
+        @ui_effect
         def _():
             ele = self.element
             ele._props["rows"] = to_value(ref_ui)
@@ -173,7 +174,7 @@ class TableBindableUi(BindableUi[ui.table]):
         return self
 
     def bind_columns(self, ref_ui: ReadonlyRef[List[Dict]]):
-        @effect
+        @ui_effect
         def _():
             ele = self.element
             ele._props["columns"] = to_value(ref_ui)

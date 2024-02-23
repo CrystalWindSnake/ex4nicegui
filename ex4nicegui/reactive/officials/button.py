@@ -4,6 +4,7 @@ from typing import (
     Optional,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     _TMaybeRef as TMaybeRef,
@@ -48,7 +49,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
         return _bind_color(self, ref_ui)
 
     def bind_text(self, ref_ui: ReadonlyRef):
-        @effect
+        @ui_effect
         def _():
             ele = self.element
             ele._props["label"] = to_value(ref_ui)
@@ -57,7 +58,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
         return self
 
     def bind_icon(self, ref_ui: ReadonlyRef):
-        @effect
+        @ui_effect
         def _():
             ele = self.element
             ele._props["icon"] = to_value(ref_ui)

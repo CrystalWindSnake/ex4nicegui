@@ -3,6 +3,7 @@ from typing import (
 )
 from typing_extensions import Literal
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     is_setter_ref,
@@ -61,7 +62,7 @@ class DrawerBindableUi(BindableUi[Drawer]):
 
         super().__init__(element)  # type: ignore
 
-        @effect
+        @ui_effect
         def _():
             mvalue = "true" if to_value(value) else "false"
             element.props(f":model-value={mvalue}")

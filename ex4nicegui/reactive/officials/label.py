@@ -1,5 +1,6 @@
 from typing import Any
 from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     to_value,
     _TMaybeRef as TMaybeRef,
@@ -32,7 +33,7 @@ class LabelBindableUi(BindableUi[ui.label]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_color(self, ref_ui: TMaybeRef):
-        @effect
+        @ui_effect
         def _():
             ele = self.element
             color = to_value(ref_ui)
@@ -40,7 +41,7 @@ class LabelBindableUi(BindableUi[ui.label]):
             ele.update()
 
     def bind_text(self, ref_ui: TMaybeRef):
-        @effect
+        @ui_effect
         def _():
             self.element.set_text(str(to_value(ref_ui)))
             self.element.update()
