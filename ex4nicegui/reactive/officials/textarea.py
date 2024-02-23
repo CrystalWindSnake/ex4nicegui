@@ -50,6 +50,10 @@ class TextareaBindableUi(BindableUi[ui.textarea]):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
+    @property
+    def value(self):
+        return self.element.value
+
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
             return self.bind_value(ref_ui)

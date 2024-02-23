@@ -22,6 +22,10 @@ class LabelBindableUi(BindableUi[ui.label]):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
+    @property
+    def text(self):
+        return self.element.text
+
     def bind_prop(self, prop: str, ref_ui: TMaybeRef):
         if prop == "text":
             return self.bind_text(ref_ui)
