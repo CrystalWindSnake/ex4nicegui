@@ -1,4 +1,3 @@
-from collections import deque
 from datetime import date, datetime
 from functools import partial
 import types
@@ -350,6 +349,10 @@ def on(
         )
 
     return wrap
+
+
+def batch(fn: Callable[..., None]):
+    return signe.batch(fn, get_uiScheduler())
 
 
 def event_batch(event_fn: Callable[..., None]):

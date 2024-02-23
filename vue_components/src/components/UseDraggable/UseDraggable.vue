@@ -30,8 +30,6 @@ defineExpose({
 function apply(targetId: string) {
   const el = document.getElementById(`c${targetId}`);
 
-  console.log("run apply:", el);
-
   // `style` will be a helper computed for `left: ?px; top: ?px;`
 
   function onStart() {

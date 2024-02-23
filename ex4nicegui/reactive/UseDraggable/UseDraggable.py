@@ -3,8 +3,7 @@ from dataclasses import dataclass
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
-from signe import effect, batch
-from ex4nicegui.utils.signals import _TMaybeRef, to_ref, to_value
+from ex4nicegui.utils.signals import batch, to_ref, to_value, effect
 
 
 _Update_Args = [

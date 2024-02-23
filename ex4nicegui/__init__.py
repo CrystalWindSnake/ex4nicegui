@@ -16,6 +16,7 @@ from ex4nicegui.utils.signals import (
     reactive,
     deep_ref,
     is_setter_ref,
+    batch,
 )
 from ex4nicegui import tools
 from signe import batch
