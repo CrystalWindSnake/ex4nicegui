@@ -12,7 +12,6 @@ from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
     _TMaybeRef as TMaybeRef,
-    effect,
     is_setter_ref,
     to_value,
 )

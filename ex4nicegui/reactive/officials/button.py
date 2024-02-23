@@ -8,7 +8,6 @@ from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     _TMaybeRef as TMaybeRef,
-    effect,
     to_value,
 )
 from nicegui import ui

@@ -4,7 +4,6 @@ from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     to_value,
     _TMaybeRef as TMaybeRef,
-    effect,
 )
 from nicegui import ui
 from .base import BindableUi

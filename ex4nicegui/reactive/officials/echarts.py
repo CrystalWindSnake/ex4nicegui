@@ -9,7 +9,6 @@ from ex4nicegui.utils.signals import (
     is_ref,
     ref_computed,
     _TMaybeRef as TMaybeRef,
-    effect,
     to_value,
 )
 from .base import BindableUi

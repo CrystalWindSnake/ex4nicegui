@@ -6,7 +6,6 @@ from typing import (
     Optional,
 )
 from ex4nicegui.utils.signals import (
-    effect,
     ReadonlyRef,
     is_ref,
     ref_computed,

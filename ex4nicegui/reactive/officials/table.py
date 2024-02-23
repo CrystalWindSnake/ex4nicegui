@@ -14,7 +14,6 @@ from ex4nicegui.utils.signals import (
     is_ref,
     ref_computed,
     to_ref,
-    effect,
     _TMaybeRef as TMaybeRef,
     to_value,
 )

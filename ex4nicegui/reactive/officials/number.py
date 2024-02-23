@@ -11,7 +11,6 @@ from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    effect,
     _TMaybeRef as TMaybeRef,
     to_value,
 )

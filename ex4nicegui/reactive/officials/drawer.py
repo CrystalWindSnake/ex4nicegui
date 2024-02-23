@@ -10,7 +10,6 @@ from ex4nicegui.utils.signals import (
     to_ref,
     to_value,
     _TMaybeRef as TMaybeRef,
-    effect,
 )
 from nicegui import ui
 from nicegui.page_layout import Drawer
