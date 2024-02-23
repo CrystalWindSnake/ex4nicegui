@@ -3,7 +3,7 @@ from ex4nicegui.utils.signals import (
     ref_computed,
     effect,
     effect_refreshable,
-    # ref_from_signal,
+    to_raw,
     is_ref,
     to_ref,
     to_value,
@@ -40,6 +40,7 @@ __all__ = [
     "reactive",
     "deep_ref",
     "batch",
+    "to_raw",
 ]
 
 __version__ = "0.4.13"

@@ -79,6 +79,9 @@ TRef = signe.TSignal[T]
 Ref = TRef[T]
 
 
+to_raw = signe.to_raw
+
+
 def is_ref(obj):
     return signe.is_signal(obj) or isinstance(obj, RefWrapper)
 
@@ -95,7 +98,7 @@ def to_value(obj: TGetterOrReadonlyRef[T]) -> T:
 WatchedState = signe.WatchedState
 
 
-def to_ref(maybe_ref: _TMaybeRef[T]):
+def to_ref(maybe_ref: _TMaybeRef[T], is_deep=False):
     """Takes an inner value and returns a reactive and mutable ref object, which has a single property .value that points to the inner value.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#to_ref
@@ -110,7 +113,7 @@ def to_ref(maybe_ref: _TMaybeRef[T]):
     if is_ref(maybe_ref):
         return cast(Ref[T], maybe_ref)
 
-    return cast(Ref[T], ref(maybe_ref))
+    return cast(Ref[T], ref(maybe_ref, is_deep))
 
 
 def _is_comp_values(value):
@@ -128,7 +131,7 @@ def _ref_comp_with_None(old, new):
     return False
 
 
-def ref(value: T, is_shallow=True):
+def ref(value: T, is_deep=False):
     comp = False  # Default never equal
 
     if _is_comp_values(value):
@@ -137,13 +140,22 @@ def ref(value: T, is_shallow=True):
     if value is None:
         comp = _ref_comp_with_None
 
-    s = signe.signal(value, comp, is_shallow=is_shallow)
+    s = signe.signal(value, comp, is_shallow=not is_deep)
 
     return cast(Ref[T], s)
 
 
 def deep_ref(value: T) -> Ref[T]:
-    return ref(value, is_shallow=False)
+    """Deep response version of `to_ref`.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#deep_ref
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#deep_ref
+
+    >>> deep_ref(1)
+    >>> deep_ref([1,2,3])
+
+    """
+    return to_ref(value, is_deep=True)
 
 
 _TEffect_Fn = Callable[[Callable[..., T]], signe.Effect]
