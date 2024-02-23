@@ -76,6 +76,10 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
 
         return self
 
+    @property
+    def value(self):
+        return self.element.value
+
 
 class LazyInputBindableUi(InputBindableUi):
     def __init__(
