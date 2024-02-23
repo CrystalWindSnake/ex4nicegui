@@ -225,7 +225,7 @@ def ref_computed(
             )  # type: ignore
 
         getter = signe.computed(
-            fn,
+            cast(Callable[[], T], fn),
             **kws,
             scope=_CLIENT_SCOPE_MANAGER.get_scope(),
             scheduler=get_uiScheduler(),
