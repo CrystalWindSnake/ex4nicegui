@@ -1,17 +1,15 @@
-from typing import Any, Callable, List, Optional, TypeVar, cast
+from typing import Any, Callable, List, Optional, TypeVar
 from typing_extensions import TypedDict
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    is_ref,
     _TMaybeRef as TMaybeRef,
-    effect,
-    to_ref,
+    to_value,
 )
 from nicegui import ui
-from nicegui.events import handle_event
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi
 
 
 _TDateRange = TypedDict("_TDateRange", {"from": str, "to": str})
@@ -21,7 +19,7 @@ _TDateValue = TypeVar(
 )
 
 
-class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
+class DateBindableUi(BindableUi[ui.date]):
     def __init__(
         self,
         value: Optional[TMaybeRef[_TDateValue]] = None,
@@ -44,28 +42,31 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         :param mask: the format of the date string (default: 'YYYY-MM-DD')
         :param on_change: callback to execute when changing the date
         """
-        value_ref = to_ref(value)
-        kws = {
-            "value": value_ref,
-            "mask": mask,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "label",
+                "value",
+                "placeholder",
+                "password",
+                "password_toggle_button",
+                "autocomplete",
+                "validation",
+            ],
+            v_model=("value", "on_change"),
+            events=["on_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
-
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
-
+        value_kws = pc.get_values_kws()
         element = ui.date(**value_kws)
+        super().__init__(element)  # type: ignore
 
-        super().__init__(value_ref, element)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+    @property
+    def value(self):
+        return self.element.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -74,9 +75,8 @@ class DateBindableUi(SingleValueBindableUi[_TDateValue, ui.date]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
-        @effect
+        @ui_effect
         def _():
-            self.element.set_value(ref_ui.value)
-            self.element.update()
+            self.element.set_value(to_value(ref_ui))
 
         return self

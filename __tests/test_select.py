@@ -1,3 +1,4 @@
+import re
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed, effect
@@ -9,7 +10,10 @@ from .utils import SelectUtils, set_test_id, ButtonUtils, SwitchUtils
 def test_const_str(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.select(["a", "b"], label="test select"), "target")
+        set_test_id(
+            rxui.select(["a", "b"], label="test select").classes("min-w-[20ch]"),
+            "target",
+        )
 
     page.open(page_path)
 
@@ -22,7 +26,9 @@ def test_ref_str(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.select(["a", "b"], value=r_str), "target")
+        set_test_id(
+            rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch]"), "target"
+        )
 
     page.open(page_path)
     target = SelectUtils(page, "target")
@@ -46,7 +52,9 @@ def test_clearable(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.select(["a", "b"], value=r_str), "target").props("clearable")
+        set_test_id(
+            rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch]"), "target"
+        ).props("clearable")
 
     page.open(page_path)
     target = SelectUtils(page, "target")
@@ -74,7 +82,7 @@ def test_option_change(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
         set_test_id(rxui.switch("has data", value=r_has_data), "switch")
-        set_test_id(rxui.select(cp_data, value=r_str), "target")
+        set_test_id(rxui.select(cp_data, value=r_str).classes("min-w-[20ch]"), "target")
 
     page.open(page_path)
     target = SelectUtils(page, "target")
@@ -116,7 +124,9 @@ def test_multiple_dict_opts(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
         set_test_id(
-            rxui.select({1: "a", 2: "b", 3: "c", 4: "d"}, value=r_value, multiple=True),
+            rxui.select(
+                {1: "a", 2: "b", 3: "c", 4: "d"}, value=r_value, multiple=True
+            ).classes("min-w-[20ch]"),
             "target",
         )
 
@@ -139,7 +149,7 @@ def test_new_value_mode(page: ScreenPage, page_path: str):
         set_test_id(
             rxui.select(
                 r_opts, clearable=True, value=r_str, new_value_mode="add-unique"
-            ),
+            ).classes("min-w-[20ch]"),
             "target",
         )
 
@@ -182,7 +192,7 @@ def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
         def _():
             value2.value = opts2.value[0]
 
-        select = rxui.select(opts2, value=value2)
+        select = rxui.select(opts2, value=value2).classes("min-w-[20ch]")
 
         def onclick():
             value1.value = "opts2"
@@ -206,5 +216,5 @@ def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
     target.expect_to_have_value("a")
 
     button.click()
-    page.wait(1000)
+    page.wait()
     target.expect_to_have_value("m")

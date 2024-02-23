@@ -1,53 +1,62 @@
 from typing import Any, Optional, Callable
 from nicegui import ui
-from .base import BindableUi
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
-    effect,
-    is_ref,
     _TMaybeRef as TMaybeRef,
+    to_value,
 )
-from .utils import _convert_kws_ref2value
-from .base import SingleValueBindableUi
+from .base import BindableUi
 
 
-class ExpansionBindableUi(SingleValueBindableUi[bool, ui.expansion]):
+class ExpansionBindableUi(BindableUi[ui.expansion]):
     def __init__(
         self,
         text: Optional[TMaybeRef[str]] = None,
         *,
+        caption: Optional[TMaybeRef[str]] = None,
         icon: Optional[TMaybeRef[str]] = None,
+        group: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[bool] = False,
         on_value_change: Optional[Callable[..., None]] = None,
     ) -> None:
-        kws = {
-            "text": text,
-            "icon": icon,
-            "value": value,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "text",
+                "caption",
+                "icon",
+                "group",
+                "value",
+            ],
+            v_model=("value", "on_value_change"),
+            events=["on_value_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        value_kws = pc.get_values_kws()
 
-        element = ui.expansion(on_value_change=on_value_change, **value_kws)
+        element = ui.expansion(**value_kws)
+        super().__init__(element)  # type: ignore
 
-        super().__init__(value, element)
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value) and key != "value":
-                self.bind_prop(key, value)  # type: ignore
+    @property
+    def value(self):
+        return self.element.value
 
-        self._ex_setup()
+    def bind_prop(self, prop: str, ref_ui: TMaybeRef):
+        if prop == "value":
+            return self.bind_value(ref_ui)
 
-    def _ex_setup(self):
-        ele = self.element
+        return super().bind_prop(prop, ref_ui)
 
-        @effect
+    def bind_value(self, ref_ui: TMaybeRef):
+        @ui_effect
         def _():
-            ele.value = self.value
+            self.element.set_value(to_value(ref_ui))
 
-        def onModelValueChanged(e):
-            self._ref.value = e.args
-
-        ele.on("update:modelValue", handler=onModelValueChanged)
+        return self
 
     def __enter__(self):
         self.element.__enter__()

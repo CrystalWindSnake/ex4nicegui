@@ -4,23 +4,21 @@ from typing import (
     Optional,
     TypeVar,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    is_ref,
     _TMaybeRef as TMaybeRef,
-    effect,
-    to_ref,
+    to_value,
 )
 from nicegui import ui
-from nicegui.events import handle_event
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi
 
 T = TypeVar("T")
 
 
-class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
+class SwitchBindableUi(BindableUi[ui.switch]):
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -28,25 +26,28 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
         value: TMaybeRef[bool] = False,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        value_ref = to_ref(value)
-        kws = {"text": text, "value": value_ref}
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "text",
+                "value",
+            ],
+            v_model=("value", "on_change"),
+            events=["on_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
-
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
+        value_kws = pc.get_values_kws()
+        value_kws.update({"value": 0 if value is None else value})
 
         element = ui.switch(**value_kws)
+        super().__init__(element)  # type: ignore
 
-        super().__init__(value_ref, element)
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+    @property
+    def value(self):
+        return self.element.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -55,9 +56,8 @@ class SwitchBindableUi(SingleValueBindableUi[bool, ui.switch]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
-        @effect
+        @ui_effect
         def _():
-            self.element.set_value(ref_ui.value)
-            self.element.update()
+            self.element.set_value(to_value(ref_ui))
 
         return self

@@ -41,3 +41,6 @@ class NgClientScopeManager:
                     self._client_scope_map[e.id].dispose()
 
         return self._client_scope_map[client.id]
+
+
+_CLIENT_SCOPE_MANAGER = NgClientScopeManager()

@@ -6,23 +6,21 @@ from typing import (
     Dict,
     Union,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    effect,
-    is_ref,
     _TMaybeRef as TMaybeRef,
-    to_ref,
+    to_value,
 )
 from nicegui import ui
-from nicegui.events import handle_event
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi
 
 T = TypeVar("T")
 
 
-class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
+class NumberBindableUi(BindableUi[ui.number]):
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
@@ -38,37 +36,35 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
         on_change: Optional[Callable[..., Any]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
-        value_ref = to_ref(value)
-        kws = {
-            "label": label,
-            "placeholder": placeholder,
-            "value": value_ref,
-            "min": min,
-            "max": max,
-            "step": step,
-            "prefix": prefix,
-            "suffix": suffix,
-            "format": format,
-            "validation": validation,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "label",
+                "placeholder",
+                "value",
+                "min",
+                "max",
+                "step",
+                "prefix",
+                "suffix",
+                "format",
+                "validation",
+            ],
+            v_model=("value", "on_change"),
+            events=["on_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
-
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
+        value_kws = pc.get_values_kws()
 
         element = ui.number(**value_kws)
-        element.classes("min-w-[10rem]")
+        super().__init__(element)  # type: ignore
 
-        super().__init__(value_ref, element)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+    @property
+    def value(self):
+        return self.element.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -77,8 +73,8 @@ class NumberBindableUi(SingleValueBindableUi[float, ui.number]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: ReadonlyRef[float]):
-        @effect
+        @ui_effect
         def _():
-            self.element.set_value(ref_ui.value)
+            self.element.set_value(to_value(ref_ui))
 
         return self

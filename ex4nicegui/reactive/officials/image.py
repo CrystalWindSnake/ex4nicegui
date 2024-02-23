@@ -2,38 +2,30 @@ from pathlib import Path
 from typing import (
     Union,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
-    is_ref,
     _TMaybeRef as TMaybeRef,
-    effect,
-    to_ref,
+    to_value,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi
 
 
-class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
+class ImageBindableUi(BindableUi[ui.image]):
     def __init__(
         self,
         source: Union[TMaybeRef[str], TMaybeRef[Path]] = "",
     ) -> None:
-        source_ref = to_ref(source)  # type: ignore
-        kws = {
-            "source": source_ref,
-        }
+        pc = ParameterClassifier(locals(), maybeRefs=["source"], events=[])
 
-        value_kws = _convert_kws_ref2value(kws)
+        element = ui.image(**pc.get_values_kws())
+        super().__init__(element)
 
-        element = ui.image(**value_kws)
-
-        super().__init__(source_ref, element)  # type: ignore
-
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "source":
@@ -42,6 +34,6 @@ class ImageBindableUi(SingleValueBindableUi[Union[str, Path], ui.image]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_source(self, ref_ui: ReadonlyRef[Union[str, Path]]):
-        @effect
+        @ui_effect
         def _():
-            self.element.set_source(ref_ui.value)
+            self.element.set_source(to_value(ref_ui))

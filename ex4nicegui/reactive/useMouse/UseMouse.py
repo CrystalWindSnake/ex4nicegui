@@ -3,9 +3,8 @@ from dataclasses import dataclass
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
-from signe import signal, batch
 
-from ex4nicegui.utils.signals import ReadonlyRef
+from ex4nicegui.utils.signals import ReadonlyRef, batch, to_ref
 
 _Update_Args = [
     "x",
@@ -28,9 +27,9 @@ class UseMouse(Element, component="UseMouse.js"):
         if options:
             self._props["options"] = options
 
-        self.__x = signal(0.0)
-        self.__y = signal(0.0)
-        self.__sourceType = signal("sourceType")
+        self.__x = to_ref(0.0)
+        self.__y = to_ref(0.0)
+        self.__sourceType = to_ref("sourceType")
 
         def update(args: UseMouseUpdateEventArguments):
             @batch

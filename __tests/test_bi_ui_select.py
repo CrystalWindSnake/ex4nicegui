@@ -188,8 +188,13 @@ def test_update_options(page: ScreenPage, page_path: str):
         )
         ds = bi.data_source(df)
 
-        set_test_id(ds.ui_select("cls1", value="x1", multiple=False), "cls1")
-        set_test_id(ds.ui_select("cls2", clearable=False), "cls2")
+        set_test_id(
+            ds.ui_select("cls1", value="x1", multiple=False).classes("min-w-[20ch]"),
+            "cls1",
+        )
+        set_test_id(
+            ds.ui_select("cls2", clearable=False).classes("min-w-[20ch]"), "cls2"
+        )
 
     page.open(page_path)
 

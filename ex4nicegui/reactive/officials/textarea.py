@@ -3,22 +3,24 @@ from typing import (
     Callable,
     Optional,
     Dict,
+    cast,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
-    is_ref,
     _TMaybeRef as TMaybeRef,
     effect,
-    to_ref,
+    is_setter_ref,
+    to_value,
 )
 from nicegui import ui
 from nicegui.events import handle_event
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi
 
 
-class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
+class TextareaBindableUi(BindableUi[ui.textarea]):
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
@@ -28,25 +30,29 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
         on_change: Optional[Callable[..., Any]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
-        value_ref = to_ref(value)
-        kws = {
-            "label": label,
-            "placeholder": placeholder,
-            "value": value_ref,
-            "validation": validation,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "label",
+                "placeholder",
+                "value",
+                "validation",
+            ],
+            v_model=("value", "on_change"),
+            events=["on_change"],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
-
-        self._setup_on_change(value_ref, value_kws, on_change)
+        value_kws = pc.get_values_kws()
 
         element = ui.textarea(**value_kws)
+        super().__init__(element)  # type: ignore
 
-        super().__init__(value_ref, element)
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+    @property
+    def value(self):
+        return self.element.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -55,25 +61,11 @@ class TextareaBindableUi(SingleValueBindableUi[str, ui.textarea]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: ReadonlyRef[str]):
-        @effect
+        @ui_effect
         def _():
-            self.element.set_value(ref_ui.value)
-            self.element.update()
+            self.element.set_value(to_value(ref_ui))
 
         return self
-
-    def _setup_on_change(
-        self,
-        value_ref: Ref[str],
-        value_kws: dict,
-        on_change: Optional[Callable[..., Any]] = None,
-    ):
-        def inject_on_change(e):
-            value_ref.value = e.value
-            if on_change:
-                handle_event(on_change, e)
-
-        value_kws.update({"on_change": inject_on_change})
 
 
 class LazyTextareaBindableUi(TextareaBindableUi):
@@ -86,6 +78,11 @@ class LazyTextareaBindableUi(TextareaBindableUi):
         on_change: Optional[Callable[..., Any]] = None,
         validation: Dict[str, Callable[..., bool]] = {},
     ) -> None:
+        org_value = value
+        is_setter_value = is_setter_ref(value)
+        if is_setter_value:
+            value = to_value(value)
+
         super().__init__(
             label,
             placeholder=placeholder,
@@ -94,24 +91,22 @@ class LazyTextareaBindableUi(TextareaBindableUi):
             validation=validation,
         )
 
-        ele = self.element
+        if is_setter_value:
+            ref = cast(Ref, org_value)
+            ele = self.element
 
-        @effect
-        def _():
-            ele.value = self.value
+            @effect
+            def _():
+                ele.value = ref.value
 
-        def onValueChanged(e):
-            self._ref.value = ele.value
-            if on_change:
-                handle_event(on_change, e)
+            def onValueChanged(e):
+                ref.value = ele.value
+                if on_change:
+                    handle_event(on_change, e)
 
-        ele.on("blur", onValueChanged)
-        ele.on("keyup.enter", onValueChanged)
+            def on_clear(e):
+                ref.value = ""
 
-    def _setup_on_change(
-        self,
-        value_ref: Ref[str],
-        value_kws: dict,
-        on_change: Optional[Callable[..., Any]] = None,
-    ):
-        pass
+            ele.on("blur", onValueChanged)
+            ele.on("keyup.enter", onValueChanged)
+            ele.on("clear", on_clear)

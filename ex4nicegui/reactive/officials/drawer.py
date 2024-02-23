@@ -2,17 +2,23 @@ from typing import (
     Any,
 )
 from typing_extensions import Literal
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
-from ex4nicegui.utils.signals import to_value, is_ref, _TMaybeRef as TMaybeRef, effect
+from ex4nicegui.utils.signals import (
+    is_setter_ref,
+    to_ref,
+    to_value,
+    _TMaybeRef as TMaybeRef,
+)
 from nicegui import ui
 from nicegui.page_layout import Drawer
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi
 
 _TDrawerSide = Literal["left", "right"]
 
 
-class DrawerBindableUi(SingleValueBindableUi[bool, Drawer]):
+class DrawerBindableUi(BindableUi[Drawer]):
     def __init__(
         self,
         side: TMaybeRef[_TDrawerSide] = "left",
@@ -25,18 +31,22 @@ class DrawerBindableUi(SingleValueBindableUi[bool, Drawer]):
         top_corner: TMaybeRef[bool] = False,
         bottom_corner: TMaybeRef[bool] = False,
     ) -> None:
-        kws = {
-            "side": side,
-            "overlay": overlay,
-            "value": value,
-            "fixed": fixed,
-            "bordered": bordered,
-            "elevated": elevated,
-            "top_corner": top_corner,
-            "bottom_corner": bottom_corner,
-        }
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "side",
+                "overlay",
+                "value",
+                "fixed",
+                "bordered",
+                "elevated",
+                "top_corner",
+                "bottom_corner",
+            ],
+        )
 
-        value_kws = _convert_kws_ref2value(kws)
+        value_kws = pc.get_values_kws()
+
         del value_kws["side"]
         del value_kws["overlay"]
 
@@ -49,27 +59,23 @@ class DrawerBindableUi(SingleValueBindableUi[bool, Drawer]):
 
         element.classes("flex flex-col gap-4 backdrop-blur-md bg-[#5898d4]/30")
 
-        init_value = (
-            element._props["model-value"]
-            if "model-value" in element._props
-            else element._props["show-if-above"]
-        )
+        super().__init__(element)  # type: ignore
 
-        super().__init__(value, element)
-
-        @effect
+        @ui_effect
         def _():
-            value = "true" if self.value else "false"
-            element.props(f":model-value={value}")
+            mvalue = "true" if to_value(value) else "false"
+            element.props(f":model-value={mvalue}")
 
-        def on_update(e):
-            self._ref.value = e.args
+        if is_setter_ref(value):
+            ref = to_ref(value)
 
-        element.on("update:modelValue", on_update)
+            def on_update(e):
+                ref.value = e.args
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+            element.on("update:modelValue", on_update)
+
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
     def toggle(self):
         self.element.toggle()

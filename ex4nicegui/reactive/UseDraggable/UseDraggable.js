@@ -12,7 +12,7 @@ const H = Vue.onMounted
 function q(e) {
   return W() ? (X(e), !0) : !1;
 }
-function d(e) {
+function v(e) {
   return typeof e == "function" ? e() : T(e);
 }
 const F = typeof window < "u", z = () => {
@@ -48,7 +48,7 @@ function R(e) {
 }
 function ee(e) {
   var r;
-  const t = d(e);
+  const t = v(e);
   return (r = t == null ? void 0 : t.$el) != null ? r : t;
 }
 const C = F ? window : void 0;
@@ -57,18 +57,18 @@ function h(...e) {
   if (typeof e[0] == "string" || Array.isArray(e[0]) ? ([t, o, a] = e, r = C) : [r, t, o, a] = e, !r)
     return z;
   Array.isArray(t) || (t = [t]), Array.isArray(o) || (o = [o]);
-  const u = [], v = () => {
+  const u = [], d = () => {
     u.forEach((i) => i()), u.length = 0;
-  }, _ = (i, p, l, s) => (i.addEventListener(p, l, s), () => i.removeEventListener(p, l, s)), g = x(
-    () => [ee(r), d(a)],
+  }, _ = (i, p, s, l) => (i.addEventListener(p, s, l), () => i.removeEventListener(p, s, l)), g = x(
+    () => [ee(r), v(a)],
     ([i, p]) => {
-      v(), i && u.push(
-        ...t.flatMap((l) => o.map((s) => _(i, l, s, p)))
+      d(), i && u.push(
+        ...t.flatMap((s) => o.map((l) => _(i, s, l, p)))
       );
     },
     { immediate: !0, flush: "post" }
   ), f = () => {
-    g(), v();
+    g(), d();
   };
   return q(f), f;
 }
@@ -79,29 +79,29 @@ var te = Object.defineProperty, re = Object.defineProperties, ne = Object.getOwn
     for (var t of S(r))
       ae.call(r, t) && b(e, t, r[t]);
   return e;
-}, le = (e, r) => re(e, ne(r));
-function se(e, r = {}) {
+}, se = (e, r) => re(e, ne(r));
+function le(e, r = {}) {
   var t, o;
   const {
     pointerTypes: a,
     preventDefault: u,
-    stopPropagation: v,
+    stopPropagation: d,
     exact: _,
     onMove: g,
     onEnd: f,
     onStart: i,
     initialValue: p,
-    axis: l = "both",
-    draggingElement: s = C,
+    axis: s = "both",
+    draggingElement: l = C,
     handle: P = e
   } = r, c = D(
-    (t = d(p)) != null ? t : { x: 0, y: 0 }
+    (t = v(p)) != null ? t : { x: 0, y: 0 }
   ), y = D(), w = (n) => a ? a.includes(n.pointerType) : !0, $ = (n) => {
-    d(u) && n.preventDefault(), d(v) && n.stopPropagation();
+    v(u) && n.preventDefault(), v(d) && n.stopPropagation();
   }, V = (n) => {
-    if (!w(n) || d(_) && n.target !== d(e))
+    if (!w(n) || v(_) && n.target !== v(e))
       return;
-    const m = d(e).getBoundingClientRect(), O = {
+    const m = v(e).getBoundingClientRect(), O = {
       x: n.clientX - m.left,
       y: n.clientY - m.top
     };
@@ -110,7 +110,7 @@ function se(e, r = {}) {
     if (!w(n) || !y.value)
       return;
     let { x: m, y: O } = c.value;
-    (l === "x" || l === "both") && (m = n.clientX - y.value.x), (l === "y" || l === "both") && (O = n.clientY - y.value.y), c.value = {
+    (s === "x" || s === "both") && (m = n.clientX - y.value.x), (s === "y" || s === "both") && (O = n.clientY - y.value.y), c.value = {
       x: m,
       y: O
     }, g == null || g(c.value, n), $(n);
@@ -119,9 +119,9 @@ function se(e, r = {}) {
   };
   if (F) {
     const n = { capture: (o = r.capture) != null ? o : !0 };
-    h(P, "pointerdown", V, n), h(s, "pointermove", L, n), h(s, "pointerup", M, n);
+    h(P, "pointerdown", V, n), h(l, "pointermove", L, n), h(l, "pointerup", M, n);
   }
-  return le(ie({}, R(c)), {
+  return se(ie({}, R(c)), {
     position: c,
     isDragging: E(() => !!y.value),
     style: E(
@@ -144,8 +144,7 @@ const pe = /* @__PURE__ */ Y({
       }
     });
     function a(u) {
-      const v = document.getElementById(`c${u}`);
-      console.log("run apply:", v);
+      const d = document.getElementById(`c${u}`);
       function _() {
         t("update", {
           x: f.value,
@@ -164,20 +163,20 @@ const pe = /* @__PURE__ */ Y({
           isFinal: !0
         });
       }
-      const { x: f, y: i, style: p, isDragging: l } = se(v, {
+      const { x: f, y: i, style: p, isDragging: s } = le(d, {
         onStart: _,
         onEnd: g,
         ...o.options
       });
-      x([f, i, p], ([s, P, c]) => {
-        t("update", { x: s, y: P, style: c, isFirst: !1, isFinal: !1 });
-      }), x(l, (s) => {
-        t("isDraggingUpdate", { isDragging: s });
+      x([f, i, p], ([l, P, c]) => {
+        t("update", { x: l, y: P, style: c, isFirst: !1, isFinal: !1 });
+      }), x(s, (l) => {
+        t("isDraggingUpdate", { isDragging: l });
       });
     }
     return H(() => {
       o.elementId && a(o.elementId);
-    }), (u, v) => null;
+    }), (u, d) => null;
   }
 });
 export {

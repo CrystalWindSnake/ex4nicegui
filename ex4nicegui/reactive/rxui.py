@@ -1,1 +1,1 @@
-from .__index import *
+from . import *  # noqa: F403

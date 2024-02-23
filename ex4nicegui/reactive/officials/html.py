@@ -1,67 +1,26 @@
-import asyncio
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
-    is_ref,
     _TMaybeRef as TMaybeRef,
-    effect,
+    to_value,
 )
 from nicegui import ui
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi, _bind_color
 
 
-class HtmlBindableUi(SingleValueBindableUi[str, ui.html]):
-    @staticmethod
-    def _setup_(binder: "HtmlBindableUi"):
-        first = True
+class HtmlComponent(ui.element, component="html.js"):
+    def __init__(self, content: str) -> None:
+        super().__init__()
+        self._props["content"] = content
 
-        @effect
+
+class html(BindableUi[HtmlComponent]):
+    def __init__(self, content: TMaybeRef[str]) -> None:
+        element = HtmlComponent("")
+
+        super().__init__(element)
+
+        @ui_effect
         def _():
-            nonlocal first
-
-            async def task():
-                pass
-                await ui.run_javascript(
-                    f"getElement({binder.element.id}).innerText= '{binder.value}' ",
-                    respond=False,
-                )
-
-            if not first:
-                asyncio.run(task())
-            else:
-                first = False
-
-    def __init__(
-        self,
-        content: TMaybeRef[str] = "",
-    ) -> None:
-        kws = {
-            "content": content,
-        }
-
-        value_kws = _convert_kws_ref2value(kws)
-
-        element = ui.html(**value_kws)
-
-        super().__init__(content, element)
-
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
-
-        HtmlBindableUi._setup_(self)
-
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
-        if prop == "color":
-            return self.bind_color(ref_ui)
-
-        return super().bind_prop(prop, ref_ui)
-
-    def bind_color(self, ref_ui: ReadonlyRef):
-        @effect
-        def _():
-            ele = self.element
-            color = ref_ui.value
-            ele._style["color"] = color
-            ele.update()
+            element._props["content"] = to_value(content)
+            element.update()

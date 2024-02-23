@@ -1,41 +1,48 @@
-from signe.core.runtime import BatchExecutionScheduler, ExecutionScheduler
-from signe.core.context import get_executor
-import asyncio
-from typing import Literal
+from collections import deque
+import signe
+from typing import (
+    TypeVar,
+    Callable,
+)
+from functools import lru_cache
 
 
-class PostEventExecutionScheduler(BatchExecutionScheduler):
+T = TypeVar("T")
+
+T_JOB_FN = Callable[[], None]
+
+
+class UiScheduler(signe.ExecutionScheduler):
     def __init__(self) -> None:
         super().__init__()
-        self.__has_callback = False
+
+        self._pre_deque: deque[T_JOB_FN] = deque()
+        self._post_deque: deque[T_JOB_FN] = deque()
+
+    def pre_job(self, job: T_JOB_FN):
+        self._pre_deque.appendleft(job)
+
+    def post_job(self, job: T_JOB_FN):
+        self._post_deque.appendleft(job)
 
     def run(self):
-        if not self.__has_callback:
-            try:
-                asyncio.get_running_loop().call_soon(self.real_run)
-            except RuntimeError:
-                super().run_batch()
-            self.__has_callback = True
+        while self._scheduler_fns:
+            super().run()
 
-    def real_run(
-        self,
-    ):
-        super().run_batch()
-        self.__has_callback = False
+            self.pause_scheduling()
+            self.run_pre_deque()
+            self.run_post_deque()
+            self.reset_scheduling()
+
+    def run_pre_deque(self):
+        while self._pre_deque:
+            self._pre_deque.pop()()
+
+    def run_post_deque(self):
+        while self._post_deque:
+            self._post_deque.pop()()
 
 
-_T_Scheduler = Literal["sync", "post-event"]
-
-
-def reset_execution_scheduler(type: _T_Scheduler):
-    """Reset responsive scheduler type
-
-    Args:
-        type (Literal["sync", "post-event"]):
-            `sync`: triggers the relevant computation as soon as the ref is assigned.
-            `post-event`: performs other trigger calculations after the event loop in which the ref is assigned.
-    """
-    if type == "post-event":
-        get_executor().set_default_execution_scheduler(PostEventExecutionScheduler())
-    elif type == "sync":
-        get_executor().set_default_execution_scheduler(ExecutionScheduler())
+@lru_cache(maxsize=1)
+def get_uiScheduler():
+    return UiScheduler()

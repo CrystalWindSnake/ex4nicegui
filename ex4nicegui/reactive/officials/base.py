@@ -16,9 +16,6 @@ from typing import (
 from typing_extensions import Self
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
-    to_ref,
-    _TMaybeRef as TMaybeRef,
-    TRef,
     effect,
     to_value,
     is_ref,
@@ -199,12 +196,12 @@ class BindableUi(Generic[TWidget]):
                         self.classes(remove=name)
 
         elif is_ref(classes):
-            ref_obj = to_value(classes)
+            ref_obj = to_value(classes)  # type: ignore
             assert isinstance(ref_obj, dict)
 
             @effect
             def _():
-                for name, value in cast(Dict, to_value(classes)).items():
+                for name, value in cast(Dict, to_value(classes)).items():  # type: ignore
                     if value:
                         self.classes(add=name)
                     else:
@@ -242,21 +239,21 @@ class BindableUi(Generic[TWidget]):
         return self
 
 
-class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
-    def __init__(self, value: TMaybeRef[T], element: TWidget) -> None:
-        super().__init__(element)
-        self._ref = to_ref(value)
+# class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
+#     def __init__(self, value: TMaybeRef[T], element: TWidget) -> None:
+#         super().__init__(element)
+#         self._ref = to_ref(value)
 
-    @property
-    def value(self) -> T:
-        return self._ref.value  # type: ignore
+#     @property
+#     def value(self) -> T:
+#         return self._ref.value  # type: ignore
 
-    def bind_ref(self, ref: TRef[T]):
-        @effect
-        def _():
-            ref.value = self._ref.value  # type: ignore
+#     def bind_ref(self, ref: TRef[T]):
+#         @effect
+#         def _():
+#             ref.value = self._ref.value  # type: ignore
 
-        return self
+#         return self
 
 
 _T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
@@ -293,7 +290,7 @@ _color_sys_type = Literal["QUASAR", "TAILWIND", "STYLE"]
 _color_attr_name = "data-ex4ng-color"
 
 
-def _bind_color(bindable_ui: SingleValueBindableUi, ref_ui: TGetterOrReadonlyRef):
+def _bind_color(bindable_ui: BindableUi, ref_ui: TGetterOrReadonlyRef):
     @effect
     def _():
         ele = cast(TextColorElement, bindable_ui.element)

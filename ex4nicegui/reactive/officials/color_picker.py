@@ -2,23 +2,24 @@ from typing import (
     Any,
     Callable,
     Optional,
+    cast,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     Ref,
-    is_ref,
     _TMaybeRef as TMaybeRef,
-    effect,
-    to_ref,
+    is_setter_ref,
+    to_value,
 )
 from nicegui import ui
 from nicegui.events import handle_event
-from .base import SingleValueBindableUi
-from .utils import _convert_kws_ref2value
+from .base import BindableUi
 
 
-class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
+class ColorPickerBindableUi(BindableUi[ui.color_picker]):
     def __init__(
         self,
         color: TMaybeRef[str] = "",
@@ -33,15 +34,19 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
             on_pick (Optional[Callable[..., Any]], optional): callback to execute when a color is picked. Defaults to None.
             value (TMaybeRef[bool], optional): whether the menu is already opened. Defaults to False.
         """
-        color_ref = to_ref(color)
-        kws = {
-            "color": color_ref,
-            "value": value,
-        }
 
-        value_kws = _convert_kws_ref2value(kws)
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=[
+                "color",
+                "value",
+            ],
+            v_model=("color", "on_pick"),
+            v_model_arg_getter=lambda e: e.color,
+            events=["on_pick"],
+        )
 
-        self._setup_on_change(color_ref, value_kws, on_pick)
+        value_kws = pc.get_values_kws()
 
         with ui.card().tight():
             exclued_color = {**value_kws}
@@ -55,11 +60,14 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
 
             ui.button(on_click=element_menu.open, icon="colorize")
 
-        super().__init__(color_ref, element_menu)
+        super().__init__(element_menu)  # type: ignore
 
-        for key, value in kws.items():
-            if is_ref(value):
-                self.bind_prop(key, value)  # type: ignore
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
+
+    @property
+    def value(self):
+        return self.element.value
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "value":
@@ -68,31 +76,18 @@ class ColorPickerBindableUi(SingleValueBindableUi[str, ui.color_picker]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_color(self, ref_ui: ReadonlyRef[str]):
-        @effect
+        @ui_effect
         def _():
-            self.element.set_color(ref_ui.value)
+            self.element.set_color(to_value(ref_ui))
 
         return self
 
     def bind_value(self, ref_ui: ReadonlyRef[bool]):
-        @effect
+        @ui_effect
         def _():
-            self.element.set_value(ref_ui.value)
+            self.element.set_value(to_value(ref_ui))
 
         return self
-
-    def _setup_on_change(
-        self,
-        color_ref: Ref[str],
-        value_kws: dict,
-        on_pick: Optional[Callable[..., Any]] = None,
-    ):
-        def inject_on_change(e):
-            color_ref.value = e.color
-            if on_pick:
-                handle_event(on_pick, e)
-
-        value_kws.update({"on_pick": inject_on_change})
 
 
 class ColorPickerLazyBindableUi(ColorPickerBindableUi):
@@ -103,22 +98,22 @@ class ColorPickerLazyBindableUi(ColorPickerBindableUi):
         on_pick: Optional[Callable[..., Any]] = None,
         value: TMaybeRef[bool] = False,
     ) -> None:
+        org_value = value
+        is_setter_value = is_setter_ref(value)
+        if is_setter_value:
+            value = to_value(value)
+
         super().__init__(color, on_pick=None, value=value)
 
-        ele = self._element_picker
+        if is_setter_value:
+            ref = cast(Ref, org_value)
 
-        def onModelValueChanged(e):
-            self._ref.value = e.args  # type: ignore
+            ele = self._element_picker
 
-            if on_pick:
-                handle_event(on_pick, e)
+            def onModelValueChanged(e):
+                ref.value = e.args  # type: ignore
 
-        ele.on("change", handler=onModelValueChanged)
+                if on_pick:
+                    handle_event(on_pick, e)
 
-    def _setup_on_change(
-        self,
-        color_ref: Ref[str],
-        value_kws: dict,
-        on_pick: Optional[Callable[..., Any]] = None,
-    ):
-        pass
+            ele.on("change", handler=onModelValueChanged)
