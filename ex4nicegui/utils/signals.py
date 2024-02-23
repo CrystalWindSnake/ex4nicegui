@@ -224,12 +224,12 @@ def ref_computed(
                 ref_computed_method(fn, computed_args=kws),  # type: ignore
             )  # type: ignore
 
-        getter = signe.computed(
+        getter = signe.Computed(
             cast(Callable[[], T], fn),
             **kws,
             scope=_CLIENT_SCOPE_MANAGER.get_scope(),
             scheduler=get_uiScheduler(),
-        )  # type: ignore
+        )  
         return cast(DescReadonlyRef[T], getter)
 
     else:
@@ -259,13 +259,20 @@ class ref_computed_method(Generic[T]):
     def __init__(self, fget: Callable[[Any], T], computed_args: Dict) -> None:
         self._fget = fget
         self._computed_args = computed_args
-        self._instance_map: WeakValueDictionary[int, TRef[T]] = WeakValueDictionary()
+        self._instance_map: WeakValueDictionary[int, TReadonlyRef[T]] = WeakValueDictionary()
 
     def __get_computed(self, instance):
         ins_id = id(instance)
         if ins_id not in self._instance_map:
-            cp = ref_computed(partial(self._fget, instance), **self._computed_args)
-            self._instance_map[ins_id] = cp  # type: ignore
+
+            cp = signe.Computed(
+                partial(self._fget, instance),
+                **self._computed_args,
+                scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+                scheduler=get_uiScheduler(),
+                capture_parent_effect=False,
+            )  
+            self._instance_map[ins_id] = cp   # type: ignore
 
         return self._instance_map[ins_id]
 
