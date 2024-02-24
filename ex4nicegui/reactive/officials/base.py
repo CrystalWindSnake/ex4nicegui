@@ -145,8 +145,7 @@ class BindableUi(Generic[TWidget]):
         @ui_effect
         def _():
             element = cast(ui.element, self.element)
-            print(f"set_visibility:{to_value(ref_ui)}")
-            # element.set_visibility(to_value(ref_ui))
+            element.set_visibility(to_value(ref_ui))
 
         return self
 
