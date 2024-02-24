@@ -14,6 +14,7 @@ from typing import (
     Literal,
 )
 from typing_extensions import Self
+from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     effect,
@@ -141,10 +142,11 @@ class BindableUi(Generic[TWidget]):
         return self
 
     def bind_visible(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @effect
+        @ui_effect
         def _():
             element = cast(ui.element, self.element)
-            element.set_visibility(to_value(ref_ui))
+            print(f"set_visibility:{to_value(ref_ui)}")
+            # element.set_visibility(to_value(ref_ui))
 
         return self
 
