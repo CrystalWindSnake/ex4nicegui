@@ -68,7 +68,7 @@ def todo_list_panel():
                 "row"
             ).bind_visible(lambda: state.total_count.value > 0)
 
-            rxui.button("clear completed", on_click=state.remove_check_todos).props(
+            rxui.button("clear completed", on_click=state.remove_completed_todos).props(
                 "desen  flat"
             ).bind_visible(lambda: state.completed_count.value > 0)
 
@@ -93,10 +93,10 @@ def todo_list_panel():
                 ) as chip:
                     rxui.label(lambda: "completed" if todo.completed else "pending")
 
-                def swich_todo_state():
+                def switch_todo_state():
                     todo.completed = not todo.completed
 
-                chip.on("click", swich_todo_state)
+                chip.on("click", switch_todo_state)
 
                 rxui.button(
                     icon="delete",
