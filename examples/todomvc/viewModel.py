@@ -9,7 +9,7 @@ from ex4nicegui import to_ref, ref_computed, deep_ref, Ref
 class TodoItem:
     id: datetime
     title: str
-    completed = False
+    completed: bool = False
 
 
 _T_todos = List[TodoItem]
@@ -65,8 +65,8 @@ class State:
         self.todos.value.remove(todo)
 
     def remove_check_todos(self):
-        for todo in (todo for todo in self.todos.value if todo.completed):
-            self.todos.value.remove(todo)
+        for todo in [todo for todo in self.todos.value if todo.completed]:
+            self.remove_todo(todo)
 
     def all_checks(self):
         for todo in self.todos.value:
