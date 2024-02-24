@@ -46,4 +46,4 @@ __all__ = [
     "is_setter_ref",
 ]
 
-__version__ = "0.4.13"
+__version__ = "0.5.0"
