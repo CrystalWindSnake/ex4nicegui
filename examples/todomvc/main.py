@@ -7,6 +7,8 @@ from viewModel import State, TodoItem
 
 # ui
 def page_init():
+    ui.query("body").classes("bg-[#f5f5f5]")
+
     # ui.query("main.q-page").classes("flex justify-stretch items-stretch")
     # ui.query(".nicegui-content").classes("w-full")
     ui.row.default_classes("w-full items-center")
