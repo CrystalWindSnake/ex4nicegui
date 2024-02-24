@@ -113,6 +113,7 @@ with ui.card().classes("w-[50vw] self-center  overflow-hidden").style(
     "height:calc(100vh - calc(var(--nicegui-default-padding) * 2));"
 ):
     ui.label("todo list").classes("text-h3 self-center bg-primary px-6 text-white")
+    rxui.linear_progress(state.completion_ratio)
     job_panel()
 
     todo_list_panel()
