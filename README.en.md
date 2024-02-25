@@ -479,6 +479,11 @@ class_obj = ref_computed(
 rxui.switch("bg_color", value=bg_color)
 rxui.switch("has_error", value=has_error)
 rxui.label("bind to ref_computed").bind_classes(class_obj)
+
+# or direct function passing
+rxui.label("bind to ref_computed").bind_classes(
+    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
+)
 ```
 
 ---
