@@ -27,13 +27,13 @@ def test_bind_classes(page: ScreenPage, page_path: str):
 
             set_test_id(
                 rxui.label("test").bind_classes(
-                    {"bg-blue": bg_color, "text-red": has_error}
+                    {"bg-blue": bg_color, "text-red": lambda: has_error.value}
                 ),
                 f"{test_prefix}_label",
             )
 
         # can also bind to a ref_computed
-        def bind_to_ref_computed():
+        def bind_to_ref_computed_or_fn():
             bg_color = to_ref(False)
             has_error = to_ref(False)
 
@@ -55,6 +55,13 @@ def test_bind_classes(page: ScreenPage, page_path: str):
             set_test_id(
                 rxui.label("bind to ref_computed").bind_classes(class_obj),
                 f"{test_prefix}_label",
+            )
+
+            set_test_id(
+                rxui.label("bind to fn").bind_classes(
+                    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
+                ),
+                f"{test_prefix}_label_fn",
             )
 
         # binding to list
@@ -83,13 +90,13 @@ def test_bind_classes(page: ScreenPage, page_path: str):
 
             set_test_id(
                 rxui.label("binding to arrays").bind_classes(
-                    [bg_color_class, text_color_class]
+                    [bg_color_class, lambda: text_color_class.value]
                 ),
                 f"{test_prefix}_label",
             )
 
         binding_to_dict()
-        bind_to_ref_computed()
+        bind_to_ref_computed_or_fn()
         bind_to_list()
 
     page.open(page_path)
@@ -116,14 +123,18 @@ def test_bind_classes(page: ScreenPage, page_path: str):
         switch1 = SwitchUtils(page, f"{test_prefix}_switch1")
         switch2 = SwitchUtils(page, f"{test_prefix}_switch2")
         label = LabelUtils(page, f"{test_prefix}_label")
+        label_fn = LabelUtils(page, f"{test_prefix}_label_fn")
 
         label.expect_not_to_have_class("bg-red text-green")
+        label_fn.expect_not_to_have_class("bg-red text-green")
         switch1.click()
 
         label.expect_to_have_class("bg-blue")
+        label_fn.expect_to_have_class("bg-blue")
 
         switch2.click()
         label.expect_to_have_class("bg-blue text-red")
+        label_fn.expect_to_have_class("bg-blue text-red")
 
     test2()
 
@@ -176,7 +187,7 @@ def test_bind_style(page: ScreenPage, page_path: str):
             set_test_id(
                 rxui.label("test").bind_style(
                     {
-                        "background-color": bg_color,
+                        "background-color": lambda: bg_color.value,
                         "color": text_color,
                     }
                 ),

@@ -196,7 +196,7 @@ class BindableUi(Generic[TWidget]):
                     else:
                         self.classes(remove=name)
 
-        elif is_ref(classes):
+        elif is_ref(classes) or isinstance(classes, Callable):
             ref_obj = to_value(classes)  # type: ignore
             assert isinstance(ref_obj, dict)
 
@@ -209,7 +209,7 @@ class BindableUi(Generic[TWidget]):
                         self.classes(remove=name)
         elif isinstance(classes, list):
             for ref_name in classes:
-                if is_ref(ref_name):
+                if is_ref(ref_name) or isinstance(ref_name, Callable):
 
                     @on(ref_name)
                     def _(state: WatchedState):
@@ -230,7 +230,7 @@ class BindableUi(Generic[TWidget]):
         """
         if isinstance(style, dict):
             for name, ref_obj in style.items():
-                if is_ref(ref_obj):
+                if is_ref(ref_obj) or isinstance(ref_obj, Callable):
 
                     @effect
                     def _(name=name, ref_obj=ref_obj):
