@@ -242,3 +242,21 @@ class TestBase:
         get_checkbox(0).click()
 
         label_totals.expect_contain_text("2")
+
+    def test_(self, page: ScreenPage, page_path: str):
+        text = to_ref("abcd")
+
+        @ui.page(page_path)
+        def _():
+            with ui.row():
+
+                @rxui.vfor(text)  # type: ignore
+                def _(store: rxui.VforStore):
+                    rxui.label(lambda: store.get())
+
+        page.open(page_path)
+
+        page.should_contain("abcd")
+
+        text.value = "abc"
+        page.should_contain("abc")
