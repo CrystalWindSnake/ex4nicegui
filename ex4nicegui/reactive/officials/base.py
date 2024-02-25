@@ -48,10 +48,11 @@ _T_bind_classes_type = Union[
 ]
 
 
-class BindableUi(Generic[TWidget]):
+class BindableUi(Generic[TWidget], ui.element, component="empty.js"):
     def __init__(self, element: TWidget) -> None:
-        self.__element = element
-        self.tailwind = Tailwind(cast(ui.element, self.__element))
+        self._element = element
+        super().__init__()
+        self.tailwind = Tailwind(cast(ui.element, self._element))
 
     def props(self, add: Optional[str] = None, *, remove: Optional[str] = None):
         cast(ui.element, self.element).props(add, remove=remove)
@@ -99,11 +100,11 @@ class BindableUi(Generic[TWidget]):
 
     @property
     def element(self):
-        return self.__element
+        return self._element
 
     def delete(self) -> None:
         """Delete the element."""
-        self.element.delete()
+        self.delete()
 
     def move(
         self, target_container: Optional[ui.element] = None, target_index: int = -1
@@ -113,7 +114,7 @@ class BindableUi(Generic[TWidget]):
         :param target_container: container to move the element to (default: the parent container)
         :param target_index: index within the target slot (default: append to the end)
         """
-        return self.element.move(target_container, target_index)
+        return self.move(target_container, target_index)
 
     def remove(self, element: Union[ui.element, int]) -> None:
         """Remove a child element.
@@ -173,6 +174,10 @@ class BindableUi(Generic[TWidget]):
         )
 
         return self
+
+    def _handle_delete(self) -> None:
+        print("delete")
+        # return super()._handle_delete()
 
     def clear(self) -> None:
         cast(ui.element, self.element).clear()
