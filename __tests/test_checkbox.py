@@ -2,7 +2,7 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import ScreenPage
-from .utils import CheckboxUtils, set_test_id
+from .utils import CheckboxUtils, LabelUtils, set_test_id
 
 
 target_test_id = "checkbox"
@@ -18,14 +18,11 @@ def test_const_value(page: ScreenPage, page_path: str):
     target = CheckboxUtils(page, "target")
 
     target.expect_to_be_visible()
+    target.expect.not_to_be_checked()
 
-    assert not target.is_checked()
-
-    page.wait()
     target.click()
-    page.wait()
 
-    assert target.is_checked()
+    target.expect.to_be_checked()
 
 
 def test_ref_value(page: ScreenPage, page_path: str):
@@ -36,19 +33,20 @@ def test_ref_value(page: ScreenPage, page_path: str):
         cb = rxui.checkbox("test checkbox", value=r_value)
         set_test_id(cb, "target")
 
+        set_test_id(rxui.label(r_value), "value")
+
     page.open(page_path)
 
     target = CheckboxUtils(page, "target")
+    value_label = LabelUtils(page, "value")
 
     target.expect_to_be_visible()
 
-    assert not target.is_checked()
-    assert r_value.value == False
+    target.expect.not_to_be_checked()
+    value_label.expect.to_have_text("False")
 
-    page.wait()
     target.click()
-
-    assert r_value.value == True
+    value_label.expect.to_have_text("True")
 
 
 def test_ref_str_change_value(page: ScreenPage, page_path: str):
@@ -65,8 +63,6 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
 
     target.expect_to_be_visible()
 
-    page.wait()
     r_value.value = True
 
-    page.wait(1000)
-    assert target.is_checked()
+    target.expect.to_be_checked()

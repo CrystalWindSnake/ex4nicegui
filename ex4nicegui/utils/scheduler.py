@@ -30,9 +30,14 @@ class UiScheduler(signe.ExecutionScheduler):
             super().run()
 
             self.pause_scheduling()
-            self.run_pre_deque()
-            self.run_post_deque()
-            self.reset_scheduling()
+            try:
+                self.run_pre_deque()
+                self.run_post_deque()
+                pass
+            except Exception as e:
+                raise e
+            finally:
+                self.reset_scheduling()
 
     def run_pre_deque(self):
         while self._pre_deque:
