@@ -64,7 +64,7 @@ class State:
     def remove_todo(self, todo: TodoItem):
         self.todos.value.remove(todo)
 
-    def remove_check_todos(self):
+    def remove_completed_todos(self):
         for todo in [todo for todo in self.todos.value if todo.completed]:
             self.remove_todo(todo)
 

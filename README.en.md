@@ -15,6 +15,11 @@ An extension library for [nicegui](https://github.com/zauberzeug/nicegui). It ha
 pip install ex4nicegui -U
 ```
 
+## examples
+- [basic](./examples/basic/)
+- [todo list mvc](./examples/todomvc/)
+
+
 ## 🦄 Usage
 
 ```python
