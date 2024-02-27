@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Union, cast
 from nicegui.events import UiEventArguments
 from ex4nicegui.reactive import rxui
 from ex4nicegui.reactive.EChartsComponent.ECharts import (
@@ -36,7 +36,7 @@ class EChartsResult(UiResult[echarts]):
 
 def ui_echarts(
     self: DataSourceFacade,
-    fn: Callable[[Any], Union[Dict, "pyecharts.Base"]],  # pyright: ignore
+    fn: Callable[[Any], Union[Dict, "pyecharts.Base"]],  # pyright: ignore  # noqa: F821
     **kwargs,
 ):
     def create_options(data):
@@ -60,7 +60,7 @@ def ui_echarts(
         options = create_options(data)
         cp.element.update_options(options)
 
-    info = self._dataSource._register_component(ele_id, on_source_update)
+    self._dataSource._register_component(ele_id, on_source_update)
 
     cp.element.update_options(
         create_options(self._dataSource.get_filtered_data(cp.element))

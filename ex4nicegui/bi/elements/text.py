@@ -1,4 +1,4 @@
-from typing import Callable, Any, Union
+from typing import Callable, Any
 from nicegui import ui
 from ex4nicegui.utils.signals import effect
 

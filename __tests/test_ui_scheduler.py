@@ -22,7 +22,7 @@ def test_when_error():
             dummy.append(cp.value)
 
         s.value = 2
-    except Exception as e:
+    except Exception:
         s.value = -1
 
     assert dummy == [2, 0]

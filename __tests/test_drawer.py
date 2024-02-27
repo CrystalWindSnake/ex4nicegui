@@ -59,7 +59,7 @@ def test_toggle_show(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        with rxui.drawer(value=r_show) as dw:
+        with rxui.drawer(value=r_show):
             ui.label("drawer showed")
 
             def onclick():

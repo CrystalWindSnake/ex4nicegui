@@ -5,7 +5,6 @@ from ex4nicegui.bi.types import (
     _TFilterCallback,
     _TDuplicates_column_values_sort_options,
 )
-from .types import _TFilterCallback
 from ex4nicegui.utils import common as utils_common
 
 

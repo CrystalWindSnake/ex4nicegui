@@ -158,7 +158,9 @@ def test_reload_source(page: ScreenPage, page_path: str):
 
         set_test_id(
             ds1.ui_radio(
-                "name", hide_filtered=True, custom_options_map={"": "null", "c1": "类别1"}
+                "name",
+                hide_filtered=True,
+                custom_options_map={"": "null", "c1": "类别1"},
             ),
             "name radio",
         )
@@ -181,7 +183,7 @@ def test_reload_source(page: ScreenPage, page_path: str):
     reset_btn = cp_utils.ButtonUtils(page, "button")
 
     name_select = cp_utils.SelectUtils(page, "name select")
-    cls_select = cp_utils.SelectUtils(page, "cls select")
+    cls_select = cp_utils.SelectUtils(page, "cls select")  # noqa: F841
 
     name_radio = cp_utils.RadioUtils(page, "name radio")
     cls_radio = cp_utils.RadioUtils(page, "cls radio")

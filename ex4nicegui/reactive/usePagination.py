@@ -6,7 +6,7 @@ from ex4nicegui.utils.signals import (
     effect,
     _TMaybeRef as TMaybeRef,
 )
-from typing import Any, TypeVar
+from typing import Any
 from typing_extensions import Protocol
 import math
 from ex4nicegui.reactive.q_pagination import PaginationBindableUi

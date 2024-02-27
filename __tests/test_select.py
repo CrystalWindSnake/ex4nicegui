@@ -1,4 +1,3 @@
-import re
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed, effect

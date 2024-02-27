@@ -34,7 +34,7 @@ class FilesWatcher:
                 ):
                     for fn in self.callbacks:
                         fn(file)
-            except RuntimeError as e:
+            except RuntimeError:
                 return
 
         if asyncio.get_event_loop().is_running():
