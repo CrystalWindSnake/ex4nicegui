@@ -25,7 +25,8 @@ pip install ex4nicegui -U
 
 
 ## 示例项目
-- [todo list mvc](./examples/todomvc/README.md)
+- [入门](./examples/basic/)
+- [todo list mvc](./examples/todomvc/)
 
 ---
 
