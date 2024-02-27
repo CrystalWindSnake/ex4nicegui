@@ -227,9 +227,9 @@ def ref_computed(
         getter = signe.Computed(
             cast(Callable[[], T], fn),
             **kws,
-            scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+            scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
             scheduler=get_uiScheduler(),
-        )  
+        )
         return cast(DescReadonlyRef[T], getter)
 
     else:
@@ -259,20 +259,21 @@ class ref_computed_method(Generic[T]):
     def __init__(self, fget: Callable[[Any], T], computed_args: Dict) -> None:
         self._fget = fget
         self._computed_args = computed_args
-        self._instance_map: WeakValueDictionary[int, TReadonlyRef[T]] = WeakValueDictionary()
+        self._instance_map: WeakValueDictionary[
+            int, TReadonlyRef[T]
+        ] = WeakValueDictionary()
 
     def __get_computed(self, instance):
         ins_id = id(instance)
         if ins_id not in self._instance_map:
-
             cp = signe.Computed(
                 partial(self._fget, instance),
                 **self._computed_args,
-                scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+                scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
                 scheduler=get_uiScheduler(),
                 capture_parent_effect=False,
-            )  
-            self._instance_map[ins_id] = cp   # type: ignore
+            )
+            self._instance_map[ins_id] = cp  # type: ignore
 
         return self._instance_map[ins_id]
 
@@ -349,7 +350,7 @@ def on(
             fn,
             onchanges=onchanges,
             effect_kws=effect_kws,
-            scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+            scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
             deep=deep,
             scheduler=get_uiScheduler(),
         )

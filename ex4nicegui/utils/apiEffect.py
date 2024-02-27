@@ -1,4 +1,5 @@
 import signe
+from signe.core.scope import Scope
 from typing import (
     TypeVar,
     overload,
@@ -9,6 +10,7 @@ from typing import (
 
 from .scheduler import get_uiScheduler
 from .clientScope import _CLIENT_SCOPE_MANAGER
+
 
 T = TypeVar("T")
 
@@ -23,6 +25,7 @@ def ui_effect(
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
+    scope: Optional[Scope] = None,
 ) -> _TEffect_Fn:
     """Runs a function immediately while reactively tracking its dependencies and re-runs it whenever the dependencies are changed.
 
@@ -47,6 +50,7 @@ def ui_effect(
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
+    scope: Optional[Scope] = None,
 ) -> signe.Effect[None]:
     ...
 
@@ -57,11 +61,13 @@ def ui_effect(
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
+    scope: Optional[Scope] = None,
 ) -> Union[signe.Effect[None], _TEffect_Fn]:
     kws = {
         "debug_trigger": debug_trigger,
         "priority_level": priority_level,
         "debug_name": debug_name,
+        "scope": scope,
     }
     if fn:
         scheduler = get_uiScheduler()
@@ -73,12 +79,14 @@ def ui_effect(
 
             scheduler.pre_job(job)
 
+        kws.pop("scope")
+
         res = signe.Effect(
             fn,
             scheduler_fn=scheduler_fn,
             scheduler=scheduler,
             **kws,
-            scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+            scope=scope or _CLIENT_SCOPE_MANAGER.get_current_scope(),
         )
         res.update()
 

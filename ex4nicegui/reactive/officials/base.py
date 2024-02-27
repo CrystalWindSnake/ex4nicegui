@@ -13,8 +13,10 @@ from typing import (
     cast,
     Literal,
 )
+
 from typing_extensions import Self
 from ex4nicegui.utils.apiEffect import ui_effect
+import signe
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     effect,
@@ -48,11 +50,13 @@ _T_bind_classes_type = Union[
 ]
 
 
-class BindableUi(Generic[TWidget], ui.element, component="empty.js"):
+class BindableUi(Generic[TWidget]):
     def __init__(self, element: TWidget) -> None:
         self._element = element
-        super().__init__()
         self.tailwind = Tailwind(cast(ui.element, self._element))
+
+    def _ui_effect(self, fn: Callable):
+        return ui_effect(fn)
 
     def props(self, add: Optional[str] = None, *, remove: Optional[str] = None):
         cast(ui.element, self.element).props(add, remove=remove)
@@ -129,12 +133,12 @@ class BindableUi(Generic[TWidget], ui.element, component="empty.js"):
 
         if prop == "text" and isinstance(self.element, TextElement):
 
-            @effect
+            @self._ui_effect
             def _():
                 cast(TextElement, self.element).set_text(to_value(ref_ui))
                 self.element.update()
 
-        @effect
+        @self._ui_effect
         def _():
             element = cast(ui.element, self.element)
             element._props[prop] = to_value(ref_ui)
@@ -143,7 +147,7 @@ class BindableUi(Generic[TWidget], ui.element, component="empty.js"):
         return self
 
     def bind_visible(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @ui_effect
+        @self._ui_effect
         def _():
             element = cast(ui.element, self.element)
             element.set_visibility(to_value(ref_ui))
@@ -175,10 +179,6 @@ class BindableUi(Generic[TWidget], ui.element, component="empty.js"):
 
         return self
 
-    def _handle_delete(self) -> None:
-        print("delete")
-        # return super()._handle_delete()
-
     def clear(self) -> None:
         cast(ui.element, self.element).clear()
 
@@ -194,7 +194,7 @@ class BindableUi(Generic[TWidget], ui.element, component="empty.js"):
         if isinstance(classes, dict):
             for name, ref_obj in classes.items():
 
-                @effect
+                @self._ui_effect
                 def _(name=name, ref_obj=ref_obj):
                     if to_value(ref_obj):
                         self.classes(add=name)
@@ -237,7 +237,7 @@ class BindableUi(Generic[TWidget], ui.element, component="empty.js"):
             for name, ref_obj in style.items():
                 if is_ref(ref_obj) or isinstance(ref_obj, Callable):
 
-                    @effect
+                    @self._ui_effect
                     def _(name=name, ref_obj=ref_obj):
                         self.element._style[name] = to_value(ref_obj)
                         self.element.update()
@@ -266,12 +266,14 @@ _T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
 
 
 class DisableableMixin(Protocol):
+    _ui_effect: Callable[[Callable[..., Any]], signe.Effect[None]]
+
     @property
     def element(self) -> DisableableElement:
         ...
 
     def bind_enabled(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @effect
+        @self._ui_effect
         def _():
             value = to_value(ref_ui)
             self.element.set_enabled(value)
@@ -280,7 +282,7 @@ class DisableableMixin(Protocol):
         return self
 
     def bind_disable(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @effect
+        @self._ui_effect
         def _():
             value = not to_value(ref_ui)
             self.element.set_enabled(value)

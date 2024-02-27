@@ -1,6 +1,7 @@
 from __future__ import annotations
 from nicegui.element import Element
 from nicegui import ui
+from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import ReadonlyRef, on, to_ref, to_ref_wrapper
 from typing import (
     Any,
@@ -17,7 +18,7 @@ from typing import (
 from functools import partial
 from dataclasses import dataclass
 from signe.core.reactive import DictProxy as signe_DictProxy
-
+from signe.core.scope import Scope
 
 _T = TypeVar("_T")
 _T_data = ReadonlyRef[List[Any]]
@@ -65,6 +66,7 @@ class StoreItem:
     __slot__ = ["elementId"]
     store: VforStore
     elementId: int
+    scope: Scope
 
 
 class VforContainer(Element, component="vfor.js"):
@@ -144,13 +146,18 @@ class vfor(Generic[_T]):
             key = self._get_key(index, value)
             with VforContainer() as element:
                 store = VforStore(self._data, index)
-                fn(store)
-            return key, element, store
+                scope = _CLIENT_SCOPE_MANAGER.new_scope()
+
+                @scope.run
+                def _():
+                    fn(store)
+
+            return key, element, store, scope
 
         with self._container:
             for idx, value in enumerate(self._data.value):
-                key, element, store = build_element(idx, value)
-                self._store_map[key] = StoreItem(store, element.id)
+                key, element, store, scope = build_element(idx, value)
+                self._store_map[key] = StoreItem(store, element.id, scope)
 
         @on(self._data, deep=True)
         def _():
@@ -181,10 +188,19 @@ class vfor(Generic[_T]):
                         new_store_map[key] = store_item
                     else:
                         # new row item
-                        key, element, store = build_element(idx, value)
-                        store_item = StoreItem(store, element.id)
+                        key, element, store, score = build_element(idx, value)
+                        store_item = StoreItem(store, element.id, score)
                         element.move(self._container)
                         new_store_map[key] = store_item
+
+            del_store_items = tuple(
+                value
+                for key, value in self._store_map.items()
+                if key not in new_store_map
+            )
+
+            for store_item in del_store_items:
+                store_item.scope.dispose()
 
             self._store_map.clear()
             self._store_map = new_store_map

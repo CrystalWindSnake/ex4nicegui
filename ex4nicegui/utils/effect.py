@@ -78,7 +78,7 @@ def effect(
             scheduler_fn=scheduler_fn,
             scheduler=scheduler,
             **kws,
-            scope=_CLIENT_SCOPE_MANAGER.get_scope(),
+            scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
         )
 
         res.update()
