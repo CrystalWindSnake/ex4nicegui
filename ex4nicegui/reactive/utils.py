@@ -24,7 +24,7 @@ class ParameterClassifier:
         if extend_kws:
             exclude.append(extend_kws)
 
-        self._args = {
+        self._args: Dict[str, Any] = {
             k: v
             for k, v in args.items()
             if k != "self" and k[0] != "_" and (k not in exclude)
@@ -70,7 +70,7 @@ class ParameterClassifier:
 
     def get_bindings(self) -> Dict:
         return {
-            k: v
+            k.replace("_", "-"): v
             for k, v in self._args.items()
             if (k in self.maybeRefs and (is_ref(v) or isinstance(v, Callable)))
         }

@@ -1,45 +1,50 @@
-from typing import cast
-from nicegui.element import Element
+from typing import Any, Optional, Callable
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
-    Ref,
-    effect,
     to_value,
     _TMaybeRef as TMaybeRef,
 )
+from nicegui import ui
+from ex4nicegui.reactive.officials.base import BindableUi
 
 
-class QPagination(Element):
-    VALUE_PROP: str = "model-value"
-    LOOPBACK = False
-
+class PaginationBindableUi(BindableUi[ui.pagination]):
     def __init__(
         self,
-        value: TMaybeRef[int] = 1,
-        min: TMaybeRef[int] = 1,
-        max: TMaybeRef[int] = 5,
+        min: TMaybeRef[int],
+        max: TMaybeRef[int],
+        *,  # pylint: disable=redefined-builtin
+        direction_links: TMaybeRef[bool] = False,
+        value: TMaybeRef[int] = ...,  # type: ignore
+        on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
-        super().__init__(tag="q-pagination")
+        pc = ParameterClassifier(
+            locals(),
+            maybeRefs=["min", "max", "direction_links", "value"],
+            v_model=("value", "on_change"),
+            events=["on_change"],
+        )
 
-        self.__value = value
-        self.__min = min
-        self.__max = max
+        element = ui.pagination(**pc.get_values_kws())
+        super().__init__(element)
 
-        def onchange(e):
-            arg_value = cast(int, e.args)
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
 
-            self._props["model-value"] = arg_value
-            if isinstance(self.__value, Ref):
-                self.__value.value = arg_value
-            self.update()
+    @property
+    def value(self):
+        return self.element.value
 
-        self.on("update:model-value", onchange)
+    def bind_prop(self, prop: str, ref_ui: TMaybeRef):
+        if prop == "value":
+            return self.bind_value(ref_ui)
 
-        @effect
+        return super().bind_prop(prop, ref_ui)
+
+    def bind_value(self, ref_ui: TMaybeRef[int]):
+        @self._ui_effect
         def _():
-            self._props["model-value"] = to_value(value)
-            self._props["min"] = to_value(min)
+            self.element.set_value(to_value(ref_ui))
 
-            if self.__max is not None:
-                self._props["max"] = to_value(self.__max)
-
-            self.update()
+        return self
