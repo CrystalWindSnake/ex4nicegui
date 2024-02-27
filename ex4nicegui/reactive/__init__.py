@@ -46,6 +46,8 @@ from .officials.expansion import ExpansionBindableUi as expansion
 from .officials.linear_progress import LinearProgressBindableUi as linear_progress
 
 from .q_pagination import PaginationBindableUi as q_pagination
+
+pagination = q_pagination
 from .local_file_picker import local_file_picker
 from ex4nicegui.utils.signals import ref_computed, effect
 from .UseDraggable.UseDraggable import use_draggable

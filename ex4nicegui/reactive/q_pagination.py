@@ -22,6 +22,7 @@ class PaginationBindableUi(BindableUi[ui.pagination]):
         pc = ParameterClassifier(
             locals(),
             maybeRefs=["min", "max", "direction_links", "value"],
+            v_model=("value", "on_change"),
             events=["on_change"],
         )
 
