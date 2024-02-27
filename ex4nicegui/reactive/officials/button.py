@@ -11,7 +11,7 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import BindableUi, _bind_color, DisableableMixin
+from .base import BindableUi, DisableableMixin
 
 
 class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
@@ -43,7 +43,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
         return super().bind_prop(prop, ref_ui)
 
     def bind_text(self, ref_ui: ReadonlyRef):
-        @ui_effect
+        @self._ui_effect
         def _():
             ele = self.element
             ele._props["label"] = to_value(ref_ui)
@@ -52,7 +52,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
         return self
 
     def bind_icon(self, ref_ui: ReadonlyRef):
-        @ui_effect
+        @self._ui_effect
         def _():
             ele = self.element
             ele._props["icon"] = to_value(ref_ui)

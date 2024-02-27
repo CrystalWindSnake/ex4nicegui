@@ -36,7 +36,7 @@ class LabelBindableUi(BindableUi[ui.label]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_color(self, ref_ui: TMaybeRef):
-        @ui_effect
+        @self._ui_effect
         def _():
             ele = self.element
             color = to_value(ref_ui)
@@ -44,7 +44,7 @@ class LabelBindableUi(BindableUi[ui.label]):
             ele.update()
 
     def bind_text(self, ref_ui: TMaybeRef):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_text(str(to_value(ref_ui)))
             self.element.update()
