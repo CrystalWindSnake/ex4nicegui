@@ -98,7 +98,7 @@ class PaginationRef:
 
     def create_q_pagination(self):
         page = PaginationBindableUi(
-            self.current_page, max=self.page_count, direction_links=True
+            min=1, max=self.page_count, direction_links=True, value=self.current_page
         )
         page.props("boundary-links")
         return page
