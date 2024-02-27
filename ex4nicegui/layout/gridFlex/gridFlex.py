@@ -1,9 +1,7 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union, Literal
 from nicegui import ui
 from nicegui.element import Element
 
-from typing_extensions import Literal
-from typing import Optional, Union
 from . import utils
 
 

@@ -2,7 +2,7 @@ from signe.core.effect import Effect
 import ex4nicegui.reactive as rxui
 from ex4nicegui.utils.signals import ReadonlyRef, DescReadonlyRef, Ref, ref_computed
 from nicegui import ui
-from typing import Callable, Dict, TypeVar, Generic
+from typing import Dict, TypeVar
 
 T = TypeVar("T")
 

@@ -4,7 +4,6 @@ from typing import (
     Optional,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
-from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     _TMaybeRef as TMaybeRef,

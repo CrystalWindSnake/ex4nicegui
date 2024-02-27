@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 from nicegui import ui
 from ex4nicegui.bi.dataSource import DataSource
 from .models import UiResult
@@ -52,7 +52,7 @@ def ui_table(
         cp.columns = _merge_columns(fixed_columns, opts["columns"])
         cp.update()
 
-    info = self._dataSource._register_component(cp.id, on_source_update)
+    self._dataSource._register_component(cp.id, on_source_update)
 
     on_source_update()
 

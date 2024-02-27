@@ -5,7 +5,7 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import BindableUi, _bind_color
+from .base import BindableUi
 
 
 class HtmlComponent(ui.element, component="html.js"):

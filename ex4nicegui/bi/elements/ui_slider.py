@@ -28,7 +28,7 @@ class SliderResult(UiResult[ui.slider]):
 
     def _reset_state(self):
         min = self._init_data["min"]
-        max = self._init_data["max"]
+        max = self._init_data["max"]  # noqa: F841
         self._ref_value.value = min
         self.element.set_value(min)
 

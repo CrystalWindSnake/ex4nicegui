@@ -37,13 +37,13 @@ def test_ref_value(page: ScreenPage, page_path: str):
 
     expect(switch).to_be_visible()
     expect(switch).not_to_be_checked()
-    assert r_on.value == False
+    assert r_on.value is False
 
     page.wait()
     page._page.get_by_test_id("switch").locator("div").nth(2).click()
     page.wait()
     expect(switch).to_be_checked()
-    assert r_on.value == True
+    assert r_on.value is True
 
 
 def test_ref_str_change_value(page: ScreenPage, page_path: str):
