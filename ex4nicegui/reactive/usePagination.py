@@ -9,7 +9,7 @@ from ex4nicegui.utils.signals import (
 from typing import Any, TypeVar
 from typing_extensions import Protocol
 import math
-from ex4nicegui.reactive.q_pagination import QPagination
+from ex4nicegui.reactive.q_pagination import PaginationBindableUi
 
 
 def _clamp(value, min_v, max_v) -> int:
@@ -97,6 +97,8 @@ class PaginationRef:
         return cp
 
     def create_q_pagination(self):
-        page = QPagination(self.current_page, max=self.page_count)
-        page.props("boundary-links direction-links")
+        page = PaginationBindableUi(
+            self.current_page, max=self.page_count, direction_links=True
+        )
+        page.props("boundary-links")
         return page
