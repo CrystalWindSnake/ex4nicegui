@@ -12,7 +12,7 @@ class Screen:
         self.browser = browser
 
         self._context = browser.new_context()
-        self._context.set_default_timeout(5000)
+        self._context.set_default_timeout(10000)
         self.ui_run_kwargs = {"port": PORT, "show": False, "reload": False}
 
     def start_server(self) -> None:
