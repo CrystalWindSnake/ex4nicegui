@@ -10,7 +10,7 @@ def test_base(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.knob(value, show_value=True, size="100px"), "knob")
+        set_test_id(rxui.knob(value, show_value=True, size="200px"), "knob")
         set_test_id(rxui.label(value), "label")
 
     page.open(page_path)
