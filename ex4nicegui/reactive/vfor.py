@@ -54,28 +54,7 @@ class VforStore(Generic[_T]):
     def row_index(self):
         return self._data_index
 
-    def get(self, attr: Optional[Union[str, int]] = None) -> TReadonlyRef[_T]:
-        # item = self._source.value[self._data_index.value]
-
-        # if attr:
-        #     setter = None
-        #     if isinstance(item, signe_DictProxy):
-
-        #         def base_setter(value):
-        #             item[attr] = value
-
-        #         setter = base_setter
-        #     else:
-        #         setter = lambda x: _set_attribute(item, attr, x)  # noqa: E731
-
-        #     return cast(
-        #         TReadonlyRef,
-        #         to_ref_wrapper(
-        #             lambda: _get_attribute(item, attr),
-        #             setter,
-        #         ),
-        #     )
-
+    def get(self) -> TReadonlyRef[_T]:
         def base_setter(value):
             self._source.value[self._data_index.value] = value
 
