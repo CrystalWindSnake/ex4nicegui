@@ -23,8 +23,8 @@ class CircularProgressBindableUi(
         *,
         min: TMaybeRef[float] = 0.0,  # pylint: disable=redefined-builtin
         max: TMaybeRef[float] = 1.0,  # pylint: disable=redefined-builtin
-        size: Optional[TMaybeRef[str]] = None,
-        show_value: TMaybeRef[bool] = False,
+        size: Optional[TMaybeRef[str]] = "xl",
+        show_value: TMaybeRef[bool] = True,
         color: Optional[TMaybeRef[str]] = "primary",
     ) -> None:
         pc = ParameterClassifier(
