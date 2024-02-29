@@ -54,37 +54,37 @@ class VforStore(Generic[_T]):
         return self._data_index
 
     def get(self, attr: Optional[Union[str, int]] = None) -> TReadonlyRef[_T]:
-        item = self._source.value[self._data_index.value]
+        # item = self._source.value[self._data_index.value]
 
-        if attr:
-            setter = None
-            if isinstance(item, signe_DictProxy):
+        # if attr:
+        #     setter = None
+        #     if isinstance(item, signe_DictProxy):
 
-                def base_setter(value):
-                    item[attr] = value
+        #         def base_setter(value):
+        #             item[attr] = value
 
-                setter = base_setter
-            else:
-                setter = lambda x: _set_attribute(item, attr, x)  # noqa: E731
+        #         setter = base_setter
+        #     else:
+        #         setter = lambda x: _set_attribute(item, attr, x)  # noqa: E731
 
-            return cast(
-                TReadonlyRef,
-                to_ref_wrapper(
-                    lambda: _get_attribute(item, attr),
-                    setter,
-                ),
-            )
+        #     return cast(
+        #         TReadonlyRef,
+        #         to_ref_wrapper(
+        #             lambda: _get_attribute(item, attr),
+        #             setter,
+        #         ),
+        #     )
 
         def base_setter(value):
             self._source.value[self._data_index.value] = value
 
-        return cast(
-            TReadonlyRef,
-            to_ref_wrapper(
-                lambda: self._source.value[self._data_index.value],
-                base_setter,
-            ),
+        wrapper = to_ref_wrapper(
+            lambda: self._source.value[self._data_index.value],
+            base_setter,
         )
+        wrapper._is_readonly = True
+
+        return cast(TReadonlyRef, wrapper)
 
     def update(self, index: int):
         self._data_index.value = index

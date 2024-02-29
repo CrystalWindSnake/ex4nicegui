@@ -224,8 +224,12 @@ class TestBase:
 
             @rxui.vfor(items, key="id")
             def _(store: rxui.VforStore):
+                item = store.get()
                 with ui.card().classes("row-card"):
-                    rxui.checkbox(text=store.get("message"), value=store.get("done"))
+                    rxui.checkbox(
+                        text=lambda: item.value["message"],
+                        value=rxui.vmodel(item, "done"),
+                    )
 
         page.open(page_path)
 
@@ -243,7 +247,7 @@ class TestBase:
 
         label_totals.expect_contain_text("2")
 
-    def test_(self, page: ScreenPage, page_path: str):
+    def test_shallow_ref(self, page: ScreenPage, page_path: str):
         text = to_ref("abcd")
 
         @ui.page(page_path)
@@ -251,8 +255,8 @@ class TestBase:
             with ui.row():
 
                 @rxui.vfor(text)  # type: ignore
-                def _(store: rxui.VforStore):
-                    rxui.label(lambda: store.get())
+                def _(store: rxui.VforStore[str]):
+                    rxui.label(store.get())
 
         page.open(page_path)
 
@@ -260,3 +264,19 @@ class TestBase:
 
         text.value = "abc"
         page.should_contain("abc")
+
+    def test_deep_ref(self, page: ScreenPage, page_path: str):
+        data = deep_ref([1, 2, 3, 4])
+
+        @ui.page(page_path)
+        def _():
+            with ui.row():
+
+                @rxui.vfor(data)  # type: ignore
+                def _(store: rxui.VforStore[int]):
+                    item = store.get()
+                    rxui.label(item)
+
+        page.open(page_path)
+
+        page.should_contain("1 2 3 4")
