@@ -83,28 +83,32 @@ def todo_list_panel():
             ui.label("Close").classes("place-self-center  px-10")
 
             @rxui.vfor(state.filtered_todos, key="id")
-            def _(store: rxui.VforStore):
-                todo: TodoItem = store.get()
+            def _(store: rxui.VforStore[TodoItem]):
+                todo = store.get()
 
-                rxui.checkbox(lambda: todo.title, value=store.get("completed"))
+                rxui.checkbox(
+                    lambda: todo.value.title, value=rxui.vmodel(todo, "completed")
+                )
 
                 with ui.element("q-chip").classes("w-fit place-self-center").props(
                     "square clickable color=primary text-color=white"
                 ) as chip:
-                    rxui.label(lambda: "completed" if todo.completed else "pending")
+                    rxui.label(
+                        lambda: "completed" if todo.value.completed else "pending"
+                    )
 
                 def switch_todo_state():
-                    todo.completed = not todo.completed
+                    todo.value.completed = not todo.value.completed
 
                 chip.on("click", switch_todo_state)
 
                 rxui.button(
                     icon="delete",
-                    color=lambda: "negative" if todo.completed else "grey-4",
-                    on_click=lambda: state.remove_todo(store.get()),
+                    color=lambda: "negative" if todo.value.completed else "grey-4",
+                    on_click=lambda: state.remove_todo(todo.value),
                 ).classes("place-self-center").props(
                     "round desen push flat "
-                ).bind_enabled(lambda: todo.completed)
+                ).bind_enabled(lambda: todo.value.completed)
 
     return outter
 

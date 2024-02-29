@@ -56,7 +56,7 @@ from .usePagination import PaginationRef as use_pagination
 from .dropZone.dropZone import use_drag_zone
 from .fileWatcher import FilesWatcher
 from .mermaid.mermaid import Mermaid as mermaid
-from .vfor import vfor, VforStore
+from .vfor import vfor, VforStore, vmodel
 
 pagination = q_pagination
 
@@ -73,6 +73,7 @@ __all__ = [
     "FilesWatcher",
     "vfor",
     "VforStore",
+    "vmodel",
     "html",
     "aggird",
     "button",

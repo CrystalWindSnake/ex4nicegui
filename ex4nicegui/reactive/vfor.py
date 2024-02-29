@@ -2,18 +2,27 @@ from __future__ import annotations
 from nicegui.element import Element
 from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
-from ex4nicegui.utils.signals import ReadonlyRef, on, to_ref, to_ref_wrapper
+from ex4nicegui.utils.signals import (
+    ReadonlyRef,
+    RefWrapper,
+    TRef,
+    on,
+    to_ref,
+    to_ref_wrapper,
+    TGetterOrReadonlyRef,
+)
 from typing import (
     Any,
     Callable,
     Dict,
     List,
-    Mapping,
     Optional,
+    Protocol,
     TypeVar,
     Generic,
     Union,
     cast,
+    runtime_checkable,
 )
 from functools import partial
 from dataclasses import dataclass
@@ -22,6 +31,18 @@ from signe.core.scope import Scope
 
 _T = TypeVar("_T")
 _T_data = ReadonlyRef[List[Any]]
+
+
+@runtime_checkable
+class GetItemProtocol(Protocol):
+    def __getitem__(self, key):
+        ...
+
+
+@runtime_checkable
+class SetItemProtocol(Protocol):
+    def __setitem__(self, key, value):
+        ...
 
 
 class VforStore(Generic[_T]):
@@ -33,7 +54,7 @@ class VforStore(Generic[_T]):
     def row_index(self):
         return self._data_index
 
-    def get(self, attr: Optional[str] = None) -> _T:
+    def get(self, attr: Optional[Union[str, int]] = None) -> TGetterOrReadonlyRef[_T]:
         item = self._source.value[self._data_index.value]
 
         if attr:
@@ -48,14 +69,23 @@ class VforStore(Generic[_T]):
                 setter = lambda x: _set_attribute(item, attr, x)  # noqa: E731
 
             return cast(
-                _T,
+                TGetterOrReadonlyRef,
                 to_ref_wrapper(
                     lambda: _get_attribute(item, attr),
                     setter,
                 ),
             )
 
-        return item
+        def base_setter(value):
+            self._source.value[self._data_index.value] = value
+
+        return cast(
+            TGetterOrReadonlyRef,
+            to_ref_wrapper(
+                lambda: self._source.value[self._data_index.value],
+                base_setter,
+            ),
+        )
 
     def update(self, index: int):
         self._data_index.value = index
@@ -69,21 +99,55 @@ class StoreItem:
     scope: Scope
 
 
+def vmodel(ref: TGetterOrReadonlyRef[_T], *attrs: str) -> TRef[Any]:
+    if not attrs:
+        return cast(TRef, ref)
+
+    def get_obj():
+        if len(attrs) == 1:
+            return ref.value, attrs[0]
+
+        # gt 1
+        obj = _get_attribute(ref.value, attrs[0])
+        for attr in attrs[1:-1]:
+            obj = _get_attribute(obj, attr)
+
+        return obj, attrs[-1]
+
+    def setter(value):
+        obj, attr = get_obj()
+        _set_attribute(obj, attr, value)
+
+    def getter():
+        obj, attr = get_obj()
+        return _get_attribute(obj, attr)
+
+    return cast(
+        TRef,
+        to_ref_wrapper(
+            getter,
+            setter,
+        ),
+    )
+
+
 class VforContainer(Element, component="vfor.js"):
     pass
 
 
-def _get_attribute(obj: Union[object, Mapping], name: str) -> Any:
-    if isinstance(obj, Mapping):
+def _get_attribute(obj: Union[object, GetItemProtocol], name: Union[str, int]) -> Any:
+    if isinstance(obj, (GetItemProtocol)):
         return obj[name]
-    return getattr(obj, name)
+    return getattr(obj, name)  # type: ignore
 
 
-def _set_attribute(obj: Union[object, Mapping], name: str, value: Any) -> None:
-    if isinstance(obj, dict):
+def _set_attribute(
+    obj: Union[object, SetItemProtocol], name: Union[str, int], value: Any
+) -> None:
+    if isinstance(obj, SetItemProtocol):
         obj[name] = value
     else:
-        setattr(obj, name, value)
+        setattr(obj, name, value)  # type: ignore
 
 
 def _get_key_with_index(idx: int, data: Any):
