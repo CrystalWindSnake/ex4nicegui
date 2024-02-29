@@ -4,7 +4,7 @@ from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import deep_ref
 from .screen import ScreenPage
-from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
+from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id, BaseUiUtils
 from playwright.sync_api import expect
 import pytest
 from dataclasses import dataclass
@@ -273,15 +273,58 @@ class TestBase:
 
         @ui.page(page_path)
         def _():
-            with ui.row():
+            with ui.column() as for_box:
 
-                @rxui.vfor(data)  # type: ignore
+                @rxui.vfor(data)
                 def _(store: rxui.VforStore[int]):
                     item = store.get()
-                    rxui.label(item)
+                    row_num = store.row_index.value + 1
 
-            rxui.label(data)
+                    with ui.row().classes("flex-center"):
+                        label = rxui.label(item)
+                        input = rxui.input(value=rxui.vmodel(item))
+
+                        set_test_id(label, f"vfor-label-{row_num}")
+                        set_test_id(input, f"vfor-input-{row_num}")
+
+            set_test_id(for_box, "for_box")
+
+            set_test_id(rxui.label(data), "list-label")
+
+            set_test_id(rxui.input(value=rxui.vmodel(data, 0)), "input1")
+
+            def onclick():
+                data.value[0] = 66
+
+            set_test_id(ui.button("change", on_click=onclick), "btn")
 
         page.open(page_path)
 
-        page.should_contain("1234")
+        list_label = LabelUtils(page, "list-label")
+        input_for_1 = InputUtils(page, "input1")
+        change_btn = ButtonUtils(page, "btn")
+
+        vfor_label1 = LabelUtils(page, "vfor-label-1")
+        vfor_input1 = InputUtils(page, "vfor-input-1")
+
+        list_label.expect_contain_text("[1, 2, 3, 4]")
+
+        vfor_input1.fill_text("x1")
+        vfor_label1.expect_contain_text("x1")
+        input_for_1.expect_to_have_text("x1")
+        list_label.expect_contain_text("['x1', 2, 3, 4]")
+
+        #
+        input_for_1.fill_text("z20")
+
+        vfor_label1.expect_contain_text("z20")
+        vfor_input1.expect_to_have_text("z20")
+        list_label.expect_contain_text("['z20', 2, 3, 4]")
+
+        #
+        change_btn.click()
+
+        input_for_1.expect_to_have_text("66")
+        vfor_label1.expect_contain_text("66")
+        vfor_input1.expect_to_have_text("66")
+        list_label.expect_contain_text("[66, 2, 3, 4]")
