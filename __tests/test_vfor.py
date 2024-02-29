@@ -112,16 +112,19 @@ class TestTodosExample:
 
                 @rxui.vfor(todos, key="title")
                 def _(store: rxui.VforStore):
+                    item = store.get()
                     with ui.card().classes("w-full row-card"), ui.row():
-                        rxui.label(store.get("title")).classes("row-title")
+                        rxui.label(lambda: todo_proto.get(item.value, "title")).classes(
+                            "row-title"
+                        )
                         rxui.checkbox(
                             "done",
-                            value=store.get("done"),
-                            on_change=lambda e: change_done(store.get(), e.value),
+                            value=rxui.vmodel(item, "done"),
+                            on_change=lambda e: change_done(item.value, e.value),
                         )
                         rxui.button(
-                            "del", on_click=lambda: del_todo(store.get())
-                        ).bind_enabled(store.get("done"))
+                            "del", on_click=lambda: del_todo(item.value)
+                        ).bind_enabled(lambda: todo_proto.get(item.value, "done"))
 
         page.open(page_path)
 
@@ -277,6 +280,8 @@ class TestBase:
                     item = store.get()
                     rxui.label(item)
 
+            rxui.label(data)
+
         page.open(page_path)
 
-        page.should_contain("1 2 3 4")
+        page.should_contain("1234")

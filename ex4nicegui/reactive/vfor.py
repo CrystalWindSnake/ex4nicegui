@@ -3,6 +3,7 @@ from nicegui.element import Element
 from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
+    RefWrapper,
     TReadonlyRef,
     TRef,
     on,
@@ -98,7 +99,9 @@ class StoreItem:
     scope: Scope
 
 
-def vmodel(ref: TGetterOrReadonlyRef[_T], *attrs: str) -> TRef[Any]:
+def vmodel(ref: TGetterOrReadonlyRef[_T], *attrs: Union[str, int]) -> TRef[Any]:
+    if isinstance(ref, RefWrapper):
+        ref._is_readonly = False
     if not attrs:
         return cast(TRef, ref)
 
@@ -121,12 +124,15 @@ def vmodel(ref: TGetterOrReadonlyRef[_T], *attrs: str) -> TRef[Any]:
         obj, attr = get_obj()
         return _get_attribute(obj, attr)
 
+    wrapper = to_ref_wrapper(
+        getter,
+        setter,
+    )
+    wrapper._is_readonly = False
+
     return cast(
         TRef,
-        to_ref_wrapper(
-            getter,
-            setter,
-        ),
+        wrapper,
     )
 
 
