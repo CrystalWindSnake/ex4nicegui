@@ -3,6 +3,7 @@ from functools import partial
 import types
 from weakref import WeakValueDictionary
 import signe
+from signe.core.protocols import ComputedResultProtocol
 from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
@@ -24,7 +25,7 @@ from .scheduler import get_uiScheduler
 T = TypeVar("T")
 
 
-TReadonlyRef = signe.TGetterSignal[T]
+TReadonlyRef = ComputedResultProtocol[T]
 ReadonlyRef = TReadonlyRef[T]
 DescReadonlyRef = TReadonlyRef[T]
 

@@ -3,8 +3,7 @@ from nicegui.element import Element
 from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
-    RefWrapper,
+    TReadonlyRef,
     TRef,
     on,
     to_ref,
@@ -30,7 +29,7 @@ from signe.core.reactive import DictProxy as signe_DictProxy
 from signe.core.scope import Scope
 
 _T = TypeVar("_T")
-_T_data = ReadonlyRef[List[Any]]
+_T_data = TGetterOrReadonlyRef[List[Any]]
 
 
 @runtime_checkable
@@ -54,7 +53,7 @@ class VforStore(Generic[_T]):
     def row_index(self):
         return self._data_index
 
-    def get(self, attr: Optional[Union[str, int]] = None) -> TGetterOrReadonlyRef[_T]:
+    def get(self, attr: Optional[Union[str, int]] = None) -> TReadonlyRef[_T]:
         item = self._source.value[self._data_index.value]
 
         if attr:
@@ -69,7 +68,7 @@ class VforStore(Generic[_T]):
                 setter = lambda x: _set_attribute(item, attr, x)  # noqa: E731
 
             return cast(
-                TGetterOrReadonlyRef,
+                TReadonlyRef,
                 to_ref_wrapper(
                     lambda: _get_attribute(item, attr),
                     setter,
@@ -80,7 +79,7 @@ class VforStore(Generic[_T]):
             self._source.value[self._data_index.value] = value
 
         return cast(
-            TGetterOrReadonlyRef,
+            TReadonlyRef,
             to_ref_wrapper(
                 lambda: self._source.value[self._data_index.value],
                 base_setter,
