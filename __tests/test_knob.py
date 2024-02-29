@@ -2,7 +2,7 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import ScreenPage
-from .utils import set_test_id, BaseUiUtils, InputNumberUtils
+from .utils import set_test_id, BaseUiUtils
 
 
 def test_base(page: ScreenPage, page_path: str):
@@ -10,15 +10,13 @@ def test_base(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.knob(value, show_value=True), "knob")
+        set_test_id(rxui.knob(value, show_value=True, size="100px"), "knob")
         set_test_id(rxui.label(value), "label")
-        set_test_id(rxui.number(value=value), "number")
 
     page.open(page_path)
 
     knob = BaseUiUtils(page, "knob")
     label = BaseUiUtils(page, "label")
-    number = InputNumberUtils(page, "number")
 
     knob.expect.to_contain_text("0.3")
 
@@ -26,8 +24,7 @@ def test_base(page: ScreenPage, page_path: str):
     knob.expect.not_to_contain_text("0.3")
     label.expect.not_to_contain_text("0.3")
 
-    # value.value = 0.9
-    number.fill_text("0.9")
+    value.value = 0.9
 
     knob.expect.to_contain_text("0.9")
     label.expect.to_contain_text("0.9")

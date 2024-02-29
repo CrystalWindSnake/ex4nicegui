@@ -1,9 +1,5 @@
 from typing import (
-    Any,
-    Callable,
     Optional,
-    TypeVar,
-    Dict,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
@@ -14,48 +10,37 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import BindableUi
-
-T = TypeVar("T")
+from .base import BindableUi, DisableableMixin
 
 
-class NumberBindableUi(BindableUi[ui.number]):
+class CircularProgressBindableUi(
+    BindableUi[ui.circular_progress],
+    DisableableMixin,
+):
     def __init__(
         self,
-        label: Optional[TMaybeRef[str]] = None,
+        value: TMaybeRef[float] = 0.0,
         *,
-        placeholder: Optional[TMaybeRef[str]] = None,
-        value: Optional[TMaybeRef[float]] = None,
-        min: Optional[TMaybeRef[float]] = None,
-        max: Optional[TMaybeRef[float]] = None,
-        step: Optional[TMaybeRef[float]] = None,
-        prefix: Optional[TMaybeRef[str]] = None,
-        suffix: Optional[TMaybeRef[str]] = None,
-        format: Optional[TMaybeRef[str]] = None,
-        on_change: Optional[Callable[..., Any]] = None,
-        validation: Dict[str, Callable[..., bool]] = {},
+        min: TMaybeRef[float] = 0.0,  # pylint: disable=redefined-builtin
+        max: TMaybeRef[float] = 1.0,  # pylint: disable=redefined-builtin
+        size: Optional[TMaybeRef[str]] = "xl",
+        show_value: TMaybeRef[bool] = True,
+        color: Optional[TMaybeRef[str]] = "primary",
     ) -> None:
         pc = ParameterClassifier(
             locals(),
             maybeRefs=[
-                "label",
-                "placeholder",
                 "value",
                 "min",
                 "max",
-                "step",
-                "prefix",
-                "suffix",
-                "format",
-                "validation",
+                "color",
+                "size",
+                "show_value",
             ],
-            v_model=("value", "on_change"),
-            events=["on_change"],
         )
 
         value_kws = pc.get_values_kws()
-
-        element = ui.number(**value_kws)
+        element = ui.circular_progress(**value_kws)
         super().__init__(element)  # type: ignore
 
         for key, value in pc.get_bindings().items():

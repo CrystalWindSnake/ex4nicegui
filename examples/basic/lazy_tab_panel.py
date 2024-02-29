@@ -3,8 +3,6 @@ from nicegui import ui
 from nicegui.elements.tabs import Tab, TabPanel, Tabs
 from nicegui.events import handle_event
 from weakref import WeakValueDictionary
-from nicegui.elements.tabs import Tab, TabPanel, Tabs
-from weakref import WeakValueDictionary
 
 
 class lazy_tab_panels(ui.tab_panels):
