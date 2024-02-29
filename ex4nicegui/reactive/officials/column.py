@@ -1,17 +1,32 @@
 from typing import (
     Any,
 )
+from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.utils.signals import (
+    _TMaybeRef as TMaybeRef,
+)
 from nicegui import ui
 from .base import BindableUi
 
 
 class ColumnBindableUi(BindableUi[ui.column]):
-    def __init__(
-        self,
-    ) -> None:
-        element = ui.column()
+    def __init__(self, *, wrap: TMaybeRef[bool] = True) -> None:
+        pc = ParameterClassifier(locals(), maybeRefs=["wrap"], events=[])
+        element = ui.column(**pc.get_values_kws())
 
         super().__init__(element)
+
+        for key, value in pc.get_bindings().items():
+            self.bind_prop(key, value)  # type: ignore
+
+    def bind_prop(self, prop: str, ref_ui: TMaybeRef):
+        if prop == "wrap":
+            return self.bind_wrap(ref_ui)
+
+        return super().bind_prop(prop, ref_ui)
+
+    def bind_wrap(self, ref_ui: TMaybeRef):
+        self.bind_classes({"wrap": ref_ui})
 
     def __enter__(self):
         self.element.__enter__()
