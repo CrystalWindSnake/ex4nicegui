@@ -31,4 +31,5 @@ with rxui.column().bind_visible(show):
 
     @rxui.vfor(data)
     def _(store: rxui.VforStore):
-        rxui.label(lambda: store.get())
+        item = store.get()
+        rxui.label(lambda: item.value)
