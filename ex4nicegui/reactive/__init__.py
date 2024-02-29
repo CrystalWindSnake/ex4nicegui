@@ -44,6 +44,7 @@ from .officials.number import NumberBindableUi as number
 from .officials.grid import GridBindableUi as grid
 from .officials.expansion import ExpansionBindableUi as expansion
 from .officials.linear_progress import LinearProgressBindableUi as linear_progress
+from .officials.knob import KnobBindableUi as knob
 
 from .q_pagination import PaginationBindableUi as q_pagination
 
@@ -61,6 +62,7 @@ pagination = q_pagination
 
 
 __all__ = [
+    "knob",
     "UploadResult",
     "local_file_picker",
     "use_draggable",
