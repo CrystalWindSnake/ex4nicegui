@@ -1,12 +1,10 @@
 import importlib
 import pytest
 from playwright.sync_api import Playwright
-from starlette.routing import Route
 from .screen import Screen
 from nicegui.page import page as ui_page
-from nicegui import Client, app, binding, core
-
-# from nicegui.elements import plotly, pyplot
+from nicegui import Client, binding, app
+from nicegui.elements import plotly, pyplot
 import os
 
 HEADLESS = "GITHUB_ACTION" in os.environ
@@ -17,26 +15,23 @@ def reset_globals(request: pytest.FixtureRequest):
     if "noautofixt" in request.keywords:
         return
 
-    # for route in app.routes:
-    #     if isinstance(route, Route) and route.path.startswith("/_nicegui/auto/static/"):
-    #         app.remove_route(route.path)
-    # for path in {"/"}.union(Client.page_routes.values()):
-    #     app.remove_route(path)
-    # app.openapi_schema = None
-    # app.middleware_stack = None
-    # app.user_middleware.clear()
-    # # NOTE favicon routes must be removed separately because they are not "pages"
-    # for route in app.routes:
-    #     if isinstance(route, Route) and route.path.endswith("/favicon.ico"):
-    #         app.routes.remove(route)
-    # importlib.reload(core)
-    # Client.instances.clear()
-    # Client.page_routes.clear()
-    # app.reset()
-    # index_client = Client(ui_page("/"), shared=True).__enter__()
-    # app.get("/")(index_client.build_response)
-    # binding.reset()
-    yield
+    for path in {"/"}.union(Client.page_routes.values()):
+        app.remove_route(path)
+    app.openapi_schema = None
+    app.middleware_stack = None
+    app.user_middleware.clear()
+    # NOTE favicon routes must be removed separately because they are not "pages"
+    for route in app.routes:
+        if route.path.endswith("/favicon.ico"):
+            app.routes.remove(route)
+    # importlib.reload(globals)
+    # # repopulate globals.optional_features
+    importlib.reload(plotly)
+    importlib.reload(pyplot)
+    app.storage.clear()
+    index_client = Client(ui_page("/"), shared=True).__enter__()
+    app.get("/")(index_client.build_response)
+    binding.reset()
 
 
 @pytest.fixture(scope="session")
