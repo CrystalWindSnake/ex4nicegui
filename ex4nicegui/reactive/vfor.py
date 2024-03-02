@@ -2,13 +2,18 @@ from __future__ import annotations
 from nicegui.element import Element
 from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
-from ex4nicegui.utils.signals import ReadonlyRef, on, to_ref, to_ref_wrapper
+from ex4nicegui.utils.signals import (
+    TReadonlyRef,
+    on,
+    to_ref,
+    to_ref_wrapper,
+    TGetterOrReadonlyRef,
+)
 from typing import (
     Any,
     Callable,
     Dict,
     List,
-    Mapping,
     Optional,
     TypeVar,
     Generic,
@@ -17,11 +22,11 @@ from typing import (
 )
 from functools import partial
 from dataclasses import dataclass
-from signe.core.reactive import DictProxy as signe_DictProxy
 from signe.core.scope import Scope
+from .utils import get_attribute
 
 _T = TypeVar("_T")
-_T_data = ReadonlyRef[List[Any]]
+_T_data = TGetterOrReadonlyRef[List[Any]]
 
 
 class VforStore(Generic[_T]):
@@ -33,29 +38,17 @@ class VforStore(Generic[_T]):
     def row_index(self):
         return self._data_index
 
-    def get(self, attr: Optional[str] = None) -> _T:
-        item = self._source.value[self._data_index.value]
+    def get(self) -> TReadonlyRef[_T]:
+        def base_setter(value):
+            self._source.value[self._data_index.value] = value
 
-        if attr:
-            setter = None
-            if isinstance(item, signe_DictProxy):
+        wrapper = to_ref_wrapper(
+            lambda: self._source.value[self._data_index.value],
+            base_setter,
+        )
+        wrapper._is_readonly = True
 
-                def base_setter(value):
-                    item[attr] = value
-
-                setter = base_setter
-            else:
-                setter = lambda x: _set_attribute(item, attr, x)  # noqa: E731
-
-            return cast(
-                _T,
-                to_ref_wrapper(
-                    lambda: _get_attribute(item, attr),
-                    setter,
-                ),
-            )
-
-        return item
+        return cast(TReadonlyRef, wrapper)
 
     def update(self, index: int):
         self._data_index.value = index
@@ -73,25 +66,12 @@ class VforContainer(Element, component="vfor.js"):
     pass
 
 
-def _get_attribute(obj: Union[object, Mapping], name: str) -> Any:
-    if isinstance(obj, Mapping):
-        return obj[name]
-    return getattr(obj, name)
-
-
-def _set_attribute(obj: Union[object, Mapping], name: str, value: Any) -> None:
-    if isinstance(obj, dict):
-        obj[name] = value
-    else:
-        setattr(obj, name, value)
-
-
 def _get_key_with_index(idx: int, data: Any):
     return idx
 
 
 def _get_key_with_getter(attr: str, idx: int, data: Any):
-    return _get_attribute(data, attr)
+    return get_attribute(data, attr)
 
 
 class vfor(Generic[_T]):

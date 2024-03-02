@@ -3,6 +3,7 @@ from functools import partial
 import types
 from weakref import WeakValueDictionary
 import signe
+from signe.core.protocols import ComputedResultProtocol
 from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
@@ -20,11 +21,12 @@ from typing import (
 from nicegui import ui
 from .effect import effect
 from .scheduler import get_uiScheduler
+import warnings
 
 T = TypeVar("T")
 
 
-TReadonlyRef = signe.TGetterSignal[T]
+TReadonlyRef = ComputedResultProtocol[T]
 ReadonlyRef = TReadonlyRef[T]
 DescReadonlyRef = TReadonlyRef[T]
 
@@ -36,7 +38,7 @@ def reactive(obj: T) -> T:
 
 
 class RefWrapper(Generic[T]):
-    __slot__ = ("_getter_fn", "_setter_fn")
+    __slot__ = ("_getter_fn", "_setter_fn", "")
 
     def __init__(
         self,
@@ -57,12 +59,17 @@ class RefWrapper(Generic[T]):
             self._getter_fn = lambda: getter_or_ref
             self._setter_fn = lambda x: None
 
+        self._is_readonly = False
+
     @property
     def value(self) -> T:
         return cast(T, self._getter_fn())
 
     @value.setter
     def value(self, new_value: T):
+        if self._is_readonly:
+            warnings.warn("readonly ref cannot be assigned.")
+            return
         return self._setter_fn(new_value)
 
 

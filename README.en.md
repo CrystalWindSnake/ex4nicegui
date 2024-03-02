@@ -369,16 +369,58 @@ ui.button("change b", on_click=change_b)
 
 ---
 
+## functionality
+
+### vmodel
+Create two-way bindings on form input elements or components.
+
+Bidirectional bindings are supported by default for `ref` simple value types
+```python
+from ex4nicegui import rxui, to_ref, deep_ref
+
+data = to_ref("init")
+
+rxui.label(lambda: f"{data.value=!s}")
+# two-way binding 
+rxui.input(value=data)
+```
+- Simple value types are generally immutable values such as `str`, `int`, etc.
+
+When using complex data structures, `deep_ref` is used to keep nested values responsive.
+```python
+data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
+
+rxui.label(lambda: f"{data.value=!s}")
+
+# No binding effect
+rxui.input(value=data.value["a"])
+
+# readonly binding
+rxui.input(value=lambda: data.value["a"])
+
+# two-way binding
+rxui.input(value=rxui.vmodel(data.value["a"]))
+```
+
+- The first input box will be completely unresponsive because the code is equivalent to passing in a value `1` directly
+- The second input box will get read responsiveness due to the use of a function.
+- The third input box, wrapped in `rxui.vmodel`, can be bi-directionally bound.
+
+Most use `vmodel` with `vfor`, see [todo list examples](./examples/todomvc/)
+
+---
+
 ### vfor
 Render list components based on list responsive data. Each component is updated on demand. Data items support dictionaries or objects of any type
 
 ```python
 from nicegui import ui
 from ex4nicegui.reactive import rxui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import deep_ref, ref_computed
+from typing import Dict
 
 # refs
-items = to_ref(
+items = deep_ref(
     [
         {"id": 1, "message": "foo", "done": False},
         {"id": 2, "message": "bar", "done": True},
@@ -394,7 +436,6 @@ def done_count_info():
 def check():
     for item in items.value:
         item["done"] = not item["done"]
-    items.value = items.value
 
 
 # ui
@@ -403,53 +444,32 @@ ui.button("check", on_click=check)
 
 
 @rxui.vfor(items,key='id')
-def _(store: rxui.VforStore):
+def _(store: rxui.VforStore[Dict]):
     # function to build the interface for each row of data
-    msg_ref = store.get("message")  # Get responsive object with `store.get`
+    item = store.get()  # Get responsive object with `store.get`
+    mes = rxui.vmodel(item.value['message'])
 
     # Enter the content of the input box, 
     # you can see the title of the radio box changes synchronously
     with ui.card():
-        rxui.input(value=msg_ref) 
-        rxui.checkbox(text=msg_ref, value=store.get("done"))
+        with ui.row():
+            rxui.input(value=mes)
+            rxui.label(lambda: f"{mes.value=!s}")
+        rxui.checkbox(text=mes, value=rxui.vmodel(item.value['done']))
 
 ```
 
 - `rxui.vfor` decorator to custom function
     - The first argument is passed to the responsive list. Each item in the list can be a dictionary or other object (`dataclasses` etc.)
     - Second parameter `key`: In order to be able to keep track of the identity of each node, and thus reuse and reorder existing elements, you can provide a unique key for the block corresponding to each element. The default(`None`) is to use the list element index.
-- The custom function takes one argument. The current row's attribute can be retrieved via `store.get`, which is a responsive object.
+- The custom function takes one argument. The current row's  can be retrieved via `store.get`, which is a responsive object.
 
 
 > vfor are created only when new data is added.
 
-In the above example, you'll notice that when the checkbox is clicked, the text of the number of completed counts (`done_count_info`) doesn't change synchronously
-
-This is because responsive data changes in the `vfor` function do not affect the data source list. This is a restriction to prevent writing overly complex bi-directional data flow response logic.
-
-We should make changes to the data source list via events in the function
-
-```python
-...
-
-@rxui.vfor(items, key="id")
-def _(store: rxui.VforStore):
-    msg_ref = store.get("message")
-
-    def on_check_change(e):
-        items.value[store.row_index]["done"] = e.value
-        items.value = items.value
-
-    with ui.card():
-        rxui.input(value=msg_ref)
-        rxui.checkbox(text=msg_ref, value=store.get("done"),on_change=on_check_change)
-
-```
 
 ---
 
-
-## functionality
 
 ### Bind class names
 

@@ -1,7 +1,31 @@
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    cast,
+    runtime_checkable,
+    Union,
+)
 
 from ex4nicegui.utils.signals import is_ref, to_value, is_setter_ref
 from nicegui.events import handle_event
+
+
+@runtime_checkable
+class GetItemProtocol(Protocol):
+    def __getitem__(self, key):
+        ...
+
+
+@runtime_checkable
+class SetItemProtocol(Protocol):
+    def __setitem__(self, key, value):
+        ...
 
 
 def _convert_kws_ref2value(kws: Dict) -> Dict:
@@ -74,3 +98,18 @@ class ParameterClassifier:
             for k, v in self._args.items()
             if (k in self.maybeRefs and (is_ref(v) or isinstance(v, Callable)))
         }
+
+
+def get_attribute(obj: Union[object, GetItemProtocol], name: Union[str, int]) -> Any:
+    if isinstance(obj, (GetItemProtocol)):
+        return obj[name]
+    return getattr(obj, name)  # type: ignore
+
+
+def set_attribute(
+    obj: Union[object, SetItemProtocol], name: Union[str, int], value: Any
+) -> None:
+    if isinstance(obj, SetItemProtocol):
+        obj[name] = value
+    else:
+        setattr(obj, name, value)  # type: ignore

@@ -1,4 +1,4 @@
-from typing import Any, List, Protocol
+from typing import List, cast
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
@@ -6,83 +6,45 @@ from ex4nicegui.utils.signals import deep_ref
 from .screen import ScreenPage
 from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
 from playwright.sync_api import expect
-import pytest
 from dataclasses import dataclass
 
 
-@dataclass
-class TodoItem:
-    title: str
-    done: bool
+class TestExample:
+    def test_todos_example(self, page: ScreenPage, page_path: str):
+        @dataclass
+        class TodoItem:
+            title: str
+            done: bool = False
 
-
-class TodoProto(Protocol):
-    def get(self, obj, attr: str) -> Any:
-        ...
-
-    def new(self, title: str, done: bool) -> Any:
-        ...
-
-    def set(self, obj: Any, attr: str, value: Any):
-        ...
-
-
-class DictTodo(TodoProto):
-    def get(self, obj, attr: str) -> Any:
-        return obj[attr]
-
-    def set(self, obj: Any, attr: str, value: Any):
-        obj[attr] = value
-
-    def new(self, title: str, done: bool) -> Any:
-        return {"title": title, "done": done}
-
-
-class DataclassTodo(TodoProto):
-    def get(self, obj, attr: str) -> Any:
-        return getattr(obj, attr)
-
-    def set(self, obj: Any, attr: str, value: Any):
-        setattr(obj, attr, value)
-
-    def new(self, title: str, done: bool) -> Any:
-        return TodoItem(title, done)
-
-
-class TestTodosExample:
-    @pytest.mark.parametrize("todo_proto", [DictTodo(), DataclassTodo()])
-    def test_todos_example(
-        self, page: ScreenPage, page_path: str, todo_proto: TodoProto
-    ):
         @ui.page(page_path)
         def _():
             ui.row.default_classes("flex-center")
 
-            todos = deep_ref([])
+            todos = deep_ref(cast(List[TodoItem], []))
             input = to_ref("")
 
             @ref_computed
             def total_done():
-                return sum(todo_proto.get(todo, "done") for todo in todos.value)
+                return sum(todo.done for todo in todos.value)
 
             @ref_computed
             def totals():
                 return len(todos.value)
 
             def new_todo(text: str):
-                todos.value.append(todo_proto.new(**{"title": text, "done": False}))
+                todos.value.append(TodoItem(text))
 
                 input.value = ""
 
             def del_todo(todo):
                 todos.value.remove(todo)
 
-            def change_done(todo, done: bool):
-                todo_proto.set(todo, "done", done)
+            def change_done(todo: TodoItem, done: bool):
+                todo.done = done
 
             def all_done():
                 for todo in todos.value:
-                    todo_proto.set(todo, "done", True)
+                    todo.done = True
 
             def swap(a: int, b: int):
                 todos.value[a], todos.value[b] = todos.value[b], todos.value[a]
@@ -111,17 +73,18 @@ class TestTodosExample:
             with ui.column().classes("card_zone"):
 
                 @rxui.vfor(todos, key="title")
-                def _(store: rxui.VforStore):
+                def _(store: rxui.VforStore[TodoItem]):
+                    item = store.get()
                     with ui.card().classes("w-full row-card"), ui.row():
-                        rxui.label(store.get("title")).classes("row-title")
+                        rxui.label(lambda: item.value.title).classes("row-title")
                         rxui.checkbox(
                             "done",
-                            value=store.get("done"),
-                            on_change=lambda e: change_done(store.get(), e.value),
+                            value=rxui.vmodel(item.value.done),
+                            on_change=lambda e: change_done(item.value, e.value),
                         )
                         rxui.button(
-                            "del", on_click=lambda: del_todo(store.get())
-                        ).bind_enabled(store.get("done"))
+                            "del", on_click=lambda: del_todo(item.value)
+                        ).bind_enabled(lambda: item.value.done)
 
         page.open(page_path)
 
@@ -203,7 +166,7 @@ class TestTodosExample:
 
 
 class TestBase:
-    def test_two_way_binding(self, page: ScreenPage, page_path: str):
+    def test_two_way_binding_with_dict(self, page: ScreenPage, page_path: str):
         @ui.page(page_path)
         def _():
             # refs
@@ -224,8 +187,12 @@ class TestBase:
 
             @rxui.vfor(items, key="id")
             def _(store: rxui.VforStore):
+                item = store.get()
                 with ui.card().classes("row-card"):
-                    rxui.checkbox(text=store.get("message"), value=store.get("done"))
+                    rxui.checkbox(
+                        text=lambda: item.value["message"],
+                        value=rxui.vmodel(item, "done"),
+                    )
 
         page.open(page_path)
 
@@ -243,7 +210,57 @@ class TestBase:
 
         label_totals.expect_contain_text("2")
 
-    def test_(self, page: ScreenPage, page_path: str):
+    def test_two_way_binding_with_dataclass(self, page: ScreenPage, page_path: str):
+        @dataclass
+        class Item:
+            id: int
+            message: str
+            done: bool
+
+        @ui.page(page_path)
+        def _():
+            # refs
+            items = deep_ref(
+                [
+                    Item(**{"id": 1, "message": "foo", "done": False}),
+                    Item(**{"id": 2, "message": "bar", "done": True}),
+                ]
+            )
+
+            # ref_computeds
+            @ref_computed
+            def total_count():
+                return sum(item.done for item in items.value)
+
+            # ui
+            set_test_id(rxui.label(total_count), "label totals")
+
+            @rxui.vfor(items, key="id")
+            def _(store: rxui.VforStore[Item]):
+                item = store.get()
+                with ui.card().classes("row-card"):
+                    rxui.checkbox(
+                        text=lambda: item.value.message,
+                        value=rxui.vmodel(item.value.done),
+                    )
+
+        page.open(page_path)
+
+        label_totals = LabelUtils(page, "label totals")
+
+        locator_row_cards = page._page.locator(".row-card")
+        locator_row_checkboxs = locator_row_cards.get_by_role("checkbox")
+
+        def get_checkbox(index: int):
+            return locator_row_checkboxs.all()[index]
+
+        label_totals.expect_contain_text("1")
+
+        get_checkbox(0).click()
+
+        label_totals.expect_contain_text("2")
+
+    def test_shallow_ref(self, page: ScreenPage, page_path: str):
         text = to_ref("abcd")
 
         @ui.page(page_path)
@@ -251,8 +268,8 @@ class TestBase:
             with ui.row():
 
                 @rxui.vfor(text)  # type: ignore
-                def _(store: rxui.VforStore):
-                    rxui.label(lambda: store.get())
+                def _(store: rxui.VforStore[str]):
+                    rxui.label(store.get())
 
         page.open(page_path)
 
@@ -260,3 +277,64 @@ class TestBase:
 
         text.value = "abc"
         page.should_contain("abc")
+
+    def test_deep_ref(self, page: ScreenPage, page_path: str):
+        data = deep_ref([1, 2, 3, 4])
+
+        @ui.page(page_path)
+        def _():
+            with ui.column() as for_box:
+
+                @rxui.vfor(data)
+                def _(store: rxui.VforStore[int]):
+                    item = store.get()
+                    row_num = store.row_index.value + 1
+
+                    with ui.row().classes("flex-center"):
+                        label = rxui.label(item)
+                        input = rxui.input(value=rxui.vmodel(item))
+
+                        set_test_id(label, f"vfor-label-{row_num}")
+                        set_test_id(input, f"vfor-input-{row_num}")
+
+            set_test_id(for_box, "for_box")
+
+            set_test_id(rxui.label(data), "list-label")
+
+            set_test_id(rxui.input(value=rxui.vmodel(data, 0)), "input1")
+
+            def onclick():
+                data.value[0] = 66
+
+            set_test_id(ui.button("change", on_click=onclick), "btn")
+
+        page.open(page_path)
+
+        list_label = LabelUtils(page, "list-label")
+        input_for_1 = InputUtils(page, "input1")
+        change_btn = ButtonUtils(page, "btn")
+
+        vfor_label1 = LabelUtils(page, "vfor-label-1")
+        vfor_input1 = InputUtils(page, "vfor-input-1")
+
+        list_label.expect_contain_text("[1, 2, 3, 4]")
+
+        vfor_input1.fill_text("x1")
+        vfor_label1.expect_contain_text("x1")
+        input_for_1.expect_to_have_text("x1")
+        list_label.expect_contain_text("['x1', 2, 3, 4]")
+
+        #
+        input_for_1.fill_text("z20")
+
+        vfor_label1.expect_contain_text("z20")
+        vfor_input1.expect_to_have_text("z20")
+        list_label.expect_contain_text("['z20', 2, 3, 4]")
+
+        #
+        change_btn.click()
+
+        input_for_1.expect_to_have_text("66")
+        vfor_label1.expect_contain_text("66")
+        vfor_input1.expect_to_have_text("66")
+        list_label.expect_contain_text("[66, 2, 3, 4]")
