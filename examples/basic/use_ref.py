@@ -19,7 +19,7 @@ with ui.row():
 
 # must be a function to be triggered
 rxui.label(lambda: f"{len(data.value)=}")
-rxui.label(lambda: f"{show.value=}")
+rxui.label(lambda: f"{show.value=!s}")
 
 # show is a ref, it can be triggered by passing it directly.
 rxui.label(show)
