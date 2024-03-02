@@ -4,6 +4,11 @@ from io import BytesIO
 from ex4nicegui.utils.signals import (
     RefWrapper,
     TRef,
+    to_raw,
+    is_setter_ref,
+    to_ref_wrapper,
+    to_value,
+    is_reactive,
     is_setter_ref,
     to_ref_wrapper,
     to_value,
@@ -22,6 +27,7 @@ from types import FrameType
 import tokenize
 import executing
 import ast
+import warnings
 from .utils import get_attribute, set_attribute
 
 _T = TypeVar("_T")
@@ -83,16 +89,34 @@ def parse_code(code: str) -> CodeInfo:
     return CodeInfo(model, is_ref, keys)
 
 
-def create_writeable_wrapper(ref, attrs: Tuple[Union[str, int], ...]):
+def create_writeable_wrapper(expr, ref_data, attrs: Tuple[Union[str, int], ...]):
+    if not attrs:
+
+        def maybe_ref_getter():
+            return to_value(expr)
+
+        def reactive_getter():
+            return to_raw(expr)
+
+        def setter(value):
+            pass
+
+        wrapper = to_ref_wrapper(
+            reactive_getter if is_reactive(expr) else maybe_ref_getter,
+            setter,
+        )
+        wrapper._is_readonly = False
+        return wrapper
+
     def getter():
-        obj = get_attribute(to_value(ref), attrs[0])
+        obj = get_attribute(to_value(ref_data), attrs[0])
         for attr in attrs[1:]:
             obj = get_attribute(obj, attr)
 
         return obj
 
     def setter(value):
-        obj = to_value(ref)
+        obj = to_value(ref_data)
 
         for attr in attrs[:-1]:
             obj = get_attribute(obj, attr)
@@ -107,14 +131,14 @@ def create_writeable_wrapper(ref, attrs: Tuple[Union[str, int], ...]):
     return wrapper
 
 
-def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
+def vmodel(expr: Any, *attrs: Union[str, int]) -> TRef[Any]:
     """Create a two-way binding on a form input element or a component.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#vmodel
     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#vmodel
 
     Args:
-        ref (Any): _description_
+        expr (Any): _description_
 
     ## Examples
     ```python
@@ -137,14 +161,14 @@ def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
 
     """
 
-    assert not isinstance(ref, Callable), "Functions cannot be passed as arguments ref"
+    assert not isinstance(expr, Callable), "argument expr cannot be a function"
 
-    if isinstance(ref, RefWrapper):
-        ref._is_readonly = False
+    if isinstance(expr, RefWrapper):
+        expr._is_readonly = False
 
-    if is_setter_ref(ref):
+    if is_setter_ref(expr):
         if attrs:
-            wrapper = create_writeable_wrapper(ref, attrs)
+            wrapper = create_writeable_wrapper(expr, expr, attrs)
 
             return cast(
                 TRef,
@@ -153,7 +177,7 @@ def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
 
         return cast(
             TRef,
-            ref,
+            expr,
         )
 
     caller = get_caller()
@@ -162,8 +186,23 @@ def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
     info = parse_code(code)
     ref_data = caller.f_locals.get(info.model) or caller.f_globals.get(info.model)
     assert ref_data is not None, f"{info.model} not found"
+    all_attrs = (*info.keys, *attrs)
 
-    wrapper = create_writeable_wrapper(ref_data, (*info.keys, *attrs))
+    if not all_attrs:
+        warn_mes = ""
+        if is_reactive(expr) or is_setter_ref(expr):
+            warn_mes = rf"""Expression missing the key,result is read-only binding.Maybe you meant `{code}['key']`"""
+        elif not info.is_ref:
+            warn_mes = """Maybe you don't need to use vmodel"""
+        else:
+            warn_mes = rf"""No binding.Maybe you meant `{info.model}`"""
+
+        warnings.warn(
+            warn_mes,
+            stacklevel=2,
+        )
+
+    wrapper = create_writeable_wrapper(expr, ref_data, all_attrs)
 
     return cast(
         TRef,

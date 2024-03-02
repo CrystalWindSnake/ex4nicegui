@@ -17,10 +17,12 @@ from ex4nicegui.utils.signals import (
     deep_ref,
     is_setter_ref,
     batch,
+    is_reactive,
 )
 
 
 __all__ = [
+    "is_reactive",
     "rxui",
     "ref_computed",
     "effect",
