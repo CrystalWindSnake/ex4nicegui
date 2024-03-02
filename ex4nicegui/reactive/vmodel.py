@@ -6,7 +6,6 @@ from ex4nicegui.utils.signals import (
     TRef,
     is_setter_ref,
     to_ref_wrapper,
-    TGetterOrReadonlyRef,
     to_value,
 )
 from typing import (

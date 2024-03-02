@@ -23,7 +23,7 @@ from typing import (
 from functools import partial
 from dataclasses import dataclass
 from signe.core.scope import Scope
-from .utils import GetItemProtocol, SetItemProtocol
+from .utils import get_attribute
 
 _T = TypeVar("_T")
 _T_data = TGetterOrReadonlyRef[List[Any]]
@@ -66,27 +66,12 @@ class VforContainer(Element, component="vfor.js"):
     pass
 
 
-def _get_attribute(obj: Union[object, GetItemProtocol], name: Union[str, int]) -> Any:
-    if isinstance(obj, (GetItemProtocol)):
-        return obj[name]
-    return getattr(obj, name)  # type: ignore
-
-
-def _set_attribute(
-    obj: Union[object, SetItemProtocol], name: Union[str, int], value: Any
-) -> None:
-    if isinstance(obj, SetItemProtocol):
-        obj[name] = value
-    else:
-        setattr(obj, name, value)  # type: ignore
-
-
 def _get_key_with_index(idx: int, data: Any):
     return idx
 
 
 def _get_key_with_getter(attr: str, idx: int, data: Any):
-    return _get_attribute(data, attr)
+    return get_attribute(data, attr)
 
 
 class vfor(Generic[_T]):
