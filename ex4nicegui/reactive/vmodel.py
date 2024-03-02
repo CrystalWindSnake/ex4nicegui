@@ -108,7 +108,7 @@ def create_writeable_wrapper(ref, attrs: Tuple[Union[str, int], ...]):
     return wrapper
 
 
-def vmodel(ref: TGetterOrReadonlyRef[_T], *attrs: Union[str, int]) -> TRef[Any]:
+def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
     assert not isinstance(ref, Callable), "Functions cannot be passed as arguments ref"
 
     if isinstance(ref, RefWrapper):
