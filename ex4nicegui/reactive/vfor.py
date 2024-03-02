@@ -3,9 +3,7 @@ from nicegui.element import Element
 from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
-    RefWrapper,
     TReadonlyRef,
-    TRef,
     on,
     to_ref,
     to_ref_wrapper,
@@ -17,32 +15,18 @@ from typing import (
     Dict,
     List,
     Optional,
-    Protocol,
     TypeVar,
     Generic,
     Union,
     cast,
-    runtime_checkable,
 )
 from functools import partial
 from dataclasses import dataclass
-from signe.core.reactive import DictProxy as signe_DictProxy
 from signe.core.scope import Scope
+from .utils import GetItemProtocol, SetItemProtocol
 
 _T = TypeVar("_T")
 _T_data = TGetterOrReadonlyRef[List[Any]]
-
-
-@runtime_checkable
-class GetItemProtocol(Protocol):
-    def __getitem__(self, key):
-        ...
-
-
-@runtime_checkable
-class SetItemProtocol(Protocol):
-    def __setitem__(self, key, value):
-        ...
 
 
 class VforStore(Generic[_T]):
@@ -76,43 +60,6 @@ class StoreItem:
     store: VforStore
     elementId: int
     scope: Scope
-
-
-def vmodel(ref: TGetterOrReadonlyRef[_T], *attrs: Union[str, int]) -> TRef[Any]:
-    if isinstance(ref, RefWrapper):
-        ref._is_readonly = False
-    if not attrs:
-        return cast(TRef, ref)
-
-    def get_obj():
-        if len(attrs) == 1:
-            return ref.value, attrs[0]
-
-        # gt 1
-        obj = _get_attribute(ref.value, attrs[0])
-        for attr in attrs[1:-1]:
-            obj = _get_attribute(obj, attr)
-
-        return obj, attrs[-1]
-
-    def setter(value):
-        obj, attr = get_obj()
-        _set_attribute(obj, attr, value)
-
-    def getter():
-        obj, attr = get_obj()
-        return _get_attribute(obj, attr)
-
-    wrapper = to_ref_wrapper(
-        getter,
-        setter,
-    )
-    wrapper._is_readonly = False
-
-    return cast(
-        TRef,
-        wrapper,
-    )
 
 
 class VforContainer(Element, component="vfor.js"):
