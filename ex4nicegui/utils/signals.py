@@ -33,6 +33,9 @@ DescReadonlyRef = TReadonlyRef[T]
 TGetterOrReadonlyRef = signe.TGetter[T]
 
 
+is_reactive = signe.is_reactive
+
+
 def reactive(obj: T) -> T:
     return signe.reactive(obj, get_uiScheduler())
 

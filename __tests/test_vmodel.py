@@ -1,12 +1,10 @@
-from typing import List, cast
+import warnings
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import to_ref
 from ex4nicegui.utils.signals import deep_ref
 from .screen import ScreenPage
-from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
-from playwright.sync_api import expect
-from dataclasses import dataclass
+from .utils import InputUtils, LabelUtils, set_test_id
 
 
 def test_should_dict_sync(page: ScreenPage, page_path: str):
@@ -92,3 +90,21 @@ def test_should_sync_reactive_object_var(page: ScreenPage, page_path: str):
     input.fill_text("99")
 
     label.expect_to_have_text("{'a': '99'}")
+
+
+def test_should_warning_when_no_key_expr(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        data = deep_ref(1)
+        item = data.value
+
+        with warnings.catch_warnings(record=True) as w:
+            set_test_id(rxui.input(value=rxui.vmodel(item)), "input")
+
+            assert len(w) == 1
+
+    page.open(page_path)
+
+    input = InputUtils(page, "input")
+
+    input.expect_to_have_text("1")
