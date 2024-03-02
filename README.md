@@ -463,7 +463,9 @@ def _(store: rxui.VforStore[Dict]):
 
     # 输入框输入内容，可以看到单选框的标题同步变化
     with ui.card():
-        rxui.input(value=mes) 
+        with ui.row():
+            rxui.input(value=mes)
+            rxui.label(lambda: f"{mes.value=!s}")
         rxui.checkbox(text=mes, value=rxui.vmodel(item.value['done']))
 
 ```

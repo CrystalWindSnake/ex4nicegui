@@ -452,7 +452,9 @@ def _(store: rxui.VforStore[Dict]):
     # Enter the content of the input box, 
     # you can see the title of the radio box changes synchronously
     with ui.card():
-        rxui.input(value=mes) 
+        with ui.row():
+            rxui.input(value=mes)
+            rxui.label(lambda: f"{mes.value=!s}")
         rxui.checkbox(text=mes, value=rxui.vmodel(item.value['done']))
 
 ```
