@@ -119,7 +119,7 @@ class TestTodosExample:
                         )
                         rxui.checkbox(
                             "done",
-                            value=rxui.vmodel(item, "done"),
+                            value=rxui.vmodel(item.value.done),
                             on_change=lambda e: change_done(item.value, e.value),
                         )
                         rxui.button(

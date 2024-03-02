@@ -115,7 +115,18 @@ def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
         ref._is_readonly = False
 
     if is_setter_ref(ref):
-        return cast(TRef, ref)
+        if attrs:
+            wrapper = create_writeable_wrapper(ref, attrs)
+
+            return cast(
+                TRef,
+                wrapper,
+            )
+
+        return cast(
+            TRef,
+            ref,
+        )
 
     caller = get_caller()
     code = get_args_code(caller)
