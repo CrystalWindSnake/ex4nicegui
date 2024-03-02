@@ -87,7 +87,7 @@ def todo_list_panel():
                 todo = store.get()
 
                 rxui.checkbox(
-                    lambda: todo.value.title, value=rxui.vmodel(todo, "completed")
+                    lambda: todo.value.title, value=rxui.vmodel(todo.value.completed)
                 )
 
                 with ui.element("q-chip").classes("w-fit place-self-center").props(
