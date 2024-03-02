@@ -383,16 +383,56 @@ ui.button("change b", on_click=change_b)
 
 ## 组件功能
 
+### vmodel
+在表单输入元素或组件上创建双向绑定。
+
+简单值类型的 `ref` 默认支持双向绑定
+```python
+from ex4nicegui import rxui, to_ref, deep_ref
+
+data = to_ref("init")
+
+rxui.label(lambda: f"{data.value=!s}")
+# two-way binding 
+rxui.input(value=data)
+```
+
+- 简单值类型一般是 `str`,`int` 等不可变值类型
+
+当使用复杂数据结构时，会使用 `deep_ref` 保持嵌套值的响应性
+```python
+data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
+
+rxui.label(lambda: f"{data.value=!s}")
+
+# No binding effect
+rxui.input(value=data.value["a"])
+
+# readonly binding
+rxui.input(value=lambda: data.value["a"])
+
+# two-way binding
+rxui.input(value=rxui.vmodel(data.value["a"]))
+```
+
+- 第一个输入框将完全失去响应性，因为代码等价于直接传入一个数值`1`
+- 第二个输入框由于使用函数，将得到读取响应性(第三个输入框输入值，将得到同步)
+- 第三个输入框，使用 `rxui.vmodel` 包裹，即可实现双向绑定
+
+多数在配合 `vfor` 时使用 `vmodel`,可参考 [todo list 案例](./examples/todomvc/)
+
+
 ### vfor
 基于列表响应式数据，渲染列表组件。每项组件按需更新。数据项支持字典或任意类型对象
 
 ```python
 from nicegui import ui
 from ex4nicegui.reactive import rxui
-from ex4nicegui import to_ref, ref_computed
+from ex4nicegui import deep_ref, ref_computed
+from typing import Dict
 
 # refs
-items = to_ref(
+items = deep_ref(
     [
         {"id": 1, "message": "foo", "done": False},
         {"id": 2, "message": "bar", "done": True},
@@ -415,47 +455,26 @@ def check():
 rxui.label(done_count_info)
 ui.button("check", on_click=check)
 
-@rxui.vfor(items, key="id")
-def _(store: rxui.VforStore):
+
+@rxui.vfor(items,key='id')
+def _(store: rxui.VforStore[Dict]):
     # 函数中构建每一行数据的界面
-    msg_ref = store.get("message")  # 通过 store.get 获取对应行的属性响应式对象
+    item = store.get()  # 通过 store.get 获取对应行的响应式对象(相当于每行的数据 to_ref(...))
+    mes = rxui.vmodel(item.value['message']) # 复杂结构默认没有双向绑定，需要使用 `vmodel`
 
     # 输入框输入内容，可以看到单选框的标题同步变化
     with ui.card():
-        rxui.input(value=msg_ref)
-        rxui.checkbox(text=msg_ref, value=store.get("done"))
+        rxui.input(value=mes) 
+        rxui.checkbox(text=mes, value=rxui.vmodel(item.value['done']))
 
 ```
 
 - `rxui.vfor` 装饰器到自定义函数
     - 第一个参数传入响应式列表。列表中每一项可以是字典或其他对象(`dataclasses` 等等)
     - 第二个参数 `key`: 为了可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你可以为每个元素对应的块提供一个唯一的 key 。默认情况使用列表元素索引。
-- 自定义函数带有一个参数。通过 `store.get` 可以获取当前行对应的属性，此为响应式对象
+- 自定义函数带有一个参数。通过 `store.get` 可以获取当前行的响应式对象
 
 > vfor 渲染的项目，只有在新增数据时，才会创建
-
-上述的例子中，你会发现，当点击 checkbox 时，完成数量的文本(`done_count_info`)并没有同步变化
-
-因为 `vfor` 函数中对响应式数据修改，不会影响数据源列表。这是为了防止写出过于复杂的双向数据流响应逻辑而限制。
-
-我们应该在函数中通过事件，对数据源列表做修改
-
-```python
-...
-
-@rxui.vfor(items, key="id")
-def _(store: rxui.VforStore):
-    msg_ref = store.get("message")
-
-    def on_check_change(e):
-        items.value[store.row_index]["done"] = e.value
-        items.value = items.value
-
-    with ui.card():
-        rxui.input(value=msg_ref)
-        rxui.checkbox(text=msg_ref, value=store.get("done"),on_change=on_check_change)
-
-```
 
 
 ---
