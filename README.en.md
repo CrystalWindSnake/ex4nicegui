@@ -436,7 +436,6 @@ def done_count_info():
 def check():
     for item in items.value:
         item["done"] = not item["done"]
-    items.value = items.value
 
 
 # ui
