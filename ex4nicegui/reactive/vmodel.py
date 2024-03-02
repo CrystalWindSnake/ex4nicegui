@@ -109,6 +109,35 @@ def create_writeable_wrapper(ref, attrs: Tuple[Union[str, int], ...]):
 
 
 def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
+    """Create a two-way binding on a form input element or a component.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#vmodel
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#vmodel
+
+    Args:
+        ref (Any): _description_
+
+    ## Examples
+    ```python
+    from ex4nicegui.reactive import rxui
+    from ex4nicegui import deep_ref
+
+    data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
+
+    rxui.label(lambda: f"{data.value=!s}")
+
+    # No binding effect
+    rxui.input(value=data.value["a"])
+
+    # readonly binding
+    rxui.input(value=lambda: data.value["a"])
+
+    # two-way binding
+    rxui.input(value=rxui.vmodel(data.value["a"]))
+    ```
+
+    """
+
     assert not isinstance(ref, Callable), "Functions cannot be passed as arguments ref"
 
     if isinstance(ref, RefWrapper):
@@ -136,55 +165,6 @@ def vmodel(ref: Any, *attrs: Union[str, int]) -> TRef[Any]:
     assert ref_data is not None, f"{info.model} not found"
 
     wrapper = create_writeable_wrapper(ref_data, (*info.keys, *attrs))
-
-    return cast(
-        TRef,
-        wrapper,
-    )
-
-
-def vmodel_attrs(ref: TGetterOrReadonlyRef[_T], *attrs: Union[str, int]) -> TRef[Any]:
-    assert not isinstance(ref, Callable), "Functions cannot be passed as arguments ref"
-    assert attrs, ""
-
-    if isinstance(ref, RefWrapper):
-        ref._is_readonly = False
-    # if not attrs:
-    #     if is_setter_ref(ref):
-    #         return cast(TRef, ref)
-
-    #     caller = get_caller()
-    #     code = get_args_code(caller)
-
-    #     info = parse_code(code)
-    #     ref_data = caller.f_locals.get(info.model) or caller.f_globals.get(info.model)
-    #     assert ref_data is not None, f"{info.model} not found"
-
-    #     vmodel(ref_data, *info.keys)
-
-    #     wrapper._is_readonly = False
-    #     return cast(TRef, wrapper)
-
-    def getter():
-        obj = get_attribute(to_value(ref), attrs[0])
-        for attr in attrs[1:]:
-            obj = get_attribute(obj, attr)
-
-        return obj
-
-    def setter(value):
-        obj = to_value(ref)
-
-        for attr in attrs[:-1]:
-            obj = get_attribute(obj, attr)
-
-        set_attribute(obj, attrs[-1], value)
-
-    wrapper = to_ref_wrapper(
-        getter,
-        setter,
-    )
-    wrapper._is_readonly = False
 
     return cast(
         TRef,
