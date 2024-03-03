@@ -380,7 +380,7 @@ from ex4nicegui import rxui, to_ref, deep_ref
 
 data = to_ref("init")
 
-rxui.label(lambda: f"{data.value=!s}")
+rxui.label(lambda: f"{data.value=}")
 # two-way binding 
 rxui.input(value=data)
 ```

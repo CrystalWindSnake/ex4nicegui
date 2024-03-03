@@ -392,8 +392,8 @@ from ex4nicegui import rxui, to_ref, deep_ref
 
 data = to_ref("init")
 
-rxui.label(lambda: f"{data.value=!s}")
-# two-way binding 
+rxui.label(lambda: f"{data.value=}")
+# 默认就是双向绑定
 rxui.input(value=data)
 ```
 
@@ -405,13 +405,13 @@ data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
 
 rxui.label(lambda: f"{data.value=!s}")
 
-# No binding effect
+# 当前版本没有任何绑定效果.或许未来的版本可以解决
 rxui.input(value=data.value["a"])
 
-# readonly binding
+# 只读绑定.其他途径修改了 `data.value["a"]` ，此输入框会同步，但反过来不行
 rxui.input(value=lambda: data.value["a"])
 
-# two-way binding
+# 要使用 vmodel 才能双向绑定
 rxui.input(value=rxui.vmodel(data.value["a"]))
 ```
 

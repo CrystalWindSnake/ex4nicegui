@@ -19,7 +19,7 @@ with ui.row():
 
 # must be a function to be triggered
 rxui.label(lambda: f"{len(data.value)=}")
-rxui.label(lambda: f"{show.value=}")
+rxui.label(lambda: f"{show.value=!s}")
 
 # show is a ref, it can be triggered by passing it directly.
 rxui.label(show)
@@ -30,6 +30,6 @@ rxui.label(str(show.value))
 with rxui.column().bind_visible(show):
 
     @rxui.vfor(data)
-    def _(store: rxui.VforStore):
+    def _(store: rxui.VforStore[int]):
         item = store.get()
-        rxui.label(lambda: item.value)
+        rxui.label(item)
