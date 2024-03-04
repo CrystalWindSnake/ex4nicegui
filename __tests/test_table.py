@@ -1,25 +1,66 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, effect
+from ex4nicegui import to_ref, effect, deep_ref
 from .screen import ScreenPage
 import pandas as pd
-from .utils import TableUtils, set_test_id
+from .utils import TableUtils, set_test_id, InputUtils, ButtonUtils
 
 
-def test_const_value(page: ScreenPage, page_path: str):
+def test_base(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        data = pd.DataFrame({"name": ["a", "b", "c"], "age": [1, 2, 3]})
-        set_test_id(rxui.table.from_pandas(data), "target")
+        columns = deep_ref(
+            [
+                {
+                    "name": "a",
+                    "label": "a",
+                    "field": "a",
+                },
+                {"name": "b", "label": "b", "field": "b"},
+            ]
+        )
+        rows = deep_ref(
+            [
+                {"a": "n1", "b": 18},
+                {"a": "n2", "b": 21},
+            ]
+        )
+        set_test_id(rxui.table(columns, rows), "table")
+        set_test_id(rxui.input(value=rxui.vmodel(rows.value[1]["a"])), "input_row2")
+        set_test_id(
+            rxui.input(value=rxui.vmodel(columns.value[0]["label"])), "col1_label"
+        )
+
+        def onclick():
+            rows.value.append(
+                {"a": "n3"},
+            )
+
+        set_test_id(ui.button("change", on_click=onclick), "btn")
 
     page.open(page_path)
 
-    target = TableUtils(page, "target")
+    table = TableUtils(page, "table")
+    input_row2 = InputUtils(page, "input_row2")
+    col1_label = InputUtils(page, "col1_label")
+    btn = ButtonUtils(page, "btn")
 
-    target.expect_cell_to_be_visible(["name", "a", "b", "c"])
+    table.expect_cell_to_be_visible(["a", "n1", "n2", "b", "18", "21"])
+
+    input_row2.fill_text("new value")
+
+    table.expect_cell_to_be_visible(["a", "n1", "new value", "b", "18", "21"])
+
+    btn.click()
+    table.expect_cell_to_be_visible(["a", "n1", "new value", "n3", "b", "18", "21"])
+
+    col1_label.fill_text("new_col")
+    table.expect_cell_to_be_visible(
+        ["new_col", "n1", "new value", "n3", "b", "18", "21"]
+    )
 
 
-def test_ref_value(page: ScreenPage, page_path: str):
+def test_from_pandas(page: ScreenPage, page_path: str):
     data = to_ref(pd.DataFrame({"name": ["a", "b", "c"], "age": [1, 2, 3]}))
 
     @ui.page(page_path)

@@ -16,6 +16,8 @@ from ex4nicegui.utils.signals import (
     to_ref,
     _TMaybeRef as TMaybeRef,
     to_value,
+    to_raw,
+    on,
 )
 from nicegui import ui
 from .base import BindableUi
@@ -164,19 +166,19 @@ class TableBindableUi(BindableUi[ui.table]):
         return self
 
     def bind_rows(self, ref_ui: ReadonlyRef[List[Dict]]):
-        @ui_effect
+        @on(ref_ui, deep=True)
         def _():
             ele = self.element
-            ele._props["rows"] = to_value(ref_ui)
+            ele._props["rows"] = list(to_raw(to_value(ref_ui)))
             ele.update()
 
         return self
 
     def bind_columns(self, ref_ui: ReadonlyRef[List[Dict]]):
-        @ui_effect
+        @on(ref_ui, deep=True)
         def _():
             ele = self.element
-            ele._props["columns"] = to_value(ref_ui)
+            ele._props["columns"] = list(to_raw(to_value(ref_ui)))
             ele.update()
 
         return self
