@@ -27,6 +27,9 @@ def test_base(page: ScreenPage, page_path: str):
         )
         set_test_id(rxui.table(columns, rows), "table")
         set_test_id(rxui.input(value=rxui.vmodel(rows.value[1]["a"])), "input_row2")
+        set_test_id(
+            rxui.input(value=rxui.vmodel(columns.value[0]["label"])), "col1_label"
+        )
 
         def onclick():
             rows.value.append(
@@ -39,6 +42,7 @@ def test_base(page: ScreenPage, page_path: str):
 
     table = TableUtils(page, "table")
     input_row2 = InputUtils(page, "input_row2")
+    col1_label = InputUtils(page, "col1_label")
     btn = ButtonUtils(page, "btn")
 
     table.expect_cell_to_be_visible(["a", "n1", "n2", "b", "18", "21"])
@@ -49,6 +53,11 @@ def test_base(page: ScreenPage, page_path: str):
 
     btn.click()
     table.expect_cell_to_be_visible(["a", "n1", "new value", "n3", "b", "18", "21"])
+
+    col1_label.fill_text("new_col")
+    table.expect_cell_to_be_visible(
+        ["new_col", "n1", "new value", "n3", "b", "18", "21"]
+    )
 
 
 def test_from_pandas(page: ScreenPage, page_path: str):
