@@ -1,4 +1,4 @@
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Union
 from typing_extensions import Literal
 from nicegui import ui, Tailwind
 from pathlib import Path
@@ -34,7 +34,7 @@ class LocalFilePickerResult:
 
 def local_file_picker(
     title: Optional[str] = None,
-    dir: Optional[str] = None,
+    dir: Optional[Union[str, Path]] = None,
     mode: SelectMode = "file",
     ext: Optional[List[str]] = None,
 ):
