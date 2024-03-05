@@ -1,10 +1,16 @@
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Union
 from typing_extensions import Literal
-from signe import signal, effect, computed
 from nicegui import ui, Tailwind
 from pathlib import Path
 
-from ex4nicegui.utils.signals import Ref, effect_refreshable, ReadonlyRef
+from ex4nicegui.utils.signals import (
+    Ref,
+    effect_refreshable,
+    ReadonlyRef,
+    effect,
+    ref_computed as computed,
+    to_ref,
+)
 
 
 SelectMode = Literal["dir", "file"]
@@ -28,7 +34,7 @@ class LocalFilePickerResult:
 
 def local_file_picker(
     title: Optional[str] = None,
-    dir: Optional[str] = None,
+    dir: Optional[Union[str, Path]] = None,
     mode: SelectMode = "file",
     ext: Optional[List[str]] = None,
 ):
@@ -60,14 +66,14 @@ def local_file_picker(
     dir_path = Path(dir).absolute() if dir else Path("./").absolute()
 
     # 当前所在目录
-    cur_dir = signal(dir_path)
+    cur_dir = to_ref(dir_path)
     cur_name = computed(lambda: str(cur_dir.value.absolute()))
 
     # 选中的路径
-    selected = signal("")
+    selected = to_ref("")
 
     # 返回外部的结果路径
-    result = signal("")
+    result = to_ref("")
 
     no_ex_filter = ext is None
     ext_set = set(ext or [])
