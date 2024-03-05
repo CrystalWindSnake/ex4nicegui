@@ -96,7 +96,7 @@ def is_setter_ref(obj):
 
 
 def is_ref(obj):
-    return signe.is_signal(obj) or isinstance(obj, RefWrapper)
+    return signe.is_signal(obj) or isinstance(obj, (RefWrapper))
 
 
 def to_value(obj: _TMaybeRef[T]) -> T:

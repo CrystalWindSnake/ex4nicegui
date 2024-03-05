@@ -19,9 +19,11 @@ from ex4nicegui.utils.signals import (
     batch,
     is_reactive,
 )
+from ex4nicegui.utils.asyncComputed import async_computed
 
 
 __all__ = [
+    "async_computed",
     "is_reactive",
     "rxui",
     "ref_computed",
