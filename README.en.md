@@ -318,6 +318,40 @@ rxui.label(state.post_text)
 
 ---
 
+### `async_computed`
+Use `async_computed` when asynchronous functions are required for computed.
+
+```python
+
+# Simulate asynchronous functions that take a long time to execute
+async def long_time_query(input: str):
+    await asyncio.sleep(2)
+    num = random.randint(20, 100)
+    return f"query result[{input=}]:{num=}"
+
+
+search = to_ref("")
+evaluating = to_ref(False)
+
+@async_computed(search, evaluating=evaluating, init="")
+async def search_result():
+    return await long_time_query(search.value)
+
+rxui.lazy_input(value=search)
+
+rxui.label(
+    lambda: "Query in progress" if evaluating.value else "Enter content in input box above and return to search"
+)
+rxui.label(search_result)
+
+```
+
+- The first argument to `async_computed` must explicitly specify the responsive data to be monitored. Multiple responses can be specified using a list.
+- Parameter `evaluating` is responsive data of type bool, which is `True` while the asynchronous function is executing, and `False` after the computation is finished.
+- Parameter `init` specifies the initial result
+
+---
+
 ### `on`
 Similar to `effect`, but `on` needs to explicitly specify the responsive object to monitor.
 

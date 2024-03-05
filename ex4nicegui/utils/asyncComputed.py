@@ -24,6 +24,18 @@ def async_computed(
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
 ):
+    """Create an asynchronous computed dependency.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#async_computed
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#async_computed
+
+
+    Args:
+        refs (Union[TGetterOrReadonlyRef, Sequence[TGetterOrReadonlyRef]]): _description_
+        init (Optional[_T], optional): The initial state, used until the first evaluation finishes. Defaults to None.
+        evaluating (Optional[TRef[bool]], optional): Ref passed to receive the updated of async evaluation. Defaults to None.
+
+    """
     return signe.async_computed(
         refs,
         init=init,

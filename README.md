@@ -180,9 +180,10 @@ from ex4nicegui import (
     batch,
     event_batch,
     deep_ref,
+    async_computed
 )
 ```
-常用 `to_ref`,`deep_ref`,`effect`,`ref_computed`,`on`
+常用 `to_ref`,`deep_ref`,`effect`,`ref_computed`,`on`,`async_computed`
 
 ---
 
@@ -324,6 +325,39 @@ state = MyState()
 rxui.input(value=state.r_text)
 rxui.label(state.post_text)
 ```
+
+---
+
+### `async_computed`
+二次计算中需要使用异步函数时，使用 `async_computed`
+```python
+
+# 模拟长时间执行的异步函数
+async def long_time_query(input: str):
+    await asyncio.sleep(2)
+    num = random.randint(20, 100)
+    return f"query result[{input=}]:{num=}"
+
+
+search = to_ref("")
+evaluating = to_ref(False)
+
+@async_computed(search, evaluating=evaluating, init="")
+async def search_result():
+    return await long_time_query(search.value)
+
+rxui.lazy_input(value=search)
+
+rxui.label(
+    lambda: "查询中" if evaluating.value else "上方输入框输入内容并回车搜索"
+)
+rxui.label(search_result)
+
+```
+
+- `async_computed` 第一个参数必须明确指定需要监控的响应式数据. 使用列表可以同时指定多个响应式数据
+- 参数 `evaluating` 为 bool 类型的响应式数据，当异步函数执行中，此变量值为 `True`，计算结束后为 `False`
+- 参数 `init` 指定初始结果
 
 
 ---
