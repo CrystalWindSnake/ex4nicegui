@@ -4,7 +4,6 @@ import types
 from weakref import WeakValueDictionary
 import signe
 from signe.core.protocols import ComputedResultProtocol
-from signe.core.asyncComputed import AsyncComputedResult
 from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
@@ -97,7 +96,7 @@ def is_setter_ref(obj):
 
 
 def is_ref(obj):
-    return signe.is_signal(obj) or isinstance(obj, (RefWrapper, AsyncComputedResult))
+    return signe.is_signal(obj) or isinstance(obj, (RefWrapper))
 
 
 def to_value(obj: _TMaybeRef[T]) -> T:
