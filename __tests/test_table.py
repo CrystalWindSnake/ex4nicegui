@@ -61,11 +61,21 @@ def test_base(page: ScreenPage, page_path: str):
 
 
 def test_from_pandas(page: ScreenPage, page_path: str):
-    data = to_ref(pd.DataFrame({"name": ["a", "b", "c"], "age": [1, 2, 3]}))
+    data = to_ref(
+        pd.DataFrame(
+            {
+                "date": pd.date_range("today", periods=3),
+                "name": ["a", "b", "c"],
+                "age": [1, 2, 3],
+            }
+        )
+    )
 
     @ui.page(page_path)
     def _():
         set_test_id(rxui.table.from_pandas(data), "target")
+        # test lambda display
+        rxui.table.from_pandas(lambda: data.value.head(2))
 
     page.open(page_path)
 

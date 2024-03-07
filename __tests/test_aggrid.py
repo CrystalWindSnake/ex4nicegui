@@ -10,7 +10,7 @@ from .utils import AggridUtils, set_test_id
 def test_aggrid(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        table = rxui.aggird(
+        table = rxui.aggrid(
             {
                 "columnDefs": [
                     {"headerName": "Name", "field": "name", "checkboxSelection": True},
@@ -34,9 +34,19 @@ def test_aggrid(page: ScreenPage, page_path: str):
 def test_aggrid_from_dataframe(page: ScreenPage, page_path: str):
     @ui.page(page_path)
     def _():
-        r_df = to_ref(pd.DataFrame({"name": list("abcd"), "value": range(4)}))
-        table = rxui.aggird.from_pandas(r_df).classes("max-h-40")
+        r_df = to_ref(
+            pd.DataFrame(
+                {
+                    "date": pd.date_range("today", periods=4),
+                    "name": list("abcd"),
+                    "value": range(4),
+                }
+            )
+        )
+        table = rxui.aggrid.from_pandas(r_df).classes("max-h-40")
         set_test_id(table, "target")
+        # test lambda display
+        rxui.aggrid.from_pandas(lambda: r_df.value.head(2))
 
     page.open(page_path)
 
@@ -48,7 +58,7 @@ def test_aggrid_from_dataframe_columns_define_fn(page: ScreenPage, page_path: st
     @ui.page(page_path)
     def _():
         r_df = to_ref(pd.DataFrame({"name": list("abcd"), "value": range(4)}))
-        table = rxui.aggird.from_pandas(
+        table = rxui.aggrid.from_pandas(
             r_df, columns_define_fn=lambda col: {"checkboxSelection": col == "name"}
         ).classes("max-h-40")
         set_test_id(table, "target")

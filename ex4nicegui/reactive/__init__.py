@@ -1,4 +1,4 @@
-from .officials.aggrid import AggridBindableUi as aggird
+from .officials.aggrid import AggridBindableUi as aggrid
 from .officials.button import ButtonBindableUi as button
 from .officials.card import (
     CardBindableUi as card,
@@ -76,7 +76,7 @@ __all__ = [
     "VforStore",
     "vmodel",
     "html",
-    "aggird",
+    "aggrid",
     "button",
     "card",
     "card_actions",
