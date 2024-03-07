@@ -68,8 +68,9 @@ class TableBindableUi(BindableUi[ui.table]):
     def selection_ref(self):
         return self._selection_ref
 
-    @staticmethod
+    @classmethod
     def from_pandas(
+        cls,
         df: TMaybeRef,
         *,
         columns_define_fn: Optional[Callable[[str], Dict]] = None,
@@ -111,7 +112,7 @@ class TableBindableUi(BindableUi[ui.table]):
 
                 return rows, columns
 
-            return TableBindableUi(
+            return cls(
                 lambda: cp_rows_columns.value[1],
                 lambda: cp_rows_columns.value[0],
                 **other_kws,
@@ -131,7 +132,7 @@ class TableBindableUi(BindableUi[ui.table]):
             }
             for col in df.columns  # type: ignore
         ]
-        return TableBindableUi(cols, rows, **other_kws)
+        return cls(cols, rows, **other_kws)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "dataframe":

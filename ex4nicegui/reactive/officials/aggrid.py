@@ -48,8 +48,9 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
             for col in df.columns  # type: ignore
         ]
 
-    @staticmethod
+    @classmethod
     def from_pandas(
+        cls,
         df: TMaybeRef,
         columns_define_fn: Optional[Callable[[str], Dict]] = None,
         **org_kws,
@@ -67,7 +68,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
                 data = {"columnDefs": columnDefs, "rowData": rowData}
                 return data
 
-            return AggridBindableUi(cp_options, **org_kws)
+            return cls(cp_options, **org_kws)
 
         copy_df = dataframe2col_str(df)
         columnDefs = AggridBindableUi._get_columnDefs_from_dataframe(
@@ -75,7 +76,7 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         )
         rowData = copy_df.to_dict("records")  # type: ignore
         options = {"columnDefs": columnDefs, "rowData": rowData}
-        return AggridBindableUi(options, **org_kws)
+        return cls(options, **org_kws)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef[Any]):
         if prop == "options":
