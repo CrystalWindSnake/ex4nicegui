@@ -224,7 +224,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[str]]):
+    def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
         """data binding is manipulating an element's style
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-style
@@ -239,7 +239,7 @@ class BindableUi(Generic[TWidget]):
 
                     @self._ui_effect
                     def _(name=name, ref_obj=ref_obj):
-                        self.element._style[name] = to_value(ref_obj)
+                        self.element._style[name] = str(to_value(ref_obj))
                         self.element.update()
 
         return self
