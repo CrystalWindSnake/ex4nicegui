@@ -63,7 +63,23 @@ class StoreItem:
 
 
 class VforContainer(Element, component="vfor.js"):
-    pass
+    _applyTransitionGroupName = "applyTransitionGroup"
+
+    def __init__(self, transition_group=False) -> None:
+        super().__init__()
+        self._transition_group = transition_group
+        self._props[self._applyTransitionGroupName] = transition_group
+
+    def apply_transition_group(self, args: Dict[str, Any]):
+        self._transition_group = True
+        self._props[self._applyTransitionGroupName] = True
+        self._props["transitionGroupArgs"] = args
+        self.update()
+
+    def update_child_order_keys(self, keys: List[Any]):
+        print(f"keys:{keys=}")
+        self._props["childOrderKey"] = keys
+        self.update()
 
 
 def _get_key_with_index(idx: int, data: Any):
@@ -112,14 +128,25 @@ class vfor(Generic[_T]):
         self,
         data: _T_data,
         *,
-        key: Optional[str] = None,
+        key: Optional[Union[str, Callable[[int, Any], Any]]] = None,
     ) -> None:
         self._container = VforContainer()
         self._data = data
-        self._get_key = (
-            _get_key_with_index if key is None else partial(_get_key_with_getter, key)
-        )
+        self._get_key = _get_key_with_index
+
+        if isinstance(key, str):
+            self._get_key = partial(_get_key_with_getter, key)
+        elif isinstance(key, Callable):
+            self._get_key = key
+
+        # self._get_key = (
+        #     _get_key_with_index if key is None else partial(_get_key_with_getter, key)
+        # )
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
+
+    def transition_group(self, *, name="list", css=True):
+        self._container.apply_transition_group({"name": name, "css": css})
+        return self
 
     def __call__(self, fn: Callable[[Any], None]):
         def build_element(index: int, value):
@@ -139,8 +166,13 @@ class vfor(Generic[_T]):
                 key, element, store, scope = build_element(idx, value)
                 self._store_map[key] = StoreItem(store, element.id, scope)
 
-        @on(self._data, deep=True)
+        # records init children position
+        if self._container._transition_group:
+            self._container.update_child_order_keys(list(self._store_map.keys()))
+
+        @on(self._data, deep=True, onchanges=True)
         def _():
+            print()
             data_map = {
                 self._get_key(idx, d): d for idx, d in enumerate(self._data.value)
             }
@@ -185,3 +217,6 @@ class vfor(Generic[_T]):
             self._store_map.clear()
             self._store_map = new_store_map
             temp_box.delete()
+            print(f"data:{self._data.value=}")
+            if self._container._transition_group:
+                self._container.update_child_order_keys(list(self._store_map.keys()))
