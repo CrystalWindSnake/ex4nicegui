@@ -6,7 +6,7 @@ from typing import (
     Dict,
 )
 from typing_extensions import Literal
-from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.reactive.utils import ParameterClassifier, dataframe2col_str
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -57,7 +57,7 @@ class TableBindableUi(BindableUi[ui.table]):
 
         self._arg_selection = selection
         self._arg_row_key = row_key
-        self._selection_ref: ReadonlyRef[List[Any]] = to_ref([])
+        self._selection_ref: ReadonlyRef[List[Any]] = to_ref([])  # type: ignore
 
         def on_selection(_):
             self._selection_ref.value = self.element.selected  # type: ignore
@@ -68,8 +68,9 @@ class TableBindableUi(BindableUi[ui.table]):
     def selection_ref(self):
         return self._selection_ref
 
-    @staticmethod
+    @classmethod
     def from_pandas(
+        cls,
         df: TMaybeRef,
         *,
         columns_define_fn: Optional[Callable[[str], Dict]] = None,
@@ -90,15 +91,14 @@ class TableBindableUi(BindableUi[ui.table]):
             "on_pagination_change": on_pagination_change,
         }
 
-        if is_ref(df):
+        if is_ref(df) or isinstance(df, Callable):
 
             @ref_computed
-            def cp_rows():
-                return df.value.to_dict("records")
+            def cp_rows_columns():
+                copy_df = dataframe2col_str(to_value(df))
+                rows = copy_df.to_dict("records")
 
-            @ref_computed
-            def cp_cols():
-                return [
+                columns = [
                     {
                         **{
                             "name": col,
@@ -107,11 +107,18 @@ class TableBindableUi(BindableUi[ui.table]):
                         },
                         **columns_define_fn(col),  # type: ignore
                     }
-                    for col in df.value.columns
+                    for col in copy_df.columns
                 ]
 
-            return TableBindableUi(cp_cols, cp_rows, **other_kws)
+                return rows, columns
 
+            return cls(
+                lambda: cp_rows_columns.value[1],
+                lambda: cp_rows_columns.value[0],
+                **other_kws,
+            )
+
+        df = dataframe2col_str(df)
         rows = df.to_dict("records")  # type: ignore
 
         cols = [
@@ -125,7 +132,7 @@ class TableBindableUi(BindableUi[ui.table]):
             }
             for col in df.columns  # type: ignore
         ]
-        return TableBindableUi(cols, rows, **other_kws)
+        return cls(cols, rows, **other_kws)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
         if prop == "dataframe":

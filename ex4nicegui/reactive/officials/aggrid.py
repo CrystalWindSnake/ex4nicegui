@@ -15,7 +15,7 @@ from ex4nicegui.utils.signals import (
 from ex4nicegui.utils.apiEffect import ui_effect
 from nicegui import ui
 from .base import BindableUi
-from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.reactive.utils import ParameterClassifier, dataframe2col_str
 
 
 class AggridBindableUi(BindableUi[ui.aggrid]):
@@ -48,32 +48,35 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
             for col in df.columns  # type: ignore
         ]
 
-    @staticmethod
+    @classmethod
     def from_pandas(
+        cls,
         df: TMaybeRef,
         columns_define_fn: Optional[Callable[[str], Dict]] = None,
         **org_kws,
     ):
         columns_define_fn = columns_define_fn or (lambda x: {})
-        if is_ref(df):
+        if is_ref(df) or isinstance(df, Callable):
 
             @ref_computed
             def cp_options():
+                copy_df = dataframe2col_str(to_value(df))
                 columnDefs = AggridBindableUi._get_columnDefs_from_dataframe(
-                    df.value, columns_define_fn
+                    copy_df, columns_define_fn
                 )
-                rowData = df.value.to_dict("records")
+                rowData = copy_df.to_dict("records")
                 data = {"columnDefs": columnDefs, "rowData": rowData}
                 return data
 
-            return AggridBindableUi(cp_options, **org_kws)
+            return cls(cp_options, **org_kws)
 
+        copy_df = dataframe2col_str(df)
         columnDefs = AggridBindableUi._get_columnDefs_from_dataframe(
-            df, columns_define_fn
+            copy_df, columns_define_fn
         )
-        rowData = df.to_dict("records")  # type: ignore
+        rowData = copy_df.to_dict("records")  # type: ignore
         options = {"columnDefs": columnDefs, "rowData": rowData}
-        return AggridBindableUi(options, **org_kws)
+        return cls(options, **org_kws)
 
     def bind_prop(self, prop: str, ref_ui: ReadonlyRef[Any]):
         if prop == "options":
