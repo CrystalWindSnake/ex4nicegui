@@ -24,9 +24,18 @@ from functools import partial
 from dataclasses import dataclass
 from signe.core.scope import Scope
 from .utils import get_attribute
+from ex4nicegui.reactive.empty import Empty
 
 _T = TypeVar("_T")
 _T_data = TGetterOrReadonlyRef[List[Any]]
+
+
+class VforItem(Empty):
+    pass
+
+
+class VforContainer(Empty):
+    pass
 
 
 class VforStore(Generic[_T]):
@@ -62,11 +71,14 @@ class StoreItem:
     scope: Scope
 
 
-class VforContainer(Element, component="vfor.js"):
+class VforOutterBox(Element, component="vfor-outter.js"):
     _applyTransitionGroupName = "applyTransitionGroup"
 
     def __init__(self, transition_group=False) -> None:
         super().__init__()
+
+        with self:
+            self._inner_box = VforInnerBox()
         self._transition_group = transition_group
         self._props[self._applyTransitionGroupName] = transition_group
 
@@ -130,7 +142,7 @@ class vfor(Generic[_T]):
         *,
         key: Optional[Union[str, Callable[[int, Any], Any]]] = None,
     ) -> None:
-        self._container = VforContainer()
+        self._conatiner = VforContainer()
         self._data = data
         self._get_key = _get_key_with_index
 
@@ -145,13 +157,14 @@ class vfor(Generic[_T]):
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
     def transition_group(self, *, name="list", css=True):
-        self._container.apply_transition_group({"name": name, "css": css})
+        self._outter_box.apply_transition_group({"name": name, "css": css})
         return self
 
     def __call__(self, fn: Callable[[Any], None]):
         def build_element(index: int, value):
             key = self._get_key(index, value)
-            with VforContainer() as element:
+
+            with self._conatiner, VforItem() as element:
                 store = VforStore(self._data, index)
                 scope = _CLIENT_SCOPE_MANAGER.new_scope()
 
@@ -161,18 +174,16 @@ class vfor(Generic[_T]):
 
             return key, element, store, scope
 
-        with self._container:
-            for idx, value in enumerate(self._data.value):
-                key, element, store, scope = build_element(idx, value)
-                self._store_map[key] = StoreItem(store, element.id, scope)
+        for idx, value in enumerate(self._data.value):
+            key, element, store, scope = build_element(idx, value)
+            self._store_map[key] = StoreItem(store, element.id, scope)
 
         # records init children position
-        if self._container._transition_group:
-            self._container.update_child_order_keys(list(self._store_map.keys()))
+        # if self._outter_box._transition_group:
+        #     self._outter_box.update_child_order_keys(list(self._store_map.keys()))
 
-        @on(self._data, deep=True, onchanges=True)
+        @on(self._data, deep=True)
         def _():
-            print()
             data_map = {
                 self._get_key(idx, d): d for idx, d in enumerate(self._data.value)
             }
@@ -180,30 +191,29 @@ class vfor(Generic[_T]):
             temp_box = ui.element("div")
 
             element_map: Dict[int, ui.element] = {}
-            for element in list(self._container):
+            for element in list(self._conatiner):
                 element.move(temp_box)
                 element_map[element.id] = element
 
             new_store_map: Dict[Union[Any, int], StoreItem] = {}
 
-            with self._container:
-                for idx, (key, value) in enumerate(data_map.items()):
-                    store_item = self._store_map.get(key)
-                    if store_item:
-                        # `data` may have changed the value of a dictionary item,
-                        # so should update the values in the store one by one.
-                        store_item.store.update(idx)
-                        element = element_map.get(store_item.elementId)
-                        assert element
-                        element.move(self._container)
+            for idx, (key, value) in enumerate(data_map.items()):
+                store_item = self._store_map.get(key)
+                if store_item:
+                    # `data` may have changed the value of a dictionary item,
+                    # so should update the values in the store one by one.
+                    store_item.store.update(idx)
+                    element = element_map.get(store_item.elementId)
+                    assert element
+                    element.move(self._conatiner)
 
-                        new_store_map[key] = store_item
-                    else:
-                        # new row item
-                        key, element, store, score = build_element(idx, value)
-                        store_item = StoreItem(store, element.id, score)
-                        element.move(self._container)
-                        new_store_map[key] = store_item
+                    new_store_map[key] = store_item
+                else:
+                    # new row item
+                    key, element, store, score = build_element(idx, value)
+                    store_item = StoreItem(store, element.id, score)
+                    element.move(self._conatiner)
+                    new_store_map[key] = store_item
 
             del_store_items = tuple(
                 value
@@ -217,6 +227,6 @@ class vfor(Generic[_T]):
             self._store_map.clear()
             self._store_map = new_store_map
             temp_box.delete()
-            print(f"data:{self._data.value=}")
-            if self._container._transition_group:
-                self._container.update_child_order_keys(list(self._store_map.keys()))
+            # print(f"data:{self._data.value=}")
+            # if self._outter_box._transition_group:
+            #     self._outter_box.update_child_order_keys(list(self._store_map.keys()))

@@ -25,12 +25,28 @@ export default {
         return {
         }
     },
+    mounted() {
+        // const slots = this.$slots.default()
+
+
+
+        // slots.forEach((slot, index) => {
+        //     slot.props.key = this.childOrderKey[index]
+        // })
+        // console.log(this.$slots.default());
+    },
     render() {
+        // debugger
         const h = Vue.h
-        const slots = this.$slots.default()
+        const slotBox = this.$slots.default()
         if (this.applyTransitionGroup) {
 
-            console.log(slots);
+            console.log(slotBox);
+
+            slotBox[0].children = this.childOrderKey.map(idx => {
+                return slotBox[0].children[idx]
+            })
+            // console.log(slots);
 
             return h(
                 Vue.TransitionGroup,
@@ -39,14 +55,10 @@ export default {
                     name: 'list',
                     // css: false,
                     // ...this.transitionGroupArgs
-                },
-                slots.map((slot, index) => {
-                    slot.props.key = this.childOrderKey[index]
-                    return slot
-                })
+                }, slotBox
             )
         }
 
-        return slots
+        return slotBox
     }
 }
