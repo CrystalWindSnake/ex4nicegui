@@ -149,7 +149,6 @@ class vfor(Generic[_T]):
         *,
         key: Optional[Union[str, Callable[[int, Any], Any]]] = None,
     ) -> None:
-        # self._conatiner = TransitionGroup()
         self._vfor_container = VforContainer()
         self._data = data
         self._get_key = _get_key_with_index
@@ -159,9 +158,6 @@ class vfor(Generic[_T]):
         elif isinstance(key, Callable):
             self._get_key = key
 
-        # self._get_key = (
-        #     _get_key_with_index if key is None else partial(_get_key_with_getter, key)
-        # )
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
     # def transition_group(self, *, name="list", css=True):
