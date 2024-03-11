@@ -46,6 +46,10 @@ from .officials.expansion import ExpansionBindableUi as expansion
 from .officials.linear_progress import LinearProgressBindableUi as linear_progress
 from .officials.knob import KnobBindableUi as knob
 from .officials.circular_progress import CircularProgressBindableUi as circular_progress
+from .officials.tabs import TabsBindableUi as tabs
+from .officials.tab import TabBindableUi as tab
+from .officials.tab_panels import TabPanelsBindableUi as tab_panels
+from .officials.tab_panel import TabPanelBindableUi as tab_panel
 from .q_pagination import PaginationBindableUi as q_pagination
 
 from .local_file_picker import local_file_picker
@@ -63,6 +67,10 @@ pagination = q_pagination
 
 
 __all__ = [
+    "tab_panels",
+    "tab_panel",
+    "tabs",
+    "tab",
     "circular_progress",
     "knob",
     "UploadResult",
