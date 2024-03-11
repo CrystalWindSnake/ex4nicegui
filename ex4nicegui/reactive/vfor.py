@@ -1,6 +1,6 @@
 from __future__ import annotations
 from nicegui.element import Element
-from nicegui import ui
+from nicegui import context, ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
     TReadonlyRef,
@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from signe.core.scope import Scope
 from .utils import get_attribute
 from ex4nicegui.reactive.empty import Empty
+from .transitionGroup import TransitionGroup
 
 _T = TypeVar("_T")
 _T_data = TGetterOrReadonlyRef[List[Any]]
@@ -34,8 +35,14 @@ class VforItem(Empty):
     pass
 
 
-class VforContainer(Empty):
-    pass
+class VforContainer(Element, component="vfor.js"):
+    def __init__(self) -> None:
+        super().__init__()
+        self._props["itemIds"] = []
+
+    def update_items(self, item_ids: List[Dict]):
+        self._props["itemIds"] = item_ids
+        self.update()
 
 
 class VforStore(Generic[_T]):
@@ -142,7 +149,8 @@ class vfor(Generic[_T]):
         *,
         key: Optional[Union[str, Callable[[int, Any], Any]]] = None,
     ) -> None:
-        self._conatiner = VforContainer()
+        # self._conatiner = TransitionGroup()
+        self._vfor_container = VforContainer()
         self._data = data
         self._get_key = _get_key_with_index
 
@@ -156,15 +164,21 @@ class vfor(Generic[_T]):
         # )
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
-    def transition_group(self, *, name="list", css=True):
-        self._outter_box.apply_transition_group({"name": name, "css": css})
-        return self
+    # def transition_group(self, *, name="list", css=True):
+    #     parent = self._conatiner.parent_slot
+    #     assert parent
+    #     tg = TransitionGroup()
+    #     self._conatiner.move(tg)
+    #     tg.move(parent.parent)
+
+    #     # self._outter_box.apply_transition_group({"name": name, "css": css})
+    #     return self
 
     def __call__(self, fn: Callable[[Any], None]):
         def build_element(index: int, value):
             key = self._get_key(index, value)
 
-            with self._conatiner, VforItem() as element:
+            with self._vfor_container, VforItem() as element:
                 store = VforStore(self._data, index)
                 scope = _CLIENT_SCOPE_MANAGER.new_scope()
 
@@ -178,9 +192,7 @@ class vfor(Generic[_T]):
             key, element, store, scope = build_element(idx, value)
             self._store_map[key] = StoreItem(store, element.id, scope)
 
-        # records init children position
-        # if self._outter_box._transition_group:
-        #     self._outter_box.update_child_order_keys(list(self._store_map.keys()))
+        ng_client = context.get_client()
 
         @on(self._data, deep=True)
         def _():
@@ -188,45 +200,34 @@ class vfor(Generic[_T]):
                 self._get_key(idx, d): d for idx, d in enumerate(self._data.value)
             }
 
-            temp_box = ui.element("div")
-
-            element_map: Dict[int, ui.element] = {}
-            for element in list(self._conatiner):
-                element.move(temp_box)
-                element_map[element.id] = element
-
-            new_store_map: Dict[Union[Any, int], StoreItem] = {}
-
             for idx, (key, value) in enumerate(data_map.items()):
                 store_item = self._store_map.get(key)
                 if store_item:
                     # `data` may have changed the value of a dictionary item,
                     # so should update the values in the store one by one.
                     store_item.store.update(idx)
-                    element = element_map.get(store_item.elementId)
-                    assert element
-                    element.move(self._conatiner)
 
-                    new_store_map[key] = store_item
                 else:
                     # new row item
                     key, element, store, score = build_element(idx, value)
-                    store_item = StoreItem(store, element.id, score)
-                    element.move(self._conatiner)
-                    new_store_map[key] = store_item
+                    self._store_map[key] = StoreItem(store, element.id, score)
 
-            del_store_items = tuple(
-                value
+            # remove item
+            remove_items = [
+                (key, value)
                 for key, value in self._store_map.items()
-                if key not in new_store_map
+                if key not in data_map
+            ]
+
+            for key, item in remove_items:
+                target = ng_client.elements.get(item.elementId)
+                self._vfor_container.remove(target)  # type: ignore
+                item.scope.dispose()
+                del self._store_map[key]
+
+            self._vfor_container.update_items(
+                [
+                    {"key": key, "elementId": self._store_map.get(key).elementId}
+                    for key in data_map.keys()
+                ]
             )
-
-            for store_item in del_store_items:
-                store_item.scope.dispose()
-
-            self._store_map.clear()
-            self._store_map = new_store_map
-            temp_box.delete()
-            # print(f"data:{self._data.value=}")
-            # if self._outter_box._transition_group:
-            #     self._outter_box.update_child_order_keys(list(self._store_map.keys()))
