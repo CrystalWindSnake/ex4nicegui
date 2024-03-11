@@ -227,7 +227,7 @@ class vfor(Generic[_T]):
 
             self._vfor_container.update_items(
                 [
-                    {"key": key, "elementId": self._store_map.get(key).elementId}
+                    {"key": key, "elementId": self._store_map.get(key).elementId}  # type: ignore
                     for key in data_map.keys()
                 ]
             )
