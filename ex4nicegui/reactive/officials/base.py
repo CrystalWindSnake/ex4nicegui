@@ -244,6 +244,10 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
+    def update(self):
+        """Update the element on the client side."""
+        self.element.update()
+
 
 # class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
 #     def __init__(self, value: TMaybeRef[T], element: TWidget) -> None:
