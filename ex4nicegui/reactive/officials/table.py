@@ -17,6 +17,7 @@ from ex4nicegui.utils.signals import (
     to_value,
     to_raw,
     on,
+    RefWrapper,
 )
 from nicegui import ui
 from .base import BindableUi
@@ -34,8 +35,16 @@ class TableBindableUi(BindableUi[ui.table]):
         on_select: Optional[Callable[..., Any]] = None,
         on_pagination_change: Optional[Callable[..., Any]] = None,
     ) -> None:
+        local_args = locals()
+        rows_data = local_args.get("rows")
+        if isinstance(rows_data, RefWrapper):
+            local_args.update(rows=lambda: rows_data.value)
+        columns_data = local_args.get("columns")  # type: ignore
+        if isinstance(columns_data, RefWrapper):
+            local_args.update(columns=lambda: columns_data.value)
+
         pc = ParameterClassifier(
-            locals(),
+            local_args,
             maybeRefs=[
                 "columns",
                 "rows",
