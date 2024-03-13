@@ -60,6 +60,44 @@ def test_base(page: ScreenPage, page_path: str):
     )
 
 
+def test_should_can_use_vmodel(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        columns = deep_ref(
+            [
+                {
+                    "name": "a",
+                    "label": "a",
+                    "field": "a",
+                }
+            ]
+        )
+        rows = deep_ref(
+            [
+                {"a": "n1"},
+                {"a": "n2"},
+            ]
+        )
+        set_test_id(rxui.table(columns, rxui.vmodel(rows)), "table")
+
+        def onclick():
+            rows.value.append(
+                {"a": "n3"},
+            )
+
+        set_test_id(ui.button("change", on_click=onclick), "btn")
+
+    page.open(page_path)
+
+    table = TableUtils(page, "table")
+    btn = ButtonUtils(page, "btn")
+
+    table.expect_cell_to_be_visible(["a", "n1", "n2"])
+
+    btn.click()
+    table.expect_cell_to_be_visible(["a", "n1", "n2", "n3"])
+
+
 def test_from_pandas(page: ScreenPage, page_path: str):
     data = to_ref(
         pd.DataFrame(
