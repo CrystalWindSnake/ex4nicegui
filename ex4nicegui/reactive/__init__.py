@@ -58,13 +58,11 @@ from .fileWatcher import FilesWatcher
 from .mermaid.mermaid import Mermaid as mermaid
 from .vfor import vfor, VforStore
 from .vmodel import vmodel
-from .transitionGroup import transition_group
 
 pagination = q_pagination
 
 
 __all__ = [
-    "transition_group",
     "circular_progress",
     "knob",
     "UploadResult",
