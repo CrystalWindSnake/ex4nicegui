@@ -338,3 +338,27 @@ class TestBase:
         vfor_label1.expect_contain_text("66")
         vfor_input1.expect_to_have_text("66")
         list_label.expect_contain_text("[66, 2, 3, 4]")
+
+    def test_should_with_proxy(self, page: ScreenPage, page_path: str):
+        @ui.page(page_path)
+        def _():
+            data = deep_ref({"a": [1, 2]})
+
+            set_test_id(rxui.label(data), "list-label")
+
+            @rxui.vfor(data.value["a"])
+            def _(s):
+                row_num = s.row_index.value + 1
+                rxui.label(s.get())
+                input = rxui.input(value=rxui.vmodel(s.get()))
+                set_test_id(input, f"vfor-input-{row_num}")
+
+        page.open(page_path)
+
+        list_label = LabelUtils(page, "list-label")
+        vfor_input1 = InputUtils(page, "vfor-input-1")
+
+        list_label.expect_contain_text("[1, 2]")
+
+        vfor_input1.fill_text("x1")
+        list_label.expect_contain_text("['x1', 2]")
