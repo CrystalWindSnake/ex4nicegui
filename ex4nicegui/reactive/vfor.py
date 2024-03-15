@@ -1,6 +1,6 @@
 from __future__ import annotations
 from nicegui.element import Element
-from nicegui import context, ui
+from nicegui import context
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
     TReadonlyRef,
@@ -136,16 +136,6 @@ class vfor(Generic[_T]):
             self._get_key = key
 
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
-
-    # def transition_group(self, *, name="list", css=True):
-    #     parent = self._conatiner.parent_slot
-    #     assert parent
-    #     tg = TransitionGroup()
-    #     self._conatiner.move(tg)
-    #     tg.move(parent.parent)
-
-    #     # self._outter_box.apply_transition_group({"name": name, "css": css})
-    #     return self
 
     def __call__(self, fn: Callable[[Any], None]):
         def build_element(index: int, value):
