@@ -8,6 +8,9 @@ from ex4nicegui.utils.signals import (
     to_ref,
     to_ref_wrapper,
     TGetterOrReadonlyRef,
+    to_value,
+    is_reactive,
+    RefWrapper,
 )
 from typing import (
     Any,
@@ -28,7 +31,7 @@ from ex4nicegui.reactive.empty import Empty
 # from .transitionGroup import TransitionGroup
 
 _T = TypeVar("_T")
-_T_data = TGetterOrReadonlyRef[List[Any]]
+_T_data = Union[List[Any], TGetterOrReadonlyRef[List[Any]], RefWrapper]
 
 
 class VforItem(Empty):
@@ -56,10 +59,10 @@ class VforStore(Generic[_T]):
 
     def get(self) -> TReadonlyRef[_T]:
         def base_setter(value):
-            self._source.value[self._data_index.value] = value
+            to_value(self._source)[self._data_index.value] = value
 
         wrapper = to_ref_wrapper(
-            lambda: self._source.value[self._data_index.value],
+            lambda: to_value(self._source)[self._data_index.value],
             base_setter,
         )
         wrapper._is_readonly = True
@@ -127,7 +130,7 @@ class vfor(Generic[_T]):
         key: Optional[Union[str, Callable[[int, Any], Any]]] = None,
     ) -> None:
         self._vfor_container = VforContainer()
-        self._data = data
+        self._data = to_ref_wrapper(lambda: data) if is_reactive(data) else data
         self._get_key = _get_key_with_index
 
         if isinstance(key, str):
@@ -142,7 +145,7 @@ class vfor(Generic[_T]):
             key = self._get_key(index, value)
 
             with self._vfor_container, VforItem() as element:
-                store = VforStore(self._data, index)
+                store = VforStore(self._data, index)  # type: ignore
                 scope = _CLIENT_SCOPE_MANAGER.new_scope()
 
                 @scope.run
@@ -151,7 +154,7 @@ class vfor(Generic[_T]):
 
             return key, element, store, scope
 
-        for idx, value in enumerate(self._data.value):
+        for idx, value in enumerate(to_value(self._data)):  # type: ignore
             key, element, store, scope = build_element(idx, value)
             self._store_map[key] = StoreItem(store, element.id, scope)
 
@@ -160,7 +163,7 @@ class vfor(Generic[_T]):
         @on(self._data, deep=True)
         def _():
             data_map = {
-                self._get_key(idx, d): d for idx, d in enumerate(self._data.value)
+                self._get_key(idx, d): d for idx, d in enumerate(to_value(self._data))
             }
 
             for idx, (key, value) in enumerate(data_map.items()):
