@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from signe.core.scope import Scope
 from .utils import get_attribute
 from ex4nicegui.reactive.empty import Empty
-from .transitionGroup import TransitionGroup
+# from .transitionGroup import TransitionGroup
 
 _T = TypeVar("_T")
 _T_data = TGetterOrReadonlyRef[List[Any]]
@@ -76,29 +76,6 @@ class StoreItem:
     store: VforStore
     elementId: int
     scope: Scope
-
-
-class VforOutterBox(Element, component="vfor-outter.js"):
-    _applyTransitionGroupName = "applyTransitionGroup"
-
-    def __init__(self, transition_group=False) -> None:
-        super().__init__()
-
-        with self:
-            self._inner_box = VforInnerBox()
-        self._transition_group = transition_group
-        self._props[self._applyTransitionGroupName] = transition_group
-
-    def apply_transition_group(self, args: Dict[str, Any]):
-        self._transition_group = True
-        self._props[self._applyTransitionGroupName] = True
-        self._props["transitionGroupArgs"] = args
-        self.update()
-
-    def update_child_order_keys(self, keys: List[Any]):
-        print(f"keys:{keys=}")
-        self._props["childOrderKey"] = keys
-        self.update()
 
 
 def _get_key_with_index(idx: int, data: Any):
