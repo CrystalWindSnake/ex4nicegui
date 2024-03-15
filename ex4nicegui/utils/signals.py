@@ -99,7 +99,7 @@ def is_ref(obj):
     return signe.is_signal(obj) or isinstance(obj, (RefWrapper))
 
 
-def to_value(obj: _TMaybeRef[T]) -> T:
+def to_value(obj: Union[_TMaybeRef[T], RefWrapper]) -> T:
     if is_ref(obj):
         return obj.value  # type: ignore
     if isinstance(obj, Callable):
@@ -329,7 +329,7 @@ class effect_refreshable:
 
 
 def on(
-    refs: Union[TGetterOrReadonlyRef, Sequence[TGetterOrReadonlyRef]],
+    refs: Union[TGetterOrReadonlyRef, RefWrapper, Sequence[TGetterOrReadonlyRef]],
     onchanges=False,
     priority_level=1,
     effect_kws: Optional[Dict[str, Any]] = None,
@@ -349,8 +349,10 @@ def on(
 
     """
     effect_kws = effect_kws or {}
-    # if not isinstance(refs, Sequence):
-    #     refs = [refs]
+    if not isinstance(refs, Sequence):
+        refs = [refs]  # type: ignore
+
+    refs = [(lambda: ref.value) if isinstance(ref, RefWrapper) else ref for ref in refs]  # type: ignore
 
     effect_kws.update({"priority_level": priority_level})
 
