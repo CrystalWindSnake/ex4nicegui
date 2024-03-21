@@ -63,7 +63,6 @@ from .fileWatcher import FilesWatcher
 from .mermaid.mermaid import Mermaid as mermaid
 from .vfor import vfor, VforStore
 from .vmodel import vmodel
-from .state import RefState
 
 pagination = q_pagination
 
@@ -74,7 +73,6 @@ __all__ = [
     "tab_panel",
     "tabs",
     "tab",
-    "RefState",
     "circular_progress",
     "knob",
     "UploadResult",
