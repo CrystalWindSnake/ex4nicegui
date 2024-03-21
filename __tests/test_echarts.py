@@ -1,9 +1,9 @@
 from pathlib import Path
 from ex4nicegui.reactive import rxui
 from nicegui import ui, app
-from ex4nicegui import ref_computed, to_ref
+from ex4nicegui import ref_computed, to_ref, deep_ref
 from .screen import ScreenPage
-from .utils import EChartsUtils, ButtonUtils, set_test_id
+from .utils import EChartsUtils, ButtonUtils, set_test_id, InputNumberUtils
 from pyecharts import options as opts
 from pyecharts.charts import Bar
 from pyecharts.commons import utils
@@ -89,6 +89,39 @@ def test_chart_display(page: ScreenPage, page_path: str):
     target1.assert_echarts_attachment()
     target2.assert_echarts_attachment()
     target3.assert_echarts_attachment()
+
+
+def test_chart_deep_ref(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        r_opts = deep_ref(
+            {
+                "xAxis": {
+                    "type": "category",
+                    "data": ["Mon", "Tue", "Wed"],
+                },
+                "yAxis": {"type": "value"},
+                "series": [{"data": [120, 200, 150], "type": "bar"}],
+            }
+        )
+
+        number_input = rxui.number(
+            value=rxui.vmodel(r_opts.value["series"][0]["data"][0])
+        )
+
+        chart = rxui.echarts(r_opts, not_merge=False)
+
+        set_test_id(chart, "chart")
+        set_test_id(number_input, "number_input")
+
+    page.open(page_path)
+
+    chart = EChartsUtils(page, "chart")
+    number_input = InputNumberUtils(page, "number_input")
+
+    number_input.fill_text("12")
+
+    assert chart.get_options()["series"][0]["data"][0] == 12
 
 
 def test_js_function_opt(page: ScreenPage, page_path: str):

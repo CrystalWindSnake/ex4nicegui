@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, cast, Optional
 from typing_extensions import Literal
 from ex4nicegui.reactive.utils import ParameterClassifier
-from ex4nicegui.utils.apiEffect import ui_effect
+from ex4nicegui.utils.signals import on
 
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
@@ -10,6 +10,7 @@ from ex4nicegui.utils.signals import (
     ref_computed,
     _TMaybeRef as TMaybeRef,
     to_value,
+    to_raw,
 )
 from .base import BindableUi
 from ex4nicegui.reactive.EChartsComponent.ECharts import (
@@ -136,10 +137,10 @@ class EChartsBindableUi(BindableUi[echarts]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_options(self, ref_ui: ReadonlyRef[Dict]):
-        @ui_effect
+        @on(ref_ui)
         def _():
             ele = self.element
-            ele.update_options(to_value(ref_ui), self.__update_setting)
+            ele.update_options(to_raw(to_value(ref_ui)), self.__update_setting)
             ele.update()
 
         return self
