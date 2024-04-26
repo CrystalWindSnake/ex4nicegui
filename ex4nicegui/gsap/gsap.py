@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict, Optional, Union
 from nicegui.element import Element
-from nicegui import context as ng_context
+from nicegui import ui
 from weakref import WeakKeyDictionary
 
 
@@ -45,7 +45,7 @@ class Gsap(
         def fn():
             self.run_method("runScript", script)
 
-        if ng_context.get_client().has_socket_connection:
+        if ui.context.client.has_socket_connection:
             fn()
         else:
             tasks = self._props["scriptTasks"]
@@ -55,7 +55,7 @@ class Gsap(
         def fn():
             self.run_method(name, targets, vars)
 
-        if ng_context.get_client().has_socket_connection:
+        if ui.context.client.has_socket_connection:
             fn()
         else:
             tasks = self._props["tasks"]
@@ -66,7 +66,7 @@ __instance_map = WeakKeyDictionary()
 
 
 def _get_instance():
-    current_client = ng_context.get_client()
+    current_client = ui.context.client
     ins = __instance_map.get(current_client)
 
     if not ins:

@@ -16,7 +16,7 @@ from nicegui.events import (
 )
 from nicegui.element import Element
 from nicegui.awaitable_response import AwaitableResponse
-from nicegui import context as ng_context
+from nicegui import ui
 from pathlib import Path
 import nicegui
 import uuid
@@ -102,7 +102,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
 
             client.connect_handlers.remove(on_client_connect)  # type: ignore
 
-        ng_context.get_client().on_connect(on_client_connect)
+        ui.context.client.on_connect(on_client_connect)
 
         def echartsOn_handler(e):
             callbackId = e.args["callbackId"]
@@ -176,7 +176,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
         handler: _T_echats_on_callback,
         query: Optional[Union[str, Dict]] = None,
     ):
-        if not ng_context.get_client().has_socket_connection:
+        if not ui.context.client.has_socket_connection:
 
             def task_func():
                 self.echarts_on(event_name, handler, query)

@@ -149,7 +149,7 @@ class DataSource:
             self.__notify_update()
 
     def get_component_info_key(self, element_id: types._TElementID):
-        client_id = ng_context.get_client().id
+        client_id = ui.context.client.id
         return ComponentInfoKey(client_id, element_id)
 
     def get_filtered_data(self, element: ui.element):
@@ -175,7 +175,7 @@ class DataSource:
         update_callback: Optional[_TComponentUpdateCallback] = None,
         ui_result: Optional[UiResult] = None,
     ):
-        ng_client = ng_context.get_client()
+        ng_client = ui.context.client
         client_id = ng_client.id
 
         if not self._component_map.has_client_record(client_id):
@@ -198,7 +198,7 @@ class DataSource:
         filter: Optional[Filter],
         notify_update=True,
     ):
-        client_id = ng_context.get_client().id
+        client_id = ui.context.client.id
         key = ComponentInfoKey(client_id, element_id)
 
         if not self._component_map.has_record(key):
@@ -216,7 +216,7 @@ class DataSource:
         return self
 
     def notify_update(self, exclude: Optional[List[UiResult]] = None):
-        client_id = ng_context.get_client().id
+        client_id = ui.context.client.id
         exclude_infos = [
             self._component_map.get_info(ComponentInfoKey(client_id, ur.id))
             for ur in (exclude or [])

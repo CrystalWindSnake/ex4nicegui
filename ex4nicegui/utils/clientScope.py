@@ -1,6 +1,6 @@
 from typing import Dict
 from signe.core.scope import ScopeSuite
-from nicegui import Client, context as ng_context
+from nicegui import Client, ui
 
 
 _TClientID = str
@@ -24,7 +24,7 @@ class NgClientScopeManager:
         # if len(ng_context.get_slot_stack()) <= 0:
         #     return
 
-        client = ng_context.get_client()
+        client = ui.context.client
 
         if client.id not in self._client_scope_map:
             self._client_scope_map[client.id] = NgScopeSuite()

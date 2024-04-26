@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict, Optional, Union
 from nicegui.element import Element
-from nicegui import context as ng_context
+from nicegui import ui
 
 
 class Timeline(
@@ -40,7 +40,7 @@ class Timeline(
         def fn():
             self.run_method("runScript", script)
 
-        if ng_context.get_client().has_socket_connection:
+        if ui.context.client.has_socket_connection:
             fn()
         else:
             tasks = self._props["scriptTasks"]
@@ -52,7 +52,7 @@ class Timeline(
         def fn():
             self.run_method(name, targets, vars)
 
-        if ng_context.get_client().has_socket_connection:
+        if ui.context.client.has_socket_connection:
             fn()
         else:
             tasks = self._props["tasks"]
