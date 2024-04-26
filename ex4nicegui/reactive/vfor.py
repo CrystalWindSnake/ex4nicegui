@@ -1,6 +1,6 @@
 from __future__ import annotations
 from nicegui.element import Element
-from nicegui import context
+from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
     TReadonlyRef,
@@ -158,7 +158,7 @@ class vfor(Generic[_T]):
             key, element, store, scope = build_element(idx, value)
             self._store_map[key] = StoreItem(store, element.id, scope)
 
-        ng_client = context.get_client()
+        ng_client = ui.context.client
 
         @on(self._data, deep=True)
         def _():

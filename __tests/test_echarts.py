@@ -119,6 +119,7 @@ def test_chart_deep_ref(page: ScreenPage, page_path: str):
     chart = EChartsUtils(page, "chart")
     number_input = InputNumberUtils(page, "number_input")
 
+    page.wait(500)
     number_input.fill_text("12")
 
     assert chart.get_options()["series"][0]["data"][0] == 12

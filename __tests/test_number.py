@@ -14,7 +14,7 @@ def test_const(page: ScreenPage, page_path: str):
 
     target = InputNumberUtils(page, "target")
 
-    target.expect_to_have_text("1.0")
+    target.expect_to_have_text("1")
 
 
 def test_ref(page: ScreenPage, page_path: str):
@@ -28,7 +28,7 @@ def test_ref(page: ScreenPage, page_path: str):
 
     target = InputNumberUtils(page, "target")
 
-    target.expect_to_have_text("1.0")
+    target.expect_to_have_text("1")
 
     r_value.value = 3.11
     target.expect_to_have_text("3.11")
