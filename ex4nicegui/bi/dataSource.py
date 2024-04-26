@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Callable, Dict, List, Optional, Set, cast, TYPE_CHECKING
 from ex4nicegui import to_ref, ref_computed, on, batch, effect
-from nicegui import context as ng_context, Client, ui
+from nicegui import Client, ui
 
 from dataclasses import dataclass, field
 from . import types
