@@ -88,6 +88,9 @@ class BaseUiUtils:
     def expect_to_have_text(self, text: str):
         expect(self.target_locator).to_have_text(text)
 
+    def expect_not_to_have_text(self, text: str):
+        expect(self.target_locator).not_to_have_text(text)
+
     def expect_to_have_value(self, value: str):
         return expect(self.target_locator).to_have_value(value)
 

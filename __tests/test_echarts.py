@@ -3,7 +3,7 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui, app
 from ex4nicegui import ref_computed, to_ref, deep_ref
 from .screen import ScreenPage
-from .utils import EChartsUtils, ButtonUtils, set_test_id, InputNumberUtils
+from .utils import EChartsUtils, ButtonUtils, set_test_id, InputNumberUtils, LabelUtils
 from pyecharts import options as opts
 from pyecharts.charts import Bar
 from pyecharts.commons import utils
@@ -236,9 +236,6 @@ def test_pyecharts(page: ScreenPage, page_path: str):
 
 
 def test_click_event(page: ScreenPage, page_path: str):
-    click_data = {}
-    hover_data = {}
-
     @ui.page(page_path)
     def _():
         opts = {
@@ -265,17 +262,20 @@ def test_click_event(page: ScreenPage, page_path: str):
 
         ins = rxui.echarts(opts)
 
+        lbl_click = ui.label()
+        lbl_hover = ui.label()
+
         def onclick_series(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
-            click_data["seriesName"] = e.seriesName
+            lbl_click.set_text(e.seriesName)
 
         ins.on("click", onclick_series)
 
         def on_mouser_over(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
-            hover_data["seriesName"] = e.seriesName
+            lbl_hover.set_text(e.seriesName)
 
         ins.on(
             "mouseover",
@@ -284,18 +284,21 @@ def test_click_event(page: ScreenPage, page_path: str):
         )
 
         set_test_id(ins, "target")
+        set_test_id(lbl_click, "lbl_click")
+        set_test_id(lbl_hover, "lbl_hover")
 
     page.open(page_path)
 
     target = EChartsUtils(page, "target")
+    lbl_click = LabelUtils(page, "lbl_click")
+    lbl_hover = LabelUtils(page, "lbl_hover")
 
+    page.wait(1000)
     target.assert_canvas_exists()
 
     target.click_series(0.05, "A", y_position_offset=-8)
 
-    page.wait(1000)
-
-    assert click_data["seriesName"] == "Alpha"
+    lbl_click.expect_to_have_text("Alpha")
 
     target.mouse_hover_series(
         0.05,
@@ -304,9 +307,10 @@ def test_click_event(page: ScreenPage, page_path: str):
         y_position_offset=-8,
     )
 
-    page.wait(1000)
+    lbl_hover.expect_not_to_have_text("Alpha")
+    # page.wait(1000)
 
-    assert "seriesName" not in hover_data
+    # assert "seriesName" not in hover_data
 
     target.mouse_hover_series(
         0.05,
@@ -317,7 +321,8 @@ def test_click_event(page: ScreenPage, page_path: str):
 
     page.wait(1000)
 
-    assert hover_data["seriesName"] == "Beta"
+    lbl_hover.expect_to_have_text("Beta")
+    # assert hover_data["seriesName"] == "Beta"
 
 
 def test_update_opts(page: ScreenPage, page_path: str):
