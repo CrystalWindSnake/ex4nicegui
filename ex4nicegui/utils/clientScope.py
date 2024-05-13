@@ -42,3 +42,7 @@ class NgClientScopeManager:
 
 
 _CLIENT_SCOPE_MANAGER = NgClientScopeManager()
+
+
+def new_scope():
+    pass
