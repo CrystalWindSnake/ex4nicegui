@@ -20,7 +20,7 @@ from ex4nicegui.utils.signals import (
     is_reactive,
 )
 from ex4nicegui.utils.asyncComputed import async_computed
-
+from ex4nicegui.utils.clientScope import new_scope
 
 __all__ = [
     "async_computed",
@@ -43,6 +43,7 @@ __all__ = [
     "batch",
     "to_raw",
     "is_setter_ref",
+    "new_scope",
 ]
 
 __version__ = "0.6.5"

@@ -414,6 +414,31 @@ ui.button("change b", on_click=change_b)
 
 ---
 
+### `new_scope`
+
+默认情况下，所有检测函数在客户端连接断开时自动销毁。如果需要更细粒度的控制，可以使用 `new_scope`
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui, to_ref, effect, new_scope
+
+a = to_ref(0.0)
+
+scope1 = new_scope()
+
+@scope1.run
+def _():
+    @effect
+    def _():
+        print(f"scope 1:{a.value}")
+
+
+rxui.number(value=a)
+rxui.button("dispose scope 1", on_click=scope1.dispose)
+```
+
+---
+
 
 ## 组件功能
 

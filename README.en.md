@@ -403,6 +403,31 @@ ui.button("change b", on_click=change_b)
 
 ---
 
+### `new_scope`
+
+By default, all watch functions are automatically destroyed when the client connection is disconnected. For finer-grained control, the `new_scope` function can be utilized.
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui, to_ref, effect, new_scope
+
+a = to_ref(0.0)
+
+scope1 = new_scope()
+
+@scope1.run
+def _():
+    @effect
+    def _():
+        print(f"scope 1:{a.value}")
+
+
+rxui.number(value=a)
+rxui.button("dispose scope 1", on_click=scope1.dispose)
+```
+
+---
+
 ## functionality
 
 ### vmodel

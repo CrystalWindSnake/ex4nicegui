@@ -2,7 +2,6 @@ from typing import Dict
 from signe.core.scope import ScopeSuite
 from nicegui import Client, ui
 
-
 _TClientID = str
 
 
@@ -18,12 +17,18 @@ class NgClientScopeManager:
         self._client_scope_map: Dict[_TClientID, NgScopeSuite] = {}
 
     def new_scope(self, detached: bool = False):
-        return self.get_current_scope().scope(detached)
+        """Create a scope that can collect all reactive watch functions within it, allowing for a unified destruction process.
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#new_scope
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#new_scope
+
+        Args:
+            detached (bool, optional): Whether the scope should be detached from the client. Defaults to False.
+
+        """
+        return self.get_current_scope().scope(detached=detached)
 
     def get_current_scope(self):
-        # if len(ng_context.get_slot_stack()) <= 0:
-        #     return
-
         client = ui.context.client
 
         if client.id not in self._client_scope_map:
@@ -35,10 +40,13 @@ class NgClientScopeManager:
                 @client.on_disconnect
                 def _(e: Client):
                     if e.id in self._client_scope_map:
-                        self._client_scope_map[e.id]._top_scope.dispose()
+                        self._client_scope_map[e.id]._top_scope.dispose()  # type: ignore
                         del self._client_scope_map[e.id]
 
         return self._client_scope_map[client.id]
 
 
 _CLIENT_SCOPE_MANAGER = NgClientScopeManager()
+
+
+new_scope = _CLIENT_SCOPE_MANAGER.new_scope
