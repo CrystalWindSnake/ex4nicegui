@@ -4,6 +4,7 @@ from typing import (
     Optional,
     TypeVar,
     Dict,
+    Union,
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
@@ -25,7 +26,7 @@ class NumberBindableUi(BindableUi[ui.number]):
         label: Optional[TMaybeRef[str]] = None,
         *,
         placeholder: Optional[TMaybeRef[str]] = None,
-        value: Optional[TMaybeRef[float]] = None,
+        value: Optional[Union[TMaybeRef[float], TMaybeRef[int]]] = None,
         min: Optional[TMaybeRef[float]] = None,
         max: Optional[TMaybeRef[float]] = None,
         step: Optional[TMaybeRef[float]] = None,
