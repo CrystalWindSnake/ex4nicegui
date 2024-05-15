@@ -12,12 +12,9 @@ from ex4nicegui.utils.signals import (
     to_raw,
 )
 from .base import BindableUi
-from ex4nicegui.reactive.EChartsComponent.ECharts import (
-    echarts,
-    EChartsMouseEventArguments,
-)
-
+from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
 from ex4nicegui.reactive.EChartsComponent.types import _T_event_name
+from ex4nicegui.reactive.EChartsComponent.events import EChartsMouseEventArguments
 
 from nicegui.awaitable_response import AwaitableResponse
 from nicegui import ui, app

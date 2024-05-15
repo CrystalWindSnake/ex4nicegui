@@ -72,27 +72,10 @@ export default {
       this.chart.setOption(this.options, opts ?? { notMerge: this.chart.options?.series.length != this.options.series.length });
     },
 
-
-    echarts_on(eventName, query, callbackId) {
-
-      this.chart.on(eventName, query, (e) => {
-        const eventParams = {
-          componentType: e.componentType,
-          seriesType: e.seriesType,
-          seriesIndex: e.seriesIndex,
-          seriesName: e.seriesName,
-          name: e.name,
-          dataIndex: e.dataIndex,
-          data: e.data,
-          dataType: e.dataType,
-          value: e.value,
-          color: e.color,
-        };
-
-        this.$emit('event_on', { params: eventParams, callbackId, eventName });
+    echarts_on(eventName, query) {
+      this.chart.on(eventName.replace(/^chart:/, ''), query, (e) => {
+        this.$emit(eventName, e);
       });
-
-
     },
 
     run_chart_method(name, ...args) {

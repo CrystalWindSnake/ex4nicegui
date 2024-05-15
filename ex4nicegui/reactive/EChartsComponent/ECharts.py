@@ -6,24 +6,18 @@ from typing import (
     Optional,
     Union,
 )
-import typing
 
 from nicegui.events import handle_event, UiEventArguments, GenericEventArguments
-from nicegui import ui, Client
 from nicegui.element import Element
 from nicegui.awaitable_response import AwaitableResponse
 from pathlib import Path
 import nicegui
-import uuid
 
 from .types import (
-    _T_echats_on_callback,
-    _T_mouse_event_name,
-    _Chart_Click_Args,
     _T_event_name,
 )
-from .event import EChartsMouseEventArguments
 from ex4nicegui.reactive.deferredTask import DeferredTask
+from .utils import get_bound_event_args, create_event_handler_args
 
 NG_ROOT = Path(nicegui.__file__).parent / "elements"
 libraries = [NG_ROOT / "lib/echarts/echarts.min.js"]
@@ -51,22 +45,6 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
 
         self._props["options"] = options
         self._props["code"] = code
-
-        self._echarts_on_callback_map: Dict[str, _T_echats_on_callback] = {}
-
-        def echartsOn_handler(e):
-            callbackId = e.args["callbackId"]
-            event_name = e.args["eventName"]
-            params: Dict = e.args["params"]
-
-            if callbackId in self._echarts_on_callback_map:
-                event_args = _create_event_args(e.sender, e.client, event_name, params)
-
-                handler = self._echarts_on_callback_map[callbackId]
-
-                handle_event(handler, event_args)
-
-        self.on("event_on", echartsOn_handler)
 
     def update_chart(
         self,
@@ -113,28 +91,24 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
                 ),
             )
 
-        self.on(
-            "clickBlank",
-            inner_handler,
-            _Chart_Click_Args,
-        )
+        self.on("clickBlank", inner_handler)
 
     def echarts_on(
         self,
         event_name: _T_event_name,
-        handler: _T_echats_on_callback,
+        handler: Callable[[UiEventArguments], None],
         query: Optional[Union[str, Dict]] = None,
     ):
+        def org_handler(e: GenericEventArguments) -> None:
+            event_args = create_event_handler_args(event_name, e)
+            handle_event(handler, event_args)
+
+        ui_event_name = f"chart:{event_name}"
+        super().on(ui_event_name, org_handler, args=get_bound_event_args(event_name))
+
         @self.__deferred_task.register
         def _():
-            callback_id = uuid.uuid4().hex
-            self.run_method(
-                "echarts_on",
-                event_name,
-                query,
-                callback_id,
-            )
-            self._echarts_on_callback_map[callback_id] = handler
+            self.run_method("echarts_on", ui_event_name, query)
 
     def run_chart_method(
         self, name: str, *args, timeout: float = 1, check_interval: float = 0.01
@@ -160,20 +134,3 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
             timeout=timeout,
             check_interval=check_interval,
         )
-
-
-_event_args_map = {
-    event: EChartsMouseEventArguments for event in typing.get_args(_T_mouse_event_name)
-}
-
-
-def _create_event_args(
-    sender: ui.element, client: Client, event_name: str, params: Dict
-):
-    event_args_type = _event_args_map.get(event_name, GenericEventArguments)
-
-    if event_args_type is EChartsMouseEventArguments:
-        params["dataType"] = params.get("dataType")
-        return EChartsMouseEventArguments(sender=sender, client=client, **params)
-
-    return GenericEventArguments(sender=sender, client=client, args=params)
