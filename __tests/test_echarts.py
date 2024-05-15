@@ -352,6 +352,7 @@ def test_update_opts(page: ScreenPage, page_path: str):
         r_opts = to_ref(opts)
 
         set_test_id(rxui.echarts(r_opts), "target")
+        set_test_id(rxui.label(lambda: str(r_opts.value["title"])), "label")
 
         def on_click():
             del r_opts.value["title"]["bottom"]
@@ -360,16 +361,18 @@ def test_update_opts(page: ScreenPage, page_path: str):
         set_test_id(ui.button("del title bottom", on_click=on_click), "botton")
 
     page.open(page_path)
+    page.wait(600)
 
     target = EChartsUtils(page, "target")
     button = ButtonUtils(page, "botton")
+    label = LabelUtils(page, "label")
 
     target.assert_canvas_exists()
-    assert target.get_options()["title"][0]["bottom"] == 0
+    label.expect_to_have_text("{'text': 'title', 'bottom': 0}")
 
     button.click()
 
-    assert target.get_options()["title"][0]["bottom"] is None
+    label.expect_to_have_text("{'text': 'title'}")
 
 
 def test_run_chart_method(page: ScreenPage, page_path: str):
@@ -395,6 +398,7 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
         set_test_id(btn, "botton")
 
     page.open(page_path)
+    page.wait(600)
 
     target = EChartsUtils(page, "target")
     button = ButtonUtils(page, "botton")
@@ -404,7 +408,6 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
     assert "title" not in target.get_options()
 
     button.click()
-    page.wait()
 
     assert target.get_options()["title"][0]["text"] == "new title"
 

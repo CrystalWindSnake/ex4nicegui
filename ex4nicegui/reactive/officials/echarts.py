@@ -50,6 +50,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         value_kws = pc.get_values_kws()
 
         element = echarts(**value_kws).classes("grow self-stretch h-[16rem]")
+
         super().__init__(element)  # type: ignore
 
         self.__update_setting = None
@@ -78,16 +79,16 @@ class EChartsBindableUi(BindableUi[echarts]):
         ui.add_body_html(
             rf"""
             <script>
-                window.addEventListener('DOMContentLoaded', () => {{
-                    fetch("{src}")
-                        .then((response) => response.json())
-                        .then((data) => {{
-                            echarts.registerMap('{map_name}', data);
-                        }});
-                }});
+                if (typeof window.ex4ngEchartsMapTasks === "undefined") {{ 
+                    window.ex4ngEchartsMapTasks = new Map();
+                }}
+
+                window.ex4ngEchartsMapTasks.set('{map_name}', '{src}');
             </script>
         """
         )
+
+        return cls
 
     @classmethod
     def from_pyecharts(cls, chart: TMaybeRef):
