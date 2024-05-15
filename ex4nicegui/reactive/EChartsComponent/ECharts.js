@@ -1,84 +1,57 @@
 import { convertDynamicProperties } from "../../static/utils/dynamic_properties.js";
 
 
-function retry(fn, options = {}) {
 
-  options = {
-    error: 'Maximum number of tries exceeded',
-    tryMaxTimes: 5,
-    intervalMs: 800,
-    ...options
-  }
+function collectMapRegisterTask() {
+  const tasks = new Map();
 
-  let tryTimes = 0
-  let isDone = false
+  if (typeof window.ex4ngEchartsMapTasks !== "undefined") {
 
-  const doneFn = () => {
-    isDone = true
-  }
+    for (const [mapName, src] of window.ex4ngEchartsMapTasks.entries()) {
 
-  function callback() {
-    tryTimes += 1
+      const registerPromise = new Promise((resolve, reject) => {
+        fetch(src)
+          .then((response) => response.json())
+          .then((data) => {
+            echarts.registerMap(mapName, data);
+            resolve();
+          });
 
-    if (tryTimes <= options.tryMaxTimes) {
-      fn(doneFn)
+      });
 
-      if (isDone) {
-        clearInterval(task)
-      }
-
-    } else {
-      console.error(options.error)
-      clearInterval(task)
+      tasks.set(mapName, registerPromise);
     }
-
   }
 
-  callback();
-  const task = setInterval(callback, options.intervalMs);
+  return tasks;
 }
+
+
+
+const mapRegisterTasks = collectMapRegisterTask();
 
 
 export default {
   template: "<div></div>",
-  mounted() {
+  async mounted() {
+    await Promise.all(Array.from(mapRegisterTasks.values()));
 
-    function initChart() {
-      this.chart = echarts.init(this.$el, this.theme);
+    this.chart = echarts.init(this.$el, this.theme);
 
-      if (this.options) {
-        this.update_chart();
-      } else {
-        const fn = new Function('return ' + this.code)()
-        fn(this.chart)
-        this.$emit("__update_options_from_client", this.chart.getOption())
-      }
-      this.chart.getZr().on("click", (e) => {
-        if (!e.target) {
-          this.$emit("clickBlank")
-        }
-      });
-      this.resizeObs = new ResizeObserver(this.chart.resize)
-      this.resizeObs.observe(this.$el);
+    if (this.options) {
+      this.update_chart();
+    } else {
+      const fn = new Function('return ' + this.code)()
+      fn(this.chart)
+      this.$emit("__update_options_from_client", this.chart.getOption())
     }
-
-    initChart = initChart.bind(this)
-
-    retry((done) => {
-      try {
-        initChart()
-        done()
-      } catch (e) {
-        if (e instanceof TypeError && e.message === `Cannot read properties of undefined (reading 'regions')`) {
-          echarts.dispose(this.chart)
-          return
-        } else {
-          done()
-          throw e;
-        }
+    this.chart.getZr().on("click", (e) => {
+      if (!e.target) {
+        this.$emit("clickBlank")
       }
-    }, { error: 'Maximum number of retries echart init' })
-
+    });
+    this.resizeObs = new ResizeObserver(this.chart.resize)
+    this.resizeObs.observe(this.$el);
   },
   beforeDestroy() {
     this.chart.dispose();
@@ -97,30 +70,22 @@ export default {
 
     echarts_on(eventName, query, callbackId) {
 
-      retry((done) => {
-        if (this.chart) {
-
-          this.chart.on(eventName, query, (e) => {
-            const eventParams = {
-              componentType: e.componentType,
-              seriesType: e.seriesType,
-              seriesIndex: e.seriesIndex,
-              seriesName: e.seriesName,
-              name: e.name,
-              dataIndex: e.dataIndex,
-              data: e.data,
-              dataType: e.dataType,
-              value: e.value,
-              color: e.color,
-            }
-
-            this.$emit('event_on', { params: eventParams, callbackId })
-          })
-
-          done()
+      this.chart.on(eventName, query, (e) => {
+        const eventParams = {
+          componentType: e.componentType,
+          seriesType: e.seriesType,
+          seriesIndex: e.seriesIndex,
+          seriesName: e.seriesName,
+          name: e.name,
+          dataIndex: e.dataIndex,
+          data: e.data,
+          dataType: e.dataType,
+          value: e.value,
+          color: e.color,
         }
-      }, { error: 'Maximum number of retries on echarts event' })
+      });
 
+      this.$emit('event_on', { params: eventParams, callbackId });
     },
 
     run_chart_method(name, ...args) {
@@ -128,7 +93,7 @@ export default {
         name = name.slice(1);
         args = args.map((arg) => new Function("return " + arg)());
       }
-      return this.chart[name](...args);
+      return runMethod(this.chart, name, args);
     },
   },
   props: {
