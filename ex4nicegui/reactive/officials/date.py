@@ -45,13 +45,8 @@ class DateBindableUi(BindableUi[ui.date]):
         pc = ParameterClassifier(
             locals(),
             maybeRefs=[
-                "label",
                 "value",
-                "placeholder",
-                "password",
-                "password_toggle_button",
-                "autocomplete",
-                "validation",
+                "mask",
             ],
             v_model=("value", "on_change"),
             events=["on_change"],
