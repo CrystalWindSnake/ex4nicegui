@@ -1,7 +1,5 @@
 import { convertDynamicProperties } from "../../static/utils/dynamic_properties.js";
 
-
-
 function collectMapRegisterTask() {
   const tasks = new Map();
 
@@ -26,17 +24,25 @@ function collectMapRegisterTask() {
   return tasks;
 }
 
-
-
 const mapRegisterTasks = collectMapRegisterTask();
-
 
 export default {
   template: "<div></div>",
   async mounted() {
+    await this.$nextTick(); // wait for Tailwind classes to be applied
     await Promise.all(Array.from(mapRegisterTasks.values()));
 
     this.chart = echarts.init(this.$el, this.theme);
+
+    this.resizeObs = new ResizeObserver(this.chart.resize)
+
+    // Prevent interruption of chart animations due to resize operations.
+    // It is recommended to register the callbacks for such an event before setOption.
+    const createResizeObserver = () => {
+      this.resizeObs.observe(this.$el);
+      this.chart.off("finished", createResizeObserver);
+    };
+    this.chart.on("finished", createResizeObserver);
 
     if (this.options) {
       this.update_chart();
@@ -50,8 +56,7 @@ export default {
         this.$emit("clickBlank")
       }
     });
-    this.resizeObs = new ResizeObserver(this.chart.resize)
-    this.resizeObs.observe(this.$el);
+
   },
   beforeDestroy() {
     this.chart.dispose();
