@@ -1,7 +1,5 @@
 import { convertDynamicProperties } from "../../static/utils/dynamic_properties.js";
 
-
-
 function collectMapRegisterTask() {
   const tasks = new Map();
 
@@ -26,17 +24,43 @@ function collectMapRegisterTask() {
   return tasks;
 }
 
+function hasMapOrGeo(options) {
+  if (options) {
+    const hasMapSeries = options.series && Array.isArray(options.series) &&
+      options.series.some(seriesItem =>
+        seriesItem.type === 'map' ||
+        seriesItem.type === 'lines'
+      );
 
+    const hasGeoConfig = options.geo && (typeof options.geo === 'object' || Array.isArray(options.geo));
+
+    return hasMapSeries || hasGeoConfig;
+  }
+  return false;
+}
 
 const mapRegisterTasks = collectMapRegisterTask();
-
 
 export default {
   template: "<div></div>",
   async mounted() {
-    await Promise.all(Array.from(mapRegisterTasks.values()));
+    await this.$nextTick(); // wait for Tailwind classes to be applied
+
+    if (hasMapOrGeo(this.options)) {
+      await Promise.all(Array.from(mapRegisterTasks.values()));
+    }
 
     this.chart = echarts.init(this.$el, this.theme);
+
+    this.resizeObs = new ResizeObserver(this.chart.resize)
+
+    // Prevent interruption of chart animations due to resize operations.
+    // It is recommended to register the callbacks for such an event before setOption.
+    const createResizeObserver = () => {
+      this.resizeObs.observe(this.$el);
+      this.chart.off("finished", createResizeObserver);
+    };
+    this.chart.on("finished", createResizeObserver);
 
     if (this.options) {
       this.update_chart();
@@ -50,8 +74,7 @@ export default {
         this.$emit("clickBlank")
       }
     });
-    this.resizeObs = new ResizeObserver(this.chart.resize)
-    this.resizeObs.observe(this.$el);
+
   },
   beforeDestroy() {
     this.chart.dispose();
@@ -67,27 +90,10 @@ export default {
       this.chart.setOption(this.options, opts ?? { notMerge: this.chart.options?.series.length != this.options.series.length });
     },
 
-
-    echarts_on(eventName, query, callbackId) {
-
-      this.chart.on(eventName, query, (e) => {
-        const eventParams = {
-          componentType: e.componentType,
-          seriesType: e.seriesType,
-          seriesIndex: e.seriesIndex,
-          seriesName: e.seriesName,
-          name: e.name,
-          dataIndex: e.dataIndex,
-          data: e.data,
-          dataType: e.dataType,
-          value: e.value,
-          color: e.color,
-        };
-
-        this.$emit('event_on', { params: eventParams, callbackId });
+    echarts_on(eventName, query) {
+      this.chart.on(eventName.replace(/^chart:/, ''), query, (e) => {
+        this.$emit(eventName, e);
       });
-
-
     },
 
     run_chart_method(name, ...args) {

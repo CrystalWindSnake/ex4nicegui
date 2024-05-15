@@ -2,7 +2,7 @@ from typing import (
     Any,
     Optional,
 )
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import (
     UiEventArguments,
@@ -21,3 +21,6 @@ class EChartsMouseEventArguments(UiEventArguments):
     dataType: Optional[str]
     value: Any
     color: str
+
+
+_Mouse_Event_Arguments_Fields = [f.name for f in fields(EChartsMouseEventArguments)]

@@ -1,9 +1,6 @@
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, cast, Optional
-from typing_extensions import Literal
 from ex4nicegui.reactive.utils import ParameterClassifier
-from ex4nicegui.utils.signals import on
-
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
@@ -11,27 +8,15 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     to_value,
     to_raw,
+    on,
 )
 from .base import BindableUi
-from ex4nicegui.reactive.EChartsComponent.ECharts import (
-    echarts,
-    EChartsMouseEventArguments,
-)
+from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
+from ex4nicegui.reactive.EChartsComponent.types import _T_event_name
+from ex4nicegui.reactive.EChartsComponent.events import EChartsMouseEventArguments
 
 from nicegui.awaitable_response import AwaitableResponse
 from nicegui import ui, app
-
-_TEventName = Literal[
-    "click",
-    "dblclick",
-    "mousedown",
-    "mousemove",
-    "mouseup",
-    "mouseover",
-    "mouseout",
-    "globalout",
-    "contextmenu",
-]
 
 
 class EChartsBindableUi(BindableUi[echarts]):
@@ -148,7 +133,7 @@ class EChartsBindableUi(BindableUi[echarts]):
 
     def on(
         self,
-        event_name: _TEventName,
+        event_name: _T_event_name,
         handler: Callable[..., Any],
         query: Optional[Union[str, Dict]] = None,
     ):
@@ -225,6 +210,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         ---
         """
         self.element.echarts_on(event_name, handler, query)
+        return self
 
     def run_chart_method(
         self, name: str, *args, timeout: float = 1, check_interval: float = 0.01
