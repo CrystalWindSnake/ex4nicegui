@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Dict, List, Union, cast, Optional
+from typing import Any, Callable, Dict, List, Union, cast, Optional
 from typing_extensions import Literal
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import on
@@ -36,7 +36,6 @@ _TEventName = Literal[
 
 class EChartsBindableUi(BindableUi[echarts]):
     EChartsMouseEventArguments = EChartsMouseEventArguments
-    _map_register_tasks: ClassVar[Dict[str, str]] = {}
 
     def __init__(
         self,
@@ -89,7 +88,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         """
         )
 
-        cls._map_register_tasks[map_name] = src
+        return cls
 
     @classmethod
     def from_pyecharts(cls, chart: TMaybeRef):
