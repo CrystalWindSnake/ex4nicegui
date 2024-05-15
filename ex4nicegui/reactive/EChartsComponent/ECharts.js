@@ -24,13 +24,31 @@ function collectMapRegisterTask() {
   return tasks;
 }
 
+function hasMapOrGeo(options) {
+  if (options) {
+    const hasMapSeries = options.series && Array.isArray(options.series) &&
+      options.series.some(seriesItem =>
+        seriesItem.type === 'map' ||
+        seriesItem.type === 'lines'
+      );
+
+    const hasGeoConfig = options.geo && (typeof options.geo === 'object' || Array.isArray(options.geo));
+
+    return hasMapSeries || hasGeoConfig;
+  }
+  return false;
+}
+
 const mapRegisterTasks = collectMapRegisterTask();
 
 export default {
   template: "<div></div>",
   async mounted() {
     await this.$nextTick(); // wait for Tailwind classes to be applied
-    await Promise.all(Array.from(mapRegisterTasks.values()));
+
+    if (hasMapOrGeo(this.options)) {
+      await Promise.all(Array.from(mapRegisterTasks.values()));
+    }
 
     this.chart = echarts.init(this.$el, this.theme);
 
