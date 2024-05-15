@@ -2,10 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, Dict, Union, cast
 from nicegui.events import UiEventArguments
 from ex4nicegui.reactive import rxui
-from ex4nicegui.reactive.EChartsComponent.ECharts import (
-    EChartsMouseEventArguments,
-    echarts,
-)
+from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
 from nicegui import ui
 from ex4nicegui.bi.dataSource import DataSource
 from .models import UiResult
@@ -21,7 +18,7 @@ class EChartsResult(UiResult[echarts]):
         super().__init__(element, dataSource)
         self.chart_update = chart_update
 
-    def on_chart_click(self, handler: Callable[[EChartsMouseEventArguments], Any]):
+    def on_chart_click(self, handler: Callable[[UiEventArguments], Any]):
         return self.element.echarts_on("click", handler)
 
     def on_chart_click_blank(self, handler: Callable[[UiEventArguments], Any]):
