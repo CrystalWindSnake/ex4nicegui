@@ -1,6 +1,6 @@
 from typing import List, Optional
 import typing
-from .types import _T_event_name, _T_mouse_event_name, _T_generic_event_name
+from .types import _T_event_name, _T_mouse_event_name
 from .events import EChartsMouseEventArguments, _Mouse_Event_Arguments_Fields
 from nicegui.events import UiEventArguments, GenericEventArguments
 from functools import lru_cache
