@@ -7,9 +7,7 @@ from typing import (
     Optional,
     Union,
 )
-from typing_extensions import Literal
-from dataclasses import dataclass
-from nicegui.dataclasses import KWONLY_SLOTS
+
 from nicegui.events import (
     handle_event,
     UiEventArguments,
@@ -21,50 +19,11 @@ from pathlib import Path
 import nicegui
 import uuid
 
+from .types import _T_echats_on_callback, _T_mouse_event_name, _Chart_Click_Args
+from .event import EChartsMouseEventArguments
+
 NG_ROOT = Path(nicegui.__file__).parent / "elements"
 libraries = [NG_ROOT / "lib/echarts/echarts.min.js"]
-
-
-_Chart_Click_Args = [
-    "componentType",
-    "seriesType",
-    "seriesIndex",
-    "seriesName",
-    "name",
-    "dataIndex",
-    "data",
-    "dataType",
-    "value",
-    "color",
-]
-
-
-@dataclass(**KWONLY_SLOTS)
-class EChartsMouseEventArguments(UiEventArguments):
-    componentType: str
-    seriesType: str
-    seriesIndex: int
-    seriesName: str
-    name: str
-    dataIndex: int
-    data: dict
-    dataType: Optional[str]
-    value: Any
-    color: str
-
-
-_T_echats_on_callback = Callable[[EChartsMouseEventArguments], Any]
-_T_mouse_event_name = Literal[
-    "click",
-    "dblclick",
-    "mousedown",
-    "mousemove",
-    "mouseup",
-    "mouseover",
-    "mouseout",
-    "globalout",
-    "contextmenu",
-]
 
 
 class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ignore
