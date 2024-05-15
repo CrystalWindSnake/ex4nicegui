@@ -3,7 +3,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    List,
     Optional,
     Union,
 )
@@ -14,7 +13,6 @@ from nicegui.events import (
 )
 from nicegui.element import Element
 from nicegui.awaitable_response import AwaitableResponse
-from nicegui import ui
 from pathlib import Path
 import nicegui
 import uuid
