@@ -6,18 +6,22 @@ from typing import (
     Optional,
     Union,
 )
+import typing
 
-from nicegui.events import (
-    handle_event,
-    UiEventArguments,
-)
+from nicegui.events import handle_event, UiEventArguments, GenericEventArguments
+from nicegui import ui, Client
 from nicegui.element import Element
 from nicegui.awaitable_response import AwaitableResponse
 from pathlib import Path
 import nicegui
 import uuid
 
-from .types import _T_echats_on_callback, _T_mouse_event_name, _Chart_Click_Args
+from .types import (
+    _T_echats_on_callback,
+    _T_mouse_event_name,
+    _Chart_Click_Args,
+    _T_event_name,
+)
 from .event import EChartsMouseEventArguments
 from ex4nicegui.reactive.deferredTask import DeferredTask
 
@@ -52,13 +56,12 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
 
         def echartsOn_handler(e):
             callbackId = e.args["callbackId"]
+            event_name = e.args["eventName"]
             params: Dict = e.args["params"]
-            params["dataType"] = params.get("dataType")
 
             if callbackId in self._echarts_on_callback_map:
-                event_args = EChartsMouseEventArguments(
-                    sender=e.sender, client=e.client, **params
-                )
+                event_args = _create_event_args(e.sender, e.client, event_name, params)
+
                 handler = self._echarts_on_callback_map[callbackId]
 
                 handle_event(handler, event_args)
@@ -118,7 +121,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
 
     def echarts_on(
         self,
-        event_name: _T_mouse_event_name,
+        event_name: _T_event_name,
         handler: _T_echats_on_callback,
         query: Optional[Union[str, Dict]] = None,
     ):
@@ -157,3 +160,20 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
             timeout=timeout,
             check_interval=check_interval,
         )
+
+
+_event_args_map = {
+    event: EChartsMouseEventArguments for event in typing.get_args(_T_mouse_event_name)
+}
+
+
+def _create_event_args(
+    sender: ui.element, client: Client, event_name: str, params: Dict
+):
+    event_args_type = _event_args_map.get(event_name, GenericEventArguments)
+
+    if event_args_type is EChartsMouseEventArguments:
+        params["dataType"] = params.get("dataType")
+        return EChartsMouseEventArguments(sender=sender, client=client, **params)
+
+    return GenericEventArguments(sender=sender, client=client, args=params)

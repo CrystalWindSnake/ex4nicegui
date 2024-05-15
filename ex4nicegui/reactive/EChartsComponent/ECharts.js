@@ -89,7 +89,7 @@ export default {
           color: e.color,
         };
 
-        this.$emit('event_on', { params: eventParams, callbackId });
+        this.$emit('event_on', { params: eventParams, callbackId, eventName });
       });
 
 
