@@ -82,10 +82,12 @@ export default {
           dataType: e.dataType,
           value: e.value,
           color: e.color,
-        }
+        };
+
+        this.$emit('event_on', { params: eventParams, callbackId });
       });
 
-      this.$emit('event_on', { params: eventParams, callbackId });
+
     },
 
     run_chart_method(name, ...args) {
