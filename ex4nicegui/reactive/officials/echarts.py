@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, cast, Optional
 from ex4nicegui.reactive.utils import ParameterClassifier
-from ex4nicegui.utils.signals import on
-
 from ex4nicegui.utils.signals import (
     ReadonlyRef,
     is_ref,
@@ -10,6 +8,7 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     to_value,
     to_raw,
+    on,
 )
 from .base import BindableUi
 from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
