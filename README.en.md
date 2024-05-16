@@ -618,6 +618,23 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 
 ---
 
+### bind_prop
+Binds a property.
+
+```python
+label = to_ref("hello")
+
+rxui.button("").bind_prop("label", label)
+# Functions are also permissible
+rxui.button("").bind_prop(
+    "label", lambda: f"{label.value} world"
+)
+
+rxui.input(value=label)
+```
+
+---
+
 ### rxui.echarts
 Charting with echarts
 
