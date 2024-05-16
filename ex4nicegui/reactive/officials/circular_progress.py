@@ -5,7 +5,7 @@ from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
+    TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
     to_value,
 )
@@ -50,13 +50,13 @@ class CircularProgressBindableUi(
     def value(self):
         return self.element.value
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "value":
             return self.bind_value(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_value(self, ref_ui: ReadonlyRef[float]):
+    def bind_value(self, ref_ui: TGetterOrReadonlyRef[float]):
         @ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))

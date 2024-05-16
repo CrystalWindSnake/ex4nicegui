@@ -6,7 +6,7 @@ from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
+    TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
     to_value,
 )
@@ -35,7 +35,7 @@ class IconBindableUi(BindableUi[ui.icon]):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "name":
             return self.bind_name(ref_ui)
 
@@ -44,10 +44,10 @@ class IconBindableUi(BindableUi[ui.icon]):
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_color(self, ref_ui: ReadonlyRef):
+    def bind_color(self, ref_ui: TGetterOrReadonlyRef):
         return _bind_color(self, ref_ui)
 
-    def bind_name(self, ref_ui: ReadonlyRef):
+    def bind_name(self, ref_ui: TGetterOrReadonlyRef):
         @ui_effect
         def _():
             ele = cast(TextColorElement, self.element)

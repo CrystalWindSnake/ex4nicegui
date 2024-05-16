@@ -3,7 +3,7 @@ from ex4nicegui.utils.apiEffect import ui_effect
 
 
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
+    TGetterOrReadonlyRef,
     Ref,
     _TMaybeRef as TMaybeRef,
     effect,
@@ -53,7 +53,7 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "value":
             return self.bind_value(ref_ui)
         if prop == "password":
@@ -61,7 +61,7 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_value(self, ref_ui: ReadonlyRef[str]):
+    def bind_value(self, ref_ui: TGetterOrReadonlyRef[str]):
         @ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
@@ -69,7 +69,7 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
 
         return self
 
-    def bind_password(self, ref_ui: ReadonlyRef[bool]):
+    def bind_password(self, ref_ui: TGetterOrReadonlyRef[bool]):
         @ui_effect
         def _():
             self.element._props["type"] = "password" if to_value(ref_ui) else "text"

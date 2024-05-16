@@ -128,6 +128,7 @@ class BindableUi(Generic[TWidget]):
         return self.element.remove(element)
 
     def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef[Any]):
+        """test"""
         if prop == "visible":
             return self.bind_visible(ref_ui)
 

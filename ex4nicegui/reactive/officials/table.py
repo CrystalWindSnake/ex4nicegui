@@ -9,6 +9,7 @@ from typing_extensions import Literal
 from ex4nicegui.reactive.utils import ParameterClassifier, dataframe2col_str
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
+    TGetterOrReadonlyRef,
     ReadonlyRef,
     is_ref,
     ref_computed,
@@ -143,7 +144,7 @@ class TableBindableUi(BindableUi[ui.table]):
         ]
         return cls(cols, rows, **other_kws)
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "dataframe":
             return self.bind_dataframe(ref_ui)
 
@@ -155,7 +156,7 @@ class TableBindableUi(BindableUi[ui.table]):
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_dataframe(self, ref_df: ReadonlyRef):
+    def bind_dataframe(self, ref_df: TGetterOrReadonlyRef):
         @ref_computed
         def cp_converted_df():
             df = ref_df.value
@@ -180,7 +181,7 @@ class TableBindableUi(BindableUi[ui.table]):
 
         return self
 
-    def bind_rows(self, ref_ui: ReadonlyRef[List[Dict]]):
+    def bind_rows(self, ref_ui: TGetterOrReadonlyRef[List[Dict]]):
         @on(ref_ui, deep=True)
         def _():
             ele = self.element
@@ -189,7 +190,7 @@ class TableBindableUi(BindableUi[ui.table]):
 
         return self
 
-    def bind_columns(self, ref_ui: ReadonlyRef[List[Dict]]):
+    def bind_columns(self, ref_ui: TGetterOrReadonlyRef[List[Dict]]):
         @on(ref_ui, deep=True)
         def _():
             ele = self.element

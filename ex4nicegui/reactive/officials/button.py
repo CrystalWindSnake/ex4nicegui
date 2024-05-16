@@ -5,7 +5,7 @@ from typing import (
 )
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
+    TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
     to_value,
 )
@@ -33,7 +33,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "text":
             return self.bind_text(ref_ui)
         if prop == "icon":
@@ -41,7 +41,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_text(self, ref_ui: ReadonlyRef):
+    def bind_text(self, ref_ui: TGetterOrReadonlyRef):
         @self._ui_effect
         def _():
             ele = self.element
@@ -50,7 +50,7 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
 
         return self
 
-    def bind_icon(self, ref_ui: ReadonlyRef):
+    def bind_icon(self, ref_ui: TGetterOrReadonlyRef[str]):
         @self._ui_effect
         def _():
             ele = self.element
