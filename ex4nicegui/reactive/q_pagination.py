@@ -1,6 +1,7 @@
 from typing import Any, Optional, Callable
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
+    TGetterOrReadonlyRef,
     to_value,
     _TMaybeRef as TMaybeRef,
 )
@@ -35,13 +36,13 @@ class PaginationBindableUi(BindableUi[ui.pagination]):
     def value(self):
         return self.element.value
 
-    def bind_prop(self, prop: str, ref_ui: TMaybeRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "value":
             return self.bind_value(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_value(self, ref_ui: TMaybeRef[int]):
+    def bind_value(self, ref_ui: TGetterOrReadonlyRef[int]):
         @self._ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))

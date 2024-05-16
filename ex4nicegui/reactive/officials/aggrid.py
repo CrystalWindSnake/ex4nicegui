@@ -6,11 +6,11 @@ from typing import (
     Optional,
 )
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
     is_ref,
     ref_computed,
     to_value,
     _TMaybeRef as TMaybeRef,
+    TGetterOrReadonlyRef,
 )
 from ex4nicegui.utils.apiEffect import ui_effect
 from nicegui import ui
@@ -78,13 +78,13 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         options = {"columnDefs": columnDefs, "rowData": rowData}
         return cls(options, **org_kws)
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef[Any]):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef[Any]):
         if prop == "options":
             return self.bind_options(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_options(self, ref_ui: ReadonlyRef[List[Dict]]):
+    def bind_options(self, ref_ui: TGetterOrReadonlyRef[List[Dict]]):
         @ui_effect
         def _():
             ele = self.element

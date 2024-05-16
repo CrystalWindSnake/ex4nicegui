@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, cast, Optional
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
+    TGetterOrReadonlyRef,
     is_ref,
     ref_computed,
     _TMaybeRef as TMaybeRef,
@@ -116,13 +116,13 @@ class EChartsBindableUi(BindableUi[echarts]):
             code = code.read_text("utf8")
         return cls(code=code)
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "options":
             return self.bind_options(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_options(self, ref_ui: ReadonlyRef[Dict]):
+    def bind_options(self, ref_ui: TGetterOrReadonlyRef[Dict]):
         @on(ref_ui)
         def _():
             ele = self.element

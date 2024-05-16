@@ -8,7 +8,7 @@ from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
-    ReadonlyRef,
+    TGetterOrReadonlyRef,
     Ref,
     _TMaybeRef as TMaybeRef,
     is_setter_ref,
@@ -69,20 +69,20 @@ class ColorPickerBindableUi(BindableUi[ui.color_picker]):
     def value(self):
         return self.element.value
 
-    def bind_prop(self, prop: str, ref_ui: ReadonlyRef):
+    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "value":
             return self.bind_value(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_color(self, ref_ui: ReadonlyRef[str]):
+    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
         @ui_effect
         def _():
             self.element.set_color(to_value(ref_ui))
 
         return self
 
-    def bind_value(self, ref_ui: ReadonlyRef[bool]):
+    def bind_value(self, ref_ui: TGetterOrReadonlyRef[bool]):
         @ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))

@@ -2,7 +2,15 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from .screen import ScreenPage
-from .utils import SelectUtils, SwitchUtils, LabelUtils, set_test_id
+from .utils import (
+    SelectUtils,
+    SwitchUtils,
+    LabelUtils,
+    set_test_id,
+    InputUtils,
+    ButtonUtils,
+)
+from playwright.sync_api import expect
 
 
 def test_bind_classes(page: ScreenPage, page_path: str):
@@ -220,3 +228,33 @@ def test_bind_style(page: ScreenPage, page_path: str):
         assert label.get_style_attr_value() == "background-color: green; color: yellow;"
 
     test_binding_to_dict()
+
+
+def test_bind_prop(page: ScreenPage, page_path: str):
+    @ui.page(page_path)
+    def _():
+        label = to_ref("hello")
+
+        rxui.element("div").props('innerText="target1"').bind_prop("prop", label)
+        rxui.element("div").props('innerText="target2"').bind_prop(
+            "prop", lambda: f"{label.value} world"
+        )
+
+        rxui.input(value=label)
+
+    page.open(page_path)
+    page.wait(600)
+
+    pw_page = page._page
+
+    target1 = pw_page.get_by_text("target1")
+    target2 = pw_page.get_by_text("target2")
+    input = pw_page.get_by_role("textbox")
+
+    expect(target1).to_have_attribute("prop", "hello")
+    expect(target2).to_have_attribute("prop", "hello world")
+
+    input.fill("hello foo")
+
+    expect(target1).to_have_attribute("prop", "hello foo")
+    expect(target2).to_have_attribute("prop", "hello foo world")
