@@ -625,6 +625,25 @@ rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 
 `bind_style` 传入字典，`key` 为样式名字，`value` 为样式值，响应式字符串
 
+---
+
+### bind_prop
+
+绑定单个属性
+
+```python
+
+label = to_ref("hello")
+
+rxui.button("").bind_prop("label", label)
+# 允许使用函数
+rxui.button("").bind_prop(
+    "label", lambda: f"{label.value} world"
+)
+
+rxui.input(value=label)
+```
+
 
 ---
 

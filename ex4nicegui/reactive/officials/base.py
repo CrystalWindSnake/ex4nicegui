@@ -128,7 +128,16 @@ class BindableUi(Generic[TWidget]):
         return self.element.remove(element)
 
     def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef[Any]):
-        """test"""
+        """data binding is manipulating an element's property
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind_prop
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bind_prop
+
+        Args:
+            prop (str): property name
+            ref_ui (TGetterOrReadonlyRef[Any]): a reference to the value to bind to
+
+        """
         if prop == "visible":
             return self.bind_visible(ref_ui)
 
