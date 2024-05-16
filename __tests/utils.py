@@ -111,6 +111,10 @@ class SelectUtils(BaseUiUtils):
         #     has=self.page.get_by_test_id(test_id)
         # )
 
+    def show_popup_click(self):
+        self.target_box.click()
+        self.page.wait_for_timeout(600)
+
     def click(self):
         self.target_box.click()
 
@@ -134,12 +138,12 @@ class SelectUtils(BaseUiUtils):
     #     return expect(self.target_locator).to_have_value(value)
 
     def get_selected_values(self):
-        return self.target_locator.locator(".q-chip__content").all_inner_texts()
+        return self.target_box.locator(".q-chip__content").all_inner_texts()
 
     def input_and_enter(self, text: str):
-        self.target_locator.type(text)
+        self.target_box.type(text)
         self.page.wait_for_timeout(500)
-        self.target_locator.press("Enter")
+        self.target_box.press("Enter")
 
 
 class ColorPickerUtils(BaseUiUtils):

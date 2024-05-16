@@ -1,12 +1,12 @@
 from nicegui import ui
-from .screen import ScreenPage
+from .screen import BrowserManager
 import pandas as pd
 
 from ex4nicegui import bi
 from .utils import SelectUtils, set_test_id, AggridUtils
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         data = [
@@ -25,36 +25,33 @@ def test_base(page: ScreenPage, page_path: str):
 
         source = bi.data_source(df)
 
-        set_test_id(source.ui_select("level1"), "target1")
-        set_test_id(source.ui_select("level2"), "target2")
-        set_test_id(source.ui_select("level3"), "target3")
+        source.ui_select("level1").classes("target1")
+        source.ui_select("level2").classes("target2")
+        source.ui_select("level3").classes("target3")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target1 = SelectUtils(page, "target1")
-    target2 = SelectUtils(page, "target2")
-    target3 = SelectUtils(page, "target3")
+    target1 = SelectUtils(page.locator(".target1"), page)
+    target2 = SelectUtils(page.locator(".target2"), page)
+    target3 = SelectUtils(page.locator(".target3"), page)
 
-    target1.click()
-    page.wait()
+    target1.show_popup_click()
     menu_items = target1.get_options_values()
     assert menu_items == ["L1_A", "L1_B"]
     target1.click()
 
-    target2.click()
-    page.wait()
+    target2.show_popup_click()
     menu_items = target2.get_options_values()
     assert menu_items == ["L2_M_1", "L2_M_2", "L2_M_3", "L2_M_4"]
     target2.click()
 
-    target3.click()
-    page.wait()
+    target3.show_popup_click()
     menu_items = target3.get_options_values()
     assert menu_items == [f"L3_Z_{n}" for n in range(1, 8)]
     target3.click()
 
 
-def test_sort_options(page: ScreenPage, page_path: str):
+def test_sort_options(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         data = pd.DataFrame(
@@ -65,23 +62,20 @@ def test_sort_options(page: ScreenPage, page_path: str):
             }
         )
         source = bi.data_source(data)
-
-        set_test_id(
-            source.ui_select("name", sort_options={"cls": "asc", "value": "desc"}),
-            "target",
+        source.ui_select("name", sort_options={"cls": "asc", "value": "desc"}).classes(
+            "target"
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target = SelectUtils(page, "target")
+    target = SelectUtils(page.locator(".target"), page)
 
-    target.click()
-    page.wait()
+    target.show_popup_click()
     menu_items = target.get_options_values()
     assert menu_items == ["c", "b", "a", "d", "f"]
 
 
-def test_null_options(page: ScreenPage, page_path: str):
+def test_null_options(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         data = pd.DataFrame(
@@ -92,40 +86,29 @@ def test_null_options(page: ScreenPage, page_path: str):
             }
         )
         source = bi.data_source(data)
+        source.ui_select("cls").classes("target1")
+        source.ui_select("cls", exclude_null_value=True).classes("target2")
 
-        set_test_id(
-            source.ui_select("cls"),
-            "target1",
-        )
-
-        set_test_id(
-            source.ui_select("cls", exclude_null_value=True),
-            "target2",
-        )
-
-    page.open(page_path)
+    page = browser.open(page_path)
 
     # target1
-    target1 = SelectUtils(page, "target1")
+    target1 = SelectUtils(page.locator(".target1"), page)
 
-    target1.click()
-    page.wait()
+    target1.show_popup_click()
     menu_items = target1.get_options_values()
     assert menu_items == ["c1", "c2", "c3", ""]
 
     # target2
-    target2 = SelectUtils(page, "target2")
+    target2 = SelectUtils(page.locator(".target2"), page)
 
-    page.wait()
-    page._page.press("body", "Enter")
-    page.wait()
-    target2.click()
-    page.wait()
+    page.press("body", "Enter")
+
+    target2.show_popup_click()
     menu_items = target2.get_options_values()
     assert menu_items == ["c1", "c2", "c3"]
 
 
-def test_default_value(page: ScreenPage, page_path: str):
+def test_default_value(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         data = pd.DataFrame(
@@ -143,18 +126,17 @@ def test_default_value(page: ScreenPage, page_path: str):
             df["value"] = df["value"] * 100
             return df
 
-        set_test_id(ds.ui_select("name", value=["a", "b"]), "name select")
-        set_test_id(ds.ui_select("cls", multiple=False, value="c1"), "cls select")
+        ds.ui_select("name", value=["a", "b"]).classes("name-select")
+        ds.ui_select("cls", multiple=False, value="c1").classes("cls-select")
+        ds.ui_aggrid().classes("table")
+        ds1.ui_aggrid().classes("table1")
 
-        set_test_id(ds.ui_aggrid(), "table")
-        set_test_id(ds1.ui_aggrid(), "table1")
+    page = browser.open(page_path)
 
-    page.open(page_path)
-
-    name_select = SelectUtils(page, "name select")
-    cls_select = SelectUtils(page, "cls select")
-    table = AggridUtils(page, "table")
-    table1 = AggridUtils(page, "table1")
+    name_select = SelectUtils(page.locator(".name-select"), page)
+    cls_select = SelectUtils(page.locator(".cls-select"), page)
+    table = AggridUtils(page.locator(".table"))
+    table1 = AggridUtils(page.locator(".table1"))
 
     assert name_select.get_selected_values() == ["a", "b"]
     assert cls_select.get_selected_values() == ["c1"]
@@ -170,7 +152,7 @@ def test_default_value(page: ScreenPage, page_path: str):
     ]
 
 
-def test_update_options(page: ScreenPage, page_path: str):
+def test_update_options(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         df = pd.DataFrame(
@@ -187,22 +169,16 @@ def test_update_options(page: ScreenPage, page_path: str):
             }
         )
         ds = bi.data_source(df)
+        ds.ui_select("cls1", value="x1", multiple=False).classes("min-w-[20ch] cls1")
 
-        set_test_id(
-            ds.ui_select("cls1", value="x1", multiple=False).classes("min-w-[20ch]"),
-            "cls1",
-        )
-        set_test_id(
-            ds.ui_select("cls2", clearable=False).classes("min-w-[20ch]"), "cls2"
-        )
+        ds.ui_select("cls2", clearable=False).classes("min-w-[20ch] cls2")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    cls1_select = SelectUtils(page, "cls1")
-    cls2_select = SelectUtils(page, "cls2")
+    cls1_select = SelectUtils(page.locator(".cls1"), page)
+    cls2_select = SelectUtils(page.locator(".cls2"), page)
 
     cls2_select.click_and_select("a")
     cls1_select.click_and_select("x2")
     cls2_select.click_and_select("a")
-    page.wait()
     assert cls2_select.get_selected_values() == []
