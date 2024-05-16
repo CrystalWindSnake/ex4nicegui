@@ -266,8 +266,8 @@ class EChartsUtils(BaseUiUtils):
 
 
 class TableUtils(BaseUiUtils):
-    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
-        super().__init__(screen_page, test_id)
+    def __init__(self, target: Locator) -> None:
+        self.target_locator = target
 
     def expect_cell_to_be_visible(self, cell_values: List):
         for cell_value in cell_values:
