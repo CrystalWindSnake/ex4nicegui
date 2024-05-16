@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import List, Optional, Any, Callable, Union
-from playwright.sync_api import expect, Locator
+from playwright.sync_api import expect, Locator, Page
 from .screen import BrowserManager
 from typing_extensions import Protocol, Self
 
@@ -103,12 +103,13 @@ class BaseUiUtils:
 
 
 class SelectUtils(BaseUiUtils):
-    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
-        super().__init__(screen_page, test_id)
+    def __init__(self, target: Locator, page: Page) -> None:
+        self.target_box = target
+        self.page = page
 
-        self.target_box = self.page.locator("css=label.q-select").filter(
-            has=self.page.get_by_test_id(test_id)
-        )
+        # self.target_box = self.page.locator("css=label.q-select").filter(
+        #     has=self.page.get_by_test_id(test_id)
+        # )
 
     def click(self):
         self.target_box.click()
@@ -156,8 +157,8 @@ class ColorPickerUtils(BaseUiUtils):
 
 
 class RadioUtils(BaseUiUtils):
-    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
-        super().__init__(screen_page, test_id)
+    def __init__(self, target: Locator) -> None:
+        self.target_locator = target
 
     def is_checked_by_label(self, label: str):
         return self.target_locator.get_by_label(label).is_checked()
@@ -173,8 +174,8 @@ class RadioUtils(BaseUiUtils):
 
 
 class EChartsUtils(BaseUiUtils):
-    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
-        super().__init__(screen_page, test_id)
+    def __init__(self, target: Locator) -> None:
+        self.target_locator = target
 
     def assert_canvas_exists(self):
         expect(self.target_locator.locator("css=canvas")).to_be_visible(timeout=5000)
@@ -359,9 +360,9 @@ class AggridUtils:
         return [r.get_by_role("gridcell").all() for r in rows]
 
 
-class ButtonUtils(BaseUiUtils):
-    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
-        super().__init__(screen_page, test_id)
+class ButtonUtils:
+    def __init__(self, button: Locator) -> None:
+        self.target_locator = button
 
     def click(self):
         self.target_locator.click()
