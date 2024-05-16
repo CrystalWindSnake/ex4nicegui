@@ -3,7 +3,6 @@ from .screen import BrowserManager
 import pandas as pd
 
 from ex4nicegui import bi
-from .utils import set_test_id
 from . import utils as cp_utils
 from pyecharts.charts import Bar
 
