@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Any, Callable, Union
 from playwright.sync_api import expect, Locator
-from .screen import ScreenPage
+from .screen import BrowserManager
 from typing_extensions import Protocol, Self
 
 
@@ -58,7 +58,7 @@ def tran_str(value):
 class BaseUiUtils:
     def __init__(
         self,
-        screen_page: ScreenPage,
+        screen_page: BrowserManager,
         test_id: str,
     ) -> None:
         self.screen_page = screen_page
@@ -103,7 +103,7 @@ class BaseUiUtils:
 
 
 class SelectUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
         self.target_box = self.page.locator("css=label.q-select").filter(
@@ -142,7 +142,7 @@ class SelectUtils(BaseUiUtils):
 
 
 class ColorPickerUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def expect_has_button(self):
@@ -156,7 +156,7 @@ class ColorPickerUtils(BaseUiUtils):
 
 
 class RadioUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def is_checked_by_label(self, label: str):
@@ -173,7 +173,7 @@ class RadioUtils(BaseUiUtils):
 
 
 class EChartsUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def assert_canvas_exists(self):
@@ -261,7 +261,7 @@ class EChartsUtils(BaseUiUtils):
 
 
 class TableUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def expect_cell_to_be_visible(self, cell_values: List):
@@ -303,7 +303,7 @@ class TableUtils(BaseUiUtils):
 
 
 class MermaidUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def click_node(self, nodeId: str):
@@ -313,14 +313,15 @@ class MermaidUtils(BaseUiUtils):
         expect(self.target_locator.locator("css=svg")).to_be_visible(timeout=5000)
 
 
-class AggridUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
-        super().__init__(screen_page, test_id)
+class AggridUtils:
+    def __init__(self, grid: Locator) -> None:
+        # super().__init__(screen_page, test_id)
+        self.grid = grid
 
     def expect_cell_to_be_visible(self, cell_values: List):
         for cell_value in cell_values:
             expect(
-                self.target_locator.get_by_role(
+                self.grid.get_by_role(
                     "gridcell",
                     name=cell_value,
                     exact=True,
@@ -330,15 +331,13 @@ class AggridUtils(BaseUiUtils):
     def expect_selection_cell_to_be_visible(self, cell_values: List):
         for cell_value in cell_values:
             expect(
-                self.target_locator.get_by_role("gridcell")
-                .locator("div")
-                .filter(has_text="a")
+                self.grid.get_by_role("gridcell").locator("div").filter(has_text="a")
             ).to_be_visible()
 
     def expect_cell_not_to_be_visible(self, cell_values: List):
         for cell_value in cell_values:
             expect(
-                self.target_locator.get_by_role(
+                self.grid.get_by_role(
                     "gridcell",
                     name=cell_value,
                     exact=True,
@@ -348,7 +347,7 @@ class AggridUtils(BaseUiUtils):
     def get_rows(
         self,
     ):
-        return self.target_locator.locator(".ag-body-viewport").get_by_role("row").all()
+        return self.grid.locator(".ag-body-viewport").get_by_role("row").all()
 
     def get_data(self):
         return [
@@ -361,7 +360,7 @@ class AggridUtils(BaseUiUtils):
 
 
 class ButtonUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def click(self):
@@ -372,7 +371,7 @@ class ButtonUtils(BaseUiUtils):
 
 
 class LabelUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def get_text(self):
@@ -383,7 +382,9 @@ class LabelUtils(BaseUiUtils):
 
 
 class InputUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str, target_box=None) -> None:
+    def __init__(
+        self, screen_page: BrowserManager, test_id: str, target_box=None
+    ) -> None:
         super().__init__(screen_page, test_id)
 
         self.target_box = target_box or self.page.locator("css=label.q-input").filter(
@@ -430,12 +431,12 @@ class InputUtils(BaseUiUtils):
 
 
 class InputNumberUtils(InputUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
 
 class TextareaUtils(InputUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         page = screen_page._page
         target_box = page.locator("css=label.q-textarea").filter(
             has=page.get_by_test_id(test_id)
@@ -444,7 +445,7 @@ class TextareaUtils(InputUtils):
 
 
 class SwitchUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def click(self):
@@ -452,7 +453,7 @@ class SwitchUtils(BaseUiUtils):
 
 
 class ImageUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
         self.__img_target = self.target_locator.locator("img")
 
@@ -471,7 +472,7 @@ class ImageUtils(BaseUiUtils):
 
 
 class CheckboxUtils(BaseUiUtils):
-    def __init__(self, screen_page: ScreenPage, test_id: str) -> None:
+    def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
         super().__init__(screen_page, test_id)
 
     def is_checked(self):
