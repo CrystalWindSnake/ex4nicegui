@@ -1,7 +1,7 @@
 from nicegui import ui
 import pytest
 from ex4nicegui import to_ref, on, effect, event_batch
-from .screen import ScreenPage
+from .screen import BrowserManager
 from .utils import fn, ButtonUtils, set_test_id
 
 

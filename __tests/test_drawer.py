@@ -1,7 +1,7 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import ScreenPage
+from .screen import BrowserManager
 
 
 def test_display(browser: BrowserManager, page_path: str):
@@ -25,7 +25,7 @@ def test_toggle_side(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        with rxui.drawer(r_side):
+        with rxui.drawer(r_side):  # type: ignore
             ui.label("drawer showed")
             rxui.label(r_side)
 
@@ -34,19 +34,21 @@ def test_toggle_side(browser: BrowserManager, page_path: str):
 
             rxui.button("switch side", on_click=onclick).classes("my-btn")
 
-    body_width = page._page.evaluate("()=>document.body.clientWidth")
-
     page = browser.open(page_path)
+
+    btn = page.Button(".my-btn")
+
+    body_width = page.evaluate("()=>document.body.clientWidth")
     page.should_contain("drawer showed")
-    rect = page._page.get_by_text("drawer showed").bounding_box()
+    rect = page.get_by_text("drawer showed").bounding_box()
     assert rect is not None
     assert rect["x"] < body_width / 2
 
-    page.wait()
-    page._page.query_selector(".my-btn").click()
-    page.wait()
+    # page.wait()
+    btn.click()
+    # page.wait()
 
-    rect = page._page.get_by_text("drawer showed").bounding_box()
+    rect = page.get_by_text("drawer showed").bounding_box()
     assert rect is not None
     assert rect["x"] > body_width / 2
 
@@ -60,7 +62,7 @@ def test_toggle_show(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         with rxui.drawer(value=r_show):
-            ui.label("drawer showed")
+            ui.label("drawer showed").classes("label")
 
             def onclick():
                 toggle_show()
@@ -68,16 +70,21 @@ def test_toggle_show(browser: BrowserManager, page_path: str):
         rxui.button("switch show", on_click=onclick).classes("my-btn")
 
     page = browser.open(page_path)
+
+    btn = page.Button(".my-btn")
+    label = page.Label(".label")
+
     page.should_contain("drawer showed")
 
-    page.wait()
-    page._page.query_selector(".my-btn").click()
-    page.wait()
+    # page.wait()
+    btn.click()
+    # page.wait()
 
-    page.should_not_contain("drawer showed")
+    # page.should_not_contain("drawer showed")
+    label.expect_to_be_hidden()
 
-    page.wait()
-    page._page.query_selector(".my-btn").click()
-    page.wait()
+    # page.wait()
+    btn.click()
+    # page.wait()
 
     page.should_contain("drawer showed")

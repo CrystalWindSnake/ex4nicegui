@@ -1,7 +1,7 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, effect
-from .screen import ScreenPage
+from .screen import BrowserManager
 
 
 def test_mouse_move(browser: BrowserManager, page_path: str):

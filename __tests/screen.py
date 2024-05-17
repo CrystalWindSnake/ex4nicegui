@@ -107,8 +107,34 @@ class PageUtils:
     ):
         return self._page.wait_for_timeout(*args, **kwargs)
 
+    @common.with_signature_from(Page.evaluate)
+    def evaluate(
+        self,
+        *args,
+        **kwargs,
+    ):
+        return self._page.evaluate(*args, **kwargs)
+
+    @common.with_signature_from(Page.query_selector)
+    def query_selector(
+        self,
+        *args,
+        **kwargs,
+    ):
+        target = self._page.query_selector(*args, **kwargs)
+        assert target
+        target.wait_for_element_state("stable")
+        return target
+
     def should_contain(self, text: str):
-        expect(self._page.locator("body")).to_contain_text(text)
+        # expect(self._page.locator("body")).to_contain_text(text)
+        expect(self.get_by_text(text)).to_be_visible()
+
+    def should_not_contain(self, text: str):
+        expect(self._page.locator("body")).not_to_contain_text(text)
+
+    def get_by_text(self, text: str):
+        return self._page.get_by_text(text)
 
     def Base(self, selector: Union[str, Locator]):
         return utils.BaseUiUtils(self._page, selector)

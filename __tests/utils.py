@@ -110,6 +110,9 @@ class BaseUiUtils:
     def get_by_text(self, text: str):
         return self.target_locator.get_by_text(text)
 
+    def expect_to_be_hidden(self):
+        expect(self.target_locator).to_be_hidden()
+
     @property
     def expect(self):
         return expect(self.target_locator)
@@ -380,6 +383,7 @@ class ButtonUtils(BaseUiUtils):
         super().__init__(page, target_locator)
 
     def click(self):
+        self.target_locator.wait_for(state="attached")
         self.target_locator.click()
 
     def expect_enabled(self):

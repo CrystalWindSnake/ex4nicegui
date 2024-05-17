@@ -1,7 +1,7 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, effect, deep_ref
-from .screen import ScreenPage
+from .screen import BrowserManager
 import pandas as pd
 from .utils import TableUtils, set_test_id, InputUtils, ButtonUtils
 

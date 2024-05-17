@@ -2,7 +2,7 @@ from pathlib import Path
 from ex4nicegui.reactive import rxui
 from nicegui import ui, app
 from ex4nicegui import ref_computed, to_ref, deep_ref
-from .screen import ScreenPage
+from .screen import BrowserManager
 from .utils import EChartsUtils, ButtonUtils, set_test_id, InputNumberUtils, LabelUtils
 from pyecharts import options as opts
 from pyecharts.charts import Bar

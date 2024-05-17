@@ -3,7 +3,7 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import deep_ref
-from .screen import ScreenPage
+from .screen import BrowserManager
 from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
 from playwright.sync_api import expect
 from dataclasses import dataclass

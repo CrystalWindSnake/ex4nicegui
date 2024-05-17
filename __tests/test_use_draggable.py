@@ -3,7 +3,7 @@ from ex4nicegui.reactive import rxui
 from ex4nicegui.reactive.UseDraggable.UseDraggable import UseDraggable
 from nicegui import ui
 from ex4nicegui import ref_computed
-from .screen import ScreenPage
+from .screen import BrowserManager
 
 
 def test_draggable(browser: BrowserManager, page_path: str):

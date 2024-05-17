@@ -1,7 +1,7 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import ScreenPage
+from .screen import BrowserManager
 
 
 def test_const_data(browser: BrowserManager, page_path: str):

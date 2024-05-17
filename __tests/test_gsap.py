@@ -1,7 +1,7 @@
 from pathlib import Path
 from nicegui import ui
 from ex4nicegui import gsap
-from .screen import ScreenPage
+from .screen import BrowserManager
 from .utils import LabelUtils, set_test_id
 
 

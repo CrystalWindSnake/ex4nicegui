@@ -1,6 +1,6 @@
 from nicegui import ui
 from ex4nicegui import to_ref, effect, on
-from .screen import ScreenPage
+from .screen import BrowserManager
 from .utils import fn
 
 
