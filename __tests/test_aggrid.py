@@ -4,7 +4,6 @@ from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import BrowserManager
 from playwright.sync_api import expect
-from .utils import AggridUtils
 
 
 def test_aggrid(browser: BrowserManager, page_path: str):
@@ -48,7 +47,7 @@ def test_aggrid_from_dataframe(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    AggridUtils(page.locator(".target")).expect_cell_to_be_visible(list("abcd"))
+    page.Aggrid(".target").expect_cell_to_be_visible(list("abcd"))
 
 
 def test_aggrid_from_dataframe_columns_define_fn(
@@ -63,6 +62,4 @@ def test_aggrid_from_dataframe_columns_define_fn(
 
     page = browser.open(page_path)
 
-    AggridUtils(page.locator(".target")).expect_selection_cell_to_be_visible(
-        list("abcd")
-    )
+    page.Aggrid(".target").expect_selection_cell_to_be_visible(list("abcd"))

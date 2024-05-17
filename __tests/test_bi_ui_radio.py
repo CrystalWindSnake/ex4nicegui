@@ -1,9 +1,7 @@
 from nicegui import ui
 from .screen import BrowserManager
 import pandas as pd
-
 from ex4nicegui import bi
-from .utils import RadioUtils
 
 
 def test_base(browser: BrowserManager, page_path: str):
@@ -39,8 +37,8 @@ def test_base(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    level1 = RadioUtils(page.locator(".level1"))
-    level2 = RadioUtils(page.locator(".level2"))
+    level1 = page.Radio(".level1")
+    level2 = page.Radio(".level2")
 
     assert not level1.is_checked_by_label("A值")
     assert not level1.is_checked_by_label("L1_B")
@@ -73,7 +71,7 @@ def test_sort_options(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    target = RadioUtils(page.locator(".name"))
+    target = page.Radio(".name")
 
     assert target.get_all_labels() == ["c", "b", "a", "d", "f"]
 
@@ -95,11 +93,11 @@ def test_null_options(browser: BrowserManager, page_path: str):
     page = browser.open(page_path)
 
     # target1
-    target1 = RadioUtils(page.locator(".target1"))
+    target1 = page.Radio(".target1")
 
     assert target1.get_all_labels() == ["c1", "c2", "c3", ""]
 
     # target2
-    target2 = RadioUtils(page.locator(".target2"))
+    target2 = page.Radio(".target2")
 
     assert target2.get_all_labels() == ["c1", "c2", "c3"]

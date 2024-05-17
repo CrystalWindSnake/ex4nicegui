@@ -3,7 +3,6 @@ from .screen import BrowserManager
 import pandas as pd
 
 from ex4nicegui import bi
-from . import utils as cp_utils
 from pyecharts.charts import Bar
 
 
@@ -62,28 +61,18 @@ def test_remove_filters(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    # reset_btn = cp_utils.ButtonUtils(page, "button")
+    remove_filters_btn = page.Button(".remove-filters")
+    name_select = page.Select(".name-select")
+    cls_select = page.Select(".cls-select")
+    cls_radio = page.Radio(".cls-radio")
+    bar_chart = page.ECharts(".echart-bar")
+    table1 = page.Aggrid(".table1")
+    table2 = page.Aggrid(".table2")
 
-    # name_select = cp_utils.SelectUtils(page, "name select")
-    # cls_select = cp_utils.SelectUtils(page, "cls select")
-    # cls_radio = cp_utils.RadioUtils(page, "cls radio")
-
-    # bar_chart = cp_utils.EChartsUtils(page, "echart bar")
-
-    # table1 = cp_utils.AggridUtils(page, "table1")
-    # table2 = cp_utils.AggridUtils(page, "table2")
-
-    remove_filters_btn = cp_utils.ButtonUtils(page.locator(".remove-filters"))
-    name_select = cp_utils.SelectUtils(page.locator(".name-select"), page)
-    cls_select = cp_utils.SelectUtils(page.locator(".cls-select"), page)
-    cls_radio = cp_utils.RadioUtils(page.locator(".cls-radio"))
-    bar_chart = cp_utils.EChartsUtils(page.locator(".echart-bar"))
-    table1 = cp_utils.AggridUtils(page.locator(".table1"))
-    table2 = cp_utils.AggridUtils(page.locator(".table2"))
-
+    # page.pause()
     name_select.click_and_select("a")
-    cls_select.click()
 
+    cls_select.show_popup_click()
     assert cls_select.get_options_values() == ["c1", "c2"]
 
     page.press("body", "Enter")
@@ -91,7 +80,7 @@ def test_remove_filters(browser: BrowserManager, page_path: str):
     name_select.click_cancel()
     name_select.click_and_select("d")
 
-    cls_select.click()
+    cls_select.show_popup_click()
     assert cls_select.get_options_values() == ["c2"]
 
     assert cls_radio.get_all_labels() == ["c2"]
@@ -173,16 +162,13 @@ def test_reload_source(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    reload_btn = cp_utils.ButtonUtils(page.locator(".reload-btn"))
-
-    name_select = cp_utils.SelectUtils(page.locator(".name-select"), page)
-    cls_select = cp_utils.SelectUtils(page.locator(".cls-select"), page)
-
-    name_radio = cp_utils.RadioUtils(page.locator(".name-radio"))
-    cls_radio = cp_utils.RadioUtils(page.locator(".cls-radio"))
-
-    table1 = cp_utils.AggridUtils(page.locator(".table1"))
-    table2 = cp_utils.AggridUtils(page.locator(".table2"))
+    reload_btn = page.Button(".reload-btn")
+    name_select = page.Select(".name-select")
+    # cls_select = page.Select(".cls-select")
+    name_radio = page.Radio(".name-radio")
+    cls_radio = page.Radio(".cls-radio")
+    table1 = page.Aggrid(".table1")
+    table2 = page.Aggrid(".table2")
 
     name_select.click_and_select("a")
 

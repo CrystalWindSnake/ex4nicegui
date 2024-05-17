@@ -3,7 +3,6 @@ from .screen import BrowserManager
 import pandas as pd
 
 from ex4nicegui import bi
-from .utils import AggridUtils
 
 
 def test_base(browser: BrowserManager, page_path: str):
@@ -17,7 +16,7 @@ def test_base(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    target = AggridUtils(page.locator(".target"))
+    target = page.Aggrid(".target")
     target.expect_cell_to_be_visible(list("facb"))
 
 
@@ -53,7 +52,7 @@ def test_options_define(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    target = AggridUtils(page.locator(".target"))
+    target = page.Aggrid(".target")
     cells = target.get_cells()
 
     assert cells[2][2].evaluate("node => node.classList.contains('bg-red-300')")

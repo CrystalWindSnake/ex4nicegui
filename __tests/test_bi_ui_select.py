@@ -3,7 +3,6 @@ from .screen import BrowserManager
 import pandas as pd
 
 from ex4nicegui import bi
-from .utils import SelectUtils, set_test_id, AggridUtils
 
 
 def test_base(browser: BrowserManager, page_path: str):
@@ -31,9 +30,9 @@ def test_base(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    target1 = SelectUtils(page.locator(".target1"), page)
-    target2 = SelectUtils(page.locator(".target2"), page)
-    target3 = SelectUtils(page.locator(".target3"), page)
+    target1 = page.Select(".target1")
+    target2 = page.Select(".target2")
+    target3 = page.Select(".target3")
 
     target1.show_popup_click()
     menu_items = target1.get_options_values()
@@ -68,7 +67,7 @@ def test_sort_options(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    target = SelectUtils(page.locator(".target"), page)
+    target = page.Select(".target")
 
     target.show_popup_click()
     menu_items = target.get_options_values()
@@ -92,14 +91,14 @@ def test_null_options(browser: BrowserManager, page_path: str):
     page = browser.open(page_path)
 
     # target1
-    target1 = SelectUtils(page.locator(".target1"), page)
+    target1 = page.Select(".target1")
 
     target1.show_popup_click()
     menu_items = target1.get_options_values()
     assert menu_items == ["c1", "c2", "c3", ""]
 
     # target2
-    target2 = SelectUtils(page.locator(".target2"), page)
+    target2 = page.Select(".target2")
 
     page.press("body", "Enter")
 
@@ -133,10 +132,10 @@ def test_default_value(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    name_select = SelectUtils(page.locator(".name-select"), page)
-    cls_select = SelectUtils(page.locator(".cls-select"), page)
-    table = AggridUtils(page.locator(".table"))
-    table1 = AggridUtils(page.locator(".table1"))
+    name_select = page.Select(".name-select")
+    cls_select = page.Select(".cls-select")
+    table = page.Aggrid(".table")
+    table1 = page.Aggrid(".table1")
 
     assert name_select.get_selected_values() == ["a", "b"]
     assert cls_select.get_selected_values() == ["c1"]
@@ -175,8 +174,8 @@ def test_update_options(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    cls1_select = SelectUtils(page.locator(".cls1"), page)
-    cls2_select = SelectUtils(page.locator(".cls2"), page)
+    cls1_select = page.Select(".cls1")
+    cls2_select = page.Select(".cls2")
 
     cls2_select.click_and_select("a")
     cls1_select.click_and_select("x2")

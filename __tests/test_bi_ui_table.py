@@ -2,7 +2,6 @@ from nicegui import ui
 from .screen import BrowserManager
 import pandas as pd
 from ex4nicegui import bi
-from .utils import TableUtils
 
 
 def test_base(browser: BrowserManager, page_path: str):
@@ -17,7 +16,7 @@ def test_base(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    target = TableUtils(page.locator(".target"))
+    target = page.Table(".target")
 
     target.expect_cell_to_be_visible(list("facb"))
 
@@ -54,5 +53,5 @@ def test_columns_define(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    target = TableUtils(page.locator(".target"))
+    target = page.Table(".target")
     target.is_sortable("new colA")

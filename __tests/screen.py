@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import threading
-from playwright.sync_api import Browser
+from typing import Union
+from playwright.sync_api import Browser, Page, Locator
 from nicegui import ui, app
 from nicegui.server import Server
+from . import utils
+from . import common
 
 PORT = 3392
 
@@ -61,7 +66,7 @@ class BrowserManager:
         )
 
         self._page.wait_for_timeout(600)
-        return self._page
+        return PageUtils(self._page)
 
     def close(self):
         self._page.close()
@@ -69,3 +74,65 @@ class BrowserManager:
     @property
     def pw_page(self):
         return self._page
+
+
+class PageUtils:
+    def __init__(self, playwright_page: Page) -> None:
+        self._page = playwright_page
+
+    def pause(self):
+        self._page.pause()
+
+    @common.with_signature_from(Page.locator)
+    def locator(
+        self,
+        *args,
+        **kwargs,
+    ):
+        return self._page.locator(*args, **kwargs)
+
+    @common.with_signature_from(Page.press)
+    def press(
+        self,
+        *args,
+        **kwargs,
+    ):
+        return self._page.press(*args, **kwargs)
+
+    @common.with_signature_from(Page.wait_for_timeout)
+    def wait(
+        self,
+        *args,
+        **kwargs,
+    ):
+        return self._page.wait_for_timeout(*args, **kwargs)
+
+    def Aggrid(self, selector: Union[str, Locator]):
+        return utils.AggridUtils(self._page, selector)
+
+    def Table(self, selector: Union[str, Locator]):
+        return utils.TableUtils(self._page, selector)
+
+    def Button(self, selector: Union[str, Locator]):
+        return utils.ButtonUtils(self._page, selector)
+
+    def Input(self, selector: Union[str, Locator]):
+        return utils.InputUtils(self._page, selector)
+
+    def Select(self, selector: Union[str, Locator]):
+        return utils.SelectUtils(self._page, selector)
+
+    def Radio(self, selector: Union[str, Locator]):
+        return utils.RadioUtils(self._page, selector)
+
+    def Checkbox(self, selector: Union[str, Locator]):
+        return utils.CheckboxUtils(self._page, selector)
+
+    def ECharts(self, selector: Union[str, Locator]):
+        return utils.EChartsUtils(self._page, selector)
+
+    def Switch(self, selector: Union[str, Locator]):
+        return utils.SwitchUtils(self._page, selector)
+
+    def Label(self, selector: Union[str, Locator]):
+        return utils.LabelUtils(self._page, selector)
