@@ -5,7 +5,7 @@ from .screen import ScreenPage
 from .utils import InputUtils, set_test_id, LabelUtils
 
 
-def test_display(page: ScreenPage, page_path: str):
+def test_display(browser: BrowserManager, page_path: str):
     r_str = to_ref("ref value")
 
     @ui.page(page_path)
@@ -13,7 +13,7 @@ def test_display(page: ScreenPage, page_path: str):
         set_test_id(rxui.lazy_input(value="const value"), "const input")
         set_test_id(rxui.lazy_input(value=r_str), "ref input")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target_const = InputUtils(page, "const input")
     target_const.expect_to_have_text("const value")
 
@@ -25,7 +25,7 @@ def test_display(page: ScreenPage, page_path: str):
     target_ref.expect_to_have_text("new")
 
 
-def test_input_change_value_when_enter(page: ScreenPage, page_path: str):
+def test_input_change_value_when_enter(browser: BrowserManager, page_path: str):
     r_str = to_ref("old")
 
     @ui.page(page_path)
@@ -36,7 +36,7 @@ def test_input_change_value_when_enter(page: ScreenPage, page_path: str):
         label = rxui.label(r_str)
         set_test_id(label, "label")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait()
 
     input = InputUtils(page, "input")

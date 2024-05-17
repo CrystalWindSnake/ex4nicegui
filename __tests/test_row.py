@@ -6,7 +6,7 @@ from .screen import ScreenPage
 from .utils import set_test_id, BaseUiUtils, CheckboxUtils
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     wrap = to_ref(True)
 
     @ui.page(page_path)
@@ -19,7 +19,7 @@ def test_base(page: ScreenPage, page_path: str):
                 ui.card()
         set_test_id(row, "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     row = BaseUiUtils(page, "target")
     checkbox = CheckboxUtils(page, "checkbox")

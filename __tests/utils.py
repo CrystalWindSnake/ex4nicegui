@@ -107,6 +107,9 @@ class BaseUiUtils:
     def expect_not_to_have_value(self, value: str):
         return expect(self.target_locator).not_to_have_value(value)
 
+    def get_by_text(self, text: str):
+        return self.target_locator.get_by_text(text)
+
     @property
     def expect(self):
         return expect(self.target_locator)

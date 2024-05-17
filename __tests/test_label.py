@@ -5,7 +5,7 @@ from .screen import ScreenPage
 from .utils import LabelUtils, set_test_id
 
 
-def test_display(page: ScreenPage, page_path: str):
+def test_display(browser: BrowserManager, page_path: str):
     r_str = to_ref("ref label")
     r_bool = to_ref("init")
 
@@ -17,7 +17,7 @@ def test_display(page: ScreenPage, page_path: str):
         r_bool.value = True  # type: ignore
         set_test_id(rxui.label(r_bool), "bool ref target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target_const = LabelUtils(page, "target")
     target_const.expect_to_have_text("test label")
@@ -29,14 +29,14 @@ def test_display(page: ScreenPage, page_path: str):
     target_bool_ref.expect_to_have_text("True")
 
 
-def test_ref_str_change_value(page: ScreenPage, page_path: str):
+def test_ref_str_change_value(browser: BrowserManager, page_path: str):
     r_str = to_ref("old")
 
     @ui.page(page_path)
     def _():
         set_test_id(rxui.label(r_str), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = LabelUtils(page, "target")
     target.expect_to_have_text("old")
@@ -46,7 +46,7 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
     target.expect_to_have_text("new")
 
 
-def test_bind_color(page: ScreenPage, page_path: str):
+def test_bind_color(browser: BrowserManager, page_path: str):
     r_color = to_ref("red")
 
     @ui.page(page_path)
@@ -55,7 +55,7 @@ def test_bind_color(page: ScreenPage, page_path: str):
         label.bind_color(r_color)
         set_test_id(label, "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = LabelUtils(page, "target")
 
     assert target.get_style("color") == "red"

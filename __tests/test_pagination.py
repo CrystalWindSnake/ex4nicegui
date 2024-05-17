@@ -5,7 +5,7 @@ from .screen import ScreenPage
 from .utils import LabelUtils, set_test_id, BaseUiUtils
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     min = to_ref(1)
     max = to_ref(5)
     page_value = to_ref(2)
@@ -21,7 +21,7 @@ def test_base(page: ScreenPage, page_path: str):
         set_test_id(pagination, "pagination")
         set_test_id(label, "label")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     pagination = BaseUiUtils(page, "pagination")
     label_value = LabelUtils(page, "label")

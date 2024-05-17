@@ -9,7 +9,7 @@ from pyecharts.charts import Bar
 from pyecharts.commons import utils
 
 
-def test_chart_display(page: ScreenPage, page_path: str):
+def test_chart_display(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         target1 = rxui.echarts(
@@ -80,7 +80,7 @@ def test_chart_display(page: ScreenPage, page_path: str):
         set_test_id(target2, "target2")
         set_test_id(target3, "target3")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target1 = EChartsUtils(page, "target1")
     target2 = EChartsUtils(page, "target2")
@@ -91,7 +91,7 @@ def test_chart_display(page: ScreenPage, page_path: str):
     target3.assert_echarts_attachment()
 
 
-def test_chart_deep_ref(page: ScreenPage, page_path: str):
+def test_chart_deep_ref(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         r_opts = deep_ref(
@@ -114,7 +114,7 @@ def test_chart_deep_ref(page: ScreenPage, page_path: str):
         set_test_id(chart, "chart")
         set_test_id(number_input, "number_input")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     chart = EChartsUtils(page, "chart")
     number_input = InputNumberUtils(page, "number_input")
@@ -125,7 +125,7 @@ def test_chart_deep_ref(page: ScreenPage, page_path: str):
     assert chart.get_options()["series"][0]["data"][0] == 12
 
 
-def test_js_function_opt(page: ScreenPage, page_path: str):
+def test_js_function_opt(browser: BrowserManager, page_path: str):
     r_unit = to_ref("kg")
 
     yAxis_formatter = ref_computed(
@@ -176,7 +176,7 @@ def test_js_function_opt(page: ScreenPage, page_path: str):
 
         set_test_id(ins, "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = EChartsUtils(page, "target")
 
@@ -187,7 +187,7 @@ def test_js_function_opt(page: ScreenPage, page_path: str):
     assert "formatter" in opts["yAxis"][0]["axisLabel"]
 
 
-def test_pyecharts(page: ScreenPage, page_path: str):
+def test_pyecharts(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         c = (
@@ -224,7 +224,7 @@ def test_pyecharts(page: ScreenPage, page_path: str):
 
         set_test_id(ins, "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = EChartsUtils(page, "target")
 
@@ -235,7 +235,7 @@ def test_pyecharts(page: ScreenPage, page_path: str):
     assert "formatter" in chart_opts["yAxis"][0]["axisLabel"]
 
 
-def test_click_event(page: ScreenPage, page_path: str):
+def test_click_event(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         opts = {
@@ -287,7 +287,7 @@ def test_click_event(page: ScreenPage, page_path: str):
         set_test_id(lbl_click, "lbl_click")
         set_test_id(lbl_hover, "lbl_hover")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = EChartsUtils(page, "target")
     lbl_click = LabelUtils(page, "lbl_click")
@@ -325,7 +325,7 @@ def test_click_event(page: ScreenPage, page_path: str):
     # assert hover_data["seriesName"] == "Beta"
 
 
-def test_update_opts(page: ScreenPage, page_path: str):
+def test_update_opts(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         opts = {
@@ -360,7 +360,7 @@ def test_update_opts(page: ScreenPage, page_path: str):
 
         set_test_id(ui.button("del title bottom", on_click=on_click), "botton")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait(600)
 
     target = EChartsUtils(page, "target")
@@ -375,7 +375,7 @@ def test_update_opts(page: ScreenPage, page_path: str):
     label.expect_to_have_text("{'text': 'title'}")
 
 
-def test_run_chart_method(page: ScreenPage, page_path: str):
+def test_run_chart_method(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         chart = rxui.echarts(
@@ -397,7 +397,7 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
 
         set_test_id(btn, "botton")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait(600)
 
     target = EChartsUtils(page, "target")
@@ -412,7 +412,7 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
     assert target.get_options()["title"][0]["text"] == "new title"
 
 
-def test_create_map(page: ScreenPage, page_path: str):
+def test_create_map(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         #
@@ -449,7 +449,7 @@ def test_create_map(page: ScreenPage, page_path: str):
 
         set_test_id(chart, "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait()
 
     target = EChartsUtils(page, "target")

@@ -8,7 +8,7 @@ from pathlib import Path
 image_file = Path(__file__).parent / "files/slide1.jpg"
 
 
-def test_source(page: ScreenPage, page_path: str):
+def test_source(browser: BrowserManager, page_path: str):
     img_bs64 = (
         "data:image/png;base64,"
         "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAAEHElEQVRo"
@@ -40,7 +40,7 @@ def test_source(page: ScreenPage, page_path: str):
             "target",
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = ImageUtils(page, "target")
 

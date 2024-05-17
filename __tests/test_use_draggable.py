@@ -6,7 +6,7 @@ from ex4nicegui import ref_computed
 from .screen import ScreenPage
 
 
-def test_draggable(page: ScreenPage, page_path: str):
+def test_draggable(browser: BrowserManager, page_path: str):
     r_drag = cast(UseDraggable, None)
 
     @ui.page(page_path)
@@ -35,7 +35,7 @@ def test_draggable(page: ScreenPage, page_path: str):
         rxui.label(x_label)
         rxui.label(y_label)
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait()
 
     box_target = page._page.query_selector(".my-box")

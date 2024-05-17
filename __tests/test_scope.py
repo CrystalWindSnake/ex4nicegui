@@ -5,7 +5,7 @@ from .screen import ScreenPage
 from .utils import set_test_id, ButtonUtils, InputUtils, LabelUtils
 
 
-def test_can_dispose_temporarily(page: ScreenPage, page_path: str):
+def test_can_dispose_temporarily(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         a = to_ref("0")
@@ -38,7 +38,7 @@ def test_can_dispose_temporarily(page: ScreenPage, page_path: str):
             rxui.button("dispose scope 2", on_click=scope2.dispose), "dispose_scope2"
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait(600)
 
     input = InputUtils(page, "input")

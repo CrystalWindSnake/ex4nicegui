@@ -4,7 +4,7 @@ from ex4nicegui import to_ref, effect
 from .screen import ScreenPage
 
 
-def test_mouse_move(page: ScreenPage, page_path: str):
+def test_mouse_move(browser: BrowserManager, page_path: str):
     r_x = to_ref(0.0)
     r_y = to_ref(0.0)
 
@@ -17,7 +17,7 @@ def test_mouse_move(page: ScreenPage, page_path: str):
             r_x.value = r_mouse.x.value
             r_y.value = r_mouse.y.value
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait()
     page._page.mouse.move(10, 10)
 

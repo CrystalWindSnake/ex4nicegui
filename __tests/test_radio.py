@@ -5,12 +5,12 @@ from .screen import ScreenPage
 from .utils import RadioUtils, set_test_id
 
 
-def test_display(page: ScreenPage, page_path: str):
+def test_display(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         set_test_id(rxui.radio(["a", "b"]), "target const")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     def normal_check(radio_utils: RadioUtils):
         radio_utils.expect_to_be_visible()
@@ -32,14 +32,14 @@ def test_display(page: ScreenPage, page_path: str):
     normal_check(target_const)
 
 
-def test_ref_value(page: ScreenPage, page_path: str):
+def test_ref_value(browser: BrowserManager, page_path: str):
     r_value = to_ref("")
 
     @ui.page(page_path)
     def _():
         set_test_id(rxui.radio(["a", "b"], value=r_value), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = RadioUtils(page, "target")
 
@@ -64,14 +64,14 @@ def test_ref_value(page: ScreenPage, page_path: str):
     assert r_value.value == "b"
 
 
-def test_ref_str_change_value(page: ScreenPage, page_path: str):
+def test_ref_str_change_value(browser: BrowserManager, page_path: str):
     r_value = to_ref("")
 
     @ui.page(page_path)
     def _():
         set_test_id(rxui.radio(["a", "b"], value=r_value), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = RadioUtils(page, "target")
 
@@ -90,7 +90,7 @@ def test_ref_str_change_value(page: ScreenPage, page_path: str):
     assert target.is_checked_by_label("b")
 
 
-def test_ref_value_dict_options(page: ScreenPage, page_path: str):
+def test_ref_value_dict_options(browser: BrowserManager, page_path: str):
     r_value = to_ref("")
 
     @ui.page(page_path)
@@ -101,7 +101,7 @@ def test_ref_value_dict_options(page: ScreenPage, page_path: str):
         }
         set_test_id(rxui.radio(opts, value=r_value), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = RadioUtils(page, "target")
 

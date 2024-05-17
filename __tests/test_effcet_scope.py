@@ -4,7 +4,7 @@ from .screen import ScreenPage
 from .utils import fn
 
 
-def test_effect_cleanup_when_page_close(page: ScreenPage, page_path: str):
+def test_effect_cleanup_when_page_close(browser: BrowserManager, page_path: str):
     other_page_path = f"{page_path}/other"
     value = to_ref("org")
 
@@ -21,7 +21,7 @@ def test_effect_cleanup_when_page_close(page: ScreenPage, page_path: str):
     def _():
         ui.link("back to main", page_path)
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait(1000)
 
     assert call.calledTimes == 1
@@ -35,7 +35,7 @@ def test_effect_cleanup_when_page_close(page: ScreenPage, page_path: str):
     assert call.calledTimes == 1
 
 
-def test_on_cleanup_when_page_close(page: ScreenPage, page_path: str):
+def test_on_cleanup_when_page_close(browser: BrowserManager, page_path: str):
     other_page_path = f"{page_path}/other"
     value = to_ref("org")
 
@@ -56,7 +56,7 @@ def test_on_cleanup_when_page_close(page: ScreenPage, page_path: str):
     def _():
         ui.link("back to main", page_path)
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait(1000)
 
     assert call_fn_times.calledTimes == 1

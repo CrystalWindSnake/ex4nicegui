@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 
 class TestExample:
-    def test_todos_example(self, page: ScreenPage, page_path: str):
+    def test_todos_example(self, browser: BrowserManager, page_path: str):
         @dataclass
         class TodoItem:
             title: str
@@ -86,7 +86,7 @@ class TestExample:
                             "del", on_click=lambda: del_todo(item.value)
                         ).bind_enabled(lambda: item.value.done)
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
         btn_add = ButtonUtils(page, "btn add")
         btn_all_done = ButtonUtils(page, "btn all done")
@@ -166,7 +166,7 @@ class TestExample:
 
 
 class TestBase:
-    def test_two_way_binding_with_dict(self, page: ScreenPage, page_path: str):
+    def test_two_way_binding_with_dict(self, browser: BrowserManager, page_path: str):
         @ui.page(page_path)
         def _():
             # refs
@@ -194,7 +194,7 @@ class TestBase:
                         value=rxui.vmodel(item, "done"),
                     )
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
         label_totals = LabelUtils(page, "label totals")
 
@@ -210,7 +210,9 @@ class TestBase:
 
         label_totals.expect_contain_text("2")
 
-    def test_two_way_binding_with_dataclass(self, page: ScreenPage, page_path: str):
+    def test_two_way_binding_with_dataclass(
+        self, browser: BrowserManager, page_path: str
+    ):
         @dataclass
         class Item:
             id: int
@@ -244,7 +246,7 @@ class TestBase:
                         value=rxui.vmodel(item.value.done),
                     )
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
         label_totals = LabelUtils(page, "label totals")
 
@@ -260,7 +262,7 @@ class TestBase:
 
         label_totals.expect_contain_text("2")
 
-    def test_shallow_ref(self, page: ScreenPage, page_path: str):
+    def test_shallow_ref(self, browser: BrowserManager, page_path: str):
         text = to_ref("abcd")
 
         @ui.page(page_path)
@@ -271,14 +273,14 @@ class TestBase:
                 def _(store: rxui.VforStore[str]):
                     rxui.label(store.get())
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
         page.should_contain("abcd")
 
         text.value = "abc"
         page.should_contain("abc")
 
-    def test_deep_ref(self, page: ScreenPage, page_path: str):
+    def test_deep_ref(self, browser: BrowserManager, page_path: str):
         data = deep_ref([1, 2, 3, 4])
 
         @ui.page(page_path)
@@ -308,7 +310,7 @@ class TestBase:
 
             set_test_id(ui.button("change", on_click=onclick), "btn")
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
         list_label = LabelUtils(page, "list-label")
         input_for_1 = InputUtils(page, "input1")
@@ -339,7 +341,7 @@ class TestBase:
         vfor_input1.expect_to_have_text("66")
         list_label.expect_contain_text("[66, 2, 3, 4]")
 
-    def test_should_with_proxy(self, page: ScreenPage, page_path: str):
+    def test_should_with_proxy(self, browser: BrowserManager, page_path: str):
         @ui.page(page_path)
         def _():
             data = deep_ref({"a": [1, 2]})
@@ -353,7 +355,7 @@ class TestBase:
                 input = rxui.input(value=rxui.vmodel(s.get()))
                 set_test_id(input, f"vfor-input-{row_num}")
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
         list_label = LabelUtils(page, "list-label")
         vfor_input1 = InputUtils(page, "vfor-input-1")

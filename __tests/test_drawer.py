@@ -4,17 +4,17 @@ from ex4nicegui import to_ref
 from .screen import ScreenPage
 
 
-def test_display(page: ScreenPage, page_path: str):
+def test_display(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         with rxui.drawer():
             ui.label("drawer showed")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.should_contain("drawer showed")
 
 
-def test_toggle_side(page: ScreenPage, page_path: str):
+def test_toggle_side(browser: BrowserManager, page_path: str):
     r_side = to_ref("left")
 
     def toggle_side():
@@ -36,7 +36,7 @@ def test_toggle_side(page: ScreenPage, page_path: str):
 
     body_width = page._page.evaluate("()=>document.body.clientWidth")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.should_contain("drawer showed")
     rect = page._page.get_by_text("drawer showed").bounding_box()
     assert rect is not None
@@ -51,7 +51,7 @@ def test_toggle_side(page: ScreenPage, page_path: str):
     assert rect["x"] > body_width / 2
 
 
-def test_toggle_show(page: ScreenPage, page_path: str):
+def test_toggle_show(browser: BrowserManager, page_path: str):
     r_show = to_ref(True)
 
     def toggle_show():
@@ -67,7 +67,7 @@ def test_toggle_show(page: ScreenPage, page_path: str):
 
         rxui.button("switch show", on_click=onclick).classes("my-btn")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.should_contain("drawer showed")
 
     page.wait()

@@ -4,7 +4,7 @@ from .screen import ScreenPage
 from .utils import InputUtils, LabelUtils, set_test_id
 
 
-def test_when_error_in_effect(page: ScreenPage, page_path: str):
+def test_when_error_in_effect(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         text = to_ref("Hello")
@@ -24,7 +24,7 @@ def test_when_error_in_effect(page: ScreenPage, page_path: str):
         set_test_id(rxui.input(value=text), "input")
         set_test_id(rxui.label(dummy), "label")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait(600)
 
     input = InputUtils(page, "input")

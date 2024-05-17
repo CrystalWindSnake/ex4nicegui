@@ -5,26 +5,26 @@ from .screen import ScreenPage
 from .utils import InputNumberUtils, set_test_id
 
 
-def test_const(page: ScreenPage, page_path: str):
+def test_const(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         set_test_id(rxui.number(value=1.0), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = InputNumberUtils(page, "target")
 
     target.expect_to_have_text("1")
 
 
-def test_ref(page: ScreenPage, page_path: str):
+def test_ref(browser: BrowserManager, page_path: str):
     r_value = to_ref(1.0)
 
     @ui.page(page_path)
     def _():
         set_test_id(rxui.number(value=r_value), "target")  # type: ignore
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = InputNumberUtils(page, "target")
 
@@ -47,7 +47,7 @@ def test_ref(page: ScreenPage, page_path: str):
     assert r_value.value == 66
 
 
-def test_on_change(page: ScreenPage, page_path: str):
+def test_on_change(browser: BrowserManager, page_path: str):
     value_on_change = 0
 
     def on_change(e):
@@ -58,7 +58,7 @@ def test_on_change(page: ScreenPage, page_path: str):
     def _():
         set_test_id(rxui.number(format="%.2f", step=0.1, on_change=on_change), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = InputNumberUtils(page, "target")
 
@@ -66,12 +66,12 @@ def test_on_change(page: ScreenPage, page_path: str):
     assert value_on_change == 1111.0
 
 
-def test_with_format(page: ScreenPage, page_path: str):
+def test_with_format(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         set_test_id(rxui.number(format="%.2f", step=0.1), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = InputNumberUtils(page, "target")
 

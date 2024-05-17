@@ -4,7 +4,7 @@ from ex4nicegui import to_ref
 from .screen import ScreenPage
 
 
-def test_const_data(page: ScreenPage, page_path: str):
+def test_const_data(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         page_size = 10
@@ -24,7 +24,7 @@ def test_const_data(page: ScreenPage, page_path: str):
         assert pagination_ref.current_source.value == list(range(100, 105))
 
 
-def test_set_current_page(page: ScreenPage, page_path: str):
+def test_set_current_page(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         page_size = 10
@@ -45,7 +45,7 @@ def test_set_current_page(page: ScreenPage, page_path: str):
         assert pagination_ref.current_source.value == list(range(100, 105))
 
 
-def test_set_current_page_over_max_size(page: ScreenPage, page_path: str):
+def test_set_current_page_over_max_size(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         page_size = 10
@@ -60,7 +60,7 @@ def test_set_current_page_over_max_size(page: ScreenPage, page_path: str):
         assert pagination_ref.current_source.value == list(range(0, 10))
 
 
-def test_first_last_page(page: ScreenPage, page_path: str):
+def test_first_last_page(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         page_size = 10

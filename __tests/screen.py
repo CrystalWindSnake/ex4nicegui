@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 from typing import Union
-from playwright.sync_api import Browser, Page, Locator
+from playwright.sync_api import Browser, Page, Locator, expect
 from nicegui import ui, app
 from nicegui.server import Server
 from . import utils
@@ -107,6 +107,12 @@ class PageUtils:
     ):
         return self._page.wait_for_timeout(*args, **kwargs)
 
+    def should_contain(self, text: str):
+        expect(self._page.locator("body")).to_contain_text(text)
+
+    def Base(self, selector: Union[str, Locator]):
+        return utils.BaseUiUtils(self._page, selector)
+
     def Aggrid(self, selector: Union[str, Locator]):
         return utils.AggridUtils(self._page, selector)
 
@@ -136,3 +142,6 @@ class PageUtils:
 
     def Label(self, selector: Union[str, Locator]):
         return utils.LabelUtils(self._page, selector)
+
+    def ColorPicker(self, selector: Union[str, Locator]):
+        return utils.ColorPickerUtils(self._page, selector)

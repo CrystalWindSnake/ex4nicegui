@@ -5,7 +5,7 @@ from .screen import ScreenPage
 from .utils import InputUtils, set_test_id, BaseUiUtils
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         current = to_ref("a")
@@ -21,7 +21,7 @@ def test_base(page: ScreenPage, page_path: str):
 
         set_test_id(panels, "panels")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     input = InputUtils(page, "input")
     tabs = BaseUiUtils(page, "panels")

@@ -7,12 +7,12 @@ from playwright.sync_api import expect
 target_test_id = "switch"
 
 
-def test_const_value(page: ScreenPage, page_path: str):
+def test_const_value(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         rxui.switch(value=False).props(f'data-testid="{target_test_id}"')
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     switch = page.get_by_test_id(target_test_id)
 
@@ -25,14 +25,14 @@ def test_const_value(page: ScreenPage, page_path: str):
     expect(switch).to_be_checked()
 
 
-def test_ref_value(page: ScreenPage, page_path: str):
+def test_ref_value(browser: BrowserManager, page_path: str):
     r_on = to_ref(False)
 
     @ui.page(page_path)
     def _():
         rxui.switch(value=r_on).props(f'data-testid="{target_test_id}"')
 
-    page.open(page_path)
+    page = browser.open(page_path)
     switch = page.get_by_test_id(target_test_id)
 
     expect(switch).to_be_visible()
@@ -46,14 +46,14 @@ def test_ref_value(page: ScreenPage, page_path: str):
     assert r_on.value is True
 
 
-def test_ref_str_change_value(page: ScreenPage, page_path: str):
+def test_ref_str_change_value(browser: BrowserManager, page_path: str):
     r_on = to_ref(False)
 
     @ui.page(page_path)
     def _():
         rxui.switch(value=r_on).props(f'data-testid="{target_test_id}"')
 
-    page.open(page_path)
+    page = browser.open(page_path)
     switch = page.get_by_test_id(target_test_id)
 
     expect(switch).to_be_visible()

@@ -5,7 +5,7 @@ from .screen import ScreenPage
 from .utils import LabelUtils, set_test_id
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         gsap.set_defaults({"duration": 0.3})
@@ -16,7 +16,7 @@ def test_base(page: ScreenPage, page_path: str):
         gsap.from_(".target-from", {"x": 50})
         gsap.to(".target-to", {"x": 10})
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target_from = LabelUtils(page, "label from")
     target_to = LabelUtils(page, "label to")
     page.wait(1500)
@@ -25,7 +25,7 @@ def test_base(page: ScreenPage, page_path: str):
     assert target_to.get_style("transform") == "translate(10px, 0px)"
 
 
-def test_run_script(page: ScreenPage, page_path: str):
+def test_run_script(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         gsap.set_defaults({"duration": 0.3})
@@ -39,19 +39,19 @@ def test_run_script(page: ScreenPage, page_path: str):
 """
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = LabelUtils(page, "label")
     page.wait(1500)
     assert target.get_style("transform") == "translate(0px, 60px)"
 
 
-def test_run_script_with_file(page: ScreenPage, page_path: str):
+def test_run_script_with_file(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         set_test_id(ui.label("test").classes("target"), "label")
         gsap.run_script(Path(__file__).parent / "files/gsap_script.js")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = LabelUtils(page, "label")
 
     page.wait(1500)

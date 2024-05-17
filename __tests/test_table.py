@@ -6,7 +6,7 @@ import pandas as pd
 from .utils import TableUtils, set_test_id, InputUtils, ButtonUtils
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         columns = deep_ref(
@@ -38,7 +38,7 @@ def test_base(page: ScreenPage, page_path: str):
 
         set_test_id(ui.button("change", on_click=onclick), "btn")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     table = TableUtils(page, "table")
     input_row2 = InputUtils(page, "input_row2")
@@ -60,7 +60,7 @@ def test_base(page: ScreenPage, page_path: str):
     )
 
 
-def test_should_can_use_vmodel(page: ScreenPage, page_path: str):
+def test_should_can_use_vmodel(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         columns = deep_ref(
@@ -87,7 +87,7 @@ def test_should_can_use_vmodel(page: ScreenPage, page_path: str):
 
         set_test_id(ui.button("change", on_click=onclick), "btn")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     table = TableUtils(page, "table")
     btn = ButtonUtils(page, "btn")
@@ -98,7 +98,7 @@ def test_should_can_use_vmodel(page: ScreenPage, page_path: str):
     table.expect_cell_to_be_visible(["a", "n1", "n2", "n3"])
 
 
-def test_from_pandas(page: ScreenPage, page_path: str):
+def test_from_pandas(browser: BrowserManager, page_path: str):
     data = to_ref(
         pd.DataFrame(
             {
@@ -115,7 +115,7 @@ def test_from_pandas(page: ScreenPage, page_path: str):
         # test lambda display
         rxui.table.from_pandas(lambda: data.value.head(2))
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = TableUtils(page, "target")
 
@@ -130,7 +130,7 @@ def test_from_pandas(page: ScreenPage, page_path: str):
     target.expect_cell_to_be_visible(["new name", "x", "y", "z"])
 
 
-def test_selection_ref(page: ScreenPage, page_path: str):
+def test_selection_ref(browser: BrowserManager, page_path: str):
     data = pd.DataFrame({"name": ["a", "b", "c"], "age": [1, 2, 3]})
 
     r_table: rxui.table = None  # type: ignore
@@ -141,7 +141,7 @@ def test_selection_ref(page: ScreenPage, page_path: str):
         r_table = rxui.table.from_pandas(data, selection="single", row_key="name")
         set_test_id(r_table, "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     assert r_table
 
@@ -154,7 +154,7 @@ def test_selection_ref(page: ScreenPage, page_path: str):
     assert r_table.selection_ref.value == [{"name": "a", "age": 1}]
 
 
-def test_single_selection(page: ScreenPage, page_path: str):
+def test_single_selection(browser: BrowserManager, page_path: str):
     data = pd.DataFrame({"name": ["a", "b", "c"], "age": [1, 2, 3]})
     r_select = to_ref([])
 
@@ -167,7 +167,7 @@ def test_single_selection(page: ScreenPage, page_path: str):
         def _():
             r_select.value = r_table.selection_ref.value
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = TableUtils(page, "target")
 
@@ -184,7 +184,7 @@ def test_single_selection(page: ScreenPage, page_path: str):
     assert r_select.value == [{"name": "b", "age": 2}]
 
 
-def test_multiple_selection(page: ScreenPage, page_path: str):
+def test_multiple_selection(browser: BrowserManager, page_path: str):
     data = pd.DataFrame({"name": ["a", "b", "c"], "age": [1, 2, 3]})
     r_select = to_ref([])
 
@@ -197,7 +197,7 @@ def test_multiple_selection(page: ScreenPage, page_path: str):
         def _():
             r_select.value = r_table.selection_ref.value
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = TableUtils(page, "target")
 
     page.wait()
@@ -208,7 +208,7 @@ def test_multiple_selection(page: ScreenPage, page_path: str):
     assert r_select.value == [{"name": "a", "age": 1}, {"name": "b", "age": 2}]
 
 
-def test_columns_define(page: ScreenPage, page_path: str):
+def test_columns_define(browser: BrowserManager, page_path: str):
     data = pd.DataFrame({"name": ["a", "b", "c"], "age": [1, 2, 3]})
 
     @ui.page(page_path)
@@ -221,7 +221,7 @@ def test_columns_define(page: ScreenPage, page_path: str):
         )
         set_test_id(r_table, "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = TableUtils(page, "target")
 

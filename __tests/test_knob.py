@@ -5,7 +5,7 @@ from .screen import ScreenPage
 from .utils import set_test_id, BaseUiUtils, ButtonUtils
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     value = to_ref(0.3)
 
     @ui.page(page_path)
@@ -18,7 +18,7 @@ def test_base(page: ScreenPage, page_path: str):
             "btn",
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     knob = BaseUiUtils(page, "knob")
     label = BaseUiUtils(page, "label")

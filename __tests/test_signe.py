@@ -22,7 +22,7 @@ def test_on_priority_level():
     assert records == ["second", "first"]
 
 
-def test_batch_event(page: ScreenPage, page_path: str):
+def test_batch_event(browser: BrowserManager, page_path: str):
     a = to_ref(0)
     b = to_ref(0)
 
@@ -55,7 +55,7 @@ def test_batch_event(page: ScreenPage, page_path: str):
 
         ui.button("change all values", on_click=when_click)
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     assert fn_on_times.calledTimes == 0
     assert fn_effect.calledTimes == 1
@@ -68,7 +68,7 @@ def test_batch_event(page: ScreenPage, page_path: str):
 
 
 @pytest.mark.skip("todo")
-def test_sync_scheduler(page: ScreenPage, page_path: str):
+def test_sync_scheduler(browser: BrowserManager, page_path: str):
     # reset_execution_scheduler("sync")
 
     a = to_ref(0)
@@ -88,7 +88,7 @@ def test_sync_scheduler(page: ScreenPage, page_path: str):
 
         set_test_id(ui.button("change", on_click=when_click), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     btn = ButtonUtils(page, "target")
     btn.click()
@@ -98,7 +98,7 @@ def test_sync_scheduler(page: ScreenPage, page_path: str):
 
 
 @pytest.mark.skip("todo")
-def test_post_event_scheduler(page: ScreenPage, page_path: str):
+def test_post_event_scheduler(browser: BrowserManager, page_path: str):
     # reset_execution_scheduler("post-event")
 
     a = to_ref(0)
@@ -118,7 +118,7 @@ def test_post_event_scheduler(page: ScreenPage, page_path: str):
 
         set_test_id(ui.button("change", on_click=when_click), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     btn = ButtonUtils(page, "target")
     btn.click()

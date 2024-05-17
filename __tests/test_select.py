@@ -6,7 +6,7 @@ from playwright.sync_api import expect
 from .utils import SelectUtils, set_test_id, ButtonUtils, SwitchUtils
 
 
-def test_const_str(page: ScreenPage, page_path: str):
+def test_const_str(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         set_test_id(
@@ -14,13 +14,13 @@ def test_const_str(page: ScreenPage, page_path: str):
             "target",
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = SelectUtils(page, "target")
     expect(target.page.get_by_text("test select", exact=True)).to_be_visible()
 
 
-def test_ref_str(page: ScreenPage, page_path: str):
+def test_ref_str(browser: BrowserManager, page_path: str):
     r_str = to_ref("")
 
     @ui.page(page_path)
@@ -29,7 +29,7 @@ def test_ref_str(page: ScreenPage, page_path: str):
             rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch]"), "target"
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = SelectUtils(page, "target")
 
     target.expect_not_to_have_value("a")
@@ -46,7 +46,7 @@ def test_ref_str(page: ScreenPage, page_path: str):
     target.expect_not_to_have_value("b")
 
 
-def test_clearable(page: ScreenPage, page_path: str):
+def test_clearable(browser: BrowserManager, page_path: str):
     r_str = to_ref("a")
 
     @ui.page(page_path)
@@ -55,7 +55,7 @@ def test_clearable(page: ScreenPage, page_path: str):
             rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch]"), "target"
         ).props("clearable")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = SelectUtils(page, "target")
 
     target.expect_to_have_value("a")
@@ -68,7 +68,7 @@ def test_clearable(page: ScreenPage, page_path: str):
     assert r_str.value is None
 
 
-def test_option_change(page: ScreenPage, page_path: str):
+def test_option_change(browser: BrowserManager, page_path: str):
     r_str = to_ref("")
     r_has_data = to_ref(False)
 
@@ -83,7 +83,7 @@ def test_option_change(page: ScreenPage, page_path: str):
         set_test_id(rxui.switch("has data", value=r_has_data), "switch")
         set_test_id(rxui.select(cp_data, value=r_str).classes("min-w-[20ch]"), "target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = SelectUtils(page, "target")
     switch = SwitchUtils(page, "switch")
 
@@ -96,7 +96,7 @@ def test_option_change(page: ScreenPage, page_path: str):
     assert r_str.value == "a"
 
 
-def test_multiple_list_opts(page: ScreenPage, page_path: str):
+def test_multiple_list_opts(browser: BrowserManager, page_path: str):
     r_value = to_ref(["a", "b"])
 
     @ui.page(page_path)
@@ -105,7 +105,7 @@ def test_multiple_list_opts(page: ScreenPage, page_path: str):
             rxui.select(["a", "b", "c", "d"], value=r_value, multiple=True), "target"
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = SelectUtils(page, "target")
 
     target.expect_to_have_value("a, b")
@@ -117,7 +117,7 @@ def test_multiple_list_opts(page: ScreenPage, page_path: str):
     assert r_value.value == ["a", "b", "d"]
 
 
-def test_multiple_dict_opts(page: ScreenPage, page_path: str):
+def test_multiple_dict_opts(browser: BrowserManager, page_path: str):
     r_value = to_ref([1, 2])
 
     @ui.page(page_path)
@@ -129,7 +129,7 @@ def test_multiple_dict_opts(page: ScreenPage, page_path: str):
             "target",
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = SelectUtils(page, "target")
 
     target.expect_to_have_value("a, b")
@@ -139,7 +139,7 @@ def test_multiple_dict_opts(page: ScreenPage, page_path: str):
     assert r_value.value == [1, 2, 4]
 
 
-def test_new_value_mode(page: ScreenPage, page_path: str):
+def test_new_value_mode(browser: BrowserManager, page_path: str):
     r_str = to_ref(None)
     r_opts = to_ref([])
 
@@ -152,7 +152,7 @@ def test_new_value_mode(page: ScreenPage, page_path: str):
             "target",
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
     target = SelectUtils(page, "target")
 
     target.input_and_enter("a")
@@ -172,7 +172,7 @@ def test_new_value_mode(page: ScreenPage, page_path: str):
     assert r_opts.value == ["a", "other"]
 
 
-def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
+def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
     data = {
         "opts1": list("abcd"),
         "opts2": list("mnxy"),
@@ -208,7 +208,7 @@ def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
             "button",
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
     target = SelectUtils(page, "target")
     button = ButtonUtils(page, "button")
