@@ -472,6 +472,12 @@ class SwitchUtils(BaseUiUtils):
     def click(self):
         self.target_locator.locator("div").first.click()
 
+    def expect_checked(self):
+        expect(self.target_locator).to_be_checked()
+
+    def expect_not_checked(self):
+        expect(self.target_locator).not_to_be_checked()
+
 
 class ImageUtils(BaseUiUtils):
     # def __init__(self, screen_page: BrowserManager, test_id: str) -> None:

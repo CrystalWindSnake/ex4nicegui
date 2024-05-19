@@ -11,20 +11,17 @@ def test_base(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.checkbox(value=wrap), "checkbox")
+        rxui.checkbox(value=wrap).classes("checkbox")
 
-        row = rxui.row(wrap=wrap)
-        with row:
+        with rxui.row(wrap=wrap).classes("target"):
             for _ in range(5):
                 ui.card()
-        set_test_id(row, "target")
 
     page = browser.open(page_path)
 
-    row = BaseUiUtils(page, "target")
-    checkbox = CheckboxUtils(page, "checkbox")
+    row = page.Base(".target")
+    checkbox = page.Checkbox(".checkbox")
 
-    # page.pause()
     row.expect.to_have_class(re.compile(r"wrap"))
 
     checkbox.click()

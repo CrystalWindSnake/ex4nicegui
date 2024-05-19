@@ -9,15 +9,12 @@ from .utils import SelectUtils, set_test_id, ButtonUtils, SwitchUtils
 def test_const_str(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.select(["a", "b"], label="test select").classes("min-w-[20ch]"),
-            "target",
-        )
+        rxui.select(["a", "b"], label="test select").classes("min-w-[20ch] target")
 
     page = browser.open(page_path)
 
-    target = SelectUtils(page, "target")
-    expect(target.page.get_by_text("test select", exact=True)).to_be_visible()
+    target = page.Select(".target")
+    target.expect_to_be_visible()
 
 
 def test_ref_str(browser: BrowserManager, page_path: str):

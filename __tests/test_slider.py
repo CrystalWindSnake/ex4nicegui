@@ -2,7 +2,6 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import BrowserManager
-from .utils import LabelUtils, set_test_id
 
 
 def test_base(browser: BrowserManager, page_path: str):
@@ -10,12 +9,12 @@ def test_base(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.slider(min=0, max=100, value=r_value), "target")
-        set_test_id(rxui.label(r_value), "label")
+        rxui.slider(min=0, max=100, value=r_value).classes("target")
+        rxui.label(r_value).classes("label")
 
     page = browser.open(page_path)
 
-    label = LabelUtils(page, "label")
+    label = page.Label(".label")
 
     page_g = page._page
 

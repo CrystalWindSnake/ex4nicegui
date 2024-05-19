@@ -40,16 +40,16 @@ def test_base(browser: BrowserManager, page_path: str):
     level1 = page.Radio(".level1")
     level2 = page.Radio(".level2")
 
-    assert not level1.is_checked_by_label("A值")
-    assert not level1.is_checked_by_label("L1_B")
+    level1.expect_not_to_be_checked("A值")
+    level1.expect_not_to_be_checked("L1_B")
 
     level1.check_by_label("A值")
 
-    assert level1.is_checked_by_label("A值")
-    assert not level1.is_checked_by_label("L1_B")
+    level1.expect_to_be_checked("A值")
+    level1.expect_not_to_be_checked("L1_B")
 
-    assert not level2.is_checked_by_label("L2_M_1")
-    assert not level2.is_checked_by_label("level2@m_2")
+    level2.expect_not_to_be_checked("L2_M_1")
+    level2.expect_not_to_be_checked("level2@m_2")
 
     assert level2.get_all_labels() == ["L2_M_1", "level2@m_2"]
 

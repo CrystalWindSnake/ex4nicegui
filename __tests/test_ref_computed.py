@@ -21,14 +21,13 @@ def test_method_decorator(browser: BrowserManager, page_path: str):
 
         state = MyState()
 
-        set_test_id(rxui.input(value=state.r_text), "input")
-
-        set_test_id(rxui.label(state.post_text), "label")
+        rxui.input(value=state.r_text).classes("input")
+        rxui.label(state.post_text).classes("label")
 
     page = browser.open(page_path)
 
-    input = InputUtils(page, "input")
-    label = LabelUtils(page, "label")
+    input = page.Input(".input")
+    label = page.Label(".label")
 
     label.expect_to_have_text("post")
     input.fill_text("new text")
