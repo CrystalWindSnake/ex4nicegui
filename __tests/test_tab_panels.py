@@ -9,22 +9,19 @@ def test_base(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         current = to_ref("a")
+        rxui.input(value=current).classes("input")
 
-        set_test_id(rxui.input(value=current), "input")
-
-        with rxui.tab_panels(current) as panels:
+        with rxui.tab_panels(current).classes("panels"):
             with rxui.tab_panel("a"):
                 rxui.label("a page")
 
             with rxui.tab_panel("b"):
                 rxui.label("b page")
 
-        set_test_id(panels, "panels")
-
     page = browser.open(page_path)
 
-    input = InputUtils(page, "input")
-    tabs = BaseUiUtils(page, "panels")
+    input = page.Input(".input")
+    tabs = page.Base(".panels")
 
     tabs.expect.to_contain_text("a page")
 

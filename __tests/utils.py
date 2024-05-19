@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 from typing import List, Optional, Any, Callable, Union
 from playwright.sync_api import expect, Locator, Page
-
 from typing_extensions import Protocol, Self
+from . import common
 
 
 class IPropsAble(Protocol):
@@ -109,6 +109,14 @@ class BaseUiUtils:
 
     def expect_to_be_hidden(self):
         expect(self.target_locator).to_be_hidden()
+
+    def bounding_box(self):
+        return self.target_locator.bounding_box()
+
+    @common.with_signature_from(Locator.click)
+    def click(self, *args, **kwargs):
+        self.target_locator.wait_for(state="attached")
+        return self.target_locator.click(*args, **kwargs)
 
     @property
     def expect(self):
@@ -308,10 +316,25 @@ class TableUtils(BaseUiUtils):
             "checkbox"
         ).click()
 
+    def expect_cell_style(self, cell_value: str, style: str, style_value: str):
+        expect(
+            self.target_locator.get_by_role("cell", name=cell_value, exact=True)
+        ).to_have_css(style, style_value)
+
     def get_cell_style(self, cell_value: str):
         return self.target_locator.get_by_role(
             "cell", name=cell_value, exact=True
         ).get_attribute("style")
+
+    # def expect_cell_have_style(self, cell_value: str):
+    #     expect(
+    #         self.target_locator.get_by_role("cell", name=cell_value, exact=True)
+    #     ).to_have_attribute("style",re.compile('*'))
+
+    # def expect_cell_not_have_style(self, cell_value: str):
+    #     expect(
+    #         self.target_locator.get_by_role("cell", name=cell_value, exact=True)
+    #     ).to_have_attribute("style",)
 
     def is_sortable(self, column_name: str):
         # sortable
@@ -381,10 +404,6 @@ class AggridUtils(BaseUiUtils):
 class ButtonUtils(BaseUiUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
         super().__init__(page, target_locator)
-
-    def click(self):
-        self.target_locator.wait_for(state="attached")
-        self.target_locator.click()
 
     def expect_enabled(self):
         expect(self.target_locator).to_be_enabled()

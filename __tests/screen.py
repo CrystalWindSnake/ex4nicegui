@@ -134,6 +134,10 @@ class PageUtils:
     ):
         return self._page.get_by_role(*args, **kwargs)
 
+    @property
+    def mouse(self):
+        return self._page.mouse
+
     def should_contain(self, text: str):
         # expect(self._page.locator("body")).to_contain_text(text)
         expect(self.get_by_text(text)).to_be_visible()

@@ -36,12 +36,12 @@ def test_draggable(browser: BrowserManager, page_path: str):
         rxui.label(y_label)
 
     page = browser.open(page_path)
-    page.wait()
 
-    box_target = page._page.query_selector(".my-box")
-    assert box_target is not None
+    box = page.Base(".my-box")
 
-    box_rect = box_target.bounding_box()
+    box.expect_to_be_visible()
+
+    box_rect = box.bounding_box()
     assert box_rect is not None
 
     assert r_drag.x == 100.0
@@ -59,9 +59,7 @@ def test_draggable(browser: BrowserManager, page_path: str):
     page._page.mouse.move(x + 500, y)
     page._page.mouse.up()
 
-    page.wait()
-
-    box_rect = box_target.bounding_box()
+    box_rect = box.bounding_box()
     assert box_rect is not None
 
     assert box_rect["x"] == org_x + 500

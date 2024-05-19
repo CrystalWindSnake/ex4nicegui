@@ -10,18 +10,17 @@ def test_display(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.textarea(value="const value"), "const input")
-        set_test_id(rxui.textarea(value=r_str), "ref input")
+        rxui.textarea(value="const value").classes("const")
+        rxui.textarea(value=r_str).classes("ref")
 
     page = browser.open(page_path)
-    target_const = TextareaUtils(page, "const input")
+    target_const = page.Textarea(".const")
     target_const.expect_to_have_text("const value")
 
-    target_ref = TextareaUtils(page, "ref input")
+    target_ref = page.Textarea(".ref")
     target_ref.expect_to_have_text("ref value")
 
     r_str.value = "new"
-    page.wait()
     target_ref.expect_to_have_text("new")
 
 
@@ -30,13 +29,13 @@ def test_input_change_value(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.textarea(value=r_str), "target")
-        set_test_id(rxui.label(r_str), "label")
+        rxui.textarea(value=r_str).classes("target")
+        rxui.label(r_str).classes("label")
 
     page = browser.open(page_path)
 
-    input = TextareaUtils(page, "target")
-    label = LabelUtils(page, "label")
+    input = page.Textarea(".target")
+    label = page.Label(".label")
 
     input.fill_text("new value")
 
