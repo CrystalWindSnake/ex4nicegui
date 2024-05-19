@@ -298,7 +298,7 @@ def test_click_event(browser: BrowserManager, page_path: str):
         y_position_offset=+8,
     )
 
-    page.wait(1000)
+    # page.wait(1000)
 
     lbl_hover.expect_to_have_text("Beta")
 
@@ -339,7 +339,6 @@ def test_update_opts(browser: BrowserManager, page_path: str):
         ui.button("del title bottom", on_click=on_click).classes("del-btn")
 
     page = browser.open(page_path)
-    page.wait(600)
 
     target = page.ECharts(".target")
     label = page.Label(".label")
@@ -349,7 +348,6 @@ def test_update_opts(browser: BrowserManager, page_path: str):
     label.expect_to_have_text("{'text': 'title', 'bottom': 0}")
 
     del_btn.click()
-
     label.expect_to_have_text("{'text': 'title'}")
 
 
@@ -381,7 +379,6 @@ def test_run_chart_method(browser: BrowserManager, page_path: str):
     assert "title" not in target.get_options()
 
     button.click()
-
     assert target.get_options()["title"][0]["text"] == "new title"
 
 

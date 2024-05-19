@@ -61,8 +61,6 @@ def test_ref_change_value(browser: BrowserManager, page_path: str):
     def _():
         rxui.date(r_single_value).classes("single-date")
         rxui.date(r_range_value).props("multiple range").classes("range-date")  # type: ignore
-        # rxui.date(r_single_value).props(f'data-testid="{single_date_id}"')
-        # rxui.date(r_range_value).props(f'data-testid="{range_date_id}" multiple range')  # type: ignore
 
     page = browser.open(page_path)
 
@@ -70,12 +68,10 @@ def test_ref_change_value(browser: BrowserManager, page_path: str):
     range_date = page.Base(".range-date")
 
     expect(single_date.get_by_text("Sun, Jan 1").first).to_be_visible()
-    # page.wait()
     r_single_value.value = "2023-01-02"
     expect(single_date.get_by_text("Mon, Jan 2").first).to_be_visible()
 
     expect(range_date.get_by_text("6 days").first).to_be_visible()
-    # page.wait()
     r_range_value.value = [
         {"from": "2023-01-06", "to": "2023-01-10"},
         {"from": "2023-01-15", "to": "2023-01-16"},

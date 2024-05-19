@@ -21,7 +21,6 @@ def test_base(browser: BrowserManager, page_path: str):
     column = page.Base(".target")
     checkbox = page.Checkbox(".checkbox")
 
-    # page.pause()
     column.expect.to_have_class(re.compile(r"wrap"))
 
     checkbox.click()

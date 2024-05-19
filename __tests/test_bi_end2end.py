@@ -69,7 +69,6 @@ def test_remove_filters(browser: BrowserManager, page_path: str):
     table1 = page.Aggrid(".table1")
     table2 = page.Aggrid(".table2")
 
-    # page.pause()
     name_select.click_and_select("a")
 
     cls_select.show_popup_click()
@@ -137,9 +136,6 @@ def test_reload_source(browser: BrowserManager, page_path: str):
         @bi.data_source
         def ds2():
             return ds1.filtered_data.head(3)
-
-        def onclick():
-            ds1.reload(df1)
 
         ui.button("reload", on_click=lambda: ds1.reload(df1)).classes("reload-btn")
 

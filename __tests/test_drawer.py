@@ -44,10 +44,7 @@ def test_toggle_side(browser: BrowserManager, page_path: str):
     assert rect is not None
     assert rect["x"] < body_width / 2
 
-    # page.wait()
     btn.click()
-    # page.wait()
-
     rect = page.get_by_text("drawer showed").bounding_box()
     assert rect is not None
     assert rect["x"] > body_width / 2
@@ -76,15 +73,8 @@ def test_toggle_show(browser: BrowserManager, page_path: str):
 
     page.should_contain("drawer showed")
 
-    # page.wait()
     btn.click()
-    # page.wait()
-
-    # page.should_not_contain("drawer showed")
     label.expect_to_be_hidden()
 
-    # page.wait()
     btn.click()
-    # page.wait()
-
     page.should_contain("drawer showed")
