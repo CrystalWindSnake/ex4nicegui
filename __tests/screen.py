@@ -171,3 +171,6 @@ class PageUtils:
 
     def ColorPicker(self, selector: Union[str, Locator]):
         return utils.ColorPickerUtils(self._page, selector)
+
+    def Number(self, selector: Union[str, Locator]):
+        return utils.InputNumberUtils(self._page, selector)
