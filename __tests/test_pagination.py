@@ -13,18 +13,15 @@ def test_base(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        pagination = rxui.pagination(
+        rxui.pagination(
             min, max, direction_links=direction_links, value=page_value
-        )
-        label = rxui.label(page_value)
-
-        set_test_id(pagination, "pagination")
-        set_test_id(label, "label")
+        ).classes("pagination")
+        rxui.label(page_value).classes("label")
 
     page = browser.open(page_path)
 
-    pagination = BaseUiUtils(page, "pagination")
-    label_value = LabelUtils(page, "label")
+    pagination = page.Base(".pagination")
+    label_value = page.Label(".label")
 
     pagination.expect.to_contain_text("keyboard_arrow_left12345keyboard_arrow_right")
     label_value.expect_contain_text("2")

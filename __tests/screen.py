@@ -159,6 +159,9 @@ class PageUtils:
     def Input(self, selector: Union[str, Locator]):
         return utils.InputUtils(self._page, selector)
 
+    def Textarea(self, selector: Union[str, Locator]):
+        return utils.TextareaUtils(self._page, selector)
+
     def Select(self, selector: Union[str, Locator]):
         return utils.SelectUtils(self._page, selector)
 
@@ -185,3 +188,6 @@ class PageUtils:
 
     def Image(self, selector: Union[str, Locator]):
         return utils.ImageUtils(self._page, selector)
+
+    def Mermaid(self, selector: Union[str, Locator]):
+        return utils.MermaidUtils(self._page, selector)

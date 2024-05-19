@@ -10,18 +10,17 @@ def test_display(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.lazy_textarea(value="const value"), "const input")
-        set_test_id(rxui.lazy_textarea(value=r_str), "ref input")
+        rxui.lazy_textarea(value="const value").classes("const-input")
+        rxui.lazy_textarea(value=r_str).classes("ref-input")
 
     page = browser.open(page_path)
-    target_const = TextareaUtils(page, "const input")
+    target_const = page.Textarea(".const-input")
     target_const.expect_to_have_text("const value")
 
-    target_ref = TextareaUtils(page, "ref input")
+    target_ref = page.Textarea(".ref-input")
     target_ref.expect_to_have_text("ref value")
 
     r_str.value = "new"
-    page.wait()
     target_ref.expect_to_have_text("new")
 
 
@@ -30,12 +29,12 @@ def test_input_change_value_when_enter(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.lazy_textarea(value=r_str), "target")
-        set_test_id(rxui.label(r_str), "label")
+        rxui.lazy_textarea(value=r_str).classes("target")
+        rxui.label(r_str).classes("label")
 
     page = browser.open(page_path)
-    input = TextareaUtils(page, "target")
-    label = LabelUtils(page, "label")
+    input = page.Textarea(".target")
+    label = page.Label(".label")
 
     input.fill_text("new value")
     label.expect_to_have_text("old")

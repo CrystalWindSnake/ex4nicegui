@@ -174,8 +174,11 @@ class RadioUtils(BaseUiUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
         super().__init__(page, target_locator)
 
-    def is_checked_by_label(self, label: str):
-        return self.target_locator.get_by_label(label).is_checked()
+    def expect_to_be_checked(self, label: str):
+        expect(self.target_locator.get_by_label(label)).to_be_checked()
+
+    def expect_not_to_be_checked(self, label: str):
+        expect(self.target_locator.get_by_label(label)).not_to_be_checked()
 
     def check_by_label(self, label: str):
         # self.target_locator.click(f"text={label}")

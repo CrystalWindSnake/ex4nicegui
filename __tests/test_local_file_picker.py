@@ -15,15 +15,14 @@ def test_base(browser: BrowserManager, page_path: str):
         fp = rxui.local_file_picker(dir=cur_file.parent, mode="dir")
         fp.bind_ref(select)
 
-        set_test_id(rxui.label(select), "label")
-
-        set_test_id(ui.button("choose file", on_click=fp.open), "btn")
+        rxui.label(select).classes("label")
+        ui.button("choose file", on_click=fp.open).classes("btn")
 
     page = browser.open(page_path)
     page_utils = page._page
 
-    label = LabelUtils(page, "label")
-    btn = ButtonUtils(page, "btn")
+    label = page.Label(".label")
+    btn = page.Button(".btn")
 
     btn.click()
 

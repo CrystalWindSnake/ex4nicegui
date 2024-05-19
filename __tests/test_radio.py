@@ -8,28 +8,25 @@ from .utils import RadioUtils, set_test_id
 def test_display(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.radio(["a", "b"]), "target const")
+        rxui.radio(["a", "b"]).classes("target")
 
     page = browser.open(page_path)
 
-    def normal_check(radio_utils: RadioUtils):
-        radio_utils.expect_to_be_visible()
+    target = page.Radio(".target")
 
-        assert not radio_utils.is_checked_by_label("a")
-        assert not radio_utils.is_checked_by_label("b")
+    target.expect_to_be_visible()
+    target.expect_not_to_be_checked("a")
+    target.expect_not_to_be_checked("b")
 
-        radio_utils.check_by_label("a")
-        page.wait()
-        assert radio_utils.is_checked_by_label("a")
-        assert not radio_utils.is_checked_by_label("b")
+    target.check_by_label("a")
 
-        radio_utils.check_by_label("b")
-        page.wait()
-        assert not radio_utils.is_checked_by_label("a")
-        assert radio_utils.is_checked_by_label("b")
+    target.expect_to_be_checked("a")
+    target.expect_not_to_be_checked("b")
 
-    target_const = RadioUtils(page, "target const")
-    normal_check(target_const)
+    target.check_by_label("b")
+
+    target.expect_not_to_be_checked("a")
+    target.expect_to_be_checked("b")
 
 
 def test_ref_value(browser: BrowserManager, page_path: str):
@@ -37,31 +34,32 @@ def test_ref_value(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.radio(["a", "b"], value=r_value), "target")
+        rxui.radio(["a", "b"], value=r_value).classes("target")
+        rxui.label(r_value).classes("label")
 
     page = browser.open(page_path)
 
-    target = RadioUtils(page, "target")
+    target = page.Radio(".target")
+    label = page.Label(".label")
 
     target.expect_to_be_visible()
 
-    assert not target.is_checked_by_label("a")
-    assert not target.is_checked_by_label("b")
+    target.expect_not_to_be_checked("a")
+    target.expect_not_to_be_checked("b")
+
     assert r_value.value is None
 
-    page.wait()
     target.check_by_label("a")
-    page.wait()
-    assert target.is_checked_by_label("a")
-    assert not target.is_checked_by_label("b")
-    assert r_value.value == "a"
 
-    page.wait()
+    target.expect_to_be_checked("a")
+    target.expect_not_to_be_checked("b")
+    label.expect_contain_text("a")
+
     target.check_by_label("b")
-    page.wait()
-    assert not target.is_checked_by_label("a")
-    assert target.is_checked_by_label("b")
-    assert r_value.value == "b"
+
+    target.expect_not_to_be_checked("a")
+    target.expect_to_be_checked("b")
+    label.expect_contain_text("b")
 
 
 def test_ref_str_change_value(browser: BrowserManager, page_path: str):
@@ -69,25 +67,22 @@ def test_ref_str_change_value(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.radio(["a", "b"], value=r_value), "target")
+        rxui.radio(["a", "b"], value=r_value).classes("target")
 
     page = browser.open(page_path)
 
-    target = RadioUtils(page, "target")
+    target = page.Radio(".target")
 
     target.expect_to_be_visible()
 
-    page.wait()
     r_value.value = "a"
-    page.wait()
-    assert target.is_checked_by_label("a")
-    assert not target.is_checked_by_label("b")
 
-    page.wait()
+    target.expect_to_be_checked("a")
+    target.expect_not_to_be_checked("b")
+
     r_value.value = "b"
-    page.wait()
-    assert not target.is_checked_by_label("a")
-    assert target.is_checked_by_label("b")
+    target.expect_not_to_be_checked("a")
+    target.expect_to_be_checked("b")
 
 
 def test_ref_value_dict_options(browser: BrowserManager, page_path: str):
@@ -99,28 +94,24 @@ def test_ref_value_dict_options(browser: BrowserManager, page_path: str):
             "a": "a value",
             "b": "b value",
         }
-        set_test_id(rxui.radio(opts, value=r_value), "target")
+        rxui.radio(opts, value=r_value).classes("target")
+        rxui.label(r_value).classes("label")
 
     page = browser.open(page_path)
 
-    target = RadioUtils(page, "target")
+    target = page.Radio(".target")
+    label = page.Label(".label")
 
     target.expect_to_be_visible()
 
-    assert not target.is_checked_by_label("a value")
-    assert not target.is_checked_by_label("b value")
-    assert r_value.value is None
-
-    page.wait()
     target.check_by_label("a value")
-    page.wait()
-    assert target.is_checked_by_label("a value")
-    assert not target.is_checked_by_label("b value")
-    assert r_value.value == "a"
 
-    page.wait()
+    target.expect_to_be_checked("a value")
+    target.expect_not_to_be_checked("b value")
+    label.expect_contain_text("a")
+
     target.check_by_label("b value")
-    page.wait()
-    assert not target.is_checked_by_label("a value")
-    assert target.is_checked_by_label("b value")
-    assert r_value.value == "b"
+
+    target.expect_not_to_be_checked("a value")
+    target.expect_to_be_checked("b value")
+    label.expect_contain_text("b")
