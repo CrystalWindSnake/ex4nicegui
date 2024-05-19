@@ -12,13 +12,13 @@ def test_should_dict_sync(browser: BrowserManager, page_path: str):
     def _():
         data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
 
-        set_test_id(rxui.label(data), "label")
-        set_test_id(rxui.input(value=rxui.vmodel(data.value["a"])), "input")
+        rxui.label(data).classes("label")
+        rxui.input(value=rxui.vmodel(data.value["a"])).classes("input")
 
     page = browser.open(page_path)
 
-    label = LabelUtils(page, "label")
-    input = InputUtils(page, "input")
+    label = page.Label(".label")
+    input = page.Input(".input")
 
     input.expect_to_have_text("1")
     label.expect_to_have_text("{'a': 1, 'b': [1, 2, 3, 4]}")
@@ -33,13 +33,13 @@ def test_should_dict_sync_deep_value(browser: BrowserManager, page_path: str):
     def _():
         data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
 
-        set_test_id(rxui.label(data), "label")
-        set_test_id(rxui.input(value=rxui.vmodel(data.value["b"][0])), "input")
+        rxui.label(data).classes("label")
+        rxui.input(value=rxui.vmodel(data.value["b"][0])).classes("input")
 
     page = browser.open(page_path)
 
-    label = LabelUtils(page, "label")
-    input = InputUtils(page, "input")
+    label = page.Label(".label")
+    input = page.Input(".input")
 
     input.expect_to_have_text("1")
     label.expect_to_have_text("{'a': 1, 'b': [1, 2, 3, 4]}")
@@ -54,13 +54,13 @@ def test_should_sync_shallow_ref(browser: BrowserManager, page_path: str):
     def _():
         data = to_ref(1)
 
-        set_test_id(rxui.label(data), "label")
-        set_test_id(rxui.input(value=rxui.vmodel(data)), "input")
+        rxui.label(data).classes("label")
+        rxui.input(value=rxui.vmodel(data)).classes("input")
 
     page = browser.open(page_path)
 
-    label = LabelUtils(page, "label")
-    input = InputUtils(page, "input")
+    label = page.Label(".label")
+    input = page.Input(".input")
 
     input.expect_to_have_text("1")
     label.expect_to_have_text("1")
@@ -76,13 +76,13 @@ def test_should_sync_reactive_object_var(browser: BrowserManager, page_path: str
         data = deep_ref({"a": 1})
         item = data.value
 
-        set_test_id(rxui.label(data), "label")
-        set_test_id(rxui.input(value=rxui.vmodel(item["a"])), "input")
+        rxui.label(data).classes("label")
+        rxui.input(value=rxui.vmodel(item["a"])).classes("input")
 
     page = browser.open(page_path)
 
-    label = LabelUtils(page, "label")
-    input = InputUtils(page, "input")
+    label = page.Label(".label")
+    input = page.Input(".input")
 
     input.expect_to_have_text("1")
     label.expect_to_have_text("{'a': 1}")
@@ -99,12 +99,12 @@ def test_should_warning_when_no_key_expr(browser: BrowserManager, page_path: str
         item = data.value
 
         with warnings.catch_warnings(record=True) as w:
-            set_test_id(rxui.input(value=rxui.vmodel(item)), "input")
+            rxui.input(value=rxui.vmodel(item)).classes("input")
 
             assert len(w) == 1
 
     page = browser.open(page_path)
 
-    input = InputUtils(page, "input")
+    input = page.Input(".input")
 
     input.expect_to_have_text("1")
