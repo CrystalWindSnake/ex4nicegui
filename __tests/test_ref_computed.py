@@ -5,7 +5,6 @@ from ex4nicegui import to_ref, ref_computed
 from ex4nicegui import effect
 from ex4nicegui.utils.signals import deep_ref
 from .screen import BrowserManager
-from .utils import InputUtils, LabelUtils, set_test_id
 
 
 def test_method_decorator(browser: BrowserManager, page_path: str):

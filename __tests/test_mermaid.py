@@ -1,7 +1,6 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from .screen import BrowserManager
-from .utils import MermaidUtils, set_test_id, fn
 
 
 def test_node_click(browser: BrowserManager, page_path: str):

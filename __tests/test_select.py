@@ -2,7 +2,6 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed, effect
 from .screen import BrowserManager
-from playwright.sync_api import expect
 from .utils import SelectUtils, set_test_id, ButtonUtils, SwitchUtils
 
 

@@ -2,7 +2,6 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import BrowserManager
-from .utils import InputNumberUtils, set_test_id
 
 
 def test_const(browser: BrowserManager, page_path: str):
@@ -47,8 +46,6 @@ def test_ref(browser: BrowserManager, page_path: str):
 
 
 def test_on_change(browser: BrowserManager, page_path: str):
-    value_on_change = 0
-
     @ui.page(page_path)
     def _():
         def on_change(e):
@@ -64,7 +61,6 @@ def test_on_change(browser: BrowserManager, page_path: str):
 
     target.fill_text("1111")
     label.expect_to_have_text("1111")
-    # assert value_on_change == 1111.0
 
 
 def test_with_format(browser: BrowserManager, page_path: str):

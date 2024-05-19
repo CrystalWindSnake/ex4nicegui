@@ -3,7 +3,6 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import BrowserManager
-from .utils import LabelUtils, set_test_id, ButtonUtils
 
 
 def test_base(browser: BrowserManager, page_path: str):

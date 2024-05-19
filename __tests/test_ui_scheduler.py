@@ -1,7 +1,6 @@
 from ex4nicegui import rxui, ref_computed, effect, to_ref
 from nicegui import ui
 from .screen import BrowserManager
-from .utils import InputUtils, LabelUtils, set_test_id
 
 
 def test_when_error_in_effect(browser: BrowserManager, page_path: str):

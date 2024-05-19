@@ -2,7 +2,6 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, effect, new_scope, on
 from .screen import BrowserManager
-from .utils import set_test_id, ButtonUtils, InputUtils, LabelUtils
 
 
 def test_can_dispose_temporarily(browser: BrowserManager, page_path: str):

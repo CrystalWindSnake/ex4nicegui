@@ -4,7 +4,6 @@ from nicegui import ui
 from ex4nicegui import to_ref
 from ex4nicegui.utils.signals import deep_ref
 from .screen import BrowserManager
-from .utils import InputUtils, LabelUtils, set_test_id
 
 
 def test_should_dict_sync(browser: BrowserManager, page_path: str):
