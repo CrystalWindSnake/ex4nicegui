@@ -162,17 +162,19 @@ def test_bind_style(browser: BrowserManager, page_path: str):
         select2 = page.Select(f".{test_prefix}_select2")
         label = page.Label(f".{test_prefix}_label")
 
-        assert label.get_style_attr_value() == "background-color: blue; color: red;"
+        label.expect_to_have_style("background-color", "rgb(0, 0, 255)")
+        label.expect_to_have_style("color", "rgb(255, 0, 0)")
 
         #
         select1.click_and_select("green")
 
-        assert label.get_style_attr_value() == "background-color: green; color: red;"
+        label.expect_to_have_style("background-color", "rgb(0, 128, 0)")
+        label.expect_to_have_style("color", "rgb(255, 0, 0)")
 
         #
         select2.click_and_select("yellow")
-
-        assert label.get_style_attr_value() == "background-color: green; color: yellow;"
+        label.expect_to_have_style("background-color", "rgb(0, 128, 0)")
+        label.expect_to_have_style("color", "rgb(255, 255, 0)")
 
     test_binding_to_dict()
 

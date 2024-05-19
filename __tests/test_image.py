@@ -2,7 +2,6 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import BrowserManager
-from .utils import ImageUtils, set_test_id
 from pathlib import Path
 
 image_file = Path(__file__).parent / "files/slide1.jpg"
@@ -35,22 +34,19 @@ def test_source(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.image(img_source).props("fit=contain").classes("w-[20rem] h-[20rem]"),
-            "target",
+        rxui.image(img_source).props("fit=contain").classes(
+            "w-[20rem] h-[20rem] target"
         )
 
     page = browser.open(page_path)
 
-    target = ImageUtils(page, "target")
+    target = page.Image(".target")
 
     target.expect_find_by_class("q-img__image")
     target.expect_load_image()
 
     img_source.value = img_bs64  # type: ignore
 
-    page.wait(1000)
     target.expect_load_image()
 
-    src = target.get_src()
-    assert src.startswith("data:image/png;base64,iVB")
+    target.expect_src_starts_with("data:image/png;base64,iVB")

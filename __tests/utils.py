@@ -86,11 +86,8 @@ class BaseUiUtils:
         for cls in classes:
             expect(self.target_locator).not_to_have_class(re.compile(cls))
 
-    def get_style_attr_value(self) -> str:
-        return self.target_locator.evaluate("element => element.getAttribute('style')")
-
-    def get_style(self, name: str):
-        return self.target_locator.evaluate(f"node=> node.style.{name}")
+    def expect_to_have_style(self, name: str, value: str):
+        expect(self.target_locator).to_have_css(name, value)
 
     def expect_to_be_visible(self):
         expect(self.target_locator).to_be_visible()
@@ -494,6 +491,9 @@ class ImageUtils(BaseUiUtils):
 
     def expect_load_image(self):
         expect(self.get_image()).to_be_visible()
+
+    def expect_src_starts_with(self, expected: str):
+        expect(self.get_image()).to_have_attribute("src", re.compile(f"^{expected}"))
 
 
 class CheckboxUtils(BaseUiUtils):

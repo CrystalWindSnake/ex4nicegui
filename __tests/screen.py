@@ -126,6 +126,14 @@ class PageUtils:
         target.wait_for_element_state("stable")
         return target
 
+    @common.with_signature_from(Page.get_by_role)
+    def get_by_role(
+        self,
+        *args,
+        **kwargs,
+    ):
+        return self._page.get_by_role(*args, **kwargs)
+
     def should_contain(self, text: str):
         # expect(self._page.locator("body")).to_contain_text(text)
         expect(self.get_by_text(text)).to_be_visible()
@@ -174,3 +182,6 @@ class PageUtils:
 
     def Number(self, selector: Union[str, Locator]):
         return utils.InputNumberUtils(self._page, selector)
+
+    def Image(self, selector: Union[str, Locator]):
+        return utils.ImageUtils(self._page, selector)

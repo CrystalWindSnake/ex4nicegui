@@ -11,21 +11,21 @@ def test_display(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.label("test label"), "target")
-        set_test_id(rxui.label(r_str), "ref target")
+        rxui.label("test label").classes("target")
+        rxui.label(r_str).classes("ref-target")
 
         r_bool.value = True  # type: ignore
-        set_test_id(rxui.label(r_bool), "bool ref target")
+        rxui.label(r_bool).classes("bool-ref-target")
 
     page = browser.open(page_path)
 
-    target_const = LabelUtils(page, "target")
+    target_const = page.Label(".target")
     target_const.expect_to_have_text("test label")
 
-    target_ref = LabelUtils(page, "ref target")
+    target_ref = page.Label(".ref-target")
     target_ref.expect_to_have_text("ref label")
 
-    target_bool_ref = LabelUtils(page, "bool ref target")
+    target_bool_ref = page.Label(".bool-ref-target")
     target_bool_ref.expect_to_have_text("True")
 
 
@@ -34,11 +34,11 @@ def test_ref_str_change_value(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.label(r_str), "target")
+        rxui.label(r_str).classes("target")
 
     page = browser.open(page_path)
 
-    target = LabelUtils(page, "target")
+    target = page.Label(".target")
     target.expect_to_have_text("old")
 
     r_str.value = "new"
@@ -51,15 +51,12 @@ def test_bind_color(browser: BrowserManager, page_path: str):
 
     @ui.page(page_path)
     def _():
-        label = rxui.label("label")
-        label.bind_color(r_color)
-        set_test_id(label, "target")
+        rxui.label("label").classes("target").bind_color(r_color)
 
     page = browser.open(page_path)
-    target = LabelUtils(page, "target")
+    target = page.Label(".target")
 
-    assert target.get_style("color") == "red"
+    target.expect_to_have_style("color", "rgb(255, 0, 0)")
 
     r_color.value = "green"
-    page.wait()
-    assert target.get_style("color") == "green"
+    target.expect_to_have_style("color", "rgb(0, 128, 0)")

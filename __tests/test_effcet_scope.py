@@ -22,11 +22,10 @@ def test_effect_cleanup_when_page_close(browser: BrowserManager, page_path: str)
         ui.link("back to main", page_path)
 
     page = browser.open(page_path)
-    page.wait(1000)
 
     assert call.calledTimes == 1
 
-    page._page.get_by_role("link", name="to other page").click()
+    page.get_by_role("link", name="to other page").click()
 
     # must wait for background execution to clean up
     page.wait(4000)
@@ -57,7 +56,6 @@ def test_on_cleanup_when_page_close(browser: BrowserManager, page_path: str):
         ui.link("back to main", page_path)
 
     page = browser.open(page_path)
-    page.wait(1000)
 
     assert call_fn_times.calledTimes == 1
     page._page.get_by_role("link", name="to other page").click()

@@ -23,10 +23,8 @@ def test_ref_str(browser: BrowserManager, page_path: str):
     page = browser.open(page_path)
     page.should_contain("home")
 
-    page.wait()
     r_str.value = "add"
 
-    page.wait()
     page.should_contain("add")
 
 
@@ -47,5 +45,5 @@ def test_color(browser: BrowserManager, page_path: str):
     assert get_color_value() == "rgb(88, 152, 212)"
 
     r_color.value = "rgba(224,52,52,1)"
-    page.wait()
+
     assert get_color_value() == "rgb(224, 52, 52)"
