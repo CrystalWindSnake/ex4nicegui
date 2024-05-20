@@ -46,10 +46,16 @@ jobs:
       - run: poetry build
       # - run: pip install nicegui>=1.4.23 signe typing_extensions Pillow docutils executing
       # - run: python setup.py build
-      - name: to build lib dir
-        working-directory: ./build/lib
+
+      - name: run
         run: |
-          ls
-          pwd
+          poetry install
           python -c "import ex4nicegui;from ex4nicegui.reactive import rxui;from ex4nicegui import bi"
+    
+      # - name: to build lib dir
+      #   working-directory: ./build/lib
+      #   run: |
+      #     ls
+      #     pwd
+      #     python -c "import ex4nicegui;from ex4nicegui.reactive import rxui;from ex4nicegui import bi"
     
