@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "ex4nicegui"
+version = "0.6.6"
+description = "Extension library based on nicegui, providing data responsive,BI functionality modules"
+authors = ["CrystalWindSnake <568166495@qq.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/CrystalWindSnake/ex4nicegui"
+keywords = ["nicegui", "ex4nicegui", "webui"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+nicegui = "^1.4.25"
+signe = "^0.4.14"
+executing = "^2.0.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.1"
+pandas = [
+    {version = "^1.0.0", python = "~3.8"},
+    {version = "^2.0.0", python = ">=3.9,<3.13"}
+]
+numpy = [
+    {version = "^1.24.0", python = "~3.8"},
+    {version = "^1.26.0", python = ">=3.9,<3.13"}
+]
+pyecharts = "^2.0.5"
+pytest-playwright = "^0.5.0"
+playwright = "^1.43.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
