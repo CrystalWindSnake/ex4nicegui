@@ -5,6 +5,7 @@ description = "Extension library based on nicegui, providing data responsive,BI 
 authors = ["CrystalWindSnake <568166495@qq.com>"]
 license = "MIT"
 readme = "README.md"
+keywords = ["nicegui", "ex4nicegui", "webui"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
