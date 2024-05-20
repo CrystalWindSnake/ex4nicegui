@@ -36,12 +36,10 @@ def test_color(browser: BrowserManager, page_path: str):
 
     page = browser.open(page_path)
 
-    def get_color_value():
-        return page._page.locator(".target").evaluate(
-            "(node)=>window.getComputedStyle(node).color"
-        )
+    icon = page.Base(".target")
 
-    assert get_color_value() == "rgb(88, 152, 212)"
+    icon.expect_to_have_style("color", "rgb(88, 152, 212)")
 
     r_color.value = "rgba(224,52,52,1)"
-    assert get_color_value() == "rgb(224, 52, 52)"
+
+    icon.expect_to_have_style("color", "rgb(224, 52, 52)")
