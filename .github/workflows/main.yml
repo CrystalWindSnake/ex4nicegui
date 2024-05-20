@@ -10,6 +10,7 @@ on:
 jobs:
   run-all-test:
     runs-on: ubuntu-latest
+    needs: [import-correct]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
