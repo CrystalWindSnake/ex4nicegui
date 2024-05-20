@@ -12,25 +12,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        # with:
-        #   ref: 'test-github_act'
-      - uses: actions/setup-python@v3.1.4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
-      - run: pip install pytest playwright pyecharts pytest-playwright nicegui>=1.4.23 pandas Pillow executing signe typing_extensions
-      - run: playwright install
-      # - run: python -m playwright install --with-deps
+      - name: set up Poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: "1.6.1"
+      - name: install dependencies
+        run: |
+          set -x
+          poetry config virtualenvs.create false
+          poetry install --all-extras
+          python -m playwright install 
       - run: pytest __tests/
-      # - run: pytest -k test_const_value __tests/test_radio.py
   import-correct:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3.1.4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.8'
-      - run: pip install nicegui>=1.4.23 signe typing_extensions Pillow docutils executing
-      - run: python setup.py build
+      - name: set up Poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: "1.6.1"
+      - name: install dependencies
+        run: |
+          set -x
+          poetry config virtualenvs.create false
+          poetry install --all-extras
+      - run: poetry build
+      # - run: pip install nicegui>=1.4.23 signe typing_extensions Pillow docutils executing
+      # - run: python setup.py build
       - name: to build lib dir
         working-directory: ./build/lib
         run: |
