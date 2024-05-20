@@ -40,7 +40,7 @@ class ServerManager:
         if self.server_thread is None:
             self.start_server()
 
-        self.connected.clear()
+        # self.connected.clear()
 
         return BrowserManager(self, self.connected)
 
