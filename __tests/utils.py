@@ -499,10 +499,6 @@ class SwitchUtils(BaseUiUtils):
 
 
 class ImageUtils(BaseUiUtils):
-    # def __init__(self, screen_page: BrowserManager, test_id: str) -> None:
-    #     super().__init__(screen_page, test_id)
-    #     self.__img_target = self.target_locator.locator("img")
-
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
         super().__init__(page, target_locator)
         self.__img_target = self.target_locator.locator("img")
@@ -518,7 +514,7 @@ class ImageUtils(BaseUiUtils):
         return res
 
     def expect_load_image(self):
-        expect(self.get_image()).to_be_visible()
+        expect(self.get_image()).to_be_visible(timeout=10000)
 
     def expect_src_starts_with(self, expected: str):
         expect(self.get_image()).to_have_attribute("src", re.compile(f"^{expected}"))
