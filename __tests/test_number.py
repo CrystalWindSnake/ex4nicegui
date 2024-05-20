@@ -74,3 +74,21 @@ def test_with_format(browser: BrowserManager, page_path: str):
 
     target.input_text("1111")
     target.expect_to_have_text("1111")
+
+
+def test_precision(browser: BrowserManager, page_path: str):
+    value = to_ref(3.14159265359)
+    precision = to_ref(5)
+
+    @ui.page(page_path)
+    def _():
+        rxui.number(value=value, precision=precision).classes("target")
+
+    page = browser.open(page_path)
+
+    target = page.Number(".target")
+
+    target.expect_to_have_text("3.14159265359")
+
+    precision.value = 2
+    target.expect_to_have_text("3.14")
