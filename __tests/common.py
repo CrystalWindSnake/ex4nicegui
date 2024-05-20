@@ -1,14 +1,14 @@
 import typing
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, Concatenate
 
 P = ParamSpec("P")
 R = typing.TypeVar("R")
 
 
 def with_signature_from(
-    f: typing.Callable[typing.Concatenate[typing.Any, P], R],
+    f: typing.Callable[Concatenate[typing.Any, P], R],
 ) -> typing.Callable[
-    [typing.Callable[typing.Concatenate[typing.Any, P], R]],
-    typing.Callable[typing.Concatenate[typing.Any, P], R],
+    [typing.Callable[Concatenate[typing.Any, P], R]],
+    typing.Callable[Concatenate[typing.Any, P], R],
 ]:
     return lambda _: _
