@@ -23,6 +23,7 @@ numpy = [
     {version = "^1.24.0", python = "~3.8"},
     {version = "^1.26.0", python = ">=3.9,<3.13"}
 ]
+pyecharts = "^2.0.5"
 
 [build-system]
 requires = ["poetry-core"]
