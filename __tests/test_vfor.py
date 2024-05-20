@@ -3,14 +3,13 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import deep_ref
-from .screen import ScreenPage
-from .utils import ButtonUtils, InputUtils, LabelUtils, set_test_id
+from .screen import BrowserManager
 from playwright.sync_api import expect
 from dataclasses import dataclass
 
 
 class TestExample:
-    def test_todos_example(self, page: ScreenPage, page_path: str):
+    def test_todos_example(self, browser: BrowserManager, page_path: str):
         @dataclass
         class TodoItem:
             title: str
@@ -50,25 +49,22 @@ class TestExample:
                 todos.value[a], todos.value[b] = todos.value[b], todos.value[a]
 
             with ui.row():
-                set_test_id(rxui.input(value=input), "input")
-                set_test_id(
-                    rxui.button("add", on_click=lambda: new_todo(input.value)),
-                    "btn add",
+                rxui.input(value=input).classes("input")
+                rxui.button("add", on_click=lambda: new_todo(input.value)).classes(
+                    "btn-add"
                 )
-                set_test_id(
-                    rxui.button("all done", on_click=lambda: all_done()), "btn all done"
+                rxui.button("all done", on_click=lambda: all_done()).classes(
+                    "btn-all-done"
                 )
-                set_test_id(
-                    rxui.button("swap", on_click=lambda: swap(0, -1)), "btn swap"
-                )
+                rxui.button("swap", on_click=lambda: swap(0, -1)).classes("btn-swap")
 
                 with ui.row():
                     ui.label("done count:")
-                    set_test_id(rxui.label(total_done), "label done")
+                    rxui.label(total_done).classes("label-done")
 
                 with ui.row():
                     ui.label("totals count:")
-                    set_test_id(rxui.label(totals), "label totals")
+                    rxui.label(totals).classes("label-totals")
 
             with ui.column().classes("card_zone"):
 
@@ -86,17 +82,17 @@ class TestExample:
                             "del", on_click=lambda: del_todo(item.value)
                         ).bind_enabled(lambda: item.value.done)
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
-        btn_add = ButtonUtils(page, "btn add")
-        btn_all_done = ButtonUtils(page, "btn all done")
-        btn_swap = ButtonUtils(page, "btn swap")
-        input = InputUtils(page, "input")
+        btn_add = page.Button(".btn-add")
+        btn_all_done = page.Button(".btn-all-done")
+        btn_swap = page.Button(".btn-swap")
+        input = page.Input(".input")
 
-        label_done = LabelUtils(page, "label done")
-        label_totals = LabelUtils(page, "label totals")
+        label_done = page.Label(".label-done")
+        label_totals = page.Label(".label-totals")
 
-        locator_row_cards = page._page.locator(".row-card")
+        locator_row_cards = page.locator(".row-card")
         locator_row_titles = locator_row_cards.locator(".row-title")
         locator_row_checkboxs = locator_row_cards.get_by_role("checkbox")
         locator_row_btns = locator_row_cards.get_by_role("button")
@@ -166,7 +162,7 @@ class TestExample:
 
 
 class TestBase:
-    def test_two_way_binding_with_dict(self, page: ScreenPage, page_path: str):
+    def test_two_way_binding_with_dict(self, browser: BrowserManager, page_path: str):
         @ui.page(page_path)
         def _():
             # refs
@@ -183,7 +179,7 @@ class TestBase:
                 return sum(item["done"] for item in items.value)
 
             # ui
-            set_test_id(rxui.label(total_count), "label totals")
+            rxui.label(total_count).classes("label-totals")
 
             @rxui.vfor(items, key="id")
             def _(store: rxui.VforStore):
@@ -194,11 +190,11 @@ class TestBase:
                         value=rxui.vmodel(item, "done"),
                     )
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
-        label_totals = LabelUtils(page, "label totals")
+        label_totals = page.Label(".label-totals")
 
-        locator_row_cards = page._page.locator(".row-card")
+        locator_row_cards = page.locator(".row-card")
         locator_row_checkboxs = locator_row_cards.get_by_role("checkbox")
 
         def get_checkbox(index: int):
@@ -210,7 +206,9 @@ class TestBase:
 
         label_totals.expect_contain_text("2")
 
-    def test_two_way_binding_with_dataclass(self, page: ScreenPage, page_path: str):
+    def test_two_way_binding_with_dataclass(
+        self, browser: BrowserManager, page_path: str
+    ):
         @dataclass
         class Item:
             id: int
@@ -233,7 +231,7 @@ class TestBase:
                 return sum(item.done for item in items.value)
 
             # ui
-            set_test_id(rxui.label(total_count), "label totals")
+            rxui.label(total_count).classes("label-totals")
 
             @rxui.vfor(items, key="id")
             def _(store: rxui.VforStore[Item]):
@@ -244,11 +242,11 @@ class TestBase:
                         value=rxui.vmodel(item.value.done),
                     )
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
-        label_totals = LabelUtils(page, "label totals")
+        label_totals = page.Label(".label-totals")
 
-        locator_row_cards = page._page.locator(".row-card")
+        locator_row_cards = page.locator(".row-card")
         locator_row_checkboxs = locator_row_cards.get_by_role("checkbox")
 
         def get_checkbox(index: int):
@@ -260,7 +258,7 @@ class TestBase:
 
         label_totals.expect_contain_text("2")
 
-    def test_shallow_ref(self, page: ScreenPage, page_path: str):
+    def test_shallow_ref(self, browser: BrowserManager, page_path: str):
         text = to_ref("abcd")
 
         @ui.page(page_path)
@@ -271,19 +269,19 @@ class TestBase:
                 def _(store: rxui.VforStore[str]):
                     rxui.label(store.get())
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
         page.should_contain("abcd")
 
         text.value = "abc"
         page.should_contain("abc")
 
-    def test_deep_ref(self, page: ScreenPage, page_path: str):
+    def test_deep_ref(self, browser: BrowserManager, page_path: str):
         data = deep_ref([1, 2, 3, 4])
 
         @ui.page(page_path)
         def _():
-            with ui.column() as for_box:
+            with ui.column().classes("for_box"):
 
                 @rxui.vfor(data)
                 def _(store: rxui.VforStore[int]):
@@ -291,31 +289,27 @@ class TestBase:
                     row_num = store.row_index.value + 1
 
                     with ui.row().classes("flex-center"):
-                        label = rxui.label(item)
-                        input = rxui.input(value=rxui.vmodel(item))
+                        rxui.label(item).classes(f"vfor-label-{row_num}")
+                        rxui.input(value=rxui.vmodel(item)).classes(
+                            f"vfor-input-{row_num}"
+                        )
 
-                        set_test_id(label, f"vfor-label-{row_num}")
-                        set_test_id(input, f"vfor-input-{row_num}")
-
-            set_test_id(for_box, "for_box")
-
-            set_test_id(rxui.label(data), "list-label")
-
-            set_test_id(rxui.input(value=rxui.vmodel(data, 0)), "input1")
+            rxui.label(data).classes("list-label")
+            rxui.input(value=rxui.vmodel(data, 0)).classes("input1")
 
             def onclick():
                 data.value[0] = 66
 
-            set_test_id(ui.button("change", on_click=onclick), "btn")
+            ui.button("change", on_click=onclick).classes("btn")
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
-        list_label = LabelUtils(page, "list-label")
-        input_for_1 = InputUtils(page, "input1")
-        change_btn = ButtonUtils(page, "btn")
+        list_label = page.Label(".list-label")
+        input_for_1 = page.Input(".input1")
+        change_btn = page.Button(".btn")
 
-        vfor_label1 = LabelUtils(page, "vfor-label-1")
-        vfor_input1 = InputUtils(page, "vfor-input-1")
+        vfor_label1 = page.Label(".vfor-label-1")
+        vfor_input1 = page.Input(".vfor-input-1")
 
         list_label.expect_contain_text("[1, 2, 3, 4]")
 
@@ -339,24 +333,23 @@ class TestBase:
         vfor_input1.expect_to_have_text("66")
         list_label.expect_contain_text("[66, 2, 3, 4]")
 
-    def test_should_with_proxy(self, page: ScreenPage, page_path: str):
+    def test_should_with_proxy(self, browser: BrowserManager, page_path: str):
         @ui.page(page_path)
         def _():
             data = deep_ref({"a": [1, 2]})
 
-            set_test_id(rxui.label(data), "list-label")
+            rxui.label(data).classes("list-label")
 
             @rxui.vfor(data.value["a"])
             def _(s):
                 row_num = s.row_index.value + 1
                 rxui.label(s.get())
-                input = rxui.input(value=rxui.vmodel(s.get()))
-                set_test_id(input, f"vfor-input-{row_num}")
+                rxui.input(value=rxui.vmodel(s.get())).classes(f"vfor-input-{row_num}")
 
-        page.open(page_path)
+        page = browser.open(page_path)
 
-        list_label = LabelUtils(page, "list-label")
-        vfor_input1 = InputUtils(page, "vfor-input-1")
+        list_label = page.Label(".list-label")
+        vfor_input1 = page.Input(".vfor-input-1")
 
         list_label.expect_contain_text("[1, 2]")
 

@@ -1,11 +1,10 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, effect, new_scope, on
-from .screen import ScreenPage
-from .utils import set_test_id, ButtonUtils, InputUtils, LabelUtils
+from .screen import BrowserManager
 
 
-def test_can_dispose_temporarily(page: ScreenPage, page_path: str):
+def test_can_dispose_temporarily(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         a = to_ref("0")
@@ -28,24 +27,24 @@ def test_can_dispose_temporarily(page: ScreenPage, page_path: str):
             def _():
                 scope2_text.value = f"scope 2:{a.value}"
 
-        set_test_id(rxui.input(value=a), "input")
-        set_test_id(rxui.label(scope1_text), "scope1_text")
-        set_test_id(rxui.label(scope2_text), "scope2_text")
-        set_test_id(
-            rxui.button("dispose scope 1", on_click=scope1.dispose), "dispose_scope1"
+        rxui.input(value=a).classes("input")
+        rxui.label(scope1_text).classes("scope1_text")
+        rxui.label(scope2_text).classes("scope2_text")
+        rxui.button("dispose scope 1", on_click=scope1.dispose).classes(
+            "dispose-scope1"
         )
-        set_test_id(
-            rxui.button("dispose scope 2", on_click=scope2.dispose), "dispose_scope2"
+        rxui.button("dispose scope 2", on_click=scope2.dispose).classes(
+            "dispose-scope2"
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
     page.wait(600)
 
-    input = InputUtils(page, "input")
-    scope1_text = LabelUtils(page, "scope1_text")
-    scope2_text = LabelUtils(page, "scope2_text")
-    dispose_scope1 = ButtonUtils(page, "dispose_scope1")
-    dispose_scope2 = ButtonUtils(page, "dispose_scope2")
+    input = page.Input(".input")
+    scope1_text = page.Label(".scope1_text")
+    scope2_text = page.Label(".scope2_text")
+    dispose_scope1 = page.Button(".dispose-scope1")
+    dispose_scope2 = page.Button(".dispose-scope2")
 
     # page.pause()
 

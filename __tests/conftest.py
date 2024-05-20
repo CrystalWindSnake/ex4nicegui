@@ -1,7 +1,7 @@
 import importlib
 import pytest
 from playwright.sync_api import Playwright
-from .screen import Screen
+from .screen import ServerManager
 from nicegui.page import page as ui_page
 from nicegui import Client, binding, app
 from nicegui.elements import plotly, pyplot
@@ -22,7 +22,7 @@ def reset_globals(request: pytest.FixtureRequest):
     app.user_middleware.clear()
     # NOTE favicon routes must be removed separately because they are not "pages"
     for route in app.routes:
-        if route.path.endswith("/favicon.ico"):
+        if route.path.endswith("/favicon.ico"):  # type: ignore
             app.routes.remove(route)
     # importlib.reload(globals)
     # # repopulate globals.optional_features
@@ -35,26 +35,26 @@ def reset_globals(request: pytest.FixtureRequest):
 
 
 @pytest.fixture(scope="session")
-def screen(playwright: Playwright, request: pytest.FixtureRequest):
+def server(playwright: Playwright, request: pytest.FixtureRequest):
     if "noautofixt" in request.keywords:
         return
     browser = playwright.chromium.launch(headless=HEADLESS)
-    screen = Screen(browser)
+    server = ServerManager(browser)
 
-    yield screen
+    yield server
 
-    screen.stop_server()
+    server.stop_server()
 
 
 @pytest.fixture(scope="module")
-def page(screen: Screen, request: pytest.FixtureRequest):
+def browser(server: ServerManager, request: pytest.FixtureRequest):
     if "noautofixt" in request.keywords:
         return
-    test_page = screen.new_page()
+    browser = server.new_page()
 
-    yield test_page
+    yield browser
 
-    test_page.close()
+    browser.close()
 
 
 URL_COUNTER = 0

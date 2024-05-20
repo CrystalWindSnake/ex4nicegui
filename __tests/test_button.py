@@ -1,22 +1,21 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import ScreenPage
-from .utils import ButtonUtils, set_test_id
+from .screen import BrowserManager
 
 
-def test_ref_text(page: ScreenPage, page_path: str):
+def test_ref_text(browser: BrowserManager, page_path: str):
     r_text = to_ref("old text")
 
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.button(r_text).props('data-testid="target"').props("no-caps"), "btn"
+        rxui.button(r_text).props('data-testid="target"').props("no-caps").classes(
+            "btn"
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    btn = ButtonUtils(page, "btn")
+    btn = page.Button(".btn")
 
     btn.expect_to_have_text("old text")
 
@@ -24,16 +23,15 @@ def test_ref_text(page: ScreenPage, page_path: str):
     btn.expect_to_have_text(text="new text")
 
 
-def test_enabled(page: ScreenPage, page_path: str):
+def test_enabled(browser: BrowserManager, page_path: str):
     r_num = to_ref(0)
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.button("").bind_enabled(lambda: r_num.value % 2 == 0), "btn")
+        rxui.button("").bind_enabled(lambda: r_num.value % 2 == 0).classes("btn")
 
-    page.open(page_path)
-
-    btn = ButtonUtils(page, "btn")
+    page = browser.open(page_path)
+    btn = page.Button(".btn")
 
     btn.expect.to_be_enabled()
 

@@ -1,26 +1,21 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, effect
-from .screen import ScreenPage
+from .screen import BrowserManager
 
 
-def test_mouse_move(page: ScreenPage, page_path: str):
-    r_x = to_ref(0.0)
-    r_y = to_ref(0.0)
-
+def test_mouse_move(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         r_mouse = rxui.use_mouse()
 
-        @effect
-        def _():
-            r_x.value = r_mouse.x.value
-            r_y.value = r_mouse.y.value
+        rxui.label(r_mouse.x).classes("label-x")
+        rxui.label(r_mouse.y).classes("label-y")
 
-    page.open(page_path)
-    page.wait()
-    page._page.mouse.move(10, 10)
+    page = browser.open(page_path)
+    label_x = page.Label(".label-x")
+    label_y = page.Label(".label-y")
 
-    page.wait()
-    assert r_x.value == 10
-    assert r_y.value == 10
+    page.mouse.move(10, 10)
+
+    label_x.expect_contain_text("10")
+    label_y.expect_contain_text("10")

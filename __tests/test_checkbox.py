@@ -1,21 +1,20 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import ScreenPage
-from .utils import CheckboxUtils, LabelUtils, set_test_id
+from .screen import BrowserManager
 
 
 target_test_id = "checkbox"
 
 
-def test_const_value(page: ScreenPage, page_path: str):
+def test_const_value(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.checkbox("test checkbox"), "target")
+        rxui.checkbox("test checkbox").classes("target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target = CheckboxUtils(page, "target")
+    target = page.Checkbox(".target")
 
     target.expect_to_be_visible()
     target.expect.not_to_be_checked()
@@ -25,20 +24,19 @@ def test_const_value(page: ScreenPage, page_path: str):
     target.expect.to_be_checked()
 
 
-def test_ref_value(page: ScreenPage, page_path: str):
+def test_ref_value(browser: BrowserManager, page_path: str):
     r_value = to_ref(False)
 
     @ui.page(page_path)
     def _():
-        cb = rxui.checkbox("test checkbox", value=r_value)
-        set_test_id(cb, "target")
+        rxui.checkbox("test checkbox", value=r_value).classes("target")
 
-        set_test_id(rxui.label(r_value), "value")
+        rxui.label(r_value).classes("value")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target = CheckboxUtils(page, "target")
-    value_label = LabelUtils(page, "value")
+    target = page.Checkbox(".target")
+    value_label = page.Label(".value")
 
     target.expect_to_be_visible()
 
@@ -49,17 +47,16 @@ def test_ref_value(page: ScreenPage, page_path: str):
     value_label.expect.to_have_text("True")
 
 
-def test_ref_str_change_value(page: ScreenPage, page_path: str):
+def test_ref_str_change_value(browser: BrowserManager, page_path: str):
     r_value = to_ref(False)
 
     @ui.page(page_path)
     def _():
-        cb = rxui.checkbox("test checkbox", value=r_value)
-        set_test_id(cb, "target")
+        rxui.checkbox("test checkbox", value=r_value).classes("target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target = CheckboxUtils(page, "target")
+    target = page.Checkbox(".target")
 
     target.expect_to_be_visible()
 

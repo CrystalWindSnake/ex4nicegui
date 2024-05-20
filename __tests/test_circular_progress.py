@@ -1,21 +1,20 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import ScreenPage
-from .utils import set_test_id, BaseUiUtils
+from .screen import BrowserManager
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     value = to_ref(0.3)
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.circular_progress(value, show_value=True, size="100px"), "cp")
-        set_test_id(rxui.number(value=value), "number")
+        rxui.circular_progress(value, show_value=True, size="100px").classes("cp")
+        rxui.number(value=value).classes("number")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    cp = BaseUiUtils(page, "cp")
+    cp = page.Base(".cp")
 
     cp.expect.to_contain_text("0.3")
 

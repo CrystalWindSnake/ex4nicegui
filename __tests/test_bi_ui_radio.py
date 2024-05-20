@@ -1,12 +1,10 @@
 from nicegui import ui
-from .screen import ScreenPage
+from .screen import BrowserManager
 import pandas as pd
-
 from ex4nicegui import bi
-from .utils import RadioUtils, set_test_id
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         data = [
@@ -25,43 +23,38 @@ def test_base(page: ScreenPage, page_path: str):
 
         source = bi.data_source(df)
 
-        set_test_id(
-            source.ui_radio("level1", custom_options_map={"L1_A": "A值"}), "target1"
-        )
+        source.ui_radio("level1", custom_options_map={"L1_A": "A值"}).classes("level1")
 
         def custom_options_map(v: str):
             if v == "L2_M_2":
                 return {"label": "level2@m_2", "color": "red"}
             return v
 
-        set_test_id(
-            source.ui_radio("level2", custom_options_map=custom_options_map), "target2"
+        source.ui_radio("level2", custom_options_map=custom_options_map).classes(
+            "level2"
         )
-        set_test_id(source.ui_radio("level3"), "target3")
+        source.ui_radio("level3").classes("level3")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target1 = RadioUtils(page, "target1")
-    target2 = RadioUtils(page, "target2")
-    RadioUtils(page, "target3")
+    level1 = page.Radio(".level1")
+    level2 = page.Radio(".level2")
 
-    assert not target1.is_checked_by_label("A值")
-    assert not target1.is_checked_by_label("L1_B")
+    level1.expect_not_to_be_checked("A值")
+    level1.expect_not_to_be_checked("L1_B")
 
-    page.wait()
+    level1.check_by_label("A值")
 
-    target1.check_by_label("A值")
-    page.wait()
-    assert target1.is_checked_by_label("A值")
-    assert not target1.is_checked_by_label("L1_B")
+    level1.expect_to_be_checked("A值")
+    level1.expect_not_to_be_checked("L1_B")
 
-    assert not target2.is_checked_by_label("L2_M_1")
-    assert not target2.is_checked_by_label("level2@m_2")
+    level2.expect_not_to_be_checked("L2_M_1")
+    level2.expect_not_to_be_checked("level2@m_2")
 
-    assert target2.get_all_labels() == ["L2_M_1", "level2@m_2"]
+    assert level2.get_all_labels() == ["L2_M_1", "level2@m_2"]
 
 
-def test_sort_options(page: ScreenPage, page_path: str):
+def test_sort_options(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         data = pd.DataFrame(
@@ -72,20 +65,18 @@ def test_sort_options(page: ScreenPage, page_path: str):
             }
         )
         source = bi.data_source(data)
-
-        set_test_id(
-            source.ui_radio("name", sort_options={"cls": "asc", "value": "desc"}),
-            "target",
+        source.ui_radio("name", sort_options={"cls": "asc", "value": "desc"}).classes(
+            "name"
         )
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target = RadioUtils(page, "target")
+    target = page.Radio(".name")
 
     assert target.get_all_labels() == ["c", "b", "a", "d", "f"]
 
 
-def test_null_options(page: ScreenPage, page_path: str):
+def test_null_options(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         data = pd.DataFrame(
@@ -96,25 +87,17 @@ def test_null_options(page: ScreenPage, page_path: str):
             }
         )
         source = bi.data_source(data)
+        source.ui_radio("cls").classes("target1")
+        source.ui_radio("cls", exclude_null_value=True).classes("target2")
 
-        set_test_id(
-            source.ui_radio("cls"),
-            "target1",
-        )
-
-        set_test_id(
-            source.ui_radio("cls", exclude_null_value=True),
-            "target2",
-        )
-
-    page.open(page_path)
+    page = browser.open(page_path)
 
     # target1
-    target1 = RadioUtils(page, "target1")
+    target1 = page.Radio(".target1")
 
     assert target1.get_all_labels() == ["c1", "c2", "c3", ""]
 
     # target2
-    target2 = RadioUtils(page, "target2")
+    target2 = page.Radio(".target2")
 
     assert target2.get_all_labels() == ["c1", "c2", "c3"]

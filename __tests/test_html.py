@@ -1,20 +1,19 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import ScreenPage
-from .utils import set_test_id, BaseUiUtils
+from .screen import BrowserManager
 
 
-def test_base(page: ScreenPage, page_path: str):
+def test_base(browser: BrowserManager, page_path: str):
     current = to_ref("<p>test1</p>")
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.html(current), "target")
+        rxui.html(current).classes("target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target = BaseUiUtils(page, "target")
+    target = page.Base(".target")
     target.expect.to_have_text("test1")
 
     current.value = "<p>test2:<span>inner</span></p>"

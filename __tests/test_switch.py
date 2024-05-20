@@ -1,66 +1,61 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
-from .screen import ScreenPage
-from playwright.sync_api import expect
+from .screen import BrowserManager
 
 target_test_id = "switch"
 
 
-def test_const_value(page: ScreenPage, page_path: str):
+def test_const_value(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
-        rxui.switch(value=False).props(f'data-testid="{target_test_id}"')
+        rxui.switch(value=False).classes("target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    switch = page.get_by_test_id(target_test_id)
+    target = page.Switch(".target")
 
-    expect(switch).to_be_visible()
-    expect(switch).not_to_be_checked()
+    target.expect_to_be_visible()
+    target.expect_not_checked()
 
-    page.wait()
-    page._page.get_by_test_id("switch").locator("div").nth(2).click()
-    page.wait()
-    expect(switch).to_be_checked()
+    target.click()
+    target.expect_checked()
 
 
-def test_ref_value(page: ScreenPage, page_path: str):
+def test_ref_value(browser: BrowserManager, page_path: str):
     r_on = to_ref(False)
 
     @ui.page(page_path)
     def _():
-        rxui.switch(value=r_on).props(f'data-testid="{target_test_id}"')
+        rxui.switch(value=r_on).classes("target")
+        rxui.label(text=r_on).classes("label")
 
-    page.open(page_path)
-    switch = page.get_by_test_id(target_test_id)
+    page = browser.open(page_path)
+    target = page.Switch(".target")
+    label = page.Label(".label")
 
-    expect(switch).to_be_visible()
-    expect(switch).not_to_be_checked()
-    assert r_on.value is False
+    target.expect_to_be_visible()
+    target.expect_not_checked()
+    label.expect_contain_text("False")
 
-    page.wait()
-    page._page.get_by_test_id("switch").locator("div").nth(2).click()
-    page.wait()
-    expect(switch).to_be_checked()
-    assert r_on.value is True
+    target.click()
+    target.expect_checked()
+    label.expect_contain_text("True")
 
 
-def test_ref_str_change_value(page: ScreenPage, page_path: str):
+def test_ref_str_change_value(browser: BrowserManager, page_path: str):
     r_on = to_ref(False)
 
     @ui.page(page_path)
     def _():
-        rxui.switch(value=r_on).props(f'data-testid="{target_test_id}"')
+        rxui.switch(value=r_on).classes("target")
 
-    page.open(page_path)
-    switch = page.get_by_test_id(target_test_id)
+    page = browser.open(page_path)
+    target = page.Switch(".target")
 
-    expect(switch).to_be_visible()
-    expect(switch).not_to_be_checked()
+    target.expect_to_be_visible()
+    target.expect_not_checked()
 
-    page.wait()
     r_on.value = True
 
-    page.wait()
-    expect(switch).to_be_checked()
+    target.expect_checked()

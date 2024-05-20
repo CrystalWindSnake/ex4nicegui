@@ -2,17 +2,16 @@ from pathlib import Path
 from ex4nicegui.reactive import rxui
 from nicegui import ui, app
 from ex4nicegui import ref_computed, to_ref, deep_ref
-from .screen import ScreenPage
-from .utils import EChartsUtils, ButtonUtils, set_test_id, InputNumberUtils, LabelUtils
+from .screen import BrowserManager
 from pyecharts import options as opts
 from pyecharts.charts import Bar
 from pyecharts.commons import utils
 
 
-def test_chart_display(page: ScreenPage, page_path: str):
+def test_chart_display(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
-        target1 = rxui.echarts(
+        rxui.echarts(
             {
                 "title": {"text": "echart title"},
                 "xAxis": {
@@ -43,7 +42,7 @@ def test_chart_display(page: ScreenPage, page_path: str):
                     }
                 ],
             }
-        )
+        ).classes("target1")
 
         show = to_ref(False)
 
@@ -69,29 +68,25 @@ def test_chart_display(page: ScreenPage, page_path: str):
 
         # Charts don't show up in ui, but the instance tag are still there
         # i.g. https://github.com/CrystalWindSnake/ex4nicegui/issues/77
-        target2 = rxui.echarts.from_pyecharts(chart_opts)
+        rxui.echarts.from_pyecharts(chart_opts).classes("target2")
 
         # from js
-        target3 = rxui.echarts.from_javascript(
+        rxui.echarts.from_javascript(
             Path(__file__).parent / "files/echarts_code.js"
-        )
+        ).classes("target3")
 
-        set_test_id(target1, "target1")
-        set_test_id(target2, "target2")
-        set_test_id(target3, "target3")
+    page = browser.open(page_path)
 
-    page.open(page_path)
-
-    target1 = EChartsUtils(page, "target1")
-    target2 = EChartsUtils(page, "target2")
-    target3 = EChartsUtils(page, "target3")
+    target1 = page.ECharts(".target1")
+    target2 = page.ECharts(".target2")
+    target3 = page.ECharts(".target3")
 
     target1.assert_echarts_attachment()
     target2.assert_echarts_attachment()
     target3.assert_echarts_attachment()
 
 
-def test_chart_deep_ref(page: ScreenPage, page_path: str):
+def test_chart_deep_ref(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         r_opts = deep_ref(
@@ -105,27 +100,23 @@ def test_chart_deep_ref(page: ScreenPage, page_path: str):
             }
         )
 
-        number_input = rxui.number(
-            value=rxui.vmodel(r_opts.value["series"][0]["data"][0])
+        rxui.number(value=rxui.vmodel(r_opts.value["series"][0]["data"][0])).classes(
+            "number_input"
         )
 
-        chart = rxui.echarts(r_opts, not_merge=False)
+        rxui.echarts(r_opts, not_merge=False).classes("chart")
 
-        set_test_id(chart, "chart")
-        set_test_id(number_input, "number_input")
+    page = browser.open(page_path)
 
-    page.open(page_path)
+    chart = page.ECharts(".chart")
+    number_input = page.Number(".number_input")
 
-    chart = EChartsUtils(page, "chart")
-    number_input = InputNumberUtils(page, "number_input")
-
-    page.wait(500)
     number_input.fill_text("12")
 
     assert chart.get_options()["series"][0]["data"][0] == 12
 
 
-def test_js_function_opt(page: ScreenPage, page_path: str):
+def test_js_function_opt(browser: BrowserManager, page_path: str):
     r_unit = to_ref("kg")
 
     yAxis_formatter = ref_computed(
@@ -172,13 +163,11 @@ def test_js_function_opt(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        ins = rxui.echarts(opts)
+        rxui.echarts(opts).classes("target")
 
-        set_test_id(ins, "target")
+    page = browser.open(page_path)
 
-    page.open(page_path)
-
-    target = EChartsUtils(page, "target")
+    target = page.ECharts(".target")
 
     target.assert_canvas_exists()
 
@@ -187,7 +176,7 @@ def test_js_function_opt(page: ScreenPage, page_path: str):
     assert "formatter" in opts["yAxis"][0]["axisLabel"]
 
 
-def test_pyecharts(page: ScreenPage, page_path: str):
+def test_pyecharts(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         c = (
@@ -220,13 +209,11 @@ def test_pyecharts(page: ScreenPage, page_path: str):
             )
         )
 
-        ins = rxui.echarts.from_pyecharts(c)
+        rxui.echarts.from_pyecharts(c).classes("target")
 
-        set_test_id(ins, "target")
+    page = browser.open(page_path)
 
-    page.open(page_path)
-
-    target = EChartsUtils(page, "target")
+    target = page.ECharts(".target")
 
     target.assert_canvas_exists()
 
@@ -235,7 +222,7 @@ def test_pyecharts(page: ScreenPage, page_path: str):
     assert "formatter" in chart_opts["yAxis"][0]["axisLabel"]
 
 
-def test_click_event(page: ScreenPage, page_path: str):
+def test_click_event(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         opts = {
@@ -260,40 +247,35 @@ def test_click_event(page: ScreenPage, page_path: str):
             ],
         }
 
-        ins = rxui.echarts(opts)
+        chart = rxui.echarts(opts).classes("target")
 
-        lbl_click = ui.label()
-        lbl_hover = ui.label()
+        lbl_click = ui.label().classes("lbl_click")
+        lbl_hover = ui.label().classes("lbl_hover")
 
         def onclick_series(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
             lbl_click.set_text(e.seriesName)
 
-        ins.on("click", onclick_series)
+        chart.on("click", onclick_series)
 
         def on_mouser_over(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
             lbl_hover.set_text(e.seriesName)
 
-        ins.on(
+        chart.on(
             "mouseover",
             on_mouser_over,
             query={"seriesName": "Beta"},
         )
 
-        set_test_id(ins, "target")
-        set_test_id(lbl_click, "lbl_click")
-        set_test_id(lbl_hover, "lbl_hover")
+    page = browser.open(page_path)
 
-    page.open(page_path)
+    target = page.ECharts(".target")
+    lbl_click = page.Label(".lbl_click")
+    lbl_hover = page.Label(".lbl_hover")
 
-    target = EChartsUtils(page, "target")
-    lbl_click = LabelUtils(page, "lbl_click")
-    lbl_hover = LabelUtils(page, "lbl_hover")
-
-    page.wait(1000)
     target.assert_canvas_exists()
 
     target.click_series(0.05, "A", y_position_offset=-8)
@@ -308,9 +290,6 @@ def test_click_event(page: ScreenPage, page_path: str):
     )
 
     lbl_hover.expect_not_to_have_text("Alpha")
-    # page.wait(1000)
-
-    # assert "seriesName" not in hover_data
 
     target.mouse_hover_series(
         0.05,
@@ -319,13 +298,12 @@ def test_click_event(page: ScreenPage, page_path: str):
         y_position_offset=+8,
     )
 
-    page.wait(1000)
+    # page.wait(1000)
 
     lbl_hover.expect_to_have_text("Beta")
-    # assert hover_data["seriesName"] == "Beta"
 
 
-def test_update_opts(page: ScreenPage, page_path: str):
+def test_update_opts(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         opts = {
@@ -351,31 +329,29 @@ def test_update_opts(page: ScreenPage, page_path: str):
 
         r_opts = to_ref(opts)
 
-        set_test_id(rxui.echarts(r_opts), "target")
-        set_test_id(rxui.label(lambda: str(r_opts.value["title"])), "label")
+        rxui.echarts(r_opts).classes("target")
+        rxui.label(lambda: str(r_opts.value["title"])).classes("label")
 
         def on_click():
             del r_opts.value["title"]["bottom"]
             r_opts.value = r_opts.value
 
-        set_test_id(ui.button("del title bottom", on_click=on_click), "botton")
+        ui.button("del title bottom", on_click=on_click).classes("del-btn")
 
-    page.open(page_path)
-    page.wait(600)
+    page = browser.open(page_path)
 
-    target = EChartsUtils(page, "target")
-    button = ButtonUtils(page, "botton")
-    label = LabelUtils(page, "label")
+    target = page.ECharts(".target")
+    label = page.Label(".label")
+    del_btn = page.Button(".del-btn")
 
     target.assert_canvas_exists()
     label.expect_to_have_text("{'text': 'title', 'bottom': 0}")
 
-    button.click()
-
+    del_btn.click()
     label.expect_to_have_text("{'text': 'title'}")
 
 
-def test_run_chart_method(page: ScreenPage, page_path: str):
+def test_run_chart_method(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         chart = rxui.echarts(
@@ -386,33 +362,27 @@ def test_run_chart_method(page: ScreenPage, page_path: str):
                     {"type": "bar", "name": "Alpha", "data": [0.1, 0.2]},
                 ],
             }
-        )
+        ).classes("target")
 
         def onclick():
             chart.run_chart_method("setOption", {"title": {"text": "new title"}})
 
-        btn = ui.button("clear", on_click=onclick)
+        ui.button("change title", on_click=onclick).classes("change-btn")
 
-        set_test_id(chart, "target")
+    page = browser.open(page_path)
 
-        set_test_id(btn, "botton")
-
-    page.open(page_path)
-    page.wait(600)
-
-    target = EChartsUtils(page, "target")
-    button = ButtonUtils(page, "botton")
+    target = page.ECharts(".target")
+    button = page.Button(".change-btn")
 
     target.assert_canvas_exists()
 
     assert "title" not in target.get_options()
 
     button.click()
-
     assert target.get_options()["title"][0]["text"] == "new title"
 
 
-def test_create_map(page: ScreenPage, page_path: str):
+def test_create_map(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         #
@@ -437,7 +407,7 @@ def test_create_map(page: ScreenPage, page_path: str):
 
         rxui.echarts.register_map("test_map", "/test/map")
 
-        chart = rxui.echarts(
+        rxui.echarts(
             {
                 "geo": {
                     "map": "test_map",
@@ -445,12 +415,9 @@ def test_create_map(page: ScreenPage, page_path: str):
                 },
                 "series": [],
             }
-        )
+        ).classes("target")
 
-        set_test_id(chart, "target")
+    page = browser.open(page_path)
 
-    page.open(page_path)
-    page.wait()
-
-    target = EChartsUtils(page, "target")
+    target = page.ECharts(".target")
     target.assert_canvas_exists()

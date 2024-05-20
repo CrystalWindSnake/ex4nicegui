@@ -1,10 +1,9 @@
 from ex4nicegui import rxui, ref_computed, effect, to_ref
 from nicegui import ui
-from .screen import ScreenPage
-from .utils import InputUtils, LabelUtils, set_test_id
+from .screen import BrowserManager
 
 
-def test_when_error_in_effect(page: ScreenPage, page_path: str):
+def test_when_error_in_effect(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         text = to_ref("Hello")
@@ -21,14 +20,13 @@ def test_when_error_in_effect(page: ScreenPage, page_path: str):
         def _():
             dummy.value = str(cp.value)
 
-        set_test_id(rxui.input(value=text), "input")
-        set_test_id(rxui.label(dummy), "label")
+        rxui.input(value=text).classes("input")
+        rxui.label(dummy).classes("label")
 
-    page.open(page_path)
-    page.wait(600)
+    page = browser.open(page_path)
 
-    input = InputUtils(page, "input")
-    label = LabelUtils(page, "label")
+    input = page.Input(".input")
+    label = page.Label(".label")
 
     label.expect_contain_text("Hello world")
 

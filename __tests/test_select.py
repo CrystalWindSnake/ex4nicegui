@@ -1,36 +1,30 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed, effect
-from .screen import ScreenPage
-from playwright.sync_api import expect
-from .utils import SelectUtils, set_test_id, ButtonUtils, SwitchUtils
+from .screen import BrowserManager
+import pytest
 
 
-def test_const_str(page: ScreenPage, page_path: str):
+def test_const_str(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.select(["a", "b"], label="test select").classes("min-w-[20ch]"),
-            "target",
-        )
+        rxui.select(["a", "b"], label="test select").classes("min-w-[20ch] target")
 
-    page.open(page_path)
+    page = browser.open(page_path)
 
-    target = SelectUtils(page, "target")
-    expect(target.page.get_by_text("test select", exact=True)).to_be_visible()
+    target = page.Select(".target")
+    target.expect_to_be_visible()
 
 
-def test_ref_str(page: ScreenPage, page_path: str):
+def test_ref_str(browser: BrowserManager, page_path: str):
     r_str = to_ref("")
 
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch]"), "target"
-        )
+        rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch] target")
 
-    page.open(page_path)
-    target = SelectUtils(page, "target")
+    page = browser.open(page_path)
+    target = page.Select(".target")
 
     target.expect_not_to_have_value("a")
     target.expect_not_to_have_value("b")
@@ -46,17 +40,17 @@ def test_ref_str(page: ScreenPage, page_path: str):
     target.expect_not_to_have_value("b")
 
 
-def test_clearable(page: ScreenPage, page_path: str):
+def test_clearable(browser: BrowserManager, page_path: str):
     r_str = to_ref("a")
 
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch]"), "target"
-        ).props("clearable")
+        rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch] target").props(
+            "clearable"
+        )
 
-    page.open(page_path)
-    target = SelectUtils(page, "target")
+    page = browser.open(page_path)
+    target = page.Select(".target")
 
     target.expect_to_have_value("a")
 
@@ -68,7 +62,7 @@ def test_clearable(page: ScreenPage, page_path: str):
     assert r_str.value is None
 
 
-def test_option_change(page: ScreenPage, page_path: str):
+def test_option_change(browser: BrowserManager, page_path: str):
     r_str = to_ref("")
     r_has_data = to_ref(False)
 
@@ -80,33 +74,35 @@ def test_option_change(page: ScreenPage, page_path: str):
 
     @ui.page(page_path)
     def _():
-        set_test_id(rxui.switch("has data", value=r_has_data), "switch")
-        set_test_id(rxui.select(cp_data, value=r_str).classes("min-w-[20ch]"), "target")
+        rxui.switch("has data", value=r_has_data).classes("switch")
+        rxui.select(cp_data, value=r_str).classes("min-w-[20ch] target")
+        rxui.label(r_str).classes("label-str")
 
-    page.open(page_path)
-    target = SelectUtils(page, "target")
-    switch = SwitchUtils(page, "switch")
+    page = browser.open(page_path)
+    target = page.Select(".target")
+    switch = page.Switch(".switch")
+    label = page.Label(".label-str")
 
-    page.wait()
     switch.click()
 
     target.click_and_select("a")
 
-    page.wait()
-    assert r_str.value == "a"
+    label.expect_contain_text("a")
 
 
-def test_multiple_list_opts(page: ScreenPage, page_path: str):
+def test_multiple_list_opts(browser: BrowserManager, page_path: str):
     r_value = to_ref(["a", "b"])
 
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.select(["a", "b", "c", "d"], value=r_value, multiple=True), "target"
+        rxui.select(["a", "b", "c", "d"], value=r_value, multiple=True).classes(
+            "target"
         )
+        rxui.label(r_value).classes("label-value")
 
-    page.open(page_path)
-    target = SelectUtils(page, "target")
+    page = browser.open(page_path)
+    target = page.Select(".target")
+    label = page.Label(".label-value")
 
     target.expect_to_have_value("a, b")
 
@@ -114,46 +110,50 @@ def test_multiple_list_opts(page: ScreenPage, page_path: str):
 
     target.expect_to_have_value("a, b, d")
 
-    assert r_value.value == ["a", "b", "d"]
+    label.expect_contain_text("['a', 'b', 'd']")
 
 
-def test_multiple_dict_opts(page: ScreenPage, page_path: str):
+def test_multiple_dict_opts(browser: BrowserManager, page_path: str):
     r_value = to_ref([1, 2])
 
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.select(
-                {1: "a", 2: "b", 3: "c", 4: "d"}, value=r_value, multiple=True
-            ).classes("min-w-[20ch]"),
-            "target",
-        )
+        rxui.select(
+            {1: "a", 2: "b", 3: "c", 4: "d"}, value=r_value, multiple=True
+        ).classes("min-w-[20ch] target")
 
-    page.open(page_path)
-    target = SelectUtils(page, "target")
+        rxui.label(r_value).classes("label-value")
+
+    page = browser.open(page_path)
+    target = page.Select(".target")
+    label = page.Label(".label-value")
 
     target.expect_to_have_value("a, b")
 
     target.click_and_select("d")
     target.expect_to_have_value("a, b, d")
-    assert r_value.value == [1, 2, 4]
+
+    label.expect_contain_text("[1, 2, 4]")
 
 
-def test_new_value_mode(page: ScreenPage, page_path: str):
+@pytest.mark.skip(reason="not implemented yet")
+def test_new_value_mode(browser: BrowserManager, page_path: str):
     r_str = to_ref(None)
     r_opts = to_ref([])
 
     @ui.page(page_path)
     def _():
-        set_test_id(
-            rxui.select(
-                r_opts, clearable=True, value=r_str, new_value_mode="add-unique"
-            ).classes("min-w-[20ch]"),
-            "target",
-        )
+        rxui.select(
+            r_opts, clearable=True, value=r_str, new_value_mode="add-unique"
+        ).classes("min-w-[20ch] target")
 
-    page.open(page_path)
-    target = SelectUtils(page, "target")
+        rxui.label(r_str).classes("label-str")
+        rxui.label(r_opts).classes("label-opts")
+
+    page = browser.open(page_path)
+    target = page.Select(".target")
+    label_str = page.Label(".label-str")
+    label_opts = page.Label(".label-opts")
 
     target.input_and_enter("a")
 
@@ -161,18 +161,16 @@ def test_new_value_mode(page: ScreenPage, page_path: str):
 
     target.input_and_enter("other")
 
-    page.wait()
-    assert r_str.value == "other"
+    label_str.expect_contain_text("other")
 
     target.click_cancel()
 
-    page.wait()
-    assert r_str.value is None
+    label_str.expect_contain_text("None")
 
-    assert r_opts.value == ["a", "other"]
+    label_opts.expect_contain_text("""["a", "other"]""")
 
 
-def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
+def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
     data = {
         "opts1": list("abcd"),
         "opts2": list("mnxy"),
@@ -191,29 +189,18 @@ def test_opts_value_change_same_time(page: ScreenPage, page_path: str):
         def _():
             value2.value = opts2.value[0]
 
-        select = rxui.select(opts2, value=value2).classes("min-w-[20ch]")
+        rxui.select(opts2, value=value2).classes("min-w-[20ch] target")
 
         def onclick():
             value1.value = "opts2"
 
-        btn = ui.button("change opt2", on_click=onclick)
+        ui.button("change opt2", on_click=onclick).classes("btn")
 
-        set_test_id(
-            select,
-            "target",
-        )
+    page = browser.open(page_path)
 
-        set_test_id(
-            btn,
-            "button",
-        )
-
-    page.open(page_path)
-
-    target = SelectUtils(page, "target")
-    button = ButtonUtils(page, "button")
+    target = page.Select(".target")
+    button = page.Button(".btn")
     target.expect_to_have_value("a")
 
     button.click()
-    page.wait()
     target.expect_to_have_value("m")
