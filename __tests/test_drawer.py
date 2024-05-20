@@ -8,10 +8,12 @@ def test_display(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         with rxui.drawer():
-            ui.label("drawer showed")
+            ui.label("drawer showed").classes("label")
 
     page = browser.open(page_path)
-    page.should_contain("drawer showed")
+
+    label = page.Label(".label")
+    label.expect_to_be_visible()
 
 
 def test_toggle_side(browser: BrowserManager, page_path: str):
@@ -39,7 +41,6 @@ def test_toggle_side(browser: BrowserManager, page_path: str):
     btn = page.Button(".my-btn")
 
     body_width = page.evaluate("()=>document.body.clientWidth")
-    page.should_contain("drawer showed")
     rect = page.get_by_text("drawer showed").bounding_box()
     assert rect is not None
     assert rect["x"] < body_width / 2
@@ -71,10 +72,8 @@ def test_toggle_show(browser: BrowserManager, page_path: str):
     btn = page.Button(".my-btn")
     label = page.Label(".label")
 
-    page.should_contain("drawer showed")
-
     btn.click()
     label.expect_to_be_hidden()
 
     btn.click()
-    page.should_contain("drawer showed")
+    label.expect_to_be_visible()
