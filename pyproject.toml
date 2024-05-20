@@ -17,13 +17,17 @@ executing = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
-playwright = "^1.44.0"
-pandas = "^1.0.0"
+pandas = [
+    {version = "^1.0.0", python = "~3.8"},
+    {version = "^2.0.0", python = ">=3.9,<3.13"}
+]
 numpy = [
     {version = "^1.24.0", python = "~3.8"},
     {version = "^1.26.0", python = ">=3.9,<3.13"}
 ]
 pyecharts = "^2.0.5"
+pytest-playwright = "^0.5.0"
+playwright = "^1.43.0"
 
 [build-system]
 requires = ["poetry-core"]
