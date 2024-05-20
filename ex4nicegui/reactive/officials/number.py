@@ -13,6 +13,7 @@ from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
     to_value,
+    on,
 )
 from nicegui import ui
 from .base import BindableUi
@@ -29,6 +30,7 @@ class NumberBindableUi(BindableUi[ui.number]):
         value: Optional[Union[TMaybeRef[float], TMaybeRef[int]]] = None,
         min: Optional[TMaybeRef[float]] = None,
         max: Optional[TMaybeRef[float]] = None,
+        precision: Optional[TMaybeRef[int]] = None,
         step: Optional[TMaybeRef[float]] = None,
         prefix: Optional[TMaybeRef[str]] = None,
         suffix: Optional[TMaybeRef[str]] = None,
@@ -44,6 +46,7 @@ class NumberBindableUi(BindableUi[ui.number]):
                 "value",
                 "min",
                 "max",
+                "precision",
                 "step",
                 "prefix",
                 "suffix",
@@ -55,7 +58,6 @@ class NumberBindableUi(BindableUi[ui.number]):
         )
 
         value_kws = pc.get_values_kws()
-
         element = ui.number(**value_kws)
         super().__init__(element)  # type: ignore
 
@@ -70,11 +72,22 @@ class NumberBindableUi(BindableUi[ui.number]):
         if prop == "value":
             return self.bind_value(ref_ui)
 
+        if prop == "precision":
+            return self._bind_precision(ref_ui)
+
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef[float]):
         @ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
+
+        return self
+
+    def _bind_precision(self, ref_ui: TGetterOrReadonlyRef[int]):
+        @on(ref_ui, onchanges=True)
+        def _():
+            self.element.precision = to_value(ref_ui)
+            self.element.sanitize()
 
         return self
