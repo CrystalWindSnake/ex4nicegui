@@ -20,7 +20,7 @@ jobs:
       - run: pip install pytest playwright pyecharts pytest-playwright nicegui>=1.4.23 pandas Pillow executing signe typing_extensions
       - run: playwright install
       # - run: python -m playwright install --with-deps
-      - run: pytest __tests/test_image.py
+      - run: pytest __tests/test_image.py __tests/test_icon.py
       # - run: pytest -k test_const_value __tests/test_radio.py
   import-correct:
     runs-on: ubuntu-latest
