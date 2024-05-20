@@ -46,7 +46,7 @@ def test_source(browser: BrowserManager, page_path: str):
     target.expect_load_image()
 
     img_source.value = img_bs64  # type: ignore
-
+    page._page.wait_for_timeout(1000)
     target.expect_load_image()
 
     target.expect_src_starts_with("data:image/png;base64,iVB")
