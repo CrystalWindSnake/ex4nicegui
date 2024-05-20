@@ -139,8 +139,8 @@ class PageUtils:
         return self._page.mouse
 
     def should_contain(self, text: str):
-        # expect(self._page.locator("body")).to_contain_text(text)
-        expect(self.get_by_text(text)).to_be_visible()
+        expect(self._page.locator("body")).to_contain_text(text)
+        # expect(self.get_by_text(text)).to_contain_text(text)
 
     def should_not_contain(self, text: str):
         expect(self._page.locator("body")).not_to_contain_text(text)
