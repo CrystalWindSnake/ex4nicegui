@@ -423,7 +423,7 @@ def test_create_map(browser: BrowserManager, page_path: str):
                                     
             chart.setOption({
                 "geo": {
-                    "map": "china",
+                    "map": "test_map",
                     "roam": True,
                 },
                 "tooltip": {},
@@ -493,14 +493,14 @@ def test_create_from_js_code(browser: BrowserManager, page_path: str):
             r"""
         (chart,echarts) =>{
 
-            fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+            fetch('/test/map')
             .then(response => response.json())
             .then(data => {
-                    echarts.registerMap('china', data);
+                    echarts.registerMap('test_map', data);
 
                     chart.setOption({
                         "geo": {
-                            "map": "china",
+                            "map": "test_map",
                             "roam": True,
                         },
                         "tooltip": {},
