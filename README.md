@@ -688,6 +688,33 @@ rxui.echarts.from_javascript(
 
 - 函数第一个参数为 echart 实例对象.你需要在函数中通过 `setOption` 完成图表配置
 
+函数也有第二个参数，为 `echarts` 全局对象，你可以通过 `echarts.registerMap` 注册地图。
+
+```python
+rxui.echarts.from_javascript(
+"""
+(chart,echarts) =>{
+
+    fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+    .then(response => response.json())
+    .then(data => {
+            echarts.registerMap('test_map', data);
+
+            chart.setOption({
+                geo: {
+                    map: 'test_map',
+                    roam: true,
+                },
+                tooltip: {},
+                legend: {},
+                series: [],
+            });
+    });
+}
+"""
+)
+```
+
 ---
 
 #### rxui.echarts.register_map
@@ -713,6 +740,14 @@ rxui.echarts(
 
 - 参数 `map_name` 为自定义的地图名字。注意在图表配置中 `map` 必需对应注册的名字
 - 参数 `src` 为有效的地图数据网络链接。
+
+
+如果是 svg 数据，需要设置参数 `type="svg"`
+```python
+rxui.echarts.register_map("svg-rect", "/test/svg", type="svg")
+```
+
+
 
 你也可以直接提供本地地图数据的json文件路径对象(Path)
 ```python

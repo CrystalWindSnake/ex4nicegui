@@ -676,6 +676,35 @@ rxui.echarts.from_javascript(
 
 - The first parameter of the function is the echart instance object. You need to configure the chart in the function with `setOption`.
 
+The function also has a second parameter, which is the global echarts object, allowing you to register maps via echarts.registerMap.
+
+
+```python
+rxui.echarts.from_javascript(
+"""
+(chart,echarts) =>{
+
+    fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+    .then(response => response.json())
+    .then(data => {
+            echarts.registerMap('test_map', data);
+
+            chart.setOption({
+                geo: {
+                    map: 'test_map',
+                    roam: true,
+                },
+                tooltip: {},
+                legend: {},
+                series: [],
+            });
+    });
+}
+"""
+)
+```
+
+
 ---
 
 #### rxui.echarts.register_map
@@ -694,13 +723,21 @@ rxui.echarts(
         },
         "tooltip": {},
         "legend": {},
-        "series": [], }
+        "series": [], 
     }
 )
 ```
 
 - The parameter `map_name` is a customized map name. Note that `map` must correspond to a registered name in the chart configuration.
 - The parameter `src` is a valid network link to the map data.
+
+
+If it's SVG data, you need to set the parameter `type="svg"`
+```python
+rxui.echarts.register_map("svg-rect", "/test/svg", type="svg")
+```
+
+
 
 You can also provide the path to the local json file for the map data.
 ```python
