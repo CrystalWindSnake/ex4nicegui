@@ -417,7 +417,105 @@ def test_create_map(browser: BrowserManager, page_path: str):
             }
         ).classes("target")
 
+        rxui.echarts.from_javascript(
+            r"""
+        chart =>{
+                                    
+            chart.setOption({
+                "geo": {
+                    "map": "china",
+                    "roam": True,
+                },
+                "tooltip": {},
+                "legend": {},
+                "series": [],
+            });
+
+        }
+        """
+        ).classes("target-js")
+
     page = browser.open(page_path)
 
     target = page.ECharts(".target")
+    target_js = page.ECharts(".target-js")
+
     target.assert_canvas_exists()
+    target_js.assert_canvas_exists()
+
+
+def test_create_from_js_code(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        @app.get("/test/map")
+        def get_map_data():
+            return {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {"adcode": 110000, "name": "北京市"},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [[35, 10], [45, 45], [15, 40], [10, 20], [35, 10]],
+                                [[20, 30], [35, 35], [30, 20], [20, 30]],
+                            ],
+                        },
+                    }
+                ],
+            }
+
+        rxui.echarts.from_javascript(
+            r"""
+        chart =>{
+            const option = {
+                xAxis: {
+                    type: 'category',
+                    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                    data: [150, 230, 224, 218, 135, 147, 260],
+                    type: 'line'
+                    }
+                ]
+            }            
+            chart.setOption(option);
+        }
+        """
+        ).classes("target")
+
+        rxui.echarts.from_javascript(
+            r"""
+        (chart,echarts) =>{
+
+            fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+            .then(response => response.json())
+            .then(data => {
+                    echarts.registerMap('china', data);
+
+                    chart.setOption({
+                        "geo": {
+                            "map": "china",
+                            "roam": True,
+                        },
+                        "tooltip": {},
+                        "legend": {},
+                        "series": [],
+                    });
+                });
+        }
+        """
+        ).classes("target-use-echarts-register-map")
+
+    page = browser.open(page_path)
+
+    target = page.ECharts(".target")
+    target_map = page.ECharts(".target-use-echarts-register-map")
+
+    target.assert_canvas_exists()
+    target_map.assert_canvas_exists()
