@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Union, cast, Optional
+from typing import Any, Callable, Dict, List, Union, cast, Optional, Literal
 from ex4nicegui.reactive.utils import ParameterClassifier
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
@@ -17,6 +17,7 @@ from ex4nicegui.reactive.EChartsComponent.events import EChartsMouseEventArgumen
 
 from nicegui.awaitable_response import AwaitableResponse
 from nicegui import ui, app
+import orjson as json
 
 
 class EChartsBindableUi(BindableUi[echarts]):
@@ -46,7 +47,14 @@ class EChartsBindableUi(BindableUi[echarts]):
             self.bind_prop(key, value)  # type: ignore
 
     @classmethod
-    def register_map(cls, map_name: str, src: Union[str, Path]):
+    def register_map(
+        cls,
+        map_name: str,
+        src: Union[str, Path],
+        *,
+        type: Literal["geoJSON", "svg"] = "geoJSON",
+        special_areas: Optional[Dict[str, Any]] = None,
+    ):
         """Registers available maps. This can only be used after including geo component or chart series of map.
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#rxuiechartsregister_map
@@ -55,6 +63,8 @@ class EChartsBindableUi(BindableUi[echarts]):
         Args:
             map_name (str): Map name, referring to map value set in geo component or map.
             src (Union[str, Path]): Map data. If str, it should be a network address. If path, it should be a valid file.
+            type (Literal["geoJSON", "svg"], optional): Map data type. Defaults to "geoJSON".
+            special_areas (Optional[Dict[str, Any]], optional): Special areas. Defaults to None.
         """
         if isinstance(src, Path):
             src = app.add_static_file(local_file=src)
@@ -63,13 +73,21 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         ui.add_body_html(
             rf"""
-            <script>
-                if (typeof window.ex4ngEchartsMapTasks === "undefined") {{ 
-                    window.ex4ngEchartsMapTasks = new Map();
-                }}
+<script>
+    (function () {{
+        if (typeof window.ex4ngEchartsMapTasks === "undefined") {{
+            window.ex4ngEchartsMapTasks = new Map();
+        }}
 
-                window.ex4ngEchartsMapTasks.set('{map_name}', '{src}');
-            </script>
+        const value = {{
+            src: '{src}',
+            type: '{type}',
+            specialAreas: {json.dumps(special_areas).decode('utf-8')}
+        }}
+
+        window.ex4ngEchartsMapTasks.set('{map_name}', value);
+    }})()
+</script>
         """
         )
 

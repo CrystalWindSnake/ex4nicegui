@@ -1,6 +1,7 @@
 from pathlib import Path
 from ex4nicegui.reactive import rxui
 from nicegui import ui, app
+from fastapi import Response
 from ex4nicegui import ref_computed, to_ref, deep_ref
 from .screen import BrowserManager
 from pyecharts import options as opts
@@ -405,7 +406,21 @@ def test_create_map(browser: BrowserManager, page_path: str):
                 ],
             }
 
+        @app.get("/test/svg")
+        def get_svg_map():
+            headers = {"Content-Type": "text/plain; charset=utf-8"}
+            return Response(
+                """
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+        <rect x="10" y="10" width="80" height="80" fill="red"/>
+        </svg>
+        """,
+                media_type="text/plain",
+                headers=headers,
+            )
+
         rxui.echarts.register_map("test_map", "/test/map")
+        rxui.echarts.register_map("svg-rect", "/test/svg", type="svg")
 
         rxui.echarts(
             {
@@ -435,13 +450,26 @@ def test_create_map(browser: BrowserManager, page_path: str):
         """
         ).classes("target-js")
 
+        # svg map
+        rxui.echarts(
+            {
+                "geo": {
+                    "map": "svg-rect",
+                    "roam": True,
+                },
+                "series": [],
+            }
+        ).classes("target-svg")
+
     page = browser.open(page_path)
 
     target = page.ECharts(".target")
     target_js = page.ECharts(".target-js")
+    target_svg = page.ECharts(".target-svg")
 
     target.assert_canvas_exists()
     target_js.assert_canvas_exists()
+    target_svg.assert_canvas_exists()
 
 
 def test_create_from_js_code(browser: BrowserManager, page_path: str):

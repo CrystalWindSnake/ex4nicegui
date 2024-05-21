@@ -5,13 +5,23 @@ function collectMapRegisterTask() {
 
   if (typeof window.ex4ngEchartsMapTasks !== "undefined") {
 
-    for (const [mapName, src] of window.ex4ngEchartsMapTasks.entries()) {
-
+    for (const [mapName, opt] of window.ex4ngEchartsMapTasks.entries()) {
+      const { src, type: mapDataType, specialAreas } = opt;
       const registerPromise = new Promise((resolve, reject) => {
         fetch(src)
-          .then((response) => response.json())
+          .then((response) => {
+            if (mapDataType === "genJSON") {
+              return response.json();
+            }
+
+            return response.text();
+          })
           .then((data) => {
-            echarts.registerMap(mapName, data);
+            if (mapDataType === "svg") {
+              data = { svg: data }
+            }
+
+            echarts.registerMap(mapName, data, specialAreas);
             resolve();
           });
 
