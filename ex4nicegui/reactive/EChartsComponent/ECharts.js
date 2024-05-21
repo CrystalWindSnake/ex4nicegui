@@ -46,10 +46,6 @@ export default {
   async mounted() {
     await this.$nextTick(); // wait for Tailwind classes to be applied
 
-    if (hasMapOrGeo(this.options)) {
-      await Promise.all(Array.from(mapRegisterTasks.values()));
-    }
-
     this.chart = echarts.init(this.$el, this.theme);
 
     this.resizeObs = new ResizeObserver(this.chart.resize)
@@ -63,10 +59,14 @@ export default {
     this.chart.on("finished", createResizeObserver);
 
     if (this.options) {
+      if (hasMapOrGeo(this.options)) {
+        await Promise.all(Array.from(mapRegisterTasks.values()));
+      }
       this.update_chart();
     } else {
       const fn = new Function('return ' + this.code)()
-      fn(this.chart)
+      await Promise.all(Array.from(mapRegisterTasks.values()));
+      fn(this.chart, echarts)
       this.$emit("__update_options_from_client", this.chart.getOption())
     }
     this.chart.getZr().on("click", (e) => {
