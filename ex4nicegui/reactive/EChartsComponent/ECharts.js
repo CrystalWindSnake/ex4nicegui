@@ -66,7 +66,7 @@ export default {
       this.update_chart();
     } else {
       const fn = new Function('return ' + this.code)()
-      fn(this.chart)
+      fn(this.chart, echarts)
       this.$emit("__update_options_from_client", this.chart.getOption())
     }
     this.chart.getZr().on("click", (e) => {
