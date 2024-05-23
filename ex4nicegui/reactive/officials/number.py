@@ -55,6 +55,7 @@ class NumberBindableUi(BindableUi[ui.number]):
             ],
             v_model=("value", "on_change"),
             events=["on_change"],
+            v_model_arg_getter=lambda e: e.sender.value,
         )
 
         value_kws = pc.get_values_kws()
