@@ -21,6 +21,10 @@ from .base import BindableUi
 T = TypeVar("T")
 
 
+def _default_vmodel_args_getter(e):
+    return e.sender.value
+
+
 class NumberBindableUi(BindableUi[ui.number]):
     def __init__(
         self,
@@ -55,6 +59,7 @@ class NumberBindableUi(BindableUi[ui.number]):
             ],
             v_model=("value", "on_change"),
             events=["on_change"],
+            v_model_arg_getter=_default_vmodel_args_getter,
         )
 
         value_kws = pc.get_values_kws()

@@ -44,6 +44,10 @@ def test_ref(browser: BrowserManager, page_path: str):
     target.input_text("66")
     label.expect_to_have_text("66.0")
 
+    # should_return_none_when_empty
+    target.clear_text()
+    label.expect_to_have_text("None")
+
 
 def test_on_change(browser: BrowserManager, page_path: str):
     @ui.page(page_path)

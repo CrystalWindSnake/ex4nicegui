@@ -466,6 +466,9 @@ class InputUtils(BaseUiUtils):
         self.enter()
         return self
 
+    def clear_text(self):
+        return self.target_locator.clear()
+
 
 class InputNumberUtils(InputUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
