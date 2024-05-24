@@ -813,6 +813,52 @@ gsap.run_script(
 
 ---
 
+### tab_panels
+
+Compared to `nicegui.ui.tab_panels`, `rxui.tab_panels` lacks a `tabs` parameter. Under the reactive data mechanism, the linkage between `tabs` and `tab_panels` can be achieved solely through the `value` parameter.
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui, to_ref
+
+names = ["Tab 1", "Tab 2", "Tab 3"]
+current_tab = to_ref(names[0])
+
+with rxui.tabs(current_tab):
+    for name in names:
+        rxui.tab(name)
+
+with rxui.tab_panels(current_tab):
+    for name in names:
+        with rxui.tab_panel(name):
+            ui.label(f"Content of {name}")
+```
+
+This is because, in a reactive context, component interactions are facilitated by an intermediary data layer (`to_ref`). Consequently, `tab_panels` can be synchronized with other components (ensuring the use of the same `ref` object).
+
+```python
+names = ["Tab 1", "Tab 2", "Tab 3"]
+current_tab = to_ref(names[0])
+
+with rxui.tab_panels(current_tab):
+    for name in names:
+        with rxui.tab_panel(name):
+            ui.label(f"Content of {name}")
+
+# The tabs definition does not have to precede the panels
+with rxui.tabs(current_tab):
+    for name in names:
+        rxui.tab(name)
+
+rxui.select(names, value=current_tab)
+rxui.radio(names, value=current_tab).props("inline")
+
+rxui.label(lambda: f"Current tab is: {current_tab.value}")
+```
+
+
+---
+
 ## BI Module
 
 Create an interactive data visualization report using the minimal API.

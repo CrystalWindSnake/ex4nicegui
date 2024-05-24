@@ -821,6 +821,53 @@ gsap.run_script(
 
 ---
 
+### tab_panels
+
+相比较于 `nicegui.ui.tab_panels` , `rxui.tab_panels` 没有参数 `tabs`。在数据响应式机制下，`tabs` 与 `tab_panels` 联动只需要通过参数 `value` 即可。
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui, to_ref
+
+names = ["Tab 1", "Tab 2", "Tab 3"]
+current_tab = to_ref(names[0])
+
+with rxui.tabs(current_tab):
+    for name in names:
+        rxui.tab(name)
+
+with rxui.tab_panels(current_tab):
+    for name in names:
+        with rxui.tab_panel(name):
+            ui.label(f"Content of {name}")
+```
+
+这是因为，数据响应机制下，组件联动是通过中间数据层(`to_ref`)实现的。因此，`tab_panels` 可以与其他组件联动(只需要保证使用同样的 `ref` 对象即可)
+
+```python
+names = ["Tab 1", "Tab 2", "Tab 3"]
+current_tab = to_ref(names[0])
+
+
+with rxui.tab_panels(current_tab):
+    for name in names:
+        with rxui.tab_panel(name):
+            ui.label(f"Content of {name}")
+
+# tabs 不必在 panels 前面
+with rxui.tabs(current_tab):
+    for name in names:
+        rxui.tab(name)
+
+rxui.select(names, value=current_tab)
+rxui.radio(names, value=current_tab).props("inline")
+
+rxui.label(lambda: f"当前 tab 为:{current_tab.value}")
+```
+
+
+---
+
 ## BI 模块
 
 以最精简的 apis 创建可交互的数据可视化报表

@@ -18,6 +18,17 @@ class TabPanelsBindableUi(BindableUi[ui.tab_panels]):
         animated: TMaybeRef[bool] = True,
         keep_alive: TMaybeRef[bool] = True,
     ) -> None:
+        """Tab Panels
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#tab_panels
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#tab_panels
+
+        Args:
+            value (TMaybeRef[str], optional): The value of the tab panel. Defaults to None.
+            on_change (Callable[..., Any], optional): The callback function when the value of the tab panel changes. Defaults to None.
+            animated (TMaybeRef[bool], optional): Whether to animate the tab panel. Defaults to True.
+            keep_alive (TMaybeRef[bool], optional): Whether to keep the tab panel alive. Defaults to True.
+        """
         pc = ParameterClassifier(
             locals(),
             maybeRefs=["value", "animated", "keep_alive"],
