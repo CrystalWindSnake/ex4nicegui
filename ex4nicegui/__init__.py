@@ -21,6 +21,7 @@ from ex4nicegui.utils.signals import (
 )
 from ex4nicegui.utils.asyncComputed import async_computed
 from ex4nicegui.utils.clientScope import new_scope
+from .version import __version__
 
 __all__ = [
     "async_computed",
@@ -44,6 +45,5 @@ __all__ = [
     "to_raw",
     "is_setter_ref",
     "new_scope",
+    "__version__",
 ]
-
-__version__ = "0.6.6"
