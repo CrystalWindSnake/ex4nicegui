@@ -291,14 +291,33 @@ class ref_computed_method(Generic[T]):
         return cast(TRef[T], self.__get_computed(__instance))
 
 
+_T_effect_refreshable_refs = Union[
+    TGetterOrReadonlyRef,
+    RefWrapper,
+    Sequence[TGetterOrReadonlyRef],
+    _TMaybeRef,
+    Sequence[_TMaybeRef],
+]
+
+
 class effect_refreshable:
-    def __init__(self, fn: Callable, refs: Union[TRef, Sequence[TRef]] = []) -> None:
+    def __init__(self, fn: Callable, refs: _T_effect_refreshable_refs = []) -> None:
         self._fn = fn
-        self._refs = refs if isinstance(refs, Sequence) else [refs]
+
+        if isinstance(refs, Sequence):
+            ref_arg = [ref for ref in refs if self._is_valid_ref(ref)]
+        else:
+            ref_arg = [refs] if self._is_valid_ref(refs) else []
+
+        self._refs = ref_arg
         self()
 
+    @classmethod
+    def _is_valid_ref(cls, ref):
+        return is_ref(ref) or isinstance(ref, Callable)
+
     @staticmethod
-    def on(refs: Union[TRef, Sequence[TRef]]):
+    def on(refs: _T_effect_refreshable_refs):
         def warp(
             fn: Callable,
         ):
@@ -323,7 +342,7 @@ class effect_refreshable:
         if len(self._refs) == 0:
             runner = effect(runner)
         else:
-            runner = on(self._refs)(runner)
+            runner = on(self._refs)(runner)  # type: ignore
 
         return runner
 
