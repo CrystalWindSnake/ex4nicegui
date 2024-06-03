@@ -307,23 +307,6 @@ class BindableUi(Generic[TWidget]):
         self.element.update()
 
 
-# class SingleValueBindableUi(BindableUi[TWidget], Generic[T, TWidget]):
-#     def __init__(self, value: TMaybeRef[T], element: TWidget) -> None:
-#         super().__init__(element)
-#         self._ref = to_ref(value)
-
-#     @property
-#     def value(self) -> T:
-#         return self._ref.value  # type: ignore
-
-#     def bind_ref(self, ref: TRef[T]):
-#         @effect
-#         def _():
-#             ref.value = self._ref.value  # type: ignore
-
-#         return self
-
-
 _T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
 
 
