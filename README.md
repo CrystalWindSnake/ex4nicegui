@@ -581,7 +581,7 @@ rxui.label("bind to ref_computed").bind_classes(
 
 ---
 
-绑定为列表
+绑定为列表或单个字符串的响应式变量
 
 ```python
 bg_color = to_ref("red")
@@ -594,10 +594,11 @@ rxui.select(["red", "green", "yellow"], label="bg color", value=bg_color)
 rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 
 rxui.label("binding to arrays").bind_classes([bg_color_class, text_color_class])
-
+rxui.label("binding to single string").bind_classes(bg_color_class)
 ```
 
-列表中每个元素为返回类名的响应式变量
+- 列表中每个元素为返回类名的响应式变量
+
 
 ---
 
