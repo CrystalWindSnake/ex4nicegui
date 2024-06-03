@@ -43,11 +43,15 @@ TWidget = TypeVar("TWidget", bound=ui.element)
 
 _T_bind_classes_type_dict = Dict[str, TGetterOrReadonlyRef[bool]]
 _T_bind_classes_type_ref_dict = TGetterOrReadonlyRef[Dict[str, bool]]
-_T_bind_classes_type_array = List[TGetterOrReadonlyRef[str]]
+_T_bind_classes_type_single = TGetterOrReadonlyRef[str]
+_T_bind_classes_type_array = List[_T_bind_classes_type_single]
 
 
 _T_bind_classes_type = Union[
-    _T_bind_classes_type_dict, _T_bind_classes_type_ref_dict, _T_bind_classes_type_array
+    _T_bind_classes_type_dict,
+    _T_bind_classes_type_ref_dict,
+    _T_bind_classes_type_single,
+    _T_bind_classes_type_array,
 ]
 
 
@@ -205,6 +209,10 @@ class BindableUi(Generic[TWidget]):
     def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]):
         ...
 
+    @overload
+    def bind_classes(self, classes: TGetterOrReadonlyRef[str]):
+        ...
+
     def bind_classes(self, classes: _T_bind_classes_type):
         """data binding is manipulating an element's class list
 
@@ -212,7 +220,7 @@ class BindableUi(Generic[TWidget]):
         @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E7%BB%91%E5%AE%9A%E7%B1%BB%E5%90%8D
 
         Args:
-            classes (_T_bind_classes_type): dict of refs | ref to dict | list of refs
+            classes (_T_bind_classes_type): dict of refs | ref to dict | str ref | list of refs
 
         ## usage
 
@@ -234,6 +242,15 @@ class BindableUi(Generic[TWidget]):
             rxui.label('Hello').bind_classes([bg_color])
             ```
 
+        bind single class name with ref
+
+            ```python
+            color = to_ref('red')
+            bg_color = lambda: f"bg-{color.value}"
+
+            rxui.label('Hello').bind_classes(bg_color)
+            ```
+
         """
         if isinstance(classes, dict):
             for name, ref_obj in classes.items():
@@ -247,24 +264,33 @@ class BindableUi(Generic[TWidget]):
 
         elif is_ref(classes) or isinstance(classes, Callable):
             ref_obj = to_value(classes)  # type: ignore
-            assert isinstance(ref_obj, dict)
 
-            @effect
-            def _():
-                for name, value in cast(Dict, to_value(classes)).items():  # type: ignore
-                    if value:
-                        self.classes(add=name)
-                    else:
-                        self.classes(remove=name)
+            if isinstance(ref_obj, dict):
+
+                @effect
+                def _():
+                    for name, value in cast(Dict, to_value(classes)).items():  # type: ignore
+                        if value:
+                            self.classes(add=name)
+                        else:
+                            self.classes(remove=name)
+            else:
+                self._bind_single_class(cast(_T_bind_classes_type_single, classes))
+
         elif isinstance(classes, list):
             for ref_name in classes:
-                if is_ref(ref_name) or isinstance(ref_name, Callable):
+                self._bind_single_class(ref_name)
 
-                    @on(ref_name)
-                    def _(state: WatchedState):
-                        self.classes(add=state.current, remove=state.previous)
-                else:
-                    self.classes(ref_name)  # type: ignore
+        return self
+
+    def _bind_single_class(self, class_name: _T_bind_classes_type_single):
+        if is_ref(class_name) or isinstance(class_name, Callable):
+
+            @on(class_name)
+            def _(state: WatchedState):
+                self.classes(add=state.current, remove=state.previous)
+        else:
+            self.classes(class_name)  # type: ignore
 
         return self
 
