@@ -63,9 +63,23 @@ def test_bind_classes(browser: BrowserManager, page_path: str):
                 [bg_color_class, lambda: text_color_class.value]
             ).classes(f"{test_prefix}_label")
 
+        def bind_single_class():
+            bg_color = to_ref("red")
+            bg_color_class = ref_computed(lambda: f"bg-{bg_color.value}")
+
+            test_prefix = "test4"
+            rxui.select(
+                ["red", "green", "yellow"], label="bg color", value=bg_color
+            ).classes(f"{test_prefix}_select1")
+
+            rxui.label("hello").bind_classes(bg_color_class).classes(
+                f"{test_prefix}_label"
+            )
+
         binding_to_dict()
         bind_to_ref_computed_or_fn()
         bind_to_list()
+        bind_single_class()
 
     page = browser.open(page_path)
 
@@ -126,6 +140,21 @@ def test_bind_classes(browser: BrowserManager, page_path: str):
         label.expect_to_contain_class("bg-green", "text-yellow")
 
     test3()
+
+    def test4():
+        test_prefix = "test4"
+        select1 = page.Select(f".{test_prefix}_select1")
+        label = page.Label(f".{test_prefix}_label")
+
+        label.expect_to_contain_class("bg-red")
+
+        #
+        select1.click_and_select("green")
+
+        label.expect_not_to_contain_class("bg-red")
+        label.expect_to_contain_class("bg-green")
+
+    test4()
 
 
 def test_bind_style(browser: BrowserManager, page_path: str):
