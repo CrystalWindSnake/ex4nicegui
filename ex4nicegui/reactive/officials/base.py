@@ -275,7 +275,21 @@ class BindableUi(Generic[TWidget]):
         @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bind-style
 
         Args:
-            style (Dict[str, Union[ReadonlyRef[str], Ref[str]]]): _description_
+            style (Dict[str, Union[ReadonlyRef[str], Ref[str]]]): dict of style name and ref value
+
+
+        ## usage
+        ```python
+        bg_color = to_ref("blue")
+        text_color = to_ref("red")
+
+        rxui.label("test").bind_style(
+            {
+                "background-color": bg_color,
+                "color": text_color,
+            }
+        )
+        ```
         """
         if isinstance(style, dict):
             for name, ref_obj in style.items():
