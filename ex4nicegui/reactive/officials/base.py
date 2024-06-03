@@ -12,6 +12,7 @@ from typing import (
     Union,
     cast,
     Literal,
+    overload,
 )
 
 from typing_extensions import Self
@@ -192,6 +193,18 @@ class BindableUi(Generic[TWidget]):
     def clear(self) -> None:
         cast(ui.element, self.element).clear()
 
+    @overload
+    def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]):
+        ...
+
+    @overload
+    def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]):
+        ...
+
+    @overload
+    def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]):
+        ...
+
     def bind_classes(self, classes: _T_bind_classes_type):
         """data binding is manipulating an element's class list
 
@@ -199,7 +212,28 @@ class BindableUi(Generic[TWidget]):
         @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E7%BB%91%E5%AE%9A%E7%B1%BB%E5%90%8D
 
         Args:
-            classes (_T_bind_classes_type):
+            classes (_T_bind_classes_type): dict of refs | ref to dict | list of refs
+
+        ## usage
+
+        bind class names with dict,value is bool ref, for example:
+
+            ```python
+            bg_color = to_ref(True)
+            has_error = to_ref(False)
+
+            rxui.label('Hello').bind_classes({'bg-blue':bg_color, 'text-red':has_error})
+            ```
+
+        bind list of class names with ref
+
+            ```python
+            color = to_ref('red')
+            bg_color = lambda: f"bg-{color.value}"
+
+            rxui.label('Hello').bind_classes([bg_color])
+            ```
+
         """
         if isinstance(classes, dict):
             for name, ref_obj in classes.items():
