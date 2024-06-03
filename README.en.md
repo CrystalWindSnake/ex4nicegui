@@ -585,10 +585,10 @@ rxui.select(["red", "green", "yellow"], label="bg color", value=bg_color)
 rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
 
 rxui.label("binding to arrays").bind_classes([bg_color_class, text_color_class])
-
+rxui.label("binding to single string").bind_classes(bg_color_class)
 ```
 
-Each element in the list is a responsive variable that returns the class name
+- Each element in the list is a responsive variable that returns the class name
 
 ---
 
