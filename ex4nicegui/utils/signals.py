@@ -85,7 +85,7 @@ def _ref_comp_with_None(old, new):
     return False
 
 
-def ref(value: T, is_deep=False):
+def ref(value: T, is_deep=False) -> Ref[T]:
     comp = False  # Default never equal
 
     if _is_comp_values(value):
