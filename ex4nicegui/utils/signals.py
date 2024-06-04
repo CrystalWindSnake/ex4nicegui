@@ -22,15 +22,17 @@ from nicegui import ui
 from .effect import effect
 from .scheduler import get_uiScheduler
 import warnings
+from .types import (
+    _TMaybeRef,
+    TGetterOrReadonlyRef,
+    ReadonlyRef,
+    Ref,
+    DescReadonlyRef,
+    TReadonlyRef,
+    TRef,
+)
 
 T = TypeVar("T")
-
-
-TReadonlyRef = ComputedResultProtocol[T]
-ReadonlyRef = TReadonlyRef[T]
-DescReadonlyRef = TReadonlyRef[T]
-
-TGetterOrReadonlyRef = signe.TGetter[T]
 
 
 is_reactive = signe.is_reactive
@@ -81,11 +83,6 @@ def to_ref_wrapper(
     setter_or_ref: Optional[Callable[[T], None]] = None,
 ):
     return RefWrapper(getter_or_ref, setter_or_ref)
-
-
-_TMaybeRef = signe.TMaybeSignal[T]
-TRef = signe.TSignal[T]
-Ref = TRef[T]
 
 
 to_raw = signe.to_raw
