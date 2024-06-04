@@ -84,4 +84,4 @@ def test_should_work_with_private_page(browser: BrowserManager, page_path: str):
 
     button = page.Button(".button")
 
-    button.click(click_count=5, delay=500)
+    button.click(click_count=6, delay=500)
