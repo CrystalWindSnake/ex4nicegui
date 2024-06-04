@@ -1,17 +1,11 @@
 from datetime import date, datetime
-from functools import partial
-import types
-from weakref import WeakValueDictionary
 import signe
-from signe.core.protocols import ComputedResultProtocol
 from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
     Dict,
-    Protocol,
     TypeVar,
     Generic,
-    overload,
     Optional,
     Callable,
     cast,
@@ -25,11 +19,7 @@ import warnings
 from .types import (
     _TMaybeRef,
     TGetterOrReadonlyRef,
-    ReadonlyRef,
     Ref,
-    DescReadonlyRef,
-    TReadonlyRef,
-    TRef,
 )
 
 T = TypeVar("T")
