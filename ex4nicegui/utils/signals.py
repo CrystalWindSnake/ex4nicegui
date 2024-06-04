@@ -36,11 +36,24 @@ def is_setter_ref(obj):
     return isinstance(obj, (signe.Signal, RefWrapper))
 
 
-def is_ref(obj):
+def is_ref(obj: Any):
+    """Checks if a value is a ref object."""
     return signe.is_signal(obj) or isinstance(obj, (RefWrapper))
 
 
 def to_value(obj: Union[_TMaybeRef[T], RefWrapper]) -> T:
+    """unwraps a ref object and returns its inner value.
+
+    Args:
+        obj (Union[_TMaybeRef[T], RefWrapper]): A getter function, an existing ref, or a non-function value.
+
+    ## Example
+    ```python
+    to_value(1)  # 1
+    to_value(lambda: 1)  # 1
+    to_value(to_ref(1))  # 1
+    ```
+    """
     if is_ref(obj):
         return obj.value  # type: ignore
     if isinstance(obj, Callable):
