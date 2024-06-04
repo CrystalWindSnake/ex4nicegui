@@ -4,7 +4,7 @@ from nicegui.dataclasses import KWONLY_SLOTS
 from nicegui.events import handle_event, UiEventArguments
 from nicegui.element import Element
 
-from ex4nicegui.utils.signals import ReadonlyRef, batch, to_ref
+from ex4nicegui.utils.signals import TReadonlyRef, batch, to_ref
 
 _Update_Args = [
     "x",
@@ -42,15 +42,15 @@ class UseMouse(Element, component="UseMouse.js"):
 
     @property
     def x(self):
-        return cast(ReadonlyRef[float], self.__x)
+        return cast(TReadonlyRef[float], self.__x)
 
     @property
     def y(self):
-        return cast(ReadonlyRef[float], self.__y)
+        return cast(TReadonlyRef[float], self.__y)
 
     @property
     def sourceType(self):
-        return cast(ReadonlyRef[float], self.__sourceType)
+        return cast(TReadonlyRef[float], self.__sourceType)
 
     def on_update(self, handler: Optional[Callable[..., Any]]):
         def inner_handler(e):

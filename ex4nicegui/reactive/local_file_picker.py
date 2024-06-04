@@ -6,7 +6,6 @@ from pathlib import Path
 from ex4nicegui.utils.signals import (
     Ref,
     effect_refreshable,
-    ReadonlyRef,
     effect,
     ref_computed as computed,
     to_ref,
@@ -17,7 +16,7 @@ SelectMode = Literal["dir", "file"]
 
 
 class LocalFilePickerResult:
-    def __init__(self, ref: ReadonlyRef[str], open_fn: Callable[..., None]) -> None:
+    def __init__(self, ref: Ref[str], open_fn: Callable[..., None]) -> None:
         self.__open_fn = open_fn
         self._ref = ref
 

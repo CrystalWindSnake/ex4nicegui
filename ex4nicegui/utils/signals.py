@@ -1,17 +1,10 @@
 from datetime import date, datetime
-from functools import partial
-import types
-from weakref import WeakValueDictionary
 import signe
-from signe.core.protocols import ComputedResultProtocol
 from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
     Dict,
-    Protocol,
     TypeVar,
-    Generic,
-    overload,
     Optional,
     Callable,
     cast,
@@ -21,85 +14,51 @@ from typing import (
 from nicegui import ui
 from .effect import effect
 from .scheduler import get_uiScheduler
-import warnings
+from .types import (
+    _TMaybeRef,
+    TGetterOrReadonlyRef,
+    Ref,
+    TReadonlyRef,  # noqa: F401
+    TRef,  # noqa: F401
+    DescReadonlyRef,  # noqa: F401
+    _TMaybeRef as TMaybeRef,  # noqa: F401
+)
+from .refWrapper import RefWrapper, to_ref_wrapper  # noqa: F401
+from .refComputed import ref_computed  # noqa: F401
 
 T = TypeVar("T")
 
 
-TReadonlyRef = ComputedResultProtocol[T]
-ReadonlyRef = TReadonlyRef[T]
-DescReadonlyRef = TReadonlyRef[T]
-
-TGetterOrReadonlyRef = signe.TGetter[T]
-
-
 is_reactive = signe.is_reactive
+to_raw = signe.to_raw
 
 
 def reactive(obj: T) -> T:
     return signe.reactive(obj, get_uiScheduler())
 
 
-class RefWrapper(Generic[T]):
-    __slot__ = ("_getter_fn", "_setter_fn", "")
-
-    def __init__(
-        self,
-        getter_or_ref: TGetterOrReadonlyRef[T],
-        setter_or_ref: Optional[Callable[[T], None]] = None,
-    ):
-        if signe.is_signal(getter_or_ref):
-            self._getter_fn = lambda: getter_or_ref.value
-
-            def ref_setter(v):
-                getter_or_ref.value = v  # type: ignore
-
-            self._setter_fn = ref_setter
-        elif isinstance(getter_or_ref, Callable):
-            self._getter_fn = getter_or_ref
-            self._setter_fn = setter_or_ref or (lambda x: None)
-        else:
-            self._getter_fn = lambda: getter_or_ref
-            self._setter_fn = lambda x: None
-
-        self._is_readonly = False
-
-    @property
-    def value(self) -> T:
-        return cast(T, self._getter_fn())
-
-    @value.setter
-    def value(self, new_value: T):
-        if self._is_readonly:
-            warnings.warn("readonly ref cannot be assigned.")
-            return
-        return self._setter_fn(new_value)
-
-
-def to_ref_wrapper(
-    getter_or_ref: TGetterOrReadonlyRef[T],
-    setter_or_ref: Optional[Callable[[T], None]] = None,
-):
-    return RefWrapper(getter_or_ref, setter_or_ref)
-
-
-_TMaybeRef = signe.TMaybeSignal[T]
-TRef = signe.TSignal[T]
-Ref = TRef[T]
-
-
-to_raw = signe.to_raw
-
-
 def is_setter_ref(obj):
     return isinstance(obj, (signe.Signal, RefWrapper))
 
 
-def is_ref(obj):
+def is_ref(obj: Any):
+    """Checks if a value is a ref object."""
     return signe.is_signal(obj) or isinstance(obj, (RefWrapper))
 
 
 def to_value(obj: Union[_TMaybeRef[T], RefWrapper]) -> T:
+    """unwraps a ref object and returns its inner value.
+
+    Args:
+        obj (Union[_TMaybeRef[T], RefWrapper]): A getter function, an existing ref, or a non-function value.
+
+    ## Example
+    ```python
+    to_value(1)  # 1
+    to_value(lambda: 1)  # 1
+    to_value(to_ref(1))  # 1
+    ```
+    """
     if is_ref(obj):
         return obj.value  # type: ignore
     if isinstance(obj, Callable):
@@ -144,7 +103,7 @@ def _ref_comp_with_None(old, new):
     return False
 
 
-def ref(value: T, is_deep=False):
+def ref(value: T, is_deep=False) -> Ref[T]:
     comp = False  # Default never equal
 
     if _is_comp_values(value):
@@ -168,127 +127,6 @@ def deep_ref(value: T) -> Ref[T]:
 
     """
     return to_ref(value, is_deep=True)
-
-
-class TInstanceCall(Protocol[T]):
-    def __call__(_, self) -> T:
-        ...
-
-
-@overload
-def ref_computed(
-    fn: Union[Callable[[], T], TInstanceCall[T]],
-    *,
-    desc="",
-    debug_trigger: Optional[Callable[..., None]] = None,
-    priority_level: int = 1,
-    debug_name: Optional[str] = None,
-) -> ReadonlyRef[T]:
-    """Takes a getter function and returns a readonly reactive ref object for the returned value from the getter. It can also take an object with get and set functions to create a writable ref object.
-
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ref_computed
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ref_computed
-
-
-    Args:
-        fn (Callable[[], T]): _description_
-        desc (str, optional): _description_. Defaults to "".
-        debug_trigger (Optional[Callable[..., None]], optional): _description_. Defaults to None.
-        priority_level (int, optional): _description_. Defaults to 1.
-        debug_name (Optional[str], optional): _description_. Defaults to None.
-
-    """
-    ...
-
-
-@overload
-def ref_computed(
-    fn=None,
-    *,
-    desc="",
-    debug_trigger: Optional[Callable[..., None]] = None,
-    priority_level: int = 1,
-    debug_name: Optional[str] = None,
-) -> Callable[[Callable[..., T]], ReadonlyRef[T]]:
-    ...
-
-
-def ref_computed(
-    fn: Optional[Union[Callable[[], T], TInstanceCall[T]]] = None,
-    *,
-    desc="",
-    debug_trigger: Optional[Callable[..., None]] = None,
-    priority_level: int = 1,
-    debug_name: Optional[str] = None,
-) -> Union[ReadonlyRef[T], Callable[[Callable[..., T]], ReadonlyRef[T]]]:
-    kws = {
-        "debug_trigger": debug_trigger,
-        "priority_level": priority_level,
-        "debug_name": debug_name,
-    }
-
-    if fn:
-        if _is_class_define_method(fn):
-            return cast(
-                ref_computed_method[T],
-                ref_computed_method(fn, computed_args=kws),  # type: ignore
-            )  # type: ignore
-
-        getter = signe.Computed(
-            cast(Callable[[], T], fn),
-            **kws,
-            scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
-            scheduler=get_uiScheduler(),
-        )
-        return cast(DescReadonlyRef[T], getter)
-
-    else:
-
-        def wrap(fn: Callable[[], T]):
-            return ref_computed(fn, **kws)
-
-        return wrap
-
-
-def _is_class_define_method(fn: Callable):
-    has_name = hasattr(fn, "__name__")
-    qualname_prefix = f".<locals>.{fn.__name__}" if has_name else ""
-
-    return (
-        hasattr(fn, "__qualname__")
-        and has_name
-        and "." in fn.__qualname__
-        and qualname_prefix != fn.__qualname__[-len(qualname_prefix) :]
-        and (isinstance(fn, types.FunctionType))
-    )
-
-
-class ref_computed_method(Generic[T]):
-    __isabstractmethod__: bool
-
-    def __init__(self, fget: Callable[[Any], T], computed_args: Dict) -> None:
-        self._fget = fget
-        self._computed_args = computed_args
-        self._instance_map: WeakValueDictionary[
-            int, TReadonlyRef[T]
-        ] = WeakValueDictionary()
-
-    def __get_computed(self, instance):
-        ins_id = id(instance)
-        if ins_id not in self._instance_map:
-            cp = signe.Computed(
-                partial(self._fget, instance),
-                **self._computed_args,
-                scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
-                scheduler=get_uiScheduler(),
-                capture_parent_effect=False,
-            )
-            self._instance_map[ins_id] = cp  # type: ignore
-
-        return self._instance_map[ins_id]
-
-    def __get__(self, __instance: Any, __owner: Optional[type] = None):
-        return cast(TRef[T], self.__get_computed(__instance))
 
 
 _T_effect_refreshable_refs = Union[

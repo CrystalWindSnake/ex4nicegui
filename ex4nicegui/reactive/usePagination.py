@@ -4,7 +4,7 @@ from ex4nicegui.utils.signals import (
     to_ref,
     to_value,
     effect,
-    _TMaybeRef as TMaybeRef,
+    TMaybeRef,
 )
 from typing import Any
 from typing_extensions import Protocol
