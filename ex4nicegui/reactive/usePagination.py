@@ -1,5 +1,5 @@
 import sys
-from ex4nicegui import (
+from ex4nicegui.utils.signals import (
     ref_computed,
     to_ref,
     to_value,

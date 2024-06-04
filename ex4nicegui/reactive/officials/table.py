@@ -10,7 +10,7 @@ from ex4nicegui.reactive.utils import ParameterClassifier, dataframe2col_str
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
-    ReadonlyRef,
+    TReadonlyRef,
     is_ref,
     ref_computed,
     to_ref,
@@ -67,7 +67,7 @@ class TableBindableUi(BindableUi[ui.table]):
 
         self._arg_selection = selection
         self._arg_row_key = row_key
-        self._selection_ref: ReadonlyRef[List[Any]] = to_ref([])  # type: ignore
+        self._selection_ref: TReadonlyRef[List[Any]] = to_ref([])  # type: ignore
 
         def on_selection(_):
             self._selection_ref.value = self.element.selected  # type: ignore

@@ -5,7 +5,7 @@ from typing import (
     Dict,
     Optional,
 )
-from ex4nicegui import (
+from ex4nicegui.utils.signals import (
     is_ref,
     ref_computed,
     to_value,

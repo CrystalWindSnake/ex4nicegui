@@ -21,6 +21,7 @@ from .types import (
     TReadonlyRef,  # noqa: F401
     TRef,  # noqa: F401
     DescReadonlyRef,  # noqa: F401
+    _TMaybeRef as TMaybeRef,  # noqa: F401
 )
 from .refWrapper import RefWrapper, to_ref_wrapper  # noqa: F401
 from .refComputed import ref_computed  # noqa: F401
