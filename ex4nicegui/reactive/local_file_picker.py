@@ -3,7 +3,7 @@ from typing_extensions import Literal
 from nicegui import ui, Tailwind
 from pathlib import Path
 
-from ex4nicegui.utils.signals import (
+from ex4nicegui import (
     Ref,
     effect_refreshable,
     ReadonlyRef,

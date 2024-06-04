@@ -5,11 +5,11 @@ from typing import (
     Dict,
     Optional,
 )
-from ex4nicegui.utils.signals import (
+from ex4nicegui import (
     is_ref,
     ref_computed,
     to_value,
-    _TMaybeRef as TMaybeRef,
+    TMaybeRef,
     TGetterOrReadonlyRef,
 )
 from ex4nicegui.utils.apiEffect import ui_effect

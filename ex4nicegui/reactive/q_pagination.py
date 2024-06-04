@@ -1,9 +1,9 @@
 from typing import Any, Optional, Callable
 from ex4nicegui.reactive.utils import ParameterClassifier
-from ex4nicegui.utils.signals import (
+from ex4nicegui import (
     TGetterOrReadonlyRef,
     to_value,
-    _TMaybeRef as TMaybeRef,
+    TMaybeRef,
 )
 from nicegui import ui
 from ex4nicegui.reactive.officials.base import BindableUi

@@ -1,10 +1,10 @@
 import sys
-from ex4nicegui.utils.signals import (
+from ex4nicegui import (
     ref_computed,
     to_ref,
     to_value,
     effect,
-    _TMaybeRef as TMaybeRef,
+    TMaybeRef,
 )
 from typing import Any
 from typing_extensions import Protocol

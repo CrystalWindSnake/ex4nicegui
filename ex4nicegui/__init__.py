@@ -1,6 +1,11 @@
 from ex4nicegui import reactive as rxui
 from ex4nicegui.utils.refComputed import ref_computed
-from ex4nicegui.utils.types import _TMaybeRef as TMaybeRef, Ref, ReadonlyRef
+from ex4nicegui.utils.types import (
+    _TMaybeRef as TMaybeRef,
+    Ref,
+    ReadonlyRef,
+    TGetterOrReadonlyRef,
+)
 from ex4nicegui.utils.signals import (
     effect,
     effect_refreshable,
@@ -35,6 +40,7 @@ __all__ = [
     "on",
     "event_batch",
     "TMaybeRef",
+    "TGetterOrReadonlyRef",
     "Ref",
     "ReadonlyRef",
     "reactive",
