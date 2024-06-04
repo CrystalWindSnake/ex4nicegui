@@ -64,7 +64,7 @@ def test_should_not_destroyed():
     assert dummy == [0, 1, 2]
 
 
-def test_should_work_with_private_page(self, browser: BrowserManager, page_path: str):
+def test_should_work_with_private_page(browser: BrowserManager, page_path: str):
     class MyState:
         def __init__(self):
             self.count = to_ref(0)
@@ -84,4 +84,4 @@ def test_should_work_with_private_page(self, browser: BrowserManager, page_path:
 
     button = page.Button(".button")
 
-    button.click(click_count=10)
+    button.click(click_count=5, delay=500)
