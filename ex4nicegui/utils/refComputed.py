@@ -21,8 +21,6 @@ from .types import (
     DescReadonlyRef,
 )
 
-import inspect
-
 
 T = TypeVar("T", covariant=True)
 
@@ -85,7 +83,7 @@ def ref_computed(
     }
 
     if fn:
-        if _systems.is_class_define_method(fn):
+        if _helpers.is_class_define_method(fn):
             return cast(
                 ref_computed_method[T],
                 ref_computed_method(fn, computed_args=kws),  # type: ignore
@@ -115,10 +113,10 @@ class ref_computed_method(Generic[T]):
         self._computed_args = computed_args
 
     def __set_name__(self, owner, name):
-        _systems.add_computed_to_instance(owner, name, self._fget, self._computed_args)
+        _helpers.add_computed_to_instance(owner, name, self._fget, self._computed_args)
 
 
-class _systems:
+class _helpers:
     @staticmethod
     def is_class_define_method(fn: Callable):
         has_name = hasattr(fn, "__name__")
@@ -131,27 +129,6 @@ class _systems:
             and qualname_prefix != fn.__qualname__[-len(qualname_prefix) :]
             and (isinstance(fn, types.FunctionType))
         )
-
-    @staticmethod
-    def get_method_class(method):
-        """
-        Get the class of a class-defined method.
-        """
-        if not inspect.isfunction(method):
-            raise ValueError("The provided argument is not a class-defined method")
-
-        method_name = method.__qualname__
-        if "." not in method_name:
-            raise ValueError(
-                "The provided method does not appear to be a class-defined method"
-            )
-
-        class_name = method_name.split(".")[0]
-        for cls in inspect.getmembers(inspect.getmodule(method), inspect.isclass):
-            if cls[0] == class_name:
-                return cls[1]
-
-        raise ValueError(f"Class {class_name} not found")
 
     @staticmethod
     def add_computed_to_instance(
