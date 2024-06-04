@@ -328,9 +328,31 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
+    def scoped_style(self, selector: str, style: str):
+        """add scoped style to the element"""
+        id = f"c{self.element.id}"
+        selector_with_self = _parent_id_with_selector(id, selector)
+        ui.add_head_html(
+            f"<style data-ex4ng-scoped='{id}'>{selector_with_self}{{{style}}}</style>"
+        )
+
+        return self
+
     def update(self):
         """Update the element on the client side."""
         self.element.update()
+
+
+def _parent_id_with_selector(parent_id: str, selector: str) -> str:
+    selector = selector.strip()
+    selector_with_self = f"#{parent_id}"
+    if selector:
+        if not selector.startswith(":"):
+            selector_with_self = selector_with_self + " "
+
+        selector_with_self = selector_with_self + selector
+
+    return selector_with_self
 
 
 _T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
