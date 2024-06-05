@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import (
     Union,
 )
-from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.reactive.systems.reactive_system import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (

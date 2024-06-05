@@ -15,7 +15,10 @@ from ex4nicegui.utils.signals import (
 from ex4nicegui.utils.apiEffect import ui_effect
 from nicegui import ui
 from .base import BindableUi
-from ex4nicegui.reactive.utils import ParameterClassifier, dataframe2col_str
+from ex4nicegui.reactive.systems.reactive_system import (
+    ParameterClassifier,
+    dataframe2col_str,
+)
 
 
 class AggridBindableUi(BindableUi[ui.aggrid]):

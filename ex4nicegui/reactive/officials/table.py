@@ -6,7 +6,10 @@ from typing import (
     Dict,
 )
 from typing_extensions import Literal
-from ex4nicegui.reactive.utils import ParameterClassifier, dataframe2col_str
+from ex4nicegui.reactive.systems.reactive_system import (
+    ParameterClassifier,
+    dataframe2col_str,
+)
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,

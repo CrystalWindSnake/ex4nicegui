@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, cast, Optional, Literal
-from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.reactive.systems.reactive_system import ParameterClassifier
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     is_ref,
