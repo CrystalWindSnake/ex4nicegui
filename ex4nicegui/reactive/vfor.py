@@ -26,7 +26,7 @@ from typing import (
 from functools import partial
 from dataclasses import dataclass
 from signe.core.scope import Scope
-from .utils import get_attribute
+from ex4nicegui.reactive.systems.object_system import get_attribute
 from ex4nicegui.reactive.empty import Empty
 # from .transitionGroup import TransitionGroup
 
