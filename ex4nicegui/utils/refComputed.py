@@ -1,12 +1,12 @@
 from functools import partial
 import types
-from weakref import WeakValueDictionary
 import signe
 from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
     Dict,
     Protocol,
+    Type,
     TypeVar,
     Generic,
     overload,
@@ -19,9 +19,8 @@ from .scheduler import get_uiScheduler
 from .types import (
     ReadonlyRef,
     DescReadonlyRef,
-    TReadonlyRef,
-    TRef,
 )
+
 
 T = TypeVar("T", covariant=True)
 
@@ -84,7 +83,7 @@ def ref_computed(
     }
 
     if fn:
-        if _is_class_define_method(fn):
+        if _helpers.is_class_define_method(fn):
             return cast(
                 ref_computed_method[T],
                 ref_computed_method(fn, computed_args=kws),  # type: ignore
@@ -106,42 +105,43 @@ def ref_computed(
         return wrap
 
 
-def _is_class_define_method(fn: Callable):
-    has_name = hasattr(fn, "__name__")
-    qualname_prefix = f".<locals>.{fn.__name__}" if has_name else ""
-
-    return (
-        hasattr(fn, "__qualname__")
-        and has_name
-        and "." in fn.__qualname__
-        and qualname_prefix != fn.__qualname__[-len(qualname_prefix) :]
-        and (isinstance(fn, types.FunctionType))
-    )
-
-
 class ref_computed_method(Generic[T]):
     __isabstractmethod__: bool
 
     def __init__(self, fget: Callable[[Any], T], computed_args: Dict) -> None:
         self._fget = fget
         self._computed_args = computed_args
-        self._instance_map: WeakValueDictionary[
-            int, TReadonlyRef[T]
-        ] = WeakValueDictionary()
 
-    def __get_computed(self, instance):
-        ins_id = id(instance)
-        if ins_id not in self._instance_map:
-            cp = signe.Computed(
-                partial(self._fget, instance),
-                **self._computed_args,
-                scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
-                scheduler=get_uiScheduler(),
-                capture_parent_effect=False,
-            )
-            self._instance_map[ins_id] = cp  # type: ignore
+    def __set_name__(self, owner, name):
+        _helpers.add_computed_to_instance(owner, name, self._fget, self._computed_args)
 
-        return self._instance_map[ins_id]
 
-    def __get__(self, __instance: Any, __owner: Optional[type] = None):
-        return cast(TRef[T], self.__get_computed(__instance))
+class _helpers:
+    @staticmethod
+    def is_class_define_method(fn: Callable):
+        has_name = hasattr(fn, "__name__")
+        qualname_prefix = f".<locals>.{fn.__name__}" if has_name else ""
+
+        return (
+            hasattr(fn, "__qualname__")
+            and has_name
+            and "." in fn.__qualname__
+            and qualname_prefix != fn.__qualname__[-len(qualname_prefix) :]
+            and (isinstance(fn, types.FunctionType))
+        )
+
+    @staticmethod
+    def add_computed_to_instance(
+        cls_type: Type, attr_name: str, fn: Callable, computed_args: Dict
+    ):
+        """
+        Add an attribute to an instance of a class.
+        """
+        original_init = cls_type.__init__
+
+        def new_init(self, *args, **kwargs):
+            original_init(self, *args, **kwargs)
+            setattr(self, attr_name, ref_computed(partial(fn, self), **computed_args))
+
+        cls_type.__init__ = new_init
+        return cls_type
