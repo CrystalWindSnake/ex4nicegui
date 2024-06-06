@@ -7,7 +7,7 @@ from typing import (
 )
 from typing_extensions import Literal
 from ex4nicegui.reactive.systems.reactive_system import ParameterClassifier
-from ex4nicegui.reactive.systems.pandas_system import dataframe2col_str
+from ex4nicegui.reactive.services.pandas_service import dataframe2col_str
 
 import ex4nicegui.utils.common as utils_common
 from ex4nicegui.utils.signals import (
