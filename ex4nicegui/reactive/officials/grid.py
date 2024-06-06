@@ -3,7 +3,7 @@ from typing import (
     Optional,
 )
 
-from ex4nicegui.reactive.systems.reactive_system import ParameterClassifier
+from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 
 from nicegui import ui
 from .base import BindableUi

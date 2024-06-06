@@ -15,7 +15,7 @@ from ex4nicegui.utils.signals import (
 from ex4nicegui.utils.apiEffect import ui_effect
 from nicegui import ui
 from .base import BindableUi
-from ex4nicegui.reactive.systems.reactive_system import ParameterClassifier
+from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.reactive.services.pandas_service import dataframe2col_str
 
 

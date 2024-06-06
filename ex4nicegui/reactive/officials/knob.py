@@ -3,7 +3,7 @@ from typing import (
     Callable,
     Optional,
 )
-from ex4nicegui.reactive.systems.reactive_system import ParameterClassifier
+from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
