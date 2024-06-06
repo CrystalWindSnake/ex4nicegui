@@ -8,10 +8,13 @@ from typing import (
     Tuple,
     cast,
 )
-
+from nicegui import ui
 from ex4nicegui.utils.signals import is_ref, is_setter_ref
 from nicegui.events import handle_event
-from ex4nicegui.reactive.systems.reactive_system import convert_kws_ref2value
+from ex4nicegui.reactive.systems.reactive_system import (
+    convert_kws_ref2value,
+    inject_method,
+)
 
 
 class ParameterClassifier:
@@ -80,3 +83,7 @@ class ParameterClassifier:
             for k, v in self._args.items()
             if (k in self.maybeRefs and (is_ref(v) or isinstance(v, Callable)))
         }
+
+
+def inject_handle_delete(element: ui.element, on_delete: Callable[[], None]):
+    inject_method(element, "_handle_delete", on_delete)

@@ -11,7 +11,6 @@ from typing import (
     Generic,
     Union,
     cast,
-    Literal,
     overload,
 )
 
@@ -27,14 +26,9 @@ from ex4nicegui.utils.signals import (
     on,
 )
 from nicegui import Tailwind, ui
-from nicegui.elements.mixins.color_elements import (
-    TextColorElement,
-    QUASAR_COLORS,
-    TAILWIND_COLORS,
-)
 from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.disableable_element import DisableableElement
-
+from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
 
 T = TypeVar("T")
 
@@ -58,7 +52,11 @@ _T_bind_classes_type = Union[
 class BindableUi(Generic[TWidget]):
     def __init__(self, element: TWidget) -> None:
         self._element = element
+        inject_handle_delete(self.element, self._on_element_delete)
         self.tailwind = Tailwind(cast(ui.element, self._element))
+
+    def _on_element_delete(self):
+        pass
 
     def _ui_effect(self, fn: Callable):
         return ui_effect(fn)
@@ -113,7 +111,7 @@ class BindableUi(Generic[TWidget]):
 
     def delete(self) -> None:
         """Delete the element."""
-        self.delete()
+        self.element.delete()
 
     def move(
         self, target_container: Optional[ui.element] = None, target_index: int = -1
@@ -123,7 +121,7 @@ class BindableUi(Generic[TWidget]):
         :param target_container: container to move the element to (default: the parent container)
         :param target_index: index within the target slot (default: append to the end)
         """
-        return self.move(target_container, target_index)
+        return self.element.move(target_container, target_index)
 
     def remove(self, element: Union[ui.element, int]) -> None:
         """Remove a child element.
@@ -363,47 +361,3 @@ class DisableableMixin(Protocol):
 
 
 DisableableBindableUi = DisableableMixin
-
-
-_color_sys_type = Literal["QUASAR", "TAILWIND", "STYLE"]
-_color_attr_name = "data-ex4ng-color"
-
-
-def _bind_color(bindable_ui: BindableUi, ref_ui: TGetterOrReadonlyRef):
-    @effect
-    def _():
-        ele = cast(TextColorElement, bindable_ui.element)
-        color = to_value(ref_ui)
-
-        # get exists color
-        # e.g 'QUASAR:red'
-        pre_color = ele._props.get(_color_attr_name)  # type: str | None
-        if pre_color:
-            color_sys, value = pre_color.split(":")  # type: ignore
-            color_sys: _color_sys_type
-
-            if color_sys == "QUASAR":
-                del ele._props[ele.TEXT_COLOR_PROP]
-            elif color_sys == "TAILWIND":
-                ele.classes(remove=value)
-            else:
-                del ele._style["color"]
-
-        cur_sys: _color_sys_type = "STYLE"
-        cur_color = color
-
-        if color in QUASAR_COLORS:
-            ele._props[ele.TEXT_COLOR_PROP] = color
-            cur_sys = "QUASAR"
-        elif color in TAILWIND_COLORS:
-            cur_color = f"text-{color}"
-            ele.classes(replace=cur_color)
-            cur_sys = "TAILWIND"
-        elif color is not None:
-            ele._style["color"] = color
-
-        ele._props[_color_attr_name] = f"{cur_sys}:{color}"
-
-        ele.update()
-
-    return bindable_ui

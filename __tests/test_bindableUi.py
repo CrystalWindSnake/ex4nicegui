@@ -3,6 +3,7 @@ from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from .screen import BrowserManager
 from playwright.sync_api import expect
+from .utils import fn
 
 
 def test_bind_classes(browser: BrowserManager, page_path: str):
@@ -235,3 +236,30 @@ def test_bind_prop(browser: BrowserManager, page_path: str):
 
     expect(target1).to_have_attribute("prop", "hello foo")
     expect(target2).to_have_attribute("prop", "hello foo world")
+
+
+def test_handle_delete(browser: BrowserManager, page_path: str):
+    @fn
+    def caller():
+        pass
+
+    class MyElement(rxui.element):
+        def __init__(self) -> None:
+            super().__init__("div")
+            self.classes("w-[100px] h-[100px] bg-gray-200")
+
+        def _on_element_delete(self):
+            caller()
+            return super()._on_element_delete()
+
+    @ui.page(page_path)
+    def _():
+        element = MyElement()
+        ui.button("delete", on_click=element.delete).classes("delete")
+
+    page = browser.open(page_path)
+
+    delete_btn = page.Button(".delete")
+    delete_btn.click()
+
+    assert caller.calledTimes == 1
