@@ -11,7 +11,8 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 
-from .base import BindableUi, _bind_color
+from .base import BindableUi
+from ex4nicegui.reactive.services import color_service
 
 
 class LinearProgressBindableUi(BindableUi[ui.linear_progress]):
@@ -57,7 +58,7 @@ class LinearProgressBindableUi(BindableUi[ui.linear_progress]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_color(self, ref_ui: TGetterOrReadonlyRef):
-        return _bind_color(self, ref_ui)
+        return color_service.bind_color(self, ref_ui)
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef):
         @ui_effect
