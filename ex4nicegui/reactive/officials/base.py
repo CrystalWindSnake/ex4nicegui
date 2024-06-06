@@ -111,7 +111,7 @@ class BindableUi(Generic[TWidget]):
 
     def delete(self) -> None:
         """Delete the element."""
-        self.delete()
+        self.element.delete()
 
     def move(
         self, target_container: Optional[ui.element] = None, target_index: int = -1
@@ -121,7 +121,7 @@ class BindableUi(Generic[TWidget]):
         :param target_container: container to move the element to (default: the parent container)
         :param target_index: index within the target slot (default: append to the end)
         """
-        return self.move(target_container, target_index)
+        return self.element.move(target_container, target_index)
 
     def remove(self, element: Union[ui.element, int]) -> None:
         """Remove a child element.
