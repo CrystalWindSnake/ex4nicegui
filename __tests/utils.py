@@ -422,6 +422,9 @@ class LabelUtils(BaseUiUtils):
     def expect_not_to_contain_text(self, expected):
         return expect(self.target_locator).not_to_contain_text(expected)
 
+    def expect_equal_text(self, expected):
+        return expect(self.target_locator).to_contain_text(re.compile(f"^{expected}$"))
+
 
 class InputUtils(BaseUiUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:

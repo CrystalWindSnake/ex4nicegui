@@ -5,7 +5,6 @@ from typing import (
     cast,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
@@ -76,14 +75,14 @@ class ColorPickerBindableUi(BindableUi[ui.color_picker]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_color(to_value(ref_ui))
 
         return self
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
 

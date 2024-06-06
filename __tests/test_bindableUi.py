@@ -263,3 +263,41 @@ def test_handle_delete(browser: BrowserManager, page_path: str):
     delete_btn.click()
 
     assert caller.calledTimes == 1
+
+
+def test_effect_dispose_after_element_delete(browser: BrowserManager, page_path: str):
+    class MyElement(rxui.element):
+        def __init__(self, ref, other) -> None:
+            super().__init__("div")
+            self.classes("w-[100px] h-[100px] bg-gray-200")
+
+            @self._ui_effect
+            def _():
+                other.value = "other " + ref.value
+
+    @ui.page(page_path)
+    def _():
+        org = to_ref("a")
+        other = to_ref("")
+
+        rxui.input(value=org).classes("input")
+        element = MyElement(org, other)
+
+        rxui.label(org).classes("org")
+        rxui.label(other).classes("other")
+
+        ui.button("delete", on_click=element.delete).classes("delete")
+
+    page = browser.open(page_path)
+    delete_btn = page.Button(".delete")
+    input = page.Input(".input")
+    org_label = page.Label(".org")
+    other_label = page.Label(".other")
+
+    input.input_text("x")
+    delete_btn.click()
+
+    input.input_text("x")
+
+    org_label.expect_contain_text("axx")
+    other_label.expect_equal_text("other ax")

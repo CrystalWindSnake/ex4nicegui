@@ -6,12 +6,10 @@ from typing import (
     cast,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.utils.apiEffect import ui_effect
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     Ref,
     _TMaybeRef as TMaybeRef,
-    effect,
     is_setter_ref,
     to_value,
 )
@@ -61,7 +59,7 @@ class TextareaBindableUi(BindableUi[ui.textarea]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef[str]):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
 
@@ -95,7 +93,7 @@ class LazyTextareaBindableUi(TextareaBindableUi):
             ref = cast(Ref, org_value)
             ele = self.element
 
-            @effect
+            @self._ui_effect
             def _():
                 ele.value = ref.value
 

@@ -9,8 +9,6 @@ from typing import (
     Union,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.utils.apiEffect import ui_effect
-
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
@@ -63,14 +61,14 @@ class RadioBindableUi(BindableUi[ui.radio]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_options(self, ref_ui: TGetterOrReadonlyRef):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_options(to_value(ref_ui))
 
         return self
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef):
-        @ui_effect
+        @self._ui_effect
         def _():
             cast(ValueElement, self.element).set_value(to_value(ref_ui))
 

@@ -1,12 +1,10 @@
 from typing import Any, Callable, List, Optional, Dict, cast
-from ex4nicegui.utils.apiEffect import ui_effect
 
 
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     Ref,
     _TMaybeRef as TMaybeRef,
-    effect,
     is_setter_ref,
     to_value,
 )
@@ -62,7 +60,7 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef[str]):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
             self.element.update()
@@ -70,7 +68,7 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
         return self
 
     def bind_password(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element._props["type"] = "password" if to_value(ref_ui) else "text"
             self.element.update()
@@ -116,7 +114,7 @@ class LazyInputBindableUi(InputBindableUi):
 
             ele = self.element
 
-            @effect
+            @self._ui_effect
             def _():
                 ele.value = ref.value
 

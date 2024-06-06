@@ -8,7 +8,6 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     to_value,
     to_raw,
-    on,
 )
 from .base import BindableUi
 from ex4nicegui.reactive.EChartsComponent.ECharts import echarts
@@ -141,7 +140,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_options(self, ref_ui: TGetterOrReadonlyRef[Dict]):
-        @on(ref_ui)
+        @self._ui_signal_on(ref_ui)
         def _():
             ele = self.element
             ele.update_options(to_raw(to_value(ref_ui)), self.__update_setting)

@@ -17,7 +17,7 @@ _color_attr_name = "data-ex4ng-color"
 
 
 def bind_color(bindable_ui: BindableUi, ref_ui: TGetterOrReadonlyRef):
-    @effect
+    @bindable_ui._ui_effect
     def _():
         ele = cast(TextColorElement, bindable_ui.element)
         color = to_value(ref_ui)

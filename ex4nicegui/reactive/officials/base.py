@@ -25,10 +25,12 @@ from ex4nicegui.utils.signals import (
     WatchedState,
     on,
 )
+from ex4nicegui.utils.clientScope import new_scope
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.disableable_element import DisableableElement
 from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
+from functools import partial
 
 T = TypeVar("T")
 
@@ -54,12 +56,18 @@ class BindableUi(Generic[TWidget]):
         self._element = element
         inject_handle_delete(self.element, self._on_element_delete)
         self.tailwind = Tailwind(cast(ui.element, self._element))
+        self._effect_scope = new_scope()
 
     def _on_element_delete(self):
-        pass
+        self._effect_scope.dispose()
 
-    def _ui_effect(self, fn: Callable):
-        return ui_effect(fn)
+    @property
+    def _ui_effect(self):
+        return partial(ui_effect, scope=self._effect_scope)
+
+    @property
+    def _ui_signal_on(self):
+        return partial(on, scope=self._effect_scope)
 
     def props(self, add: Optional[str] = None, *, remove: Optional[str] = None):
         cast(ui.element, self.element).props(add, remove=remove)
@@ -265,7 +273,7 @@ class BindableUi(Generic[TWidget]):
 
             if isinstance(ref_obj, dict):
 
-                @effect
+                @self._ui_effect
                 def _():
                     for name, value in cast(Dict, to_value(classes)).items():  # type: ignore
                         if value:
