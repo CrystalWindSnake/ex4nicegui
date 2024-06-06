@@ -19,7 +19,6 @@ from ex4nicegui.utils.apiEffect import ui_effect
 import signe
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
-    effect,
     to_value,
     is_ref,
     WatchedState,

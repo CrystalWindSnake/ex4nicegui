@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, cast
-from ex4nicegui.utils.signals import effect, to_value
+from ex4nicegui.utils.signals import to_value
 from nicegui.elements.mixins.color_elements import (
     TextColorElement,
     QUASAR_COLORS,
