@@ -11,7 +11,7 @@ from ex4nicegui.utils.signals import (
 from nicegui import ui
 from nicegui.events import handle_event
 from .base import BindableUi
-from .utils import _convert_kws_ref2value
+from ex4nicegui.reactive.systems.reactive_system import convert_kws_ref2value
 
 
 class UploadResult:
@@ -57,7 +57,7 @@ class UploadBindableUi(BindableUi[ui.upload]):
             "auto_upload": auto_upload,
         }
 
-        value_kws = _convert_kws_ref2value(kws)
+        value_kws = convert_kws_ref2value(kws)
 
         self._on_upload_callbacks = []
 
