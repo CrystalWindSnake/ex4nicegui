@@ -6,7 +6,7 @@ from typing import (
     Dict,
     Union,
 )
-from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.apiEffect import ui_effect
 
 from ex4nicegui.utils.signals import (

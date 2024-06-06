@@ -5,36 +5,13 @@ from typing import (
     Iterable,
     List,
     Optional,
-    Protocol,
     Tuple,
     cast,
-    runtime_checkable,
-    Union,
 )
 
-from ex4nicegui.utils.signals import is_ref, to_value, is_setter_ref
+from ex4nicegui.utils.signals import is_ref, is_setter_ref
 from nicegui.events import handle_event
-
-try:
-    import pandas as pd
-except ImportError:
-    pass
-
-
-@runtime_checkable
-class GetItemProtocol(Protocol):
-    def __getitem__(self, key):
-        ...
-
-
-@runtime_checkable
-class SetItemProtocol(Protocol):
-    def __setitem__(self, key, value):
-        ...
-
-
-def _convert_kws_ref2value(kws: Dict) -> Dict:
-    return {key: to_value(value) for key, value in kws.items()}
+from ex4nicegui.reactive.systems.reactive_system import convert_kws_ref2value
 
 
 class ParameterClassifier:
@@ -75,7 +52,7 @@ class ParameterClassifier:
             )
 
     def get_values_kws(self) -> Dict:
-        value_kws = _convert_kws_ref2value(
+        value_kws = convert_kws_ref2value(
             {k: v for k, v in self._args.items() if k not in self.events}
         )
 
@@ -103,45 +80,3 @@ class ParameterClassifier:
             for k, v in self._args.items()
             if (k in self.maybeRefs and (is_ref(v) or isinstance(v, Callable)))
         }
-
-
-def get_attribute(obj: Union[object, GetItemProtocol], name: Union[str, int]) -> Any:
-    if isinstance(obj, (GetItemProtocol)):
-        return obj[name]
-    return getattr(obj, name)  # type: ignore
-
-
-def set_attribute(
-    obj: Union[object, SetItemProtocol], name: Union[str, int], value: Any
-) -> None:
-    if isinstance(obj, SetItemProtocol):
-        obj[name] = value
-    else:
-        setattr(obj, name, value)  # type: ignore
-
-
-def dataframe2col_str(df, copy=True):
-    if isinstance(df.columns, pd.MultiIndex):
-        raise ValueError(
-            "MultiIndex columns are not supported. "
-            "You can convert them to strings using something like "
-            '`df.columns = ["_".join(col) for col in df.columns.values]`.'
-        )
-
-    date_cols = df.columns[df.dtypes == "datetime64[ns]"]
-    time_cols = df.columns[df.dtypes == "timedelta64[ns]"]
-    complex_cols = df.columns[df.dtypes == "complex128"]
-    period_cols = df.columns[df.dtypes == "period[M]"]
-    if (
-        len(date_cols) != 0
-        or len(time_cols) != 0
-        or len(complex_cols) != 0
-        or len(period_cols) != 0
-    ):
-        df = df.copy() if copy else df
-        df[date_cols] = df[date_cols].astype(str)
-        df[time_cols] = df[time_cols].astype(str)
-        df[complex_cols] = df[complex_cols].astype(str)
-        df[period_cols] = df[period_cols].astype(str)
-
-    return df

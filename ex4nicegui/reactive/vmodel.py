@@ -25,7 +25,7 @@ import tokenize
 import executing
 import ast
 import warnings
-from .utils import get_attribute, set_attribute
+from ex4nicegui.reactive.systems.object_system import get_attribute, set_attribute
 
 _T = TypeVar("_T")
 

@@ -14,7 +14,7 @@ from ex4nicegui.utils.signals import (
 from nicegui import ui
 from nicegui.events import handle_event
 from .base import BindableUi, DisableableMixin
-from ex4nicegui.reactive.utils import ParameterClassifier
+from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 
 
 class InputBindableUi(BindableUi[ui.input], DisableableMixin):
