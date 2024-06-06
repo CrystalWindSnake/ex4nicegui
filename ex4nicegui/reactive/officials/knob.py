@@ -4,8 +4,6 @@ from typing import (
     Optional,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.utils.apiEffect import ui_effect
-
 from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     to_value,
@@ -68,7 +66,7 @@ class KnobBindableUi(
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef[float]):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
 

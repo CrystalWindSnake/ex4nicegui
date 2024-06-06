@@ -1,5 +1,6 @@
 from datetime import date, datetime
 import signe
+from signe.core.scope import Scope
 from .clientScope import _CLIENT_SCOPE_MANAGER
 from typing import (
     Any,
@@ -191,6 +192,7 @@ def on(
     priority_level=1,
     effect_kws: Optional[Dict[str, Any]] = None,
     deep: bool = True,
+    scope: Optional[Scope] = None,
 ):
     """Watches one or more reactive data sources and invokes a callback function when the sources change.
 
@@ -219,7 +221,7 @@ def on(
             fn,
             onchanges=onchanges,
             effect_kws=effect_kws,
-            scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
+            scope=scope or _CLIENT_SCOPE_MANAGER.get_current_scope(),
             deep=deep,
             scheduler=get_uiScheduler(),
         )

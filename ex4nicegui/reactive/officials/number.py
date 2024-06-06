@@ -7,13 +7,10 @@ from typing import (
     Union,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.utils.apiEffect import ui_effect
-
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
     to_value,
-    on,
 )
 from nicegui import ui
 from .base import BindableUi
@@ -83,14 +80,14 @@ class NumberBindableUi(BindableUi[ui.number]):
         return super().bind_prop(prop, ref_ui)
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef[float]):
-        @ui_effect
+        @self._ui_effect
         def _():
             self.element.set_value(to_value(ref_ui))
 
         return self
 
     def _bind_precision(self, ref_ui: TGetterOrReadonlyRef[int]):
-        @on(ref_ui, onchanges=True)
+        @self._ui_signal_on(ref_ui, onchanges=True)
         def _():
             self.element.precision = to_value(ref_ui)
             self.element.sanitize()

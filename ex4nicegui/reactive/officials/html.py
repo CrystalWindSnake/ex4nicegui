@@ -1,5 +1,3 @@
-from ex4nicegui.utils.apiEffect import ui_effect
-
 from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
     to_value,
@@ -20,7 +18,7 @@ class html(BindableUi[HtmlComponent]):
 
         super().__init__(element)
 
-        @ui_effect
+        @self._ui_effect
         def _():
             element._props["content"] = to_value(content)
             element.update()

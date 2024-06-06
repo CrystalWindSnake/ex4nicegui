@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, cast
-from ex4nicegui.utils.signals import effect, to_value
+from ex4nicegui.utils.signals import to_value
 from nicegui.elements.mixins.color_elements import (
     TextColorElement,
     QUASAR_COLORS,
@@ -17,7 +17,7 @@ _color_attr_name = "data-ex4ng-color"
 
 
 def bind_color(bindable_ui: BindableUi, ref_ui: TGetterOrReadonlyRef):
-    @effect
+    @bindable_ui._ui_effect
     def _():
         ele = cast(TextColorElement, bindable_ui.element)
         color = to_value(ref_ui)
