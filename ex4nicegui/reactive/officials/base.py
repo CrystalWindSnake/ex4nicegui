@@ -11,7 +11,6 @@ from typing import (
     Generic,
     Union,
     cast,
-    Literal,
     overload,
 )
 
@@ -27,14 +26,9 @@ from ex4nicegui.utils.signals import (
     on,
 )
 from nicegui import Tailwind, ui
-from nicegui.elements.mixins.color_elements import (
-    TextColorElement,
-    QUASAR_COLORS,
-    TAILWIND_COLORS,
-)
 from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.disableable_element import DisableableElement
-
+from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
 
 T = TypeVar("T")
 
@@ -58,7 +52,11 @@ _T_bind_classes_type = Union[
 class BindableUi(Generic[TWidget]):
     def __init__(self, element: TWidget) -> None:
         self._element = element
+        inject_handle_delete(self.element, self._on_element_delete)
         self.tailwind = Tailwind(cast(ui.element, self._element))
+
+    def _on_element_delete(self):
+        pass
 
     def _ui_effect(self, fn: Callable):
         return ui_effect(fn)
