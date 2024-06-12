@@ -33,35 +33,43 @@ def test_method_decorator(browser: BrowserManager, page_path: str):
     label.expect_to_have_text("new text post")
 
 
-@pytest.mark.noautofixt
-def test_should_not_destroyed():
-    dummy = []
-
-    class State:
-        def __init__(self) -> None:
-            self.todos = deep_ref([])
-
-        @ref_computed
-        def total_count(self):
-            return len(self.todos.value)
-
-        def add_data(self):
-            self.todos.value.append(1)
-
-    s = State()
-
-    @effect
+def test_should_not_destroyed(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
     def _():
-        # computed is created in this effect,
-        # causing it to be destroyed before each execution of this function.
-        # The correct approach is that it should not be destroyed
-        dummy.append(s.total_count.value)
+        class State:
+            def __init__(self) -> None:
+                self.todos = deep_ref([])
 
-    assert dummy == [0]
+            @ref_computed
+            def total_count(self):
+                return len(self.todos.value)
 
-    s.add_data()
-    s.add_data()
-    assert dummy == [0, 1, 2]
+            def add_data(self):
+                self.todos.value.append(1)
+
+        s = State()
+        dummy = deep_ref([])
+
+        @effect
+        def _():
+            # computed is created in this effect,
+            # causing it to be destroyed before each execution of this function.
+            # The correct approach is that it should not be destroyed
+            dummy.value.append(s.total_count.value)
+
+        rxui.label(dummy).classes("dummy")
+
+        ui.button("add", on_click=s.add_data).classes("button")
+
+    page = browser.open(page_path)
+
+    label = page.Label(".dummy")
+    button = page.Button(".button")
+
+    label.expect_to_have_text("[0]")
+    button.click()
+    button.click()
+    label.expect_to_have_text("[0, 1, 2]")
 
 
 def test_should_work_with_private_page(browser: BrowserManager, page_path: str):
