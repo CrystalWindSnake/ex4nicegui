@@ -301,3 +301,12 @@ def test_effect_dispose_after_element_delete(browser: BrowserManager, page_path:
 
     org_label.expect_contain_text("axx")
     other_label.expect_equal_text("other ax")
+
+
+def test_scoped_style(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        with rxui.row().scoped_style(":hover > *", "background-color: red"):
+            ui.label("Hello")
+
+    page = browser.open(page_path)

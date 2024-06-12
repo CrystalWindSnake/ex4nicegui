@@ -29,6 +29,7 @@ from nicegui import Tailwind, ui
 from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.disableable_element import DisableableElement
 from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
+from ex4nicegui.reactive.scopedStyle import ScopedStyle
 from functools import partial
 
 T = TypeVar("T")
@@ -59,6 +60,8 @@ class BindableUi(Generic[TWidget]):
 
     def _on_element_delete(self):
         self._effect_scope.dispose()
+        scope_style = ScopedStyle.get()
+        scope_style.remove_style(self.element)
 
     @property
     def _ui_effect(self):
@@ -337,8 +340,11 @@ class BindableUi(Generic[TWidget]):
         """add scoped style to the element"""
         id = f"c{self.element.id}"
         selector_with_self = _parent_id_with_selector(id, selector)
+        scope_style = ScopedStyle.get()
+        scope_style.create_style(self.element, f"{selector_with_self}{{{style}}}")
+
         ui.add_head_html(
-            f"<style data-ex4ng-scoped='{id}'>{selector_with_self}{{{style}}}</style>"
+            f"<style class='ex4ng-scoped-style-{id}'>{selector_with_self}{{{style}}}</style>"
         )
 
         return self
