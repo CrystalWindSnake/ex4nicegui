@@ -500,3 +500,37 @@ class TestScopedStyle:
 
         get_style_btn.click()
         result_label.expect_contain_text(style_content)
+
+    def test_with_self_and_hover(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style = r"outline: 1px solid red;"
+
+            with rxui.row().scoped_style(":self:hover *", style) as row:
+                ui.label("Hello")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element)
+                result.set_text(content)
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+
+            style_content = (
+                rf"#c{row.element.id}:hover,#c{row.element.id}:hover *{{{style}}}"
+            )
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
