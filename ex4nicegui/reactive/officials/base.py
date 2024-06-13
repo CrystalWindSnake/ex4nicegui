@@ -350,12 +350,12 @@ class BindableUi(Generic[TWidget]):
 
         ## usage
         ```python
-        # all children of the element will have red outline, excluse the element itself
-        with rxui.row().scoped_style("", "outline: 1px solid red;") as row:
+        # all children of the element will have red outline, excluding itself
+        with rxui.row().scoped_style("*", "outline: 1px solid red;") as row:
             ui.label("Hello")
             ui.label("World")
 
-        # all children of the element will have red outline, include the element itself
+        # all children of the element will have red outline, including the element itself
         with rxui.row().scoped_style(":self *", "outline: 1px solid red;") as row:
             ui.label("Hello")
             ui.label("World")
