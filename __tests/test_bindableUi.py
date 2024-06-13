@@ -360,9 +360,7 @@ class TestScopedStyle:
         del_element_btn.click()
         result_label.expect_contain_text("")
 
-    def test_scoped_style_with_hover_selector(
-        self, browser: BrowserManager, page_path: str
-    ):
+    def test_with_hover_selector(self, browser: BrowserManager, page_path: str):
         style_content = ""
 
         @ui.page(page_path)
@@ -399,7 +397,7 @@ class TestScopedStyle:
         del_element_btn.click()
         result_label.expect_contain_text("")
 
-    def test_scoped_style_with_css_file(self, browser: BrowserManager, page_path: str):
+    def test_by_css_file(self, browser: BrowserManager, page_path: str):
         style_content = ""
 
         @ui.page(page_path)
