@@ -378,7 +378,7 @@ class BindableUi(Generic[TWidget]):
             style = style.read_text(encoding="utf-8")
 
         id = f"c{self.element.id}"
-        selector_with_self = _parent_id_with_selector(id, selector, is_css_file)
+        selector_with_self = _utils._parent_id_with_selector(id, selector, is_css_file)
         css = ""
         if is_css_file:
             css = f"{selector_with_self} {style}"
@@ -396,26 +396,30 @@ class BindableUi(Generic[TWidget]):
         self.element.update()
 
 
-def _parent_id_with_selector(parent_id: str, selector: str, is_css_file=False) -> str:
-    selector_with_self = f"#{parent_id}"
+class _utils:
+    @staticmethod
+    def _parent_id_with_selector(
+        parent_id: str, selector: str, is_css_file=False
+    ) -> str:
+        selector_with_self = f"#{parent_id}"
 
-    selector = selector.strip()
-    if (not selector) and (not is_css_file):
-        selector = "* "
+        selector = selector.strip()
+        if (not selector) and (not is_css_file):
+            selector = "* "
 
-    if selector.startswith(":self"):
-        selector = selector[5:].lstrip()
-        parent_selector = f"#{parent_id}"
-        if selector.startswith(":"):
-            parent_selector = f"{parent_selector}{selector.split()[0]}"
+        if selector.startswith(":self"):
+            selector = selector[5:].lstrip()
+            parent_selector = f"#{parent_id}"
+            if selector.startswith(":"):
+                parent_selector = f"{parent_selector}{selector.split()[0]}"
 
-        selector_with_self = f"{parent_selector},{selector_with_self}"
+            selector_with_self = f"{parent_selector},{selector_with_self}"
 
-    if not selector.startswith(":"):
-        selector_with_self = selector_with_self + " "
+        if not selector.startswith(":"):
+            selector_with_self = selector_with_self + " "
 
-    selector_with_self = selector_with_self + selector
-    return selector_with_self
+        selector_with_self = selector_with_self + selector
+        return selector_with_self
 
 
 _T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
