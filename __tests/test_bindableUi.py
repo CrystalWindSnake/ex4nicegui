@@ -305,7 +305,16 @@ def test_effect_dispose_after_element_delete(browser: BrowserManager, page_path:
 
 
 class TestScopedStyle:
-    async def _get_style_content(self, element: ui.element):
+    async def _get_style_content(self, element: ui.element, split_lines=False):
+        if split_lines:
+            return await ui.run_javascript(
+                rf"""
+                const target = document.querySelector('style.ex4ng-scoped-style-c{element.id}');
+                if (!target) return "";
+                return target.innerHTML.split(/\n/);
+                """
+            )
+
         return await ui.run_javascript(
             rf"""
             const target = document.querySelector('style.ex4ng-scoped-style-c{element.id}');
@@ -413,6 +422,46 @@ class TestScopedStyle:
             )
 
             style_content = rf"#c{row.element.id}:hover * {{background-color: red;}}"
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
+
+    def test_multiple_call(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style1 = r"background-color: blue;"
+            style2 = r"border: 1px solid red;"
+
+            with rxui.row().scoped_style(":hover > *", style1).scoped_style(
+                ".target", style2
+            ) as row:
+                ui.label("Hello").classes("target")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element, split_lines=True)
+                result.set_text(str(content))
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+
+            style_content = [
+                rf"#c{row.element.id}:hover > *{{{style1}}}",
+                rf"#c{row.element.id} .target{{{style2}}}",
+            ]
+
+            style_content = str(style_content)
 
         page = browser.open(page_path)
 
