@@ -304,9 +304,42 @@ def test_effect_dispose_after_element_delete(browser: BrowserManager, page_path:
 
 
 def test_scoped_style(browser: BrowserManager, page_path: str):
+    style_content = ""
+
     @ui.page(page_path)
     def _():
-        with rxui.row().scoped_style(":hover > *", "background-color: red"):
+        nonlocal style_content
+
+        style = r"background-color: red"
+
+        with rxui.row().scoped_style(":hover > *", style) as row:
             ui.label("Hello")
 
+        result = ui.label("").classes("result")
+
+        async def get_style_content():
+            content = await ui.run_javascript(
+                rf"""
+        const target = document.querySelector('style.ex4ng-scoped-style-c{row.element.id}');
+        if (!target) return "";
+        return target.innerHTML;
+        """
+            )
+            result.set_text(content)
+
+        ui.button("get style content", on_click=get_style_content).classes("get-style")
+        ui.button("del element", on_click=row.delete).classes("del-element")
+
+        style_content = rf"#c{row.element.id}:hover > *{{{style}}}"
+
     page = browser.open(page_path)
+
+    get_style_btn = page.Button(".get-style")
+    del_element_btn = page.Button(".del-element")
+    result_label = page.Label(".result")
+
+    get_style_btn.click()
+    result_label.expect_contain_text(style_content)
+
+    del_element_btn.click()
+    result_label.expect_contain_text("")
