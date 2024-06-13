@@ -11,18 +11,32 @@ function removeInvalidChars(str) {
     return str.replace(REGEX_NEWLINE, '');
 }
 
+function appendCSS(styleElement, cssText) {
+    // 获取已有的 CSS 内容
+    let existingCSS = styleElement.textContent || '';
+
+    // 如果已有的 CSS 内容不为空，添加一个空行作为分隔符
+    if (existingCSS.trim() !== '') {
+        existingCSS += '\n';
+    }
+
+    // 拼接新的 CSS 内容
+    existingCSS += cssText;
+
+    // 将新的 CSS 内容设置回 style 标签
+    styleElement.textContent = existingCSS;
+}
 
 export default {
     template: `<template></template>`,
-
-
     methods: {
         createStyle(id, css) {
+            css = removeInvalidChars(css);
+
             const classes = getClasses(id);
             const target = document.querySelector(`style.${classes}`);
-            css = removeInvalidChars(css);
             if (target) {
-                target.innerHTML = css;
+                appendCSS(target, css);
             } else {
                 const style = document.createElement('style');
                 style.classList.add(classes);
