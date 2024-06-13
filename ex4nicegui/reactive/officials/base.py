@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -61,7 +62,8 @@ class BindableUi(Generic[TWidget]):
     def _on_element_delete(self):
         self._effect_scope.dispose()
         scope_style = ScopedStyle.get()
-        scope_style.remove_style(self.element)
+        if scope_style:
+            scope_style.remove_style(self.element)
 
     @property
     def _ui_effect(self):
@@ -336,16 +338,25 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def scoped_style(self, selector: str, style: str):
+    def scoped_style(self, selector: str, style: Union[str, Path]):
         """add scoped style to the element"""
-        id = f"c{self.element.id}"
-        selector_with_self = _parent_id_with_selector(id, selector)
-        scope_style = ScopedStyle.get()
-        scope_style.create_style(self.element, f"{selector_with_self}{{{style}}}")
 
-        ui.add_head_html(
-            f"<style class='ex4ng-scoped-style-{id}'>{selector_with_self}{{{style}}}</style>"
-        )
+        is_css_file = isinstance(style, Path)
+
+        if is_css_file:
+            style = style.read_text(encoding="utf-8")
+
+        id = f"c{self.element.id}"
+        selector_with_self = _parent_id_with_selector(id, selector, is_css_file)
+        css = ""
+        if is_css_file:
+            css = f"{selector_with_self} {style}"
+        else:
+            css = f"{selector_with_self}{{{style}}}"
+
+        scope_style = ScopedStyle.get()
+        assert scope_style, "can not find scope style"
+        scope_style.create_style(self.element, css)
 
         return self
 
@@ -354,14 +365,18 @@ class BindableUi(Generic[TWidget]):
         self.element.update()
 
 
-def _parent_id_with_selector(parent_id: str, selector: str) -> str:
+def _parent_id_with_selector(parent_id: str, selector: str, is_css_file=False) -> str:
     selector = selector.strip()
-    selector_with_self = f"#{parent_id}"
-    if selector:
-        if not selector.startswith(":"):
-            selector_with_self = selector_with_self + " "
 
-        selector_with_self = selector_with_self + selector
+    if (not selector) and (not is_css_file):
+        selector = "* "
+
+    selector_with_self = f"#{parent_id}"
+
+    if not selector.startswith(":"):
+        selector_with_self = selector_with_self + " "
+
+    selector_with_self = selector_with_self + selector
 
     return selector_with_self
 
