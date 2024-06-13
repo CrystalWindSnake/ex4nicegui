@@ -865,6 +865,34 @@ rxui.radio(names, value=current_tab).props("inline")
 
 rxui.label(lambda: f"当前 tab 为:{current_tab.value}")
 ```
+---
+
+### scoped_style
+
+`scoped_style` 方法允许你创建限定在组件内部的样式。
+
+```python
+# 所有子元素都会有红色轮廓，但排除自身
+with rxui.row().scoped_style("*", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+
+
+# 所有子元素都会有红色轮廓，包括自身
+with rxui.row().scoped_style(":self *", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+
+# 当鼠标悬停在 row 组件时,所有子元素都会有红色轮廓，但排除自身
+with rxui.row().scoped_style(":hover *", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+
+# 当鼠标悬停在 row 组件时,所有子元素都会有红色轮廓，包括自身
+with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+```
 
 
 ---

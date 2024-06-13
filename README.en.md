@@ -856,6 +856,32 @@ rxui.radio(names, value=current_tab).props("inline")
 rxui.label(lambda: f"Current tab is: {current_tab.value}")
 ```
 
+---
+### scoped_style
+The `scoped_style` method allows you to create styles that are scoped within the component.
+
+```python
+# All child elements will have a red outline, excluding the component itself
+with rxui.row().scoped_style("*", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+
+
+# All child elements will have a red outline, including the component itself
+with rxui.row().scoped_style(":self *", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+
+# When hovering over the row component, all child elements will have a red outline, excluding the component itself
+with rxui.row().scoped_style(":hover *", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+
+# When hovering over the row component, all child elements will have a red outline, including the component itself
+with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
+    ui.label("Hello")
+    ui.label("World")
+```
 
 ---
 
