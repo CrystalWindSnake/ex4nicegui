@@ -339,7 +339,38 @@ class BindableUi(Generic[TWidget]):
         return self
 
     def scoped_style(self, selector: str, style: Union[str, Path]):
-        """add scoped style to the element"""
+        """add scoped style to the element
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#scoped_style
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#scoped_style
+
+        Args:
+            selector (str): css selector
+            style (Union[str, Path]): path to css file or inline style string
+
+        ## usage
+        ```python
+        # all children of the element will have red outline, excluse the element itself
+        with rxui.row().scoped_style("", "outline: 1px solid red;") as row:
+            ui.label("Hello")
+            ui.label("World")
+
+        # all children of the element will have red outline, include the element itself
+        with rxui.row().scoped_style(":self *", "outline: 1px solid red;") as row:
+            ui.label("Hello")
+            ui.label("World")
+
+        # all children of the element will have red outline when element is hovered
+        with rxui.row().scoped_style(":hover *", "outline: 1px solid red;") as row:
+            ui.label("Hello")
+            ui.label("World")
+
+        # all children of the element and itself will have red outline when element is hovered
+        with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
+            ui.label("Hello")
+            ui.label("World")
+        ```
+        """
 
         is_css_file = isinstance(style, Path)
 
@@ -373,8 +404,12 @@ def _parent_id_with_selector(parent_id: str, selector: str, is_css_file=False) -
         selector = "* "
 
     if selector.startswith(":self"):
-        selector_with_self = f"#{parent_id},{selector_with_self}"
         selector = selector[5:].lstrip()
+        parent_selector = f"#{parent_id}"
+        if selector.startswith(":"):
+            parent_selector = f"{parent_selector}{selector.split()[0]}"
+
+        selector_with_self = f"{parent_selector},{selector_with_self}"
 
     if not selector.startswith(":"):
         selector_with_self = selector_with_self + " "
