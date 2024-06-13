@@ -366,18 +366,20 @@ class BindableUi(Generic[TWidget]):
 
 
 def _parent_id_with_selector(parent_id: str, selector: str, is_css_file=False) -> str:
-    selector = selector.strip()
+    selector_with_self = f"#{parent_id}"
 
+    selector = selector.strip()
     if (not selector) and (not is_css_file):
         selector = "* "
 
-    selector_with_self = f"#{parent_id}"
+    if selector.startswith(":self"):
+        selector_with_self = f"#{parent_id},{selector_with_self}"
+        selector = selector[5:].lstrip()
 
     if not selector.startswith(":"):
         selector_with_self = selector_with_self + " "
 
     selector_with_self = selector_with_self + selector
-
     return selector_with_self
 
 
