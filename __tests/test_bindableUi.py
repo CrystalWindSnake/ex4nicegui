@@ -1,3 +1,4 @@
+from pathlib import Path
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
@@ -301,3 +302,235 @@ def test_effect_dispose_after_element_delete(browser: BrowserManager, page_path:
 
     org_label.expect_contain_text("axx")
     other_label.expect_equal_text("other ax")
+
+
+class TestScopedStyle:
+    async def _get_style_content(self, element: ui.element, split_lines=False):
+        if split_lines:
+            return await ui.run_javascript(
+                rf"""
+                const target = document.querySelector('style.ex4ng-scoped-style-c{element.id}');
+                if (!target) return "";
+                return target.innerHTML.split(/\n/);
+                """
+            )
+
+        return await ui.run_javascript(
+            rf"""
+            const target = document.querySelector('style.ex4ng-scoped-style-c{element.id}');
+            if (!target) return "";
+            return target.innerHTML;
+            """
+        )
+
+    def test_scoped_style(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style = r"background-color: red"
+
+            with rxui.row().scoped_style("div", style) as row:
+                ui.label("Hello")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element)
+                result.set_text(content)
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+            ui.button("del element", on_click=row.delete).classes("del-element")
+
+            style_content = rf"#c{row.element.id} div{{{style}}}"
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        del_element_btn = page.Button(".del-element")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
+
+        del_element_btn.click()
+        result_label.expect_contain_text("")
+
+    def test_with_hover_selector(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style = r"background-color: red"
+
+            with rxui.row().scoped_style(":hover > *", style) as row:
+                ui.label("Hello")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element)
+                result.set_text(content)
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+            ui.button("del element", on_click=row.delete).classes("del-element")
+
+            style_content = rf"#c{row.element.id}:hover > *{{{style}}}"
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        del_element_btn = page.Button(".del-element")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
+
+        del_element_btn.click()
+        result_label.expect_contain_text("")
+
+    def test_by_css_file(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style_file = Path(__file__).parent / "files/scoped_style.css"
+
+            with rxui.row().scoped_style(":hover", style_file) as row:
+                ui.label("Hello")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element)
+                result.set_text(content)
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+
+            style_content = rf"#c{row.element.id}:hover * {{background-color: red;}}"
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
+
+    def test_multiple_call(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style1 = r"background-color: blue;"
+            style2 = r"border: 1px solid red;"
+
+            with rxui.row().scoped_style(":hover > *", style1).scoped_style(
+                ".target", style2
+            ) as row:
+                ui.label("Hello").classes("target")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element, split_lines=True)
+                result.set_text(str(content))
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+
+            style_content = [
+                rf"#c{row.element.id}:hover > *{{{style1}}}",
+                rf"#c{row.element.id} .target{{{style2}}}",
+            ]
+
+            style_content = str(style_content)
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
+
+    def test_with_self(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style = r"border: 1px solid red;"
+
+            with rxui.row().scoped_style(":self", style) as row:
+                ui.label("Hello")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element)
+                result.set_text(content)
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+
+            style_content = rf"#c{row.element.id},#c{row.element.id} {{{style}}}"
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
+
+    def test_with_self_and_hover(self, browser: BrowserManager, page_path: str):
+        style_content = ""
+
+        @ui.page(page_path)
+        def _():
+            nonlocal style_content
+
+            style = r"outline: 1px solid red;"
+
+            with rxui.row().scoped_style(":self:hover *", style) as row:
+                ui.label("Hello")
+
+            result = ui.label("").classes("result")
+
+            async def get_style_content():
+                content = await self._get_style_content(row.element)
+                result.set_text(content)
+
+            ui.button("get style content", on_click=get_style_content).classes(
+                "get-style"
+            )
+
+            style_content = (
+                rf"#c{row.element.id}:hover,#c{row.element.id}:hover *{{{style}}}"
+            )
+
+        page = browser.open(page_path)
+
+        get_style_btn = page.Button(".get-style")
+        result_label = page.Label(".result")
+
+        get_style_btn.click()
+        result_label.expect_contain_text(style_content)
