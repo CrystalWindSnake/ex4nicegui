@@ -1,15 +1,13 @@
 from collections import deque
 import signe
-from typing import (
-    TypeVar,
-    Callable,
-)
+from typing import TypeVar, Callable, Literal
 from functools import lru_cache
 
 
 T = TypeVar("T")
 
 T_JOB_FN = Callable[[], None]
+T_JOB_TYPE = Literal["pre", "post"]
 
 
 class UiScheduler(signe.ExecutionScheduler):
@@ -51,3 +49,12 @@ class UiScheduler(signe.ExecutionScheduler):
 @lru_cache(maxsize=1)
 def get_uiScheduler():
     return UiScheduler()
+
+
+def next_tick(job: T_JOB_FN, type: T_JOB_TYPE = "pre"):
+    if type == "pre":
+        get_uiScheduler().pre_job(job)
+    elif type == "post":
+        get_uiScheduler().post_job(job)
+    else:
+        raise ValueError("Invalid job type")
