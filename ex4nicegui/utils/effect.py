@@ -1,4 +1,5 @@
 import signe
+from signe.core.consts import EffectState
 from typing import (
     TypeVar,
     overload,
@@ -6,7 +7,6 @@ from typing import (
     Callable,
     Union,
 )
-
 from .scheduler import get_uiScheduler
 from .clientScope import _CLIENT_SCOPE_MANAGER
 
@@ -81,7 +81,8 @@ def effect(
             scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
         )
 
-        res.update()
+        res.trigger(EffectState.NEED_UPDATE)
+        scheduler.run()
 
         return res
 
