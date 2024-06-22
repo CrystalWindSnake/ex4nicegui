@@ -61,4 +61,9 @@ def get_uiScheduler():
 
 
 def next_tick(job: T_JOB_FN):
+    """Schedule a job to run on the next tick of the event loop.
+
+    Args:
+        job (T_JOB_FN):  The job to run on the next tick.
+    """
     get_uiScheduler().next_tick_job(job)
