@@ -867,6 +867,34 @@ rxui.label(lambda: f"当前 tab 为:{current_tab.value}")
 ```
 ---
 
+### lazy_tab_panels
+
+懒加载模式下，只有当前激活的 tab 才会渲染。
+```python
+from ex4nicegui import to_ref, rxui, on, deep_ref
+
+current_tab = to_ref("t1")
+
+with rxui.tabs(current_tab):
+    ui.tab("t1")
+    ui.tab("t2")
+
+with rxui.lazy_tab_panels(current_tab) as panels:
+
+    @panels.add_tab_panel("t1")
+    def _():
+        ui.notify("Hello from t1")
+
+    @panels.add_tab_panel("t2")
+    def _():
+        ui.notify("Hello from t2")
+
+```
+
+页面加载后，立刻显示 "Hello from t1"。当切换到 "t2" 页签，才会显示 "Hello from t2"。
+
+---
+
 ### scoped_style
 
 `scoped_style` 方法允许你创建限定在组件内部的样式。
