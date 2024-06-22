@@ -1,5 +1,6 @@
 import signe
 from signe.core.scope import Scope
+from signe.core.consts import EffectState
 from typing import (
     TypeVar,
     overload,
@@ -88,7 +89,10 @@ def ui_effect(
             **kws,
             scope=scope or _CLIENT_SCOPE_MANAGER.get_current_scope(),
         )
-        res.update()
+
+        res.trigger(EffectState.NEED_UPDATE)
+        scheduler.run()
+        # res.update()
 
         return res
 

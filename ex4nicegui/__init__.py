@@ -6,6 +6,7 @@ from ex4nicegui.utils.types import (
     ReadonlyRef,
     TGetterOrReadonlyRef,
 )
+from ex4nicegui.utils.scheduler import next_tick
 from ex4nicegui.utils.signals import (
     effect,
     effect_refreshable,
@@ -49,5 +50,6 @@ __all__ = [
     "to_raw",
     "is_setter_ref",
     "new_scope",
+    "next_tick",
     "__version__",
 ]
