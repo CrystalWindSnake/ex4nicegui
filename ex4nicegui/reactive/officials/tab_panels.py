@@ -7,6 +7,7 @@ from ex4nicegui.utils.signals import (
     to_value,
     _TMaybeRef as TMaybeRef,
 )
+from ex4nicegui.utils.scheduler import next_tick
 from nicegui import ui, background_tasks, core
 from .base import BindableUi
 
@@ -68,7 +69,6 @@ class lazy_tab_panel(ui.tab_panel):
     def try_run_build_fn(self):
         if self._build_fn:
             _helper.run_build_fn(self, self._props["name"])
-
             self._build_fn = None
 
     def build_fn(self, fn: Callable[..., Union[None, Awaitable]]):
@@ -90,6 +90,18 @@ class LazyTabPanelsBindableUi(TabPanelsBindableUi):
         )
 
         self.__panels: WeakValueDictionary[str, lazy_tab_panel] = WeakValueDictionary()
+
+        if value:
+
+            @self._ui_effect
+            def _():
+                current_value = to_value(value)
+                if current_value in self.__panels:
+                    panel = self.__panels[current_value]
+
+                    @next_tick
+                    def _():
+                        panel.try_run_build_fn()
 
     def add_tab_panel(self, name: str):
         def decorator(fn: Callable[..., Union[None, Awaitable]]):
