@@ -51,6 +51,7 @@ from .officials.tab import TabBindableUi as tab
 from .officials.tab_panels import TabPanelsBindableUi as tab_panels
 from .officials.tab_panel import TabPanelBindableUi as tab_panel
 from .officials.element import ElementBindableUi as element
+from .officials.tab_panels import LazyTabPanelsBindableUi as lazy_tab_panels
 from .q_pagination import PaginationBindableUi as q_pagination
 
 from .local_file_picker import local_file_picker
@@ -70,6 +71,7 @@ pagination = q_pagination
 __all__ = [
     "element",
     "tab_panels",
+    "lazy_tab_panels",
     "tab_panel",
     "tabs",
     "tab",

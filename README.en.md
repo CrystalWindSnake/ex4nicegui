@@ -857,6 +857,34 @@ rxui.label(lambda: f"Current tab is: {current_tab.value}")
 ```
 
 ---
+
+### lazy_tab_panels
+
+In lazy loading mode, only the currently active tab is rendered.
+```python
+from ex4nicegui import to_ref, rxui, on, deep_ref
+
+current_tab = to_ref("t1")
+
+with rxui.tabs(current_tab):
+    ui.tab("t1")
+    ui.tab("t2")
+
+with rxui.lazy_tab_panels(current_tab) as panels:
+
+    @panels.add_tab_panel("t1")
+    def _():
+        ui.notify("Hello from t1")
+
+    @panels.add_tab_panel("t2")
+    def _():
+        ui.notify("Hello from t2")
+
+```
+
+Upon page load, "Hello from t1" is displayed immediately. When switching to the "t2" tab, "Hello from t2" is then shown.
+
+---
 ### scoped_style
 The `scoped_style` method allows you to create styles that are scoped within the component.
 
