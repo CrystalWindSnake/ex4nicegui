@@ -1,3 +1,4 @@
+import asyncio
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, deep_ref
@@ -28,6 +29,51 @@ def test_base(browser: BrowserManager, page_path: str):
                 @panels.add_tab_panel(tab)
                 def _(tab=tab):
                     ui.label(f"panels.{tab}")
+                    texts.value.append(f"panels.{tab}")
+
+    page = browser.open(page_path)
+    reslut_label = page.Label(".result")
+
+    reslut_label.expect_contain_text("['panels.t1']")
+
+    click_tab(page, "t2")
+    reslut_label.expect_contain_text("['panels.t1', 'panels.t2']")
+
+    click_tab(page, "t3")
+    reslut_label.expect_contain_text("['panels.t1', 'panels.t2', 'panels.t3']")
+
+    # make sure that content will not be duplicated.
+    click_tab(page, "t2")
+    reslut_label.expect_contain_text("['panels.t1', 'panels.t2', 'panels.t3']")
+
+    click_tab(page, "t1")
+    reslut_label.expect_contain_text("['panels.t1', 'panels.t2', 'panels.t3']")
+
+
+def test_async(browser: BrowserManager, page_path: str):
+    async def long_running_task():
+        await asyncio.sleep(0.5)
+
+    @ui.page(page_path)
+    def _():
+        texts = deep_ref([])
+
+        current_tab = to_ref("t1")
+        tabs = ["t1", "t2", "t3"]
+
+        rxui.label(texts).classes("result")
+
+        with rxui.tabs(current_tab):
+            for tab in tabs:
+                ui.tab(tab)
+
+        with rxui.lazy_tab_panels(current_tab) as panels:
+            for tab in tabs:
+
+                @panels.add_tab_panel(tab)
+                async def _(tab=tab):
+                    ui.label(f"panels.{tab}")
+                    await long_running_task()
                     texts.value.append(f"panels.{tab}")
 
     page = browser.open(page_path)
