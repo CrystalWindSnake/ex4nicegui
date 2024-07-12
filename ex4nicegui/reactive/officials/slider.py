@@ -30,7 +30,7 @@ class SliderBindableUi(
         min: TMaybeRef[_TSliderValue],
         max: TMaybeRef[_TSliderValue],
         step: TMaybeRef[_TSliderValue] = 1.0,
-        value: TMaybeRef[_TSliderValue] = None,
+        value: Optional[TMaybeRef[_TSliderValue]] = None,
         on_change: Optional[Callable[..., Any]] = None,
     ) -> None:
         pc = ParameterClassifier(
