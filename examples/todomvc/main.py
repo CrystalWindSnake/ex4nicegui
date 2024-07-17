@@ -60,17 +60,17 @@ def todo_list_panel():
                 ui.label("todo list").classes("text-h5")
 
         with grid_box(template_columns="1fr auto 1fr", vertical="center"):
-            rxui.label(lambda: f"{state.active_count.value} items left").bind_visible(
-                lambda: state.total_count.value > 0
+            rxui.label(lambda: f"{state.active_count()} items left").bind_visible(
+                lambda: state.total_count() > 0
             )
 
             rxui.radio(["all", "active", "completed"], value=state.filter_do).classes(
                 "row"
-            ).bind_visible(lambda: state.total_count.value > 0)
+            ).bind_visible(lambda: state.total_count() > 0)
 
             rxui.button("clear completed", on_click=state.remove_completed_todos).props(
                 "desen  flat"
-            ).bind_visible(lambda: state.completed_count.value > 0)
+            ).bind_visible(lambda: state.completed_count() > 0)
 
         # table
         with grid_box(template_columns="5fr 1fr auto", vertical="center").classes(
