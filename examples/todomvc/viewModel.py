@@ -34,27 +34,22 @@ class State:
     todos: Ref[_T_todos] = field(default_factory=lambda: deep_ref([]))
     filter_do = to_ref("all")
 
-    @ref_computed
     def filtered_todos(self) -> _T_todos:
         return getattr(filters, self.filter_do.value)(self.todos.value)
 
-    @ref_computed
     def active_count(self):
         return len(filters.active(self.todos.value))
 
-    @ref_computed
     def completed_count(self):
         return len(filters.completed(self.todos.value))
 
-    @ref_computed
     def total_count(self):
         return len(self.todos.value)
 
-    @ref_computed
     def completion_ratio(self):
-        if self.total_count.value == 0:
+        if self.total_count() == 0:
             return 0.0
-        return round(self.completed_count.value / self.total_count.value, 2)
+        return round(self.completed_count() / self.total_count(), 2)
 
     # methods
     def add_todo(self, title):
