@@ -1,6 +1,7 @@
 from typing import (
     Any,
     Optional,
+    Union,
 )
 
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
@@ -13,8 +14,8 @@ from ex4nicegui.utils.signals import _TMaybeRef as TMaybeRef
 class GridBindableUi(BindableUi[ui.grid]):
     def __init__(
         self,
-        rows: Optional[TMaybeRef[int]] = None,
-        columns: Optional[TMaybeRef[int]] = None,
+        rows: Optional[TMaybeRef[Union[int, str]]] = None,
+        columns: Optional[TMaybeRef[Union[int, str]]] = None,
     ) -> None:
         pc = ParameterClassifier(locals(), maybeRefs=["rows", "columns"], events=[])
 
