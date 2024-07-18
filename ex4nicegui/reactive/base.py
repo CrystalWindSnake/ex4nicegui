@@ -31,6 +31,7 @@ from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.disableable_element import DisableableElement
 from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
 from ex4nicegui.reactive.scopedStyle import ScopedStyle
+from ex4nicegui.reactive.systems import color_system
 from functools import partial
 
 T = TypeVar("T")
@@ -452,3 +453,59 @@ class DisableableMixin(Protocol):
 
 
 DisableableBindableUi = DisableableMixin
+
+
+class TextColorableMixin(Protocol):
+    _ui_signal_on: Callable[[Callable[[TGetterOrReadonlyRef[str]], Any]], signe.Effect]
+
+    @property
+    def element(self) -> ui.element:
+        ...
+
+    def _bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        @self._ui_signal_on(ref_ui)  # type: ignore
+        def _(state: WatchedState):
+            if state.previous is not None:
+                color_system.remove_text_color(self.element, state.previous)
+
+            color_system.add_text_color(self.element, state.current)
+
+            self.element.update()
+
+    def bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        """bind text color to the element
+
+        Args:
+            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
+
+        """
+        self._bind_text_color(ref_ui)
+        return self
+
+
+class BackgroundColorableMixin(Protocol):
+    _ui_signal_on: Callable[[Callable[..., Any]], signe.Effect[None]]
+
+    @property
+    def element(self) -> ui.element:
+        ...
+
+    def _bind_background_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        @self._ui_signal_on(ref_ui)  # type: ignore
+        def _(state: WatchedState):
+            if state.previous is not None:
+                color_system.remove_background_color(self.element, state.previous)
+
+            color_system.add_background_color(self.element, state.current)
+
+            self.element.update()
+
+    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        """bind color to the element
+
+        Args:
+            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
+
+        """
+        self._bind_background_color(ref_ui)
+        return self

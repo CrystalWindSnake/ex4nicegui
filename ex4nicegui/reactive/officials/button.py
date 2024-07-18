@@ -10,10 +10,20 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import BindableUi, DisableableMixin
+from .base import (
+    BindableUi,
+    DisableableMixin,
+    BackgroundColorableMixin,
+    TextColorableMixin,
+)
 
 
-class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
+class ButtonBindableUi(
+    BindableUi[ui.button],
+    DisableableMixin,
+    BackgroundColorableMixin,
+    TextColorableMixin,
+):
     def __init__(
         self,
         text: TMaybeRef[str] = "",
