@@ -137,11 +137,13 @@ class _helpers:
         """
         Add an attribute to an instance of a class.
         """
-        original_init = cls_type.__init__
 
-        def new_init(self, *args, **kwargs):
-            original_init(self, *args, **kwargs)
+        original_post_init = getattr(cls_type, "__post_init__", None)
+
+        def new_post_init(self, *args, **kwargs):
+            if original_post_init is not None:
+                original_post_init(self, *args, **kwargs)
             setattr(self, attr_name, ref_computed(partial(fn, self), **computed_args))
 
-        cls_type.__init__ = new_init
+        cls_type.__post_init__ = new_post_init
         return cls_type

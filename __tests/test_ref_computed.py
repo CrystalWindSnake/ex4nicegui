@@ -1,3 +1,4 @@
+from typing import List
 import pytest
 from ex4nicegui.reactive import rxui
 from nicegui import ui
@@ -5,6 +6,7 @@ from ex4nicegui import to_ref, ref_computed
 from ex4nicegui import effect
 from ex4nicegui.utils.signals import deep_ref
 from .screen import BrowserManager
+from dataclasses import dataclass, field
 
 
 def test_method_decorator(browser: BrowserManager, page_path: str):
@@ -31,6 +33,30 @@ def test_method_decorator(browser: BrowserManager, page_path: str):
     label.expect_to_have_text("post")
     input.fill_text("new text")
     label.expect_to_have_text("new text post")
+
+
+@pytest.mark.noautofixt
+def test_in_dataclass():
+    @dataclass
+    class MyState:
+        text: List = field(default_factory=list)
+
+        def __post_init__(self):
+            self.a = 1
+
+        @ref_computed
+        def post_text1(self):
+            return "test"
+
+        @ref_computed
+        def post_text2(self):
+            return "test1"
+
+    state = MyState()
+    state.text
+    state.post_text1.value
+    state.post_text2.value
+    state.a
 
 
 def test_should_not_destroyed(browser: BrowserManager, page_path: str):
