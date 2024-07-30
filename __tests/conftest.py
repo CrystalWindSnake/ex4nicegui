@@ -29,8 +29,8 @@ def reset_globals(request: pytest.FixtureRequest):
     importlib.reload(plotly)
     importlib.reload(pyplot)
     app.storage.clear()
-    index_client = Client(ui_page("/"), shared=True).__enter__()
-    app.get("/")(index_client.build_response)
+    Client.auto_index_client = Client(ui_page("/"), request=None).__enter__()  # pylint: disable=unnecessary-dunder-call
+    app.get("/")(Client.auto_index_client.build_response)
     binding.reset()
 
 

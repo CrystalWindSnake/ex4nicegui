@@ -426,6 +426,10 @@ class LabelUtils(BaseUiUtils):
         return expect(self.target_locator).to_contain_text(re.compile(f"^{expected}$"))
 
 
+class ChipUtils(LabelUtils):
+    pass
+
+
 class InputUtils(BaseUiUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
         super().__init__(page, target_locator)
