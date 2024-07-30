@@ -16,6 +16,7 @@ executing = "^2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
+nicegui = "latest"
 pytest = "^8.2.1"
 pandas = [
     {version = "^1.0.0", python = "~3.8"},
