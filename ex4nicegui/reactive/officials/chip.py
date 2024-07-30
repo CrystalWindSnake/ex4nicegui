@@ -41,7 +41,7 @@ class ChipBindableUi(
                 "selected",
                 "removable",
             ],
-            events=[],
+            events=["on_click", "on_selection_change", "on_value_change"],
         )
 
         element = ui.chip(**pc.get_values_kws())
