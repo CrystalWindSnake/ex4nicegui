@@ -1,6 +1,7 @@
 from typing import (
     Any,
     Callable,
+    Dict,
     Protocol,
 )
 
@@ -29,6 +30,30 @@ class TextColorableMixin(Protocol):
             color_system.add_text_color(self.element, state.current)
 
             self.element.update()
+
+    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        """bind text color to the element
+
+        Args:
+            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
+
+        """
+        self._bind_text_color(ref_ui)
+        return self
+
+
+class HtmlTextColorableMixin(Protocol):
+    _ui_signal_on: Callable[[Callable[[TGetterOrReadonlyRef[str]], Any]], signe.Effect]
+
+    @property
+    def element(self) -> ui.element:
+        ...
+
+    def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
+        ...
+
+    def _bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        return self.bind_style({"color": ref_ui})
 
     def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
         """bind text color to the element

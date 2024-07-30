@@ -7,10 +7,10 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 from .base import BindableUi
-from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
+from ex4nicegui.reactive.mixins.textColor import HtmlTextColorableMixin
 
 
-class LabelBindableUi(BindableUi[ui.label], TextColorableMixin):
+class LabelBindableUi(BindableUi[ui.label], HtmlTextColorableMixin):
     def __init__(
         self,
         text: TMaybeRef[Any] = "",
