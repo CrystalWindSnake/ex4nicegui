@@ -7,9 +7,15 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 from .base import BindableUi
+from ex4nicegui.reactive.mixins.backgroundColor import BackgroundColorableMixin
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
-class ChipBindableUi(BindableUi[ui.chip]):
+class ChipBindableUi(
+    BindableUi[ui.chip],
+    BackgroundColorableMixin,
+    TextColorableMixin,
+):
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -54,27 +60,43 @@ class ChipBindableUi(BindableUi[ui.chip]):
 
         if prop == "color":
             return self.bind_color(ref_ui)
+        if prop == "text-color":
+            return self.bind_text_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef):
-        """Binds the background color property of the chip element.
+    def bind_color(self, color: TGetterOrReadonlyRef):
+        """Binds the background color property of the chip to a ui element.
 
         Args:
-            ref_ui (TGetterOrReadonlyRef): _description_
+            color (TGetterOrReadonlyRef): background color ui element or getter function
+
+        """
+        BackgroundColorableMixin.bind_color(self, color)
+        return self
+
+    def bind_text_color(self, color: TGetterOrReadonlyRef):
+        """Binds the text color property of the chip to a ui element.
+
+        Args:
+            color (TGetterOrReadonlyRef):  text color ui element or getter function
+
+
+        """
+        TextColorableMixin.bind_color(self, color)
+        return self
+
+    def bind_text(self, text: TGetterOrReadonlyRef):
+        """Binds the text property of the chip to a ui element.
+
+        Args:
+            text (TGetterOrReadonlyRef):  text ui element or getter function
+
         """
 
         @self._ui_effect
         def _():
-            ele = self.element
-            color = to_value(ref_ui)
-            ele._props["color"] = color
-            ele.update()
-
-    def bind_text(self, ref_ui: TGetterOrReadonlyRef):
-        @self._ui_effect
-        def _():
-            self.element.set_text(str(to_value(ref_ui)))
+            self.element.set_text(str(to_value(text)))
             self.element.update()
 
         return self
