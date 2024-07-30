@@ -184,6 +184,9 @@ class PageUtils:
     def Label(self, selector: Union[str, Locator]):
         return utils.LabelUtils(self._page, selector)
 
+    def Chip(self, selector: Union[str, Locator]):
+        return utils.ChipUtils(self._page, selector)
+
     def ColorPicker(self, selector: Union[str, Locator]):
         return utils.ColorPickerUtils(self._page, selector)
 
