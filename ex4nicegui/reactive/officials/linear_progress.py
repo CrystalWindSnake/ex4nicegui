@@ -9,7 +9,8 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 
-from .base import BindableUi, TextColorableMixin
+from .base import BindableUi
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
 class LinearProgressBindableUi(BindableUi[ui.linear_progress], TextColorableMixin):

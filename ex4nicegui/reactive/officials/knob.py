@@ -10,7 +10,8 @@ from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
 )
 from nicegui import ui
-from .base import BindableUi, DisableableMixin, TextColorableMixin
+from .base import BindableUi, DisableableMixin
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
 class KnobBindableUi(

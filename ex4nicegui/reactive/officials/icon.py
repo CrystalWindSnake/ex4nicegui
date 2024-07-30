@@ -12,7 +12,8 @@ from nicegui import ui
 from nicegui.elements.mixins.color_elements import (
     TextColorElement,
 )
-from .base import BindableUi, TextColorableMixin
+from .base import BindableUi
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
 class IconBindableUi(BindableUi[ui.icon], TextColorableMixin):

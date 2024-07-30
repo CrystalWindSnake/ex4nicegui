@@ -13,9 +13,10 @@ from nicegui import ui
 from .base import (
     BindableUi,
     DisableableMixin,
-    BackgroundColorableMixin,
-    TextColorableMixin,
 )
+
+from ex4nicegui.reactive.mixins.backgroundColor import BackgroundColorableMixin
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
 class ButtonBindableUi(

@@ -7,7 +7,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Protocol,
     TypeVar,
     Generic,
     Union,
@@ -17,7 +16,6 @@ from typing import (
 
 from typing_extensions import Self
 from ex4nicegui.utils.apiEffect import ui_effect
-import signe
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     to_value,
@@ -28,10 +26,9 @@ from ex4nicegui.utils.signals import (
 from ex4nicegui.utils.clientScope import new_scope
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.text_element import TextElement
-from nicegui.elements.mixins.disableable_element import DisableableElement
 from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
 from ex4nicegui.reactive.scopedStyle import ScopedStyle
-from ex4nicegui.reactive.systems import color_system
+from ex4nicegui.reactive.mixins.disableable import DisableableMixin
 from functools import partial
 
 T = TypeVar("T")
@@ -423,89 +420,4 @@ class _utils:
         return selector_with_self
 
 
-_T_DisableableBinder = TypeVar("_T_DisableableBinder", bound=DisableableElement)
-
-
-class DisableableMixin(Protocol):
-    _ui_effect: Callable[[Callable[..., Any]], signe.Effect[None]]
-
-    @property
-    def element(self) -> DisableableElement:
-        ...
-
-    def bind_enabled(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @self._ui_effect
-        def _():
-            value = to_value(ref_ui)
-            self.element.set_enabled(value)
-            self.element._handle_enabled_change(value)
-
-        return self
-
-    def bind_disable(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        @self._ui_effect
-        def _():
-            value = not to_value(ref_ui)
-            self.element.set_enabled(value)
-            self.element._handle_enabled_change(value)
-
-        return self
-
-
 DisableableBindableUi = DisableableMixin
-
-
-class TextColorableMixin(Protocol):
-    _ui_signal_on: Callable[[Callable[[TGetterOrReadonlyRef[str]], Any]], signe.Effect]
-
-    @property
-    def element(self) -> ui.element:
-        ...
-
-    def _bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        @self._ui_signal_on(ref_ui)  # type: ignore
-        def _(state: WatchedState):
-            if state.previous is not None:
-                color_system.remove_text_color(self.element, state.previous)
-
-            color_system.add_text_color(self.element, state.current)
-
-            self.element.update()
-
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        """bind text color to the element
-
-        Args:
-            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
-
-        """
-        self._bind_text_color(ref_ui)
-        return self
-
-
-class BackgroundColorableMixin(Protocol):
-    _ui_signal_on: Callable[[Callable[..., Any]], signe.Effect[None]]
-
-    @property
-    def element(self) -> ui.element:
-        ...
-
-    def _bind_background_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        @self._ui_signal_on(ref_ui)  # type: ignore
-        def _(state: WatchedState):
-            if state.previous is not None:
-                color_system.remove_background_color(self.element, state.previous)
-
-            color_system.add_background_color(self.element, state.current)
-
-            self.element.update()
-
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        """bind color to the element
-
-        Args:
-            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
-
-        """
-        self._bind_background_color(ref_ui)
-        return self

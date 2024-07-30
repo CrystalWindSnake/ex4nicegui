@@ -9,7 +9,8 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import BindableUi, DisableableMixin, BackgroundColorableMixin
+from .base import BindableUi, DisableableMixin
+from ex4nicegui.reactive.mixins.backgroundColor import BackgroundColorableMixin
 
 
 class CircularProgressBindableUi(

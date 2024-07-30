@@ -6,7 +6,8 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
-from .base import BindableUi, TextColorableMixin
+from .base import BindableUi
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
 class LabelBindableUi(BindableUi[ui.label], TextColorableMixin):
