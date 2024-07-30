@@ -6,10 +6,10 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
-from .base import BindableUi
+from .base import BindableUi, TextColorableMixin
 
 
-class LabelBindableUi(BindableUi[ui.label]):
+class LabelBindableUi(BindableUi[ui.label], TextColorableMixin):
     def __init__(
         self,
         text: TMaybeRef[Any] = "",
@@ -34,14 +34,6 @@ class LabelBindableUi(BindableUi[ui.label]):
             return self.bind_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
-
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef):
-        @self._ui_effect
-        def _():
-            ele = self.element
-            color = to_value(ref_ui)
-            ele._style["color"] = color
-            ele.update()
 
     def bind_text(self, ref_ui: TGetterOrReadonlyRef):
         @self._ui_effect

@@ -12,11 +12,10 @@ from nicegui import ui
 from nicegui.elements.mixins.color_elements import (
     TextColorElement,
 )
-from .base import BindableUi
-from ex4nicegui.reactive.services import color_service
+from .base import BindableUi, TextColorableMixin
 
 
-class IconBindableUi(BindableUi[ui.icon]):
+class IconBindableUi(BindableUi[ui.icon], TextColorableMixin):
     def __init__(
         self,
         name: TMaybeRef[str],
@@ -42,9 +41,6 @@ class IconBindableUi(BindableUi[ui.icon]):
             return self.bind_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
-
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef):
-        return color_service.bind_color(self, ref_ui)
 
     def bind_name(self, ref_ui: TGetterOrReadonlyRef):
         @self._ui_effect

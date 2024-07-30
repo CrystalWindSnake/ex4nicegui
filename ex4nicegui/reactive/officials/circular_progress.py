@@ -9,12 +9,11 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import BindableUi, DisableableMixin
+from .base import BindableUi, DisableableMixin, BackgroundColorableMixin
 
 
 class CircularProgressBindableUi(
-    BindableUi[ui.circular_progress],
-    DisableableMixin,
+    BindableUi[ui.circular_progress], DisableableMixin, BackgroundColorableMixin
 ):
     def __init__(
         self,
@@ -52,6 +51,8 @@ class CircularProgressBindableUi(
     def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "value":
             return self.bind_value(ref_ui)
+        if prop == "color":
+            return self.bind_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 

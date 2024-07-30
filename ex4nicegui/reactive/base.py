@@ -472,7 +472,7 @@ class TextColorableMixin(Protocol):
 
             self.element.update()
 
-    def bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
         """bind text color to the element
 
         Args:
