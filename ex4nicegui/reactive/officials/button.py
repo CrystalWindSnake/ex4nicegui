@@ -10,10 +10,21 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from .base import BindableUi, DisableableMixin
+from .base import (
+    BindableUi,
+    DisableableMixin,
+)
+
+from ex4nicegui.reactive.mixins.backgroundColor import BackgroundColorableMixin
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
-class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
+class ButtonBindableUi(
+    BindableUi[ui.button],
+    DisableableMixin,
+    BackgroundColorableMixin,
+    TextColorableMixin,
+):
     def __init__(
         self,
         text: TMaybeRef[str] = "",
@@ -38,8 +49,30 @@ class ButtonBindableUi(BindableUi[ui.button], DisableableMixin):
             return self.bind_text(ref_ui)
         if prop == "icon":
             return self.bind_icon(ref_ui)
+        if prop == "color":
+            return self.bind_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
+
+    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        """Binds the background color of the button.
+
+        Args:
+            ref_ui (TGetterOrReadonlyRef[str]): Getter or readonly reference to the color.
+
+        """
+        BackgroundColorableMixin.bind_color(self, ref_ui)
+        return self
+
+    def bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+        """Binds the text color of the button.
+
+        Args:
+            ref_ui (TGetterOrReadonlyRef[str]):  Getter or readonly reference to the color.
+
+        """
+        TextColorableMixin.bind_color(self, ref_ui)
+        return self
 
     def bind_text(self, ref_ui: TGetterOrReadonlyRef):
         @self._ui_effect

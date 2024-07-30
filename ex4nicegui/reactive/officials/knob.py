@@ -11,11 +11,13 @@ from ex4nicegui.utils.signals import (
 )
 from nicegui import ui
 from .base import BindableUi, DisableableMixin
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
 class KnobBindableUi(
     BindableUi[ui.knob],
     DisableableMixin,
+    TextColorableMixin,
 ):
     def __init__(
         self,
@@ -62,6 +64,8 @@ class KnobBindableUi(
     def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
         if prop == "value":
             return self.bind_value(ref_ui)
+        if prop == "color":
+            return self.bind_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
 

@@ -10,10 +10,10 @@ from ex4nicegui.utils.signals import (
 from nicegui import ui
 
 from .base import BindableUi
-from ex4nicegui.reactive.services import color_service
+from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 
 
-class LinearProgressBindableUi(BindableUi[ui.linear_progress]):
+class LinearProgressBindableUi(BindableUi[ui.linear_progress], TextColorableMixin):
     def __init__(
         self,
         value: TMaybeRef[float] = 0.0,
@@ -54,9 +54,6 @@ class LinearProgressBindableUi(BindableUi[ui.linear_progress]):
             return self.bind_color(ref_ui)
 
         return super().bind_prop(prop, ref_ui)
-
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef):
-        return color_service.bind_color(self, ref_ui)
 
     def bind_value(self, ref_ui: TGetterOrReadonlyRef):
         @self._ui_effect
