@@ -20,9 +20,6 @@ class ClientInstanceLocker(Generic[_T]):
         if not ui.context.slot_stack:
             return None
 
-        if client is not None and (client not in self._client_instances):
-            return None
-
         client = client or ui.context.client
         if client not in self._client_instances:
             self._client_instances[client] = self._factory()
