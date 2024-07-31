@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ex4nicegui"
-version = "0.6.8"
+version = "0.6.9"
 description = "Extension library based on nicegui, providing data responsive,BI functionality modules"
 authors = ["CrystalWindSnake <568166495@qq.com>"]
 license = "MIT"
