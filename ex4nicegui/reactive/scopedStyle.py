@@ -8,6 +8,8 @@ class ScopedStyle(Element, component="scopedStyle.js"):
 
     @staticmethod
     def get():
+        if not ui.context.slot_stack:
+            return None
         return _scoped_style_factory.get_object(ui.context.client)
 
     def create_style(self, element: Element, css: str):
