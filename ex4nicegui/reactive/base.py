@@ -56,12 +56,15 @@ class BindableUi(Generic[TWidget]):
         inject_handle_delete(self.element, self._on_element_delete)
         self.tailwind = Tailwind(cast(ui.element, self._element))
         self._effect_scope = new_scope()
+        self.__used_scope_style = False
 
     def _on_element_delete(self):
         self._effect_scope.dispose()
-        scope_style = ScopedStyle.get()
-        if scope_style:
-            scope_style.remove_style(self.element)
+
+        if self.__used_scope_style:
+            scope_style = ScopedStyle.get()
+            if scope_style:
+                scope_style.remove_style(self.element)
 
     @property
     def _ui_effect(self):
@@ -386,7 +389,7 @@ class BindableUi(Generic[TWidget]):
         scope_style = ScopedStyle.get()
         assert scope_style, "can not find scope style"
         scope_style.create_style(self.element, css)
-
+        self.__used_scope_style = True
         return self
 
     def update(self):
