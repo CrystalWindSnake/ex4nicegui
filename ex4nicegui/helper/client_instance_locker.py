@@ -26,6 +26,6 @@ class ClientInstanceLocker(Generic[_T]):
 
             @client.on_disconnect
             def _():
-                del self._client_instances[client]
+                self._client_instances.pop(client, None)
 
         return self._client_instances[client]
