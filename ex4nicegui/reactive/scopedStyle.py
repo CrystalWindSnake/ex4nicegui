@@ -1,5 +1,6 @@
 from nicegui.element import Element
 from ex4nicegui.helper import client_instance_locker
+from nicegui import ui
 
 
 class ScopedStyle(Element, component="scopedStyle.js"):
@@ -7,7 +8,7 @@ class ScopedStyle(Element, component="scopedStyle.js"):
 
     @staticmethod
     def get():
-        return _scoped_style_factory.get_object()
+        return _scoped_style_factory.get_object(ui.context.client)
 
     def create_style(self, element: Element, css: str):
         element_id = f"c{element.id}"

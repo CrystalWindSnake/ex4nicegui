@@ -1,4 +1,4 @@
-from typing import Callable, TypeVar, Generic
+from typing import Callable, Optional, TypeVar, Generic
 from nicegui import ui, Client
 from weakref import WeakKeyDictionary
 
@@ -16,11 +16,14 @@ class ClientInstanceLocker(Generic[_T]):
         self._client_instances: WeakKeyDictionary[Client, _T] = WeakKeyDictionary()
         self._factory = factory
 
-    def get_object(self):
+    def get_object(self, client: Optional[Client] = None):
         if not ui.context.slot_stack:
             return None
 
-        client = ui.context.client
+        if client is not None and (client not in self._client_instances):
+            return None
+
+        client = client or ui.context.client
         if client not in self._client_instances:
             self._client_instances[client] = self._factory()
 
