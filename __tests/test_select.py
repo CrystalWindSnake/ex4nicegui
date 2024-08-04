@@ -1,6 +1,6 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed, effect
+from ex4nicegui import to_ref, ref_computed, effect, deep_ref
 from .screen import BrowserManager
 import pytest
 
@@ -204,3 +204,36 @@ def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
 
     button.click()
     target.expect_to_have_value("m")
+
+
+def test_multiple_with_deep_ref(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        data = deep_ref([])
+
+        rxui.label(data).classes("label-ref")
+
+        s = rxui.select(
+            options=["reading", "swimming", "running"],
+            value=data,
+            multiple=True,
+        ).classes("target")
+
+        lbl_element_value = ui.label().classes("label-value")
+
+        ui.button(
+            "display value", on_click=lambda: lbl_element_value.set_text(str(s.value))
+        ).classes("btn")
+
+    page = browser.open(page_path)
+
+    target = page.Select(".target")
+    button = page.Button(".btn")
+    lbl_element_value = page.Label(".label-value")
+    lbl_ref = page.Label(".label-ref")
+
+    target.click_and_select("reading", "swimming")
+    target.show_popup_click()
+    button.click()
+    lbl_element_value.expect_contain_text("['reading', 'swimming']")
+    lbl_ref.expect_contain_text("['reading', 'swimming']")
