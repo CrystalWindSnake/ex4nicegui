@@ -142,18 +142,11 @@ class SelectUtils(BaseUiUtils):
     def click_cancel(self):
         self.page.get_by_role("button", name="cancel").click()
 
-    def click_and_select(self, value: str):
+    def click_and_select(self, *values: str):
         self.click()
-        # self.page.wait_for_timeout(500)
-        # self.target_locator.filter(has_text="namearrow_drop_down").locator("i").click()
 
-        self.page.get_by_role("option", name=value).click()
-
-    # def get_input_value(self):
-    #     return self.target_locator.input_value()
-
-    # def expect_have_value(self, value: str):
-    #     return expect(self.target_locator).to_have_value(value)
+        for value in values:
+            self.page.get_by_role("option", name=value).click()
 
     def get_selected_values(self):
         return self.target_locator.locator(".q-chip__content").all_inner_texts()

@@ -13,6 +13,7 @@ from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
     to_value,
+    to_raw,
 )
 from nicegui import ui
 from nicegui.elements.mixins.value_element import ValueElement
@@ -92,6 +93,6 @@ class SelectBindableUi(BindableUi[ui.select]):
     def bind_value(self, ref_ui: TGetterOrReadonlyRef):
         @self._ui_effect()
         def _():
-            cast(ValueElement, self.element).set_value(to_value(ref_ui) or None)
+            cast(ValueElement, self.element).set_value(to_raw(to_value(ref_ui)) or None)
 
         return self
