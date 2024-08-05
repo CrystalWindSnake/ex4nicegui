@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Union, Type
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -16,7 +17,7 @@ class ViewModel:
                 setattr(self, name, deep_ref(to_value(value)))
 
     @staticmethod
-    def display(model: ViewModel):
+    def display(model: Union[ViewModel, Type]):
         result = to_ref("")
 
         all_refs = {
