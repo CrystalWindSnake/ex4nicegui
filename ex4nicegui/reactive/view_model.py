@@ -7,6 +7,7 @@ from ex4nicegui.utils.signals import (
     to_ref,
     on,
     to_raw,
+    ref_computed as computed,
 )
 
 
@@ -15,6 +16,10 @@ class ViewModel:
         for name, value in self.__class__.__dict__.items():
             if is_ref(value):
                 setattr(self, name, deep_ref(to_value(value)))
+
+        for name, value in self.__dict__.items():
+            if hasattr(value, "__computed__"):
+                setattr(self, name, computed(value))
 
     @staticmethod
     def display(model: Union[ViewModel, Type]):
