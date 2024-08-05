@@ -71,7 +71,7 @@ def to_value(obj: Union[_TMaybeRef[T], RefWrapper]) -> T:
 WatchedState = signe.WatchedState
 
 
-def to_ref(maybe_ref: _TMaybeRef[T], is_deep=False, invoke_if_callable=False):
+def to_ref(maybe_ref: _TMaybeRef[T], is_deep=False, invoke_if_callable=True):
     """Takes an inner value and returns a reactive and mutable ref object, which has a single property .value that points to the inner value.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#to_ref
@@ -120,7 +120,7 @@ def ref(value: T, is_deep=False) -> Ref[T]:
     return cast(Ref[T], s)
 
 
-def deep_ref(value: T, invoke_if_callable=False) -> Ref[T]:
+def deep_ref(value: T, invoke_if_callable=True) -> Ref[T]:
     """Deep response version of `to_ref`.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#deep_ref
