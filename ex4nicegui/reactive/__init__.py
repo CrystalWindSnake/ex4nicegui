@@ -63,6 +63,7 @@ from .usePagination import PaginationRef as use_pagination
 from .dropZone.dropZone import use_drag_zone
 from .fileWatcher import FilesWatcher
 from .mermaid.mermaid import Mermaid as mermaid
+from .officials.dialog import DialogBindableUi as dialog
 from .vfor import vfor, VforStore
 from .vmodel import vmodel
 
@@ -124,4 +125,5 @@ __all__ = [
     "pagination",
     "mermaid",
     "chip",
+    "dialog",
 ]
