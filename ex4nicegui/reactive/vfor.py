@@ -109,6 +109,9 @@ class VforStore(Generic[_T]):
         """Returns the index of the current row."""
         return self._raw_index
 
+    def get_item(self) -> _T:
+        return to_value(self._source)[self.raw_index]  # type: ignore
+
     def get(self) -> TReadonlyRef[_T]:
         def base_setter(value):
             to_value(self._source)[self._data_index.value] = value
