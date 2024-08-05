@@ -9,8 +9,6 @@ export default {
             return slotBox.find(v => v.key === elementId)
         });
 
-        console.log('solts:', slots, 'itemIds:', this.itemIds);
-
         return h(TransitionGroup, { name: 'list' }, slots)
     }
 }

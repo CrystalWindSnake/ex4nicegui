@@ -1,6 +1,6 @@
 from __future__ import annotations
 from nicegui.element import Element
-from nicegui import Client, ui
+from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
     TReadonlyRef,
@@ -11,7 +11,6 @@ from ex4nicegui.utils.signals import (
     to_value,
     is_reactive,
     RefWrapper,
-    Ref,
 )
 from typing import (
     Any,
@@ -28,7 +27,6 @@ from functools import partial
 from dataclasses import dataclass
 from signe.core.scope import Scope
 from ex4nicegui.reactive.systems.object_system import get_attribute
-from ex4nicegui.reactive.empty import Empty
 
 _T = TypeVar("_T")
 _T_data = Union[List[Any], TGetterOrReadonlyRef[List[Any]], RefWrapper]
@@ -48,51 +46,51 @@ class VforContainer(Element, component="vfor.js"):
         self.update()
 
 
-def wrapper_getter_setter(ref: Ref, index: Ref[int], *keys: Union[str, int]):
-    proxy = ref.value
+# def wrapper_getter_setter(ref: Ref, index: Ref[int], *keys: Union[str, int]):
+#     proxy = ref.value
 
-    def getter():
-        item = proxy[index.value]
-        result = item
+#     def getter():
+#         item = proxy[index.value]
+#         result = item
 
-        for k in keys:
-            result = result[k]
-        return result
+#         for k in keys:
+#             result = result[k]
+#         return result
 
-    def setter(value):
-        item = proxy[index.value]
+#     def setter(value):
+#         item = proxy[index.value]
 
-        if len(keys) == 0:
-            proxy[index.value] = value
+#         if len(keys) == 0:
+#             proxy[index.value] = value
 
-        if len(keys) == 1:
-            item[keys[0]] = value
-            return
+#         if len(keys) == 1:
+#             item[keys[0]] = value
+#             return
 
-        obj = item[keys[0]]
-        for k in keys[1:-1]:
-            obj = obj[k]
-        obj[keys[-1]] = value
+#         obj = item[keys[0]]
+#         for k in keys[1:-1]:
+#             obj = obj[k]
+#         obj[keys[-1]] = value
 
-    return getter, setter
+#     return getter, setter
 
 
-class VforStoreItem(Generic[_T], RefWrapper[_T]):
-    def __init__(
-        self,
-        source: _T_data,
-        index: Ref[int],
-        keys: Optional[List[Union[str, int]]] = None,
-    ) -> None:
-        self._source = source
-        self._data_index = index
-        self._keys = keys or []
+# class VforStoreItem(Generic[_T], RefWrapper[_T]):
+#     def __init__(
+#         self,
+#         source: _T_data,
+#         index: Ref[int],
+#         keys: Optional[List[Union[str, int]]] = None,
+#     ) -> None:
+#         self._source = source
+#         self._data_index = index
+#         self._keys = keys or []
 
-        getter, setter = wrapper_getter_setter(source, index, *self._keys)
-        super().__init__(getter, setter)
+#         getter, setter = wrapper_getter_setter(source, index, *self._keys)
+#         super().__init__(getter, setter)
 
-    def __getitem__(self, key: Union[str, int]):
-        return VforStoreItem(self._source, self._data_index, self._keys + [key])
+#     def __getitem__(self, key: Union[str, int]):
+#         return VforStoreItem(self._source, self._data_index, self._keys + [key])
 
 
 class VforStore(Generic[_T]):
@@ -105,8 +103,6 @@ class VforStore(Generic[_T]):
         return self._data_index
 
     def get(self) -> TReadonlyRef[_T]:
-        # return VforStoreItem(self._source, self._data_index)
-
         def base_setter(value):
             to_value(self._source)[self._data_index.value] = value
 
@@ -121,8 +117,8 @@ class VforStore(Generic[_T]):
     def update(self, index: int):
         self._data_index.value = index
 
-    def vmodel(self, *keys: Union[str, int]):
-        return vmodel(todos, store.row_index, "text")
+    # def vmodel(self, *keys: Union[str, int]):
+    #     return vmodel(todos, store.row_index, "text")
 
 
 @dataclass
@@ -133,8 +129,8 @@ class StoreItem:
     scope: Scope
 
 
-def _get_key_with_index(idx: int, data: Any):
-    return idx
+# def _get_key_with_index(idx: int, data: Any):
+#     return idx
 
 
 def _get_key_with_getter(attr: str, idx: int, data: Any):
@@ -183,7 +179,7 @@ class vfor(Generic[_T]):
     ) -> None:
         self._vfor_container = VforContainer()
         self._data = to_ref_wrapper(lambda: data) if is_reactive(data) else data
-        self._get_key = _get_key_with_index
+        self._get_key = vfor.index_key
 
         if isinstance(key, str):
             self._get_key = partial(_get_key_with_getter, key)
@@ -214,26 +210,6 @@ class vfor(Generic[_T]):
 
         @on(self._data, deep=True)
         def _():
-            # temp_box = ui.column()
-            # for element in tuple(self._vfor_container):
-            #     element.move(temp_box)
-
-            # for idx, d in enumerate(to_value(self._data)):
-            #     key = self._get_key(idx, d)
-            #     store_item = self._store_map.get(key)
-            #     if store_item:
-            #         # `data` may have changed the value of a dictionary item,
-            #         # so should update the values in the store one by one.
-            #         store_item.store.update(idx)
-            #         element = ng_client.elements.get(self._store_map[key].elementId)
-            #         element.move(temp_box)  # type: ignore
-
-            #     else:
-            #         key, element, store, scope = build_element(idx, d)
-            #         self._store_map[key] = StoreItem(store, element.id, scope)
-
-            # temp_box.delete()
-
             data_map = {
                 self._get_key(idx, d): d for idx, d in enumerate(to_value(self._data))
             }
@@ -267,8 +243,6 @@ class vfor(Generic[_T]):
                 {"key": key, "elementId": self._store_map.get(key).elementId}  # type: ignore
                 for key in data_map.keys()
             ]
-
-            print("item_ids", item_ids, "data_map", data_map)
 
             self._vfor_container.update_items(item_ids)
 
