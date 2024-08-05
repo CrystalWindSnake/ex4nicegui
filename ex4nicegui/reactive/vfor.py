@@ -96,11 +96,18 @@ class VforContainer(Element, component="vfor.js"):
 class VforStore(Generic[_T]):
     def __init__(self, source: _T_data, index: int) -> None:
         self._source = source
+        self._raw_index = index
         self._data_index = to_ref(index)
 
     @property
     def row_index(self):
+        """Returns the responsive index of the current row."""
         return self._data_index
+
+    @property
+    def raw_index(self):
+        """Returns the index of the current row."""
+        return self._raw_index
 
     def get(self) -> TReadonlyRef[_T]:
         def base_setter(value):
@@ -110,7 +117,7 @@ class VforStore(Generic[_T]):
             lambda: to_value(self._source)[self._data_index.value],
             base_setter,
         )
-        wrapper._is_readonly = True
+        # wrapper._is_readonly = True
 
         return cast(TReadonlyRef, wrapper)
 
@@ -208,7 +215,7 @@ class vfor(Generic[_T]):
 
         ng_client = ui.context.client
 
-        @on(self._data, deep=True)
+        @on(self._data, deep=True, priority_level=-1)
         def _():
             data_map = {
                 self._get_key(idx, d): d for idx, d in enumerate(to_value(self._data))
