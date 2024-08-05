@@ -26,6 +26,8 @@ import executing
 import ast
 import warnings
 from ex4nicegui.reactive.systems.object_system import get_attribute, set_attribute
+from ex4nicegui.utils.types import _TMaybeRef as TMaybeRef, Ref
+from ex4nicegui.utils.signals import is_reactive
 
 _T = TypeVar("_T")
 
@@ -128,80 +130,147 @@ def create_writeable_wrapper(expr, ref_data, attrs: Tuple[Union[str, int], ...])
     return wrapper
 
 
-def vmodel(expr: Any, *attrs: Union[str, int]) -> TRef[Any]:
-    """Create a two-way binding on a form input element or a component.
+# def vmodel(expr: Any, *attrs: Union[str, int]) -> TRef[Any]:
+#     """Create a two-way binding on a form input element or a component.
 
-    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#vmodel
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#vmodel
+#     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#vmodel
+#     @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#vmodel
 
-    Args:
-        expr (Any): _description_
+#     Args:
+#         expr (Any): _description_
 
-    ## Examples
-    ```python
-    from ex4nicegui.reactive import rxui
-    from ex4nicegui import deep_ref
+#     ## Examples
+#     ```python
+#     from ex4nicegui.reactive import rxui
+#     from ex4nicegui import deep_ref
 
-    data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
+#     data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
 
-    rxui.label(lambda: f"{data.value=!s}")
+#     rxui.label(lambda: f"{data.value=!s}")
 
-    # No binding effect
-    rxui.input(value=data.value["a"])
+#     # No binding effect
+#     rxui.input(value=data.value["a"])
 
-    # readonly binding
-    rxui.input(value=lambda: data.value["a"])
+#     # readonly binding
+#     rxui.input(value=lambda: data.value["a"])
 
-    # two-way binding
-    rxui.input(value=rxui.vmodel(data.value["a"]))
-    ```
+#     # two-way binding
+#     rxui.input(value=rxui.vmodel(data.value["a"]))
+#     ```
 
-    """
+#     """
 
-    assert not isinstance(expr, Callable), "argument expr cannot be a function"
+#     assert not isinstance(expr, Callable), "argument expr cannot be a function"
 
-    if isinstance(expr, RefWrapper):
-        expr._is_readonly = False
+#     if isinstance(expr, RefWrapper):
+#         expr._is_readonly = False
 
-    if is_setter_ref(expr):
-        if attrs:
-            wrapper = create_writeable_wrapper(expr, expr, attrs)
+#     if is_setter_ref(expr):
+#         if attrs:
+#             wrapper = create_writeable_wrapper(expr, expr, attrs)
 
-            return cast(
-                TRef,
-                wrapper,
-            )
+#             return cast(
+#                 TRef,
+#                 wrapper,
+#             )
 
-        return cast(
-            TRef,
-            expr,
-        )
+#         return cast(
+#             TRef,
+#             expr,
+#         )
 
-    caller = get_caller()
-    code = get_args_code(caller)
+#     caller = get_caller()
+#     code = get_args_code(caller)
 
-    info = parse_code(code)
-    ref_data = caller.f_locals.get(info.model) or caller.f_globals.get(info.model)
-    assert ref_data is not None, f"{info.model} not found"
-    all_attrs = (*info.keys, *attrs)
+#     info = parse_code(code)
+#     ref_data = caller.f_locals.get(info.model) or caller.f_globals.get(info.model)
+#     assert ref_data is not None, f"{info.model} not found"
+#     all_attrs = (*info.keys, *attrs)
 
-    if not all_attrs:
-        warn_mes = ""
-        if is_reactive(expr) or is_setter_ref(expr):
-            warn_mes = rf"""Expression missing the key,result is read-only binding.Maybe you meant `{code}['key']`"""
-        elif not info.is_ref:
-            warn_mes = """Maybe you don't need to use vmodel"""
-        else:
-            warn_mes = rf"""No binding.Maybe you meant `{info.model}`"""
+#     if not all_attrs:
+#         warn_mes = ""
+#         if is_reactive(expr) or is_setter_ref(expr):
+#             warn_mes = rf"""Expression missing the key,result is read-only binding.Maybe you meant `{code}['key']`"""
+#         elif not info.is_ref:
+#             warn_mes = """Maybe you don't need to use vmodel"""
+#         else:
+#             warn_mes = rf"""No binding.Maybe you meant `{info.model}`"""
 
-        warnings.warn(
-            warn_mes,
-            stacklevel=2,
-        )
+#         warnings.warn(
+#             warn_mes,
+#             stacklevel=2,
+#         )
 
-    wrapper = create_writeable_wrapper(expr, ref_data, all_attrs)
+#     wrapper = create_writeable_wrapper(expr, ref_data, all_attrs)
 
-    return cast(
-        TRef,
-        wrapper,
-    )
+#     return cast(
+#         TRef,
+#         wrapper,
+#     )
+
+
+# def _get_item(obj, key):
+#     if isinstance(key, (list, dict)):
+#         return obj[key]
+#     else:
+#         return getattr(obj, key)
+
+
+# def _set_item(obj, key, value):
+#     if isinstance(key, (list, dict)):
+#         obj[key] = value
+#     else:
+#         setattr(obj, key, value)
+
+
+def vmodel(ref: Ref, *keys: Union[str, int]) -> Ref:
+    item = ref if is_reactive(ref) else ref.value
+
+    def getter():
+        result = item
+
+        for k in keys:
+            result = get_attribute(result, k)
+        return result
+
+    def setter(value):
+        if len(keys) == 1:
+            set_attribute(item, keys[0], value)
+            return
+
+        obj = get_attribute(item, keys[0])
+
+        for k in keys[1:-1]:
+            set_attribute(obj, k, get_attribute(obj, k))
+
+        set_attribute(obj, keys[-1], value)
+
+    return RefWrapper(getter, setter)  # type: ignore
+
+
+def vmodel_with_index(ref: Ref, index: TMaybeRef[int], *keys: Union[str, int]) -> Ref:
+    proxy = ref.value
+
+    def getter():
+        item = proxy[to_value(index)]
+        result = item
+
+        for k in keys:
+            result = get_attribute(result, k)
+        return result
+
+    def setter(value):
+        item = proxy[to_value(index)]
+
+        if len(keys) == 1:
+            set_attribute(item, keys[0], value)
+            return
+
+        obj = get_attribute(item, keys[0])
+
+        for k in keys[1:-1]:
+            set_attribute(obj, k, get_attribute(obj, k))
+
+        set_attribute(obj, keys[-1], value)
+
+    return RefWrapper(getter, setter)  # type: ignore
