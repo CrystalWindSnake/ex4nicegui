@@ -1697,13 +1697,13 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "signe"
-version = "0.4.15"
+version = "0.4.16"
 description = "..."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "signe-0.4.15-py3-none-any.whl", hash = "sha256:6ff0034da9965ac4e383b52139dca80985d57aabfe2938dff52b2577d1ce8ce3"},
-    {file = "signe-0.4.15.tar.gz", hash = "sha256:fc3ab33331b6651cb1e9d284376cfc6e51e20fbaf9455ae475e6bba7b245d506"},
+    {file = "signe-0.4.16-py3-none-any.whl", hash = "sha256:fa656c9eb6a40e24e39ab4538038358c7abfec2c3851d86b8d3173c165f54e43"},
+    {file = "signe-0.4.16.tar.gz", hash = "sha256:75566d1b3d117ba8edad7ceeb27e56ace02ca27fc2951c0d548e74bb7d161916"},
 ]
 
 [package.dependencies]
