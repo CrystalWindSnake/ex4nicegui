@@ -40,18 +40,23 @@ class State(rxui.ViewModel):
     todos: Ref[List[TodoItem]] = rxui.var(lambda: [])
     filter_do = rxui.var("all")
 
+    @rxui.cached_var
     def filtered_todos(self) -> _T_todos:
         return getattr(filters, self.filter_do.value)(self.todos.value)
 
+    @rxui.cached_var
     def active_count(self):
         return len(filters.active(self.todos.value))
 
+    @rxui.cached_var
     def completed_count(self):
         return len(filters.completed(self.todos.value))
 
+    @rxui.cached_var
     def total_count(self):
         return len(self.todos.value)
 
+    @rxui.cached_var
     def completion_ratio(self):
         if self.total_count() == 0:
             return 0.0

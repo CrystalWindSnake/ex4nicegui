@@ -27,12 +27,13 @@ from functools import partial
 from dataclasses import dataclass
 from signe.core.scope import Scope
 from ex4nicegui.reactive.systems.object_system import get_attribute
+from ex4nicegui.reactive.empty import Empty
 
 _T = TypeVar("_T")
 _T_data = Union[List[Any], TGetterOrReadonlyRef[List[Any]], RefWrapper]
 
 
-class VforItem(Element):
+class VforItem(Empty):
     pass
 
 
