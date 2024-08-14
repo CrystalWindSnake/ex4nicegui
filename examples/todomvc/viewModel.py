@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List
 
-from ex4nicegui import to_ref, ref_computed, deep_ref, Ref
+from ex4nicegui import to_ref, deep_ref, Ref
 
 
 @dataclass
