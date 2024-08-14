@@ -2,7 +2,7 @@ from nicegui import ui
 
 from ex4nicegui import rxui, to_ref
 from ex4nicegui.layout import grid_box
-from viewModel import State, TodoItem
+from examples.todomvc.viewModel import State, TodoItem
 
 
 # ui
@@ -84,31 +84,26 @@ def todo_list_panel():
 
             @rxui.vfor(state.filtered_todos, key="id")
             def _(store: rxui.VforStore[TodoItem]):
-                todo = store.get()
+                todo = store.get_item()
 
-                rxui.checkbox(
-                    lambda: todo.value.title, value=rxui.vmodel(todo.value.completed)
-                )
+                rxui.checkbox(lambda: todo.title.value, value=todo.completed)
 
                 with ui.element("q-chip").classes("w-fit place-self-center").props(
                     "square clickable color=primary text-color=white"
                 ) as chip:
                     rxui.label(
-                        lambda: "completed" if todo.value.completed else "pending"
+                        lambda: "completed" if todo.completed.value else "pending"
                     )
 
-                def switch_todo_state():
-                    todo.value.completed = not todo.value.completed
-
-                chip.on("click", switch_todo_state)
+                chip.on("click", todo.switch_completed)
 
                 rxui.button(
                     icon="delete",
-                    color=lambda: "negative" if todo.value.completed else "grey-4",
-                    on_click=lambda: state.remove_todo(todo.value),
+                    color=lambda: "negative" if todo.completed.value else "grey-4",
+                    on_click=lambda: state.remove_todo(todo),
                 ).classes("place-self-center").props(
                     "round desen push flat "
-                ).bind_enabled(lambda: todo.value.completed)
+                ).bind_enabled(todo.completed)
 
     return outter
 
