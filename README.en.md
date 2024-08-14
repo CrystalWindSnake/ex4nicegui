@@ -161,6 +161,131 @@ ui.run()
 ```
 ---
 
+## ViewModel
+In version v0.7.0, the `ViewModel` class has been incorporated to facilitate the management of reactive data sets. Below is an illustrative example utilizing a basic calculator interface:
+
+1. Upon modification of the numerical input fields or selection of arithmetic symbols by the user, the resultant value is instantaneously reflected on the display panel.
+2. Should the computed outcome fall below zero, its representation assumes a red hue; conversely, non-negative results are rendered in black.
+
+```python
+from ex4nicegui import rxui
+
+class Calculator(rxui.ViewModel):
+    num1 = rxui.var(0)
+    sign = rxui.var("+")
+    num2 = rxui.var(0)
+
+    def result(self):
+        # When any of the values of num1, sign, or num2 changes, the result is recalculated accordingly.
+        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+
+# Each object possesses its own independent data.
+calc = Calculator()
+
+with ui.row(align_items="center"):
+    rxui.number(value=calc.num1, label="Number 1")
+    rxui.select(value=calc.sign, options=["+", "-", "*", "/"], label="Sign")
+    rxui.number(value=calc.num2, label="Number 2")
+    ui.label("=")
+    rxui.label(calc.result).bind_color(
+        lambda: "red" if calc.result() < 0 else "black"
+    )
+
+```
+
+### cached_var
+
+In the preceding example, due to the use of `calc.result` twice, every time any of the values `num1`, `sign`, or `num2` undergoes a change, `result` is executed twice
+
+In reality, the second computation is redundant. We can circumvent this unnecessary calculation by applying the `rxui.cached_var` decorator, which ensures that the result is cached and only recalculated when necessary.
+
+```python
+class Calculator(rxui.ViewModel):
+    ...
+
+    @rxui.cached_var
+    def result(self):
+        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+
+...
+```
+
+---
+
+### 使用列表
+
+When the data is mutable, such as lists or dictionaries, a factory function must be supplied to `rxui.var`.
+
+```python
+class Home(rxui.ViewModel):
+    persons= rxui.var(lambda: [])
+
+```
+
+In the following example, each person is displayed using a card. The average age of all individuals is shown at the top. When an individual's age exceeds the average age, the card's border turns red.
+
+Age modifications are made through the `number` component, triggering automatic updates across the display.
+
+```python
+from ex4nicegui import rxui, Ref
+from itertools import count
+
+id_generator = count()
+
+class Person(rxui.ViewModel):
+    name = rxui.var("")
+    age = rxui.var(0)
+
+    def __init__(self, name: str = "", age: int = 0):
+        super().__init__()
+        self.name.value = name
+        self.age.value = age
+        self.id = next(id_generator)
+
+
+class Home(rxui.ViewModel):
+    persons: Ref[List[Person]] = rxui.var(lambda: [])
+
+    def avg_age(self) -> float:
+        if len(self.persons.value) == 0:
+            return 0
+
+        return sum(p.age.value for p in self.persons.value) / len(self.persons.value)
+
+    def sample_data(self):
+        self.persons.value = [
+            Person("alice", 25),
+            Person("bob", 30),
+            Person("charlie", 31),
+            Person("dave", 22),
+            Person("eve", 26),
+            Person("frank", 29),
+        ]
+
+home = Home()
+home.sample_data()
+
+rxui.label(lambda: f"avg age: {home.avg_age()}")
+
+
+with ui.row():
+
+    @rxui.vfor(home.persons, key="id")
+    def _(store: rxui.VforStore[Person]):
+        person = store.get_item()
+        with rxui.card().classes("outline").bind_classes(
+            {
+                "outline-red-500": lambda: person.age.value > home.avg_age(),
+            }
+        ):
+            rxui.input(value=person.name, placeholder="name")
+            rxui.number(value=person.age, min=1, max=100, step=1, placeholder="age")
+
+```
+
+For more complex applications, please refer to the [examples](./examples)
+
+---
 
 ## responsive
 
