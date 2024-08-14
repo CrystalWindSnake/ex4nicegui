@@ -10,6 +10,7 @@ from ex4nicegui.utils.signals import (
     ref_computed as computed,
     Ref,
 )
+from functools import partial
 
 
 class ViewModel:
@@ -39,10 +40,8 @@ class ViewModel:
         for name, value in self.__class__.__dict__.items():
             if is_ref(value):
                 setattr(self, name, deep_ref(to_value(value)))
-
-        for name, value in self.__dict__.items():
             if callable(value) and hasattr(value, "__vm_cached__"):
-                setattr(self, name, computed(value))
+                setattr(self, name, computed(partial(value, self)))
 
     @staticmethod
     def display(model: Union[ViewModel, Type]):
