@@ -26,7 +26,7 @@ class ViewModel:
     def display(model: Union[ViewModel, Type]):
         result = to_ref("")
 
-        watch_refs = recursive_to_refs(model)
+        watch_refs = _recursive_to_refs(model)
 
         all_refs = {
             key: value for key, value in model.__dict__.items() if is_ref(value)
@@ -35,29 +35,29 @@ class ViewModel:
         @on(watch_refs)
         def _():
             result.value = str(
-                {key: recursive_to_value(value) for key, value in all_refs.items()}
+                {key: _recursive_to_value(value) for key, value in all_refs.items()}
             )
 
         return result
 
 
-def recursive_to_value(value_or_model):
+def _recursive_to_value(value_or_model):
     value = to_raw(to_value(value_or_model))
 
     if isinstance(value, ViewModel):
         all_refs = {
             key: value for key, value in value.__dict__.items() if is_ref(value)
         }
-        return {key: recursive_to_value(value) for key, value in all_refs.items()}
+        return {key: _recursive_to_value(value) for key, value in all_refs.items()}
     elif isinstance(value, dict):
-        return {key: recursive_to_value(val) for key, val in value.items()}
+        return {key: _recursive_to_value(val) for key, val in value.items()}
     elif isinstance(value, list):
-        return [recursive_to_value(val) for val in value]
+        return [_recursive_to_value(val) for val in value]
     else:
         return value
 
 
-def recursive_to_refs(model):
+def _recursive_to_refs(model):
     result = []
     stack = [model]
 
