@@ -71,7 +71,7 @@ def to_value(obj: Union[_TMaybeRef[T], RefWrapper]) -> T:
 WatchedState = signe.WatchedState
 
 
-def to_ref(maybe_ref: _TMaybeRef[T], is_deep=False, invoke_if_callable=True):
+def to_ref(maybe_ref: _TMaybeRef[T], is_deep=False):
     """Takes an inner value and returns a reactive and mutable ref object, which has a single property .value that points to the inner value.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#to_ref
@@ -85,9 +85,6 @@ def to_ref(maybe_ref: _TMaybeRef[T], is_deep=False, invoke_if_callable=True):
     """
     if is_ref(maybe_ref):
         return cast(Ref[T], maybe_ref)
-
-    if invoke_if_callable and callable(maybe_ref):
-        maybe_ref = maybe_ref()
 
     return cast(Ref[T], ref(maybe_ref, is_deep))
 
@@ -120,7 +117,7 @@ def ref(value: T, is_deep=False) -> Ref[T]:
     return cast(Ref[T], s)
 
 
-def deep_ref(value: Union[T, Callable[[], T]], invoke_if_callable=True) -> Ref[T]:
+def deep_ref(value: Union[T, Callable[[], T]]) -> Ref[T]:
     """Deep response version of `to_ref`.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#deep_ref
@@ -130,7 +127,7 @@ def deep_ref(value: Union[T, Callable[[], T]], invoke_if_callable=True) -> Ref[T
     >>> deep_ref([1,2,3])
 
     """
-    return to_ref(value, is_deep=True, invoke_if_callable=invoke_if_callable)
+    return to_ref(value, is_deep=True)
 
 
 _T_effect_refreshable_refs = Union[
