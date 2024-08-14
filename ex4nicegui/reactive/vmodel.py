@@ -27,7 +27,6 @@ import ast
 import warnings
 from ex4nicegui.reactive.systems.object_system import get_attribute, set_attribute
 from ex4nicegui.utils.types import _TMaybeRef as TMaybeRef, Ref
-from ex4nicegui.utils.signals import is_reactive
 
 _T = TypeVar("_T")
 
@@ -207,45 +206,6 @@ def vmodel(expr: Any, *attrs: Union[str, int]) -> TRef[Any]:
         TRef,
         wrapper,
     )
-
-
-# def _get_item(obj, key):
-#     if isinstance(key, (list, dict)):
-#         return obj[key]
-#     else:
-#         return getattr(obj, key)
-
-
-# def _set_item(obj, key, value):
-#     if isinstance(key, (list, dict)):
-#         obj[key] = value
-#     else:
-#         setattr(obj, key, value)
-
-
-# def vmodel(ref: Ref, *keys: Union[str, int]) -> Ref:
-#     item = ref if is_reactive(ref) else ref.value
-
-#     def getter():
-#         result = item
-
-#         for k in keys:
-#             result = get_attribute(result, k)
-#         return result
-
-#     def setter(value):
-#         if len(keys) == 1:
-#             set_attribute(item, keys[0], value)
-#             return
-
-#         obj = get_attribute(item, keys[0])
-
-#         for k in keys[1:-1]:
-#             set_attribute(obj, k, get_attribute(obj, k))
-
-#         set_attribute(obj, keys[-1], value)
-
-#     return RefWrapper(getter, setter)  # type: ignore
 
 
 def vmodel_with_index(ref: Ref, index: TMaybeRef[int], *keys: Union[str, int]) -> Ref:
