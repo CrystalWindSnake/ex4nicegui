@@ -416,6 +416,7 @@ class LabelUtils(BaseUiUtils):
         return expect(self.target_locator).not_to_contain_text(expected)
 
     def expect_equal_text(self, expected):
+        expected = re.escape(expected)
         return expect(self.target_locator).to_contain_text(re.compile(f"^{expected}$"))
 
 
