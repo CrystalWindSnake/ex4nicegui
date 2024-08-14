@@ -13,6 +13,28 @@ from ex4nicegui.utils.signals import (
 
 
 class ViewModel:
+    """A base class for reactive view models.
+
+    @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ViewModel
+
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ViewModel
+
+    Example:
+    .. code-block:: python
+        from ex4nicegui import rxui
+
+        class MyVm(rxui.ViewModel):
+            count = rxui.var(0)
+            data = rxui.var(lambda: [1,2,3])
+
+        vm = MyVm()
+
+        rxui.label(vm.count)
+        rxui.number(value=vm.count)
+
+
+    """
+
     def __init__(self):
         for name, value in self.__class__.__dict__.items():
             if is_ref(value):
@@ -93,11 +115,41 @@ _T_Var_Value = TypeVar("_T_Var_Value")
 
 
 def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Value]:
+    """Create a reactive variable. Only use within rxui.ViewModel.
+
+    Args:
+        value (Union[_T_Var_Value, Callable[[], _T_Var_Value]]): The initial value or a function to generate the initial value.
+
+    Example:
+    .. code-block:: python
+        from ex4nicegui import rxui
+        class MyVm(rxui.ViewModel):
+            count = rxui.var(0)
+            data = rxui.var(lambda: [1,2,3])
+
+
+    """
     if callable(value):
         return deep_ref(value())
     return deep_ref(value)
 
 
 def cached_var(func: Callable):
+    """A decorator to cache the result of a function. Only use within rxui.ViewModel.
+
+    Args:
+        func (Callable): The function to cache.
+
+    Example:
+    .. code-block:: python
+        from ex4nicegui import rxui
+        class MyVm(rxui.ViewModel):
+            name = rxui.var("John")
+
+        @rxui.cached_var
+        def uppper_name(self):
+            return self.name.value.upper()
+
+    """
     func.__vm_cached__ = True
     return func
