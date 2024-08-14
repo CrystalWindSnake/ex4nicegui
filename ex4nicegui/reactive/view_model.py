@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Type, TypeVar
+from typing import Callable, Union, Type, TypeVar
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -58,7 +58,7 @@ def recursive_to_value(value_or_model):
 _T_Var_Value = TypeVar("_T_Var_Value")
 
 
-def var(value: _T_Var_Value) -> Ref[_T_Var_Value]:
+def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Value]:
     if callable(value):
         return deep_ref(value())
     return deep_ref(value)
