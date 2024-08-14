@@ -1,19 +1,21 @@
 from typing import List, cast
-from ex4nicegui.reactive import rxui
+from ex4nicegui import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
 from ex4nicegui.utils.signals import deep_ref
 from .screen import BrowserManager
 from playwright.sync_api import expect
-from dataclasses import dataclass
 
 
 class TestExample:
     def test_todos_example(self, browser: BrowserManager, page_path: str):
-        @dataclass
-        class TodoItem:
+        class TodoItem(rxui.ViewModel):
+            done = rxui.var(False)
             title: str
-            done: bool = False
+
+            def __init__(self, title: str):
+                super().__init__()
+                self.title = title
 
         @ui.page(page_path)
         def _():
@@ -24,7 +26,7 @@ class TestExample:
 
             @ref_computed
             def total_done():
-                return sum(todo.done for todo in todos.value)
+                return sum(todo.done.value for todo in todos.value)
 
             @ref_computed
             def totals():
@@ -39,11 +41,11 @@ class TestExample:
                 todos.value.remove(todo)
 
             def change_done(todo: TodoItem, done: bool):
-                todo.done = done
+                todo.done.value = done
 
             def all_done():
                 for todo in todos.value:
-                    todo.done = True
+                    todo.done.value = True
 
             def swap(a: int, b: int):
                 todos.value[a], todos.value[b] = todos.value[b], todos.value[a]
@@ -80,7 +82,7 @@ class TestExample:
                         )
                         rxui.button(
                             "del", on_click=lambda: del_todo(item.value)
-                        ).bind_enabled(lambda: item.value.done)
+                        ).bind_enabled(lambda: item.value.done.value)
 
         page = browser.open(page_path)
 
@@ -209,11 +211,15 @@ class TestBase:
     def test_two_way_binding_with_dataclass(
         self, browser: BrowserManager, page_path: str
     ):
-        @dataclass
-        class Item:
-            id: int
-            message: str
-            done: bool
+        class Item(rxui.ViewModel):
+            message = rxui.var("")
+            done = rxui.var(False)
+
+            def __init__(self, id: int, message: str, done: bool):
+                super().__init__()
+                self.id = id
+                self.message.value = message
+                self.done.value = done
 
         @ui.page(page_path)
         def _():
@@ -228,18 +234,18 @@ class TestBase:
             # ref_computeds
             @ref_computed
             def total_count():
-                return sum(item.done for item in items.value)
+                return sum(item.done.value for item in items.value)
 
             # ui
             rxui.label(total_count).classes("label-totals")
 
             @rxui.vfor(items, key="id")
             def _(store: rxui.VforStore[Item]):
-                item = store.get()
+                item = store.get_item()
                 with ui.card().classes("row-card"):
                     rxui.checkbox(
-                        text=lambda: item.value.message,
-                        value=rxui.vmodel(item.value.done),
+                        text=item.message,
+                        value=item.done,
                     )
 
         page = browser.open(page_path)
