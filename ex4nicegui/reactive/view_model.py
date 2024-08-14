@@ -26,11 +26,13 @@ class ViewModel:
     def display(model: Union[ViewModel, Type]):
         result = to_ref("")
 
+        watch_refs = recursive_to_refs(model)
+
         all_refs = {
             key: value for key, value in model.__dict__.items() if is_ref(value)
         }
 
-        @on(list(all_refs.values()))
+        @on(watch_refs)
         def _():
             result.value = str(
                 {key: recursive_to_value(value) for key, value in all_refs.items()}
@@ -53,6 +55,38 @@ def recursive_to_value(value_or_model):
         return [recursive_to_value(val) for val in value]
     else:
         return value
+
+
+def recursive_to_refs(model):
+    result = []
+    stack = [model]
+
+    def handle_ref(value):
+        if is_ref(value):
+            stack.append(value.value)
+            result.append(value)
+
+        elif isinstance(value, (ViewModel, Type)):
+            stack.append(value)
+        elif isinstance(value, dict):
+            stack.append(value)
+
+    while stack:
+        current = stack.pop()
+
+        if isinstance(current, (ViewModel, Type)):
+            for key, value in current.__dict__.items():
+                handle_ref(value)
+
+        elif isinstance(current, dict):
+            for key, value in current.items():
+                handle_ref(value)
+
+        elif isinstance(current, list):
+            for value in current:
+                handle_ref(value)
+
+    return result
 
 
 _T_Var_Value = TypeVar("_T_Var_Value")
