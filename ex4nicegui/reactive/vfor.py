@@ -3,7 +3,7 @@ from nicegui.element import Element
 from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
-    TReadonlyRef,
+    Ref,
     on,
     to_ref,
     to_ref_wrapper,
@@ -50,6 +50,53 @@ class VforContainer(Element, component="vfor.js"):
         self.update()
 
 
+def wrapper_getter_setter(ref: Ref, index: Ref[int], *keys: Union[str, int]):
+    proxy = ref.value
+
+    def getter():
+        item = proxy[index.value]
+        result = item
+
+        for k in keys:
+            result = result[k]
+        return result
+
+    def setter(value):
+        item = proxy[index.value]
+
+        if len(keys) == 0:
+            proxy[index.value] = value
+
+        if len(keys) == 1:
+            item[keys[0]] = value
+            return
+
+        obj = item[keys[0]]
+        for k in keys[1:-1]:
+            obj = obj[k]
+        obj[keys[-1]] = value
+
+    return getter, setter
+
+
+class VforStoreItem(Generic[_T], RefWrapper[_T]):
+    def __init__(
+        self,
+        source: _T_data,
+        index: Ref[int],
+        keys: Optional[List[Union[str, int]]] = None,
+    ) -> None:
+        self._source = source
+        self._data_index = index
+        self._keys = keys or []
+
+        getter, setter = wrapper_getter_setter(source, index, *self._keys)
+        super().__init__(getter, setter)
+
+    def __getitem__(self, key: Union[str, int]):
+        return VforStoreItem(self._source, self._data_index, self._keys + [key])
+
+
 class VforStore(Generic[_T]):
     def __init__(self, source: _T_data, index: int) -> None:
         self._source = source
@@ -69,17 +116,8 @@ class VforStore(Generic[_T]):
     def get_item(self) -> _T:
         return to_value(self._source)[self.raw_index]  # type: ignore
 
-    def get(self) -> TReadonlyRef[_T]:
-        def base_setter(value):
-            to_value(self._source)[self._data_index.value] = value
-
-        wrapper = to_ref_wrapper(
-            lambda: to_value(self._source)[self._data_index.value],
-            base_setter,
-        )
-        # wrapper._is_readonly = True
-
-        return cast(TReadonlyRef, wrapper)
+    def get(self) -> Ref[_T]:
+        return VforStoreItem(self._source, self._data_index)  # type: ignore
 
     def update(self, index: int):
         self._data_index.value = index

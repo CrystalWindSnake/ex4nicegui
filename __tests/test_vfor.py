@@ -1,4 +1,4 @@
-from typing import List, cast
+from typing import Dict, List, cast
 from ex4nicegui import rxui
 from nicegui import ui
 from ex4nicegui import to_ref, ref_computed
@@ -72,17 +72,17 @@ class TestExample:
 
                 @rxui.vfor(todos, key="title")
                 def _(store: rxui.VforStore[TodoItem]):
-                    item = store.get()
+                    item = store.get_item()
                     with ui.card().classes("w-full row-card"), ui.row():
-                        rxui.label(lambda: item.value.title).classes("row-title")
+                        rxui.label(lambda: item.title).classes("row-title")
                         rxui.checkbox(
                             "done",
-                            value=rxui.vmodel(item.value.done),
-                            on_change=lambda e: change_done(item.value, e.value),
+                            value=rxui.vmodel(item.done),
+                            on_change=lambda e: change_done(item, e.value),
                         )
                         rxui.button(
-                            "del", on_click=lambda: del_todo(item.value)
-                        ).bind_enabled(lambda: item.value.done.value)
+                            "del", on_click=lambda: del_todo(item)
+                        ).bind_enabled(lambda: item.done.value)
 
         page = browser.open(page_path)
 
@@ -184,11 +184,11 @@ class TestBase:
             rxui.label(total_count).classes("label-totals")
 
             @rxui.vfor(items, key="id")
-            def _(store: rxui.VforStore):
-                item = store.get()
+            def _(store: rxui.VforStore[Dict]):
+                item = store.get_item()
                 with ui.card().classes("row-card"):
                     rxui.checkbox(
-                        text=lambda: item.value["message"],
+                        text=item["message"],
                         value=rxui.vmodel(item, "done"),
                     )
 
@@ -273,7 +273,7 @@ class TestBase:
 
                 @rxui.vfor(text)  # type: ignore
                 def _(store: rxui.VforStore[str]):
-                    rxui.label(store.get())
+                    rxui.label(store.get_item())
 
         page = browser.open(page_path)
 
@@ -290,15 +290,13 @@ class TestBase:
             with ui.column().classes("for_box"):
 
                 @rxui.vfor(data)
-                def _(store: rxui.VforStore[int]):
+                def _(store: rxui.VforStore[str]):
                     item = store.get()
                     row_num = store.row_index.value + 1
 
                     with ui.row().classes("flex-center"):
                         rxui.label(item).classes(f"vfor-label-{row_num}")
-                        rxui.input(value=rxui.vmodel(item)).classes(
-                            f"vfor-input-{row_num}"
-                        )
+                        rxui.input(value=item).classes(f"vfor-input-{row_num}")
 
             rxui.label(data).classes("list-label")
             rxui.input(value=rxui.vmodel(data, 0)).classes("input1")
