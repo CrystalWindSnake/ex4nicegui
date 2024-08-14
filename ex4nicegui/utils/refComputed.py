@@ -84,13 +84,10 @@ def ref_computed(
 
     if fn:
         if _helpers.is_class_define_method(fn):
-            fn.__computed__ = True  # type: ignore
-            return cast(ref_computed_method[T], fn)  # type: ignore
-
-            # return cast(
-            #     ref_computed_method[T],
-            #     ref_computed_method(fn, computed_args=kws),  # type: ignore
-            # )  # type: ignore
+            return cast(
+                ref_computed_method[T],
+                ref_computed_method(fn, computed_args=kws),  # type: ignore
+            )  # type: ignore
 
         getter = signe.Computed(
             cast(Callable[[], T], fn),
