@@ -178,6 +178,8 @@ def test_class_var(browser: BrowserManager, page_path: str):
 
 
 def test_cached_var(browser: BrowserManager, page_path: str):
+    counter = {"lower name": 0}
+
     class Person(rxui.ViewModel):
         name = rxui.var("")
 
@@ -186,13 +188,16 @@ def test_cached_var(browser: BrowserManager, page_path: str):
 
         @rxui.cached_var
         def lower_name(self) -> str:
+            counter["lower name"] += 1
             return self.name.value.lower()
 
     @ui.page(page_path)
     def _():
         p = Person()
         rxui.label(p.upper_name).classes("label-upper-name")
-        rxui.label(lambda: f"Hello, {p.lower_name()}!").classes("label-lower-name")
+        rxui.label(lambda: f"Hello, {p.lower_name()}!").bind_color(
+            lambda: "red" if p.lower_name() == "alice" else "black"
+        ).classes("label-lower-name")
         rxui.input(value=p.name).classes("input-name")
 
     page = browser.open(page_path)
@@ -205,3 +210,5 @@ def test_cached_var(browser: BrowserManager, page_path: str):
 
     label_upper_name.expect_equal_text("ALICE")
     label_lower_name.expect_equal_text("Hello, alice!")
+
+    assert counter["lower name"] == 2
