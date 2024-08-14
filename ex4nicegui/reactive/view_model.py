@@ -19,7 +19,7 @@ class ViewModel:
                 setattr(self, name, deep_ref(to_value(value)))
 
         for name, value in self.__dict__.items():
-            if hasattr(value, "__computed__"):
+            if callable(value) and hasattr(value, "__vm_cached__"):
                 setattr(self, name, computed(value))
 
     @staticmethod
@@ -96,3 +96,8 @@ def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Va
     if callable(value):
         return deep_ref(value())
     return deep_ref(value)
+
+
+def cached_var(func: Callable):
+    func.__vm_cached__ = True
+    return func

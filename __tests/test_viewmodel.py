@@ -177,14 +177,14 @@ def test_class_var(browser: BrowserManager, page_path: str):
     label_name.expect_equal_text("Hello, Alice!")
 
 
-def test_computed(browser: BrowserManager, page_path: str):
+def test_cached_var(browser: BrowserManager, page_path: str):
     class Person(rxui.ViewModel):
         name = rxui.var("")
 
         def upper_name(self) -> str:
             return self.name.value.upper()
 
-        @computed
+        @rxui.cached_var
         def lower_name(self) -> str:
             return self.name.value.lower()
 

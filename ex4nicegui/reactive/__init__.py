@@ -66,7 +66,7 @@ from .mermaid.mermaid import Mermaid as mermaid
 from .officials.dialog import DialogBindableUi as dialog
 from .vfor import vfor, VforStore
 from .vmodel import vmodel
-from .view_model import ViewModel, var
+from .view_model import ViewModel, var, cached_var
 
 pagination = q_pagination
 
@@ -92,6 +92,7 @@ __all__ = [
     "vmodel",
     "ViewModel",
     "var",
+    "cached_var",
     "html",
     "aggrid",
     "button",
