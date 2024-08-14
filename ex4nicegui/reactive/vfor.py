@@ -114,9 +114,13 @@ class VforStore(Generic[_T]):
         return self._raw_index
 
     def get_item(self) -> _T:
+        """Returns the current item."""
         return to_value(self._source)[self.raw_index]  # type: ignore
 
     def get(self) -> Ref[_T]:
+        """Returns a ref object of the current item.
+        Suitable for immutable types such as `int`, `str`, `float`, etc.
+        """
         return VforStoreItem(self._source, self._data_index)  # type: ignore
 
     def update(self, index: int):
