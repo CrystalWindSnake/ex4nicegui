@@ -1,5 +1,5 @@
 from typing import List, Union, Dict
-from ex4nicegui import rxui, on, Ref, ref
+from ex4nicegui import rxui, on, Ref, ref, ref_computed as computed
 from nicegui import ui
 from .screen import BrowserManager
 import json
@@ -175,3 +175,33 @@ def test_class_var(browser: BrowserManager, page_path: str):
     input_name.fill_text("Alice")
 
     label_name.expect_equal_text("Hello, Alice!")
+
+
+def test_computed(browser: BrowserManager, page_path: str):
+    class Person(rxui.ViewModel):
+        name = rxui.var("")
+
+        def upper_name(self) -> str:
+            return self.name.value.upper()
+
+        @computed
+        def lower_name(self) -> str:
+            return self.name.value.lower()
+
+    @ui.page(page_path)
+    def _():
+        p = Person()
+        rxui.label(p.upper_name).classes("label-upper-name")
+        rxui.label(lambda: f"Hello, {p.lower_name()}!").classes("label-lower-name")
+        rxui.input(value=p.name).classes("input-name")
+
+    page = browser.open(page_path)
+    label_upper_name = page.Label(".label-upper-name")
+    label_lower_name = page.Label(".label-lower-name")
+    input_name = page.Input(".input-name")
+
+    # test input value
+    input_name.fill_text("Alice")
+
+    label_upper_name.expect_equal_text("ALICE")
+    label_lower_name.expect_equal_text("Hello, alice!")
