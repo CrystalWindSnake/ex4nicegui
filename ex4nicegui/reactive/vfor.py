@@ -228,19 +228,7 @@ class vfor(Generic[_T]):
                 self._get_key(idx, d): d for idx, d in enumerate(to_value(self._data))
             }
 
-            for idx, (key, value) in enumerate(data_map.items()):
-                store_item = self._store_map.get(key)
-                if store_item:
-                    # `data` may have changed the value of a dictionary item,
-                    # so should update the values in the store one by one.
-                    store_item.store.update(idx)
-
-                else:
-                    # new row item
-                    key, element, store, score = build_element(idx, value)
-                    self._store_map[key] = StoreItem(store, element.id, score)
-
-            # remove item
+            # remove item if it's not in the new data
             remove_items = [
                 (key, value)
                 for key, value in self._store_map.items()
@@ -252,6 +240,18 @@ class vfor(Generic[_T]):
                 _vfor_container.remove(target)  # type: ignore
                 item.scope.dispose()
                 del self._store_map[key]
+
+            for idx, (key, value) in enumerate(data_map.items()):
+                store_item = self._store_map.get(key)
+                if store_item:
+                    # `data` may have changed the value of a dictionary item,
+                    # so should update the values in the store one by one.
+                    store_item.store.update(idx)
+
+                else:
+                    # new row item
+                    key, element, store, score = build_element(idx, value)
+                    self._store_map[key] = StoreItem(store, element.id, score)
 
             item_ids = [
                 {"key": key, "elementId": self._store_map.get(key).elementId}  # type: ignore
