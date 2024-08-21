@@ -117,7 +117,7 @@ def ref(value: T, is_deep=False) -> Ref[T]:
     return cast(Ref[T], s)
 
 
-def deep_ref(value: Union[T, Callable[[], T]]) -> Ref[T]:
+def deep_ref(value: T) -> Ref[T]:
     """Deep response version of `to_ref`.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#deep_ref

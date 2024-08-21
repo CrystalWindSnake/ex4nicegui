@@ -83,7 +83,7 @@ def ref_computed(
     }
 
     if fn:
-        if (not hasattr(fn, "__vm_cached__")) and _helpers.is_class_define_method(fn):
+        if _helpers.is_class_define_method(fn):
             return cast(
                 ref_computed_method[T],
                 ref_computed_method(fn, computed_args=kws),  # type: ignore

@@ -12,6 +12,8 @@ from ex4nicegui.utils.signals import (
 )
 from functools import partial
 
+_CACHED_VARS_FLAG = "__vm_cached__"
+
 
 class ViewModel:
     """A base class for reactive view models.
@@ -40,7 +42,7 @@ class ViewModel:
         for name, value in self.__class__.__dict__.items():
             if is_ref(value):
                 setattr(self, name, deep_ref(to_value(value)))
-            if callable(value) and hasattr(value, "__vm_cached__"):
+            if callable(value) and hasattr(value, _CACHED_VARS_FLAG):
                 setattr(self, name, computed(partial(value, self)))
 
     @staticmethod
@@ -150,5 +152,5 @@ def cached_var(func: Callable):
             return self.name.value.upper()
 
     """
-    func.__vm_cached__ = True
+    setattr(func, _CACHED_VARS_FLAG, None)
     return func
