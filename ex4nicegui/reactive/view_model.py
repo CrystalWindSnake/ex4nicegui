@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Union, Type, TypeVar
+from typing import Any, Callable, Union, Type, TypeVar
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -10,9 +10,12 @@ from ex4nicegui.utils.signals import (
     ref_computed as computed,
     Ref,
 )
+from ex4nicegui.utils.types import ReadonlyRef
 from functools import partial
 
 _CACHED_VARS_FLAG = "__vm_cached__"
+
+_T = TypeVar("_T")
 
 
 class ViewModel:
@@ -135,7 +138,7 @@ def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Va
     return deep_ref(value)
 
 
-def cached_var(func: Callable):
+def cached_var(func: Callable[..., _T]) -> ReadonlyRef[_T]:
     """A decorator to cache the result of a function. Only use within rxui.ViewModel.
 
     Args:
@@ -153,4 +156,4 @@ def cached_var(func: Callable):
 
     """
     setattr(func, _CACHED_VARS_FLAG, None)
-    return func
+    return func  # type: ignore
