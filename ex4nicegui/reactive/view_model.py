@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, Union, Type, TypeVar
+from typing import Callable, Union, Type, TypeVar
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -12,13 +12,14 @@ from ex4nicegui.utils.signals import (
 )
 from ex4nicegui.utils.types import ReadonlyRef
 from functools import partial
+from signe.core.reactive import NoProxy
 
 _CACHED_VARS_FLAG = "__vm_cached__"
 
 _T = TypeVar("_T")
 
 
-class ViewModel:
+class ViewModel(NoProxy):
     """A base class for reactive view models.
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ViewModel
