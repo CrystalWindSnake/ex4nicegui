@@ -209,22 +209,22 @@ class BindableUi(Generic[TWidget]):
         cast(ui.element, self.element).clear()
 
     @overload
-    def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]):
+    def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]) -> Self:
         ...
 
     @overload
-    def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]):
+    def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]) -> Self:
         ...
 
     @overload
-    def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]):
+    def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]) -> Self:
         ...
 
     @overload
-    def bind_classes(self, classes: TGetterOrReadonlyRef[str]):
+    def bind_classes(self, classes: TGetterOrReadonlyRef[str]) -> Self:
         ...
 
-    def bind_classes(self, classes: _T_bind_classes_type):
+    def bind_classes(self, classes: _T_bind_classes_type) -> Self:
         """data binding is manipulating an element's class list
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-class-names
