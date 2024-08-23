@@ -21,8 +21,8 @@ class TextColorableMixin(Protocol):
     def element(self) -> ui.element:
         ...
 
-    def _bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        @self._ui_signal_on(ref_ui)  # type: ignore
+    def _bind_text_color(self, color: TGetterOrReadonlyRef[str]):
+        @self._ui_signal_on(color)  # type: ignore
         def _(state: WatchedState):
             if state.previous is not None:
                 color_system.remove_text_color(self.element, state.previous)
@@ -31,14 +31,14 @@ class TextColorableMixin(Protocol):
 
             self.element.update()
 
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_color(self, color: TGetterOrReadonlyRef[str]):
         """bind text color to the element
 
         Args:
-            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
+            color (TGetterOrReadonlyRef[str]): a reference to the color value
 
         """
-        self._bind_text_color(ref_ui)
+        self._bind_text_color(color)
         return self
 
 
@@ -52,15 +52,15 @@ class HtmlTextColorableMixin(Protocol):
     def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
         ...
 
-    def _bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        return self.bind_style({"color": ref_ui})
+    def _bind_text_color(self, value: TGetterOrReadonlyRef[str]):
+        return self.bind_style({"color": value})
 
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_color(self, color: TGetterOrReadonlyRef[str]):
         """bind text color to the element
 
         Args:
-            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
+            color (TGetterOrReadonlyRef[str]): a reference to the color value
 
         """
-        self._bind_text_color(ref_ui)
+        self._bind_text_color(color)
         return self

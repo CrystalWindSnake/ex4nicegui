@@ -78,17 +78,17 @@ class AggridBindableUi(BindableUi[ui.aggrid]):
         options = {"columnDefs": columnDefs, "rowData": rowData}
         return cls(options, **org_kws)
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef[Any]):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef[Any]):
         if prop == "options":
-            return self.bind_options(ref_ui)
+            return self.bind_options(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_options(self, ref_ui: TGetterOrReadonlyRef[List[Dict]]):
+    def bind_options(self, options: TGetterOrReadonlyRef[List[Dict]]):
         @self._ui_effect
         def _():
             ele = self.element
-            data = to_value(ref_ui)
+            data = to_value(options)
             ele._props["options"].update(data)
             ele.update()
 

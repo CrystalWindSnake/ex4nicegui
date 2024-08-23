@@ -143,7 +143,7 @@ class BindableUi(Generic[TWidget]):
         """
         return self.element.remove(element)
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef[Any]):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef[Any]):
         """data binding is manipulating an element's property
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind_prop
@@ -151,37 +151,37 @@ class BindableUi(Generic[TWidget]):
 
         Args:
             prop (str): property name
-            ref_ui (TGetterOrReadonlyRef[Any]): a reference to the value to bind to
+            value (TGetterOrReadonlyRef[Any]): a reference to the value to bind to
 
         """
         if prop == "visible":
-            return self.bind_visible(ref_ui)
+            return self.bind_visible(value)
 
         if prop == "text" and isinstance(self.element, TextElement):
 
             @self._ui_effect
             def _():
-                cast(TextElement, self.element).set_text(to_value(ref_ui))
+                cast(TextElement, self.element).set_text(to_value(value))
                 self.element.update()
 
         @self._ui_effect
         def _():
             element = cast(ui.element, self.element)
-            element._props[prop] = to_value(ref_ui)
+            element._props[prop] = to_value(value)
             element.update()
 
         return self
 
-    def bind_visible(self, ref_ui: TGetterOrReadonlyRef[bool]):
+    def bind_visible(self, value: TGetterOrReadonlyRef[bool]):
         @self._ui_effect
         def _():
             element = cast(ui.element, self.element)
-            element.set_visibility(to_value(ref_ui))
+            element.set_visibility(to_value(value))
 
         return self
 
-    def bind_not_visible(self, ref_ui: TGetterOrReadonlyRef[bool]):
-        return self.bind_visible(lambda: not to_value(ref_ui))
+    def bind_not_visible(self, value: TGetterOrReadonlyRef[bool]):
+        return self.bind_visible(lambda: not to_value(value))
 
     def on(
         self,

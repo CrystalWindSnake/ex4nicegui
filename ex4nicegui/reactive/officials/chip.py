@@ -54,16 +54,16 @@ class ChipBindableUi(
     def text(self):
         return self.element.text
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "text":
-            return self.bind_text(ref_ui)
+            return self.bind_text(value)
 
         if prop == "color":
-            return self.bind_color(ref_ui)
+            return self.bind_color(value)
         if prop == "text-color":
-            return self.bind_text_color(ref_ui)
+            return self.bind_text_color(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
     def bind_color(self, color: TGetterOrReadonlyRef):
         """Binds the background color property of the chip to a ui element.

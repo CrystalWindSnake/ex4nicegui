@@ -18,14 +18,14 @@ class RowBindableUi(BindableUi[ui.row]):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: TMaybeRef):
+    def bind_prop(self, prop: str, value: TMaybeRef):
         if prop == "wrap":
-            return self.bind_wrap(ref_ui)
+            return self.bind_wrap(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_wrap(self, ref_ui: TMaybeRef):
-        self.bind_classes({"wrap": ref_ui})
+    def bind_wrap(self, value: TMaybeRef):
+        self.bind_classes({"wrap": value})
 
     def __enter__(self):
         self.element.__enter__()

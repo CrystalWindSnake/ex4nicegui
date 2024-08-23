@@ -44,50 +44,50 @@ class ButtonBindableUi(
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "text":
-            return self.bind_text(ref_ui)
+            return self.bind_text(value)
         if prop == "icon":
-            return self.bind_icon(ref_ui)
+            return self.bind_icon(value)
         if prop == "color":
-            return self.bind_color(ref_ui)
+            return self.bind_color(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_color(self, color: TGetterOrReadonlyRef[str]):
         """Binds the background color of the button.
 
         Args:
-            ref_ui (TGetterOrReadonlyRef[str]): Getter or readonly reference to the color.
+            color (TGetterOrReadonlyRef[str]): Getter or readonly reference to the color.
 
         """
-        BackgroundColorableMixin.bind_color(self, ref_ui)
+        BackgroundColorableMixin.bind_color(self, color)
         return self
 
-    def bind_text_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_text_color(self, text_color: TGetterOrReadonlyRef[str]):
         """Binds the text color of the button.
 
         Args:
-            ref_ui (TGetterOrReadonlyRef[str]):  Getter or readonly reference to the color.
+            text_color (TGetterOrReadonlyRef[str]):  Getter or readonly reference to the color.
 
         """
-        TextColorableMixin.bind_color(self, ref_ui)
+        TextColorableMixin.bind_color(self, text_color)
         return self
 
-    def bind_text(self, ref_ui: TGetterOrReadonlyRef):
+    def bind_text(self, text: TGetterOrReadonlyRef):
         @self._ui_effect
         def _():
             ele = self.element
-            ele._props["label"] = to_value(ref_ui)
+            ele._props["label"] = to_value(text)
             ele.update()
 
         return self
 
-    def bind_icon(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_icon(self, icon: TGetterOrReadonlyRef[str]):
         @self._ui_effect
         def _():
             ele = self.element
-            ele._props["icon"] = to_value(ref_ui)
+            ele._props["icon"] = to_value(icon)
             ele.update()
 
         return self

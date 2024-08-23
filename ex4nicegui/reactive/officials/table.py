@@ -145,22 +145,22 @@ class TableBindableUi(BindableUi[ui.table]):
         ]
         return cls(cols, rows, **other_kws)
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "dataframe":
-            return self.bind_dataframe(ref_ui)
+            return self.bind_dataframe(value)
 
         if prop == "rows":
-            return self.bind_rows(ref_ui)
+            return self.bind_rows(value)
 
         if prop == "columns":
-            return self.bind_columns(ref_ui)
+            return self.bind_columns(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_dataframe(self, ref_df: TGetterOrReadonlyRef):
+    def bind_dataframe(self, dataframe: TGetterOrReadonlyRef):
         @ref_computed
         def cp_converted_df():
-            df = ref_df.value
+            df = dataframe.value
             return utils_common.convert_dataframe(df)
 
         @ref_computed
@@ -182,20 +182,20 @@ class TableBindableUi(BindableUi[ui.table]):
 
         return self
 
-    def bind_rows(self, ref_ui: TGetterOrReadonlyRef[List[Dict]]):
-        @self._ui_signal_on(ref_ui, deep=True)
+    def bind_rows(self, rows: TGetterOrReadonlyRef[List[Dict]]):
+        @self._ui_signal_on(rows, deep=True)
         def _():
             ele = self.element
-            ele._props["rows"] = list(to_raw(to_value(ref_ui)))
+            ele._props["rows"] = list(to_raw(to_value(rows)))
             ele.update()
 
         return self
 
-    def bind_columns(self, ref_ui: TGetterOrReadonlyRef[List[Dict]]):
-        @self._ui_signal_on(ref_ui, deep=True)
+    def bind_columns(self, columns: TGetterOrReadonlyRef[List[Dict]]):
+        @self._ui_signal_on(columns, deep=True)
         def _():
             ele = self.element
-            ele._props["columns"] = list(to_raw(to_value(ref_ui)))
+            ele._props["columns"] = list(to_raw(to_value(columns)))
             ele.update()
 
         return self

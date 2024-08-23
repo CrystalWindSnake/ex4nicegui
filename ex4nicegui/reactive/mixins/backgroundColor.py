@@ -20,8 +20,8 @@ class BackgroundColorableMixin(Protocol):
     def element(self) -> ui.element:
         ...
 
-    def _bind_background_color(self, ref_ui: TGetterOrReadonlyRef[str]):
-        @self._ui_signal_on(ref_ui)  # type: ignore
+    def _bind_background_color(self, value: TGetterOrReadonlyRef[str]):
+        @self._ui_signal_on(value)  # type: ignore
         def _(state: WatchedState):
             if state.previous is not None:
                 color_system.remove_background_color(self.element, state.previous)
@@ -30,12 +30,12 @@ class BackgroundColorableMixin(Protocol):
 
             self.element.update()
 
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_color(self, color: TGetterOrReadonlyRef[str]):
         """bind color to the element
 
         Args:
-            ref_ui (TGetterOrReadonlyRef[str]): a reference to the color value
+            color (TGetterOrReadonlyRef[str]): a reference to the color value
 
         """
-        self._bind_background_color(ref_ui)
+        self._bind_background_color(color)
         return self

@@ -74,25 +74,25 @@ class SelectBindableUi(BindableUi[ui.select]):
     def value(self):
         return self.element.value
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "value":
-            return self.bind_value(ref_ui)
+            return self.bind_value(value)
 
         if prop == "options":
-            return self.bind_options(ref_ui)
+            return self.bind_options(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_options(self, ref_ui: TGetterOrReadonlyRef):
+    def bind_options(self, options: TGetterOrReadonlyRef):
         @self._ui_effect()
         def _():
-            self.element.set_options(to_value(ref_ui))
+            self.element.set_options(to_value(options))
 
         return self
 
-    def bind_value(self, ref_ui: TGetterOrReadonlyRef):
+    def bind_value(self, value: TGetterOrReadonlyRef):
         @self._ui_effect()
         def _():
-            cast(ValueElement, self.element).set_value(to_raw(to_value(ref_ui)) or None)
+            cast(ValueElement, self.element).set_value(to_raw(to_value(value)) or None)
 
         return self
