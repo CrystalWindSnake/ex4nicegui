@@ -33,12 +33,6 @@ class TabBindableUi(BindableUi[ui.tab]):
         for key, value in bindings_kws.items():
             self.bind_prop(key, value)  # type: ignore
 
-    # def bind_prop(self, prop: str, ref_ui: TMaybeRef):
-    #     if prop == "name":
-    #         return self.bind_name(ref_ui)
-
-    #     return super().bind_prop(prop, ref_ui)
-
     def __bind_label(self, binding_kws: Dict, value_kws: Dict):
         name_ref = binding_kws.get("name") or value_kws.get("name")
         label_ref = binding_kws.get("label") or value_kws.get("label")
@@ -49,9 +43,3 @@ class TabBindableUi(BindableUi[ui.tab]):
                 to_value(label_ref) if label_ref is not None else to_value(name_ref)
             )
             self.element.update()
-
-    # def bind_name(self, ref_ui: TMaybeRef):
-    #     @self._ui_effect
-    #     def _():
-    #         self.element._props["name"] = to_value(ref_ui)
-    #         self.element.update()

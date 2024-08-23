@@ -133,17 +133,17 @@ class EChartsBindableUi(BindableUi[echarts]):
             code = code.read_text("utf8")
         return cls(code=code)
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "options":
-            return self.bind_options(ref_ui)
+            return self.bind_options(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_options(self, ref_ui: TGetterOrReadonlyRef[Dict]):
-        @self._ui_signal_on(ref_ui)
+    def bind_options(self, options: TGetterOrReadonlyRef[Dict]):
+        @self._ui_signal_on(options)
         def _():
             ele = self.element
-            ele.update_options(to_raw(to_value(ref_ui)), self.__update_setting)
+            ele.update_options(to_raw(to_value(options)), self.__update_setting)
             ele.update()
 
         return self

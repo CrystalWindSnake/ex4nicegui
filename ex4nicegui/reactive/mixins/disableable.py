@@ -25,20 +25,20 @@ class DisableableMixin(Protocol):
     def element(self) -> DisableableElement:
         ...
 
-    def bind_enabled(self, ref_ui: TGetterOrReadonlyRef[bool]):
+    def bind_enabled(self, value: TGetterOrReadonlyRef[bool]):
         @self._ui_effect
         def _():
-            value = to_value(ref_ui)
-            self.element.set_enabled(value)
-            self.element._handle_enabled_change(value)
+            raw_value = to_value(value)
+            self.element.set_enabled(raw_value)
+            self.element._handle_enabled_change(raw_value)
 
         return self
 
-    def bind_disable(self, ref_ui: TGetterOrReadonlyRef[bool]):
+    def bind_disable(self, value: TGetterOrReadonlyRef[bool]):
         @self._ui_effect
         def _():
-            value = not to_value(ref_ui)
-            self.element.set_enabled(value)
-            self.element._handle_enabled_change(value)
+            raw_value = not to_value(value)
+            self.element.set_enabled(raw_value)
+            self.element._handle_enabled_change(raw_value)
 
         return self

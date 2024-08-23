@@ -20,14 +20,14 @@ class ColumnBindableUi(BindableUi[ui.column]):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "wrap":
-            return self.bind_wrap(ref_ui)
+            return self.bind_wrap(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_wrap(self, ref_ui: TGetterOrReadonlyRef):
-        self.bind_classes({"wrap": ref_ui})
+    def bind_wrap(self, value: TGetterOrReadonlyRef):
+        self.bind_classes({"wrap": value})
 
     def __enter__(self):
         self.element.__enter__()

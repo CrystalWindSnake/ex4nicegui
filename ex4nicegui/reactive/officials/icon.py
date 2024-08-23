@@ -34,20 +34,20 @@ class IconBindableUi(BindableUi[ui.icon], TextColorableMixin):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "name":
-            return self.bind_name(ref_ui)
+            return self.bind_name(value)
 
         if prop == "color":
-            return self.bind_color(ref_ui)
+            return self.bind_color(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_name(self, ref_ui: TGetterOrReadonlyRef):
+    def bind_name(self, name: TGetterOrReadonlyRef):
         @self._ui_effect
         def _():
             ele = cast(TextColorElement, self.element)
-            ele._props["name"] = to_value(ref_ui)
+            ele._props["name"] = to_value(name)
             ele.update()
 
         return self

@@ -49,17 +49,17 @@ class CircularProgressBindableUi(
     def value(self):
         return self.element.value
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "value":
-            return self.bind_value(ref_ui)
+            return self.bind_value(value)
         if prop == "color":
-            return self.bind_color(ref_ui)
+            return self.bind_color(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_value(self, ref_ui: TGetterOrReadonlyRef[float]):
+    def bind_value(self, value: TGetterOrReadonlyRef[float]):
         @self._ui_effect
         def _():
-            self.element.set_value(to_value(ref_ui))
+            self.element.set_value(to_value(value))
 
         return self

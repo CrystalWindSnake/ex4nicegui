@@ -68,23 +68,23 @@ class ColorPickerBindableUi(BindableUi[ui.color_picker]):
     def value(self):
         return self.element.value
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "value":
-            return self.bind_value(ref_ui)
+            return self.bind_value(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_color(self, ref_ui: TGetterOrReadonlyRef[str]):
+    def bind_color(self, color: TGetterOrReadonlyRef[str]):
         @self._ui_effect
         def _():
-            self.element.set_color(to_value(ref_ui))
+            self.element.set_color(to_value(color))
 
         return self
 
-    def bind_value(self, ref_ui: TGetterOrReadonlyRef[bool]):
+    def bind_value(self, value: TGetterOrReadonlyRef[bool]):
         @self._ui_effect
         def _():
-            self.element.set_value(to_value(ref_ui))
+            self.element.set_value(to_value(value))
 
         return self
 

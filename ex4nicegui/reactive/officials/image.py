@@ -25,13 +25,13 @@ class ImageBindableUi(BindableUi[ui.image]):
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "source":
-            return self.bind_source(ref_ui)
+            return self.bind_source(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_source(self, ref_ui: TGetterOrReadonlyRef[Union[str, Path]]):
+    def bind_source(self, source: TGetterOrReadonlyRef[Union[str, Path]]):
         @self._ui_effect
         def _():
-            self.element.set_source(to_value(ref_ui))
+            self.element.set_source(to_value(source))

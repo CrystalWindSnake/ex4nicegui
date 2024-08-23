@@ -70,26 +70,26 @@ class NumberBindableUi(BindableUi[ui.number]):
     def value(self):
         return self.element.value
 
-    def bind_prop(self, prop: str, ref_ui: TGetterOrReadonlyRef):
+    def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
         if prop == "value":
-            return self.bind_value(ref_ui)
+            return self.bind_value(value)
 
         if prop == "precision":
-            return self._bind_precision(ref_ui)
+            return self._bind_precision(value)
 
-        return super().bind_prop(prop, ref_ui)
+        return super().bind_prop(prop, value)
 
-    def bind_value(self, ref_ui: TGetterOrReadonlyRef[float]):
+    def bind_value(self, value: TGetterOrReadonlyRef[float]):
         @self._ui_effect
         def _():
-            self.element.set_value(to_value(ref_ui))
+            self.element.set_value(to_value(value))
 
         return self
 
-    def _bind_precision(self, ref_ui: TGetterOrReadonlyRef[int]):
-        @self._ui_signal_on(ref_ui, onchanges=True)
+    def _bind_precision(self, precision: TGetterOrReadonlyRef[int]):
+        @self._ui_signal_on(precision, onchanges=True)
         def _():
-            self.element.precision = to_value(ref_ui)
+            self.element.precision = to_value(precision)
             self.element.sanitize()
 
         return self
