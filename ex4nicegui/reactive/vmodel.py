@@ -139,23 +139,24 @@ def vmodel(expr: Any, *attrs: Union[str, int]) -> TRef[Any]:
         expr (Any): _description_
 
     ## Examples
-    ```python
-    from ex4nicegui.reactive import rxui
-    from ex4nicegui import deep_ref
 
-    data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
+    .. code-block:: python
+        from ex4nicegui.reactive import rxui
+        from ex4nicegui import deep_ref
 
-    rxui.label(lambda: f"{data.value=!s}")
+        data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
 
-    # No binding effect
-    rxui.input(value=data.value["a"])
+        rxui.label(lambda: f"{data.value=!s}")
 
-    # readonly binding
-    rxui.input(value=lambda: data.value["a"])
+        # No binding effect
+        rxui.input(value=data.value["a"])
 
-    # two-way binding
-    rxui.input(value=rxui.vmodel(data.value["a"]))
-    ```
+        # readonly binding
+        rxui.input(value=lambda: data.value["a"])
+
+        # two-way binding
+        rxui.input(value=rxui.vmodel(data.value,'a'))
+
 
     """
 

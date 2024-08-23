@@ -148,28 +148,27 @@ class vfor(Generic[_T]):
 
 
     ## Examples
-    ```python
-    from ex4nicegui.reactive import rxui
-    from ex4nicegui import to_ref
-    items = to_ref(
-        [
-            {"message": "foo", "done": False},
-            {"message": "bar", "done": True},
-        ]
-    )
+
+    .. code-block:: python
+        from ex4nicegui.reactive import rxui
+        from ex4nicegui import to_ref
+        items = to_ref(
+            [
+                {"message": "foo", "done": False},
+                {"message": "bar", "done": True},
+            ]
+        )
 
 
-    @rxui.vfor(items,key='message')
-    def _(store: rxui.VforStore):
-        msg_ref = store.get("message")  # this is ref object
+        @rxui.vfor(items,key='message')
+        def _(store: rxui.VforStore):
+            msg_ref = store.get("message")  # this is ref object
 
-        # type text into the input box and
-        # the title of the checkbox changes sync
-        with ui.card():
-            rxui.input(value=msg_ref)
-            rxui.checkbox(text=msg_ref, value=store.get("done"))
-
-    ```
+            # type text into the input box and
+            # the title of the checkbox changes sync
+            with ui.card():
+                rxui.input(value=msg_ref)
+                rxui.checkbox(text=msg_ref, value=store.get("done"))
 
     """
 

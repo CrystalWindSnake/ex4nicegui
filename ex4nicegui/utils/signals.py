@@ -54,11 +54,12 @@ def to_value(obj: Union[_TMaybeRef[T], RefWrapper]) -> T:
         obj (Union[_TMaybeRef[T], RefWrapper]): A getter function, an existing ref, or a non-function value.
 
     ## Example
-    ```python
-    to_value(1)  # 1
-    to_value(lambda: 1)  # 1
-    to_value(to_ref(1))  # 1
-    ```
+
+    .. code-block:: python
+        to_value(1)  # 1
+        to_value(lambda: 1)  # 1
+        to_value(to_ref(1))  # 1
+
     """
     if is_ref(obj):
         return obj.value  # type: ignore
@@ -239,26 +240,27 @@ def event_batch(event_fn: Callable[..., None]):
     Args:
         event_fn (Callable[..., None]): event callback
 
-    @Example
-    ```python
-    from nicegui import ui
-    from ex4nicegui import on, to_ref, effect, ref_computed, batch
+    ## Example
 
-    a = to_ref(0)
-    b = to_ref(0)
-    text = ref_computed(lambda: f"a={a.value};b={b.value}")
+    .. code-block:: python
+        from nicegui import ui
+        from ex4nicegui import on, to_ref, effect, ref_computed, batch
 
-    @on([a, b, text])
-    def when_vars_changed():
-        ui.notify(f"a:{a.value};b:{b.value};text={text.value}")
+        a = to_ref(0)
+        b = to_ref(0)
+        text = ref_computed(lambda: f"a={a.value};b={b.value}")
 
-    @event_batch
-    def when_click():
-        a.value += 1
-        b.value += 1
+        @on([a, b, text])
+        def when_vars_changed():
+            ui.notify(f"a:{a.value};b:{b.value};text={text.value}")
 
-    ui.button("change all values", on_click=when_click)
-    ```
+        @event_batch
+        def when_click():
+            a.value += 1
+            b.value += 1
+
+        ui.button("change all values", on_click=when_click)
+
     """
 
     def wrap(*args, **kwargs):

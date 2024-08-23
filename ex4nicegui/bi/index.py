@@ -24,43 +24,40 @@ def data_source(data: Union[Callable[..., _TData], _TData]) -> DataSourceFacade[
 
     ## Examples
 
-    ---
-
     pandas dataframe source:
-    ```python
-    df = pd.DataFrame({"name": list("abcdc"), "value": range(5)})
-    ds = bi.data_source(df)
-    ```
+
+    .. code-block:: python
+        df = pd.DataFrame({"name": list("abcdc"), "value": range(5)})
+        ds = bi.data_source(df)
+
 
     ---
 
     Link multiple data sources
 
-    ---
-    ```python
-    df = pd.DataFrame({"name": list("abcdc"), "value": range(5)})
-    ds = bi.data_source(df)
+    .. code-block:: python
+        df = pd.DataFrame({"name": list("abcdc"), "value": range(5)})
+        ds = bi.data_source(df)
 
-    @bi.data_source
-    def ds_other():
-        #  ds.filtered_data is DataFrame after filtering
-        where = ds.filtered_data[''].isin(['b','c','d'])
-        return ds.filtered_data[where]
+        @bi.data_source
+        def ds_other():
+            #  ds.filtered_data is DataFrame after filtering
+            where = ds.filtered_data[''].isin(['b','c','d'])
+            return ds.filtered_data[where]
 
-    ```
 
     ---
 
     Now, when `ds` changes, it will trigger changes to `ds_other` and thus drive the related interface components to change.
 
-    ```python
-    # select box of data source 'ds'
-    # it change will trigger changes to table
-    ds.ui_select('name')
+    .. code-block:: python
+        # select box of data source 'ds'
+        # it change will trigger changes to table
+        ds.ui_select('name')
 
-    # table of data 'ds_other'
-    ds_other.ui_aggrid()
-    ```
+        # table of data 'ds_other'
+        ds_other.ui_aggrid()
+
 
 
     """

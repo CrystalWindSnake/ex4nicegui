@@ -237,30 +237,30 @@ class BindableUi(Generic[TWidget]):
 
         bind class names with dict,value is bool ref, for example:
 
-            ```python
+        .. code-block:: python
             bg_color = to_ref(True)
             has_error = to_ref(False)
 
             rxui.label('Hello').bind_classes({'bg-blue':bg_color, 'text-red':has_error})
-            ```
+
 
         bind list of class names with ref
 
-            ```python
+        .. code-block:: python
             color = to_ref('red')
             bg_color = lambda: f"bg-{color.value}"
 
             rxui.label('Hello').bind_classes([bg_color])
-            ```
+
 
         bind single class name with ref
 
-            ```python
+        .. code-block:: python
             color = to_ref('red')
             bg_color = lambda: f"bg-{color.value}"
 
             rxui.label('Hello').bind_classes(bg_color)
-            ```
+
 
         """
         if isinstance(classes, dict):
@@ -316,17 +316,18 @@ class BindableUi(Generic[TWidget]):
 
 
         ## usage
-        ```python
-        bg_color = to_ref("blue")
-        text_color = to_ref("red")
 
-        rxui.label("test").bind_style(
-            {
-                "background-color": bg_color,
-                "color": text_color,
-            }
-        )
-        ```
+        .. code-block:: python
+            bg_color = to_ref("blue")
+            text_color = to_ref("red")
+
+            rxui.label("test").bind_style(
+                {
+                    "background-color": bg_color,
+                    "color": text_color,
+                }
+            )
+
         """
         if isinstance(style, dict):
             for name, ref_obj in style.items():
@@ -350,27 +351,28 @@ class BindableUi(Generic[TWidget]):
             style (Union[str, Path]): path to css file or inline style string
 
         ## usage
-        ```python
-        # all children of the element will have red outline, excluding itself
-        with rxui.row().scoped_style("*", "outline: 1px solid red;") as row:
-            ui.label("Hello")
-            ui.label("World")
 
-        # all children of the element will have red outline, including the element itself
-        with rxui.row().scoped_style(":self *", "outline: 1px solid red;") as row:
-            ui.label("Hello")
-            ui.label("World")
+        .. code-block:: python
+            # all children of the element will have red outline, excluding itself
+            with rxui.row().scoped_style("*", "outline: 1px solid red;") as row:
+                ui.label("Hello")
+                ui.label("World")
 
-        # all children of the element will have red outline when element is hovered
-        with rxui.row().scoped_style(":hover *", "outline: 1px solid red;") as row:
-            ui.label("Hello")
-            ui.label("World")
+            # all children of the element will have red outline, including the element itself
+            with rxui.row().scoped_style(":self *", "outline: 1px solid red;") as row:
+                ui.label("Hello")
+                ui.label("World")
 
-        # all children of the element and itself will have red outline when element is hovered
-        with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
-            ui.label("Hello")
-            ui.label("World")
-        ```
+            # all children of the element will have red outline when element is hovered
+            with rxui.row().scoped_style(":hover *", "outline: 1px solid red;") as row:
+                ui.label("Hello")
+                ui.label("World")
+
+            # all children of the element and itself will have red outline when element is hovered
+            with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
+                ui.label("Hello")
+                ui.label("World")
+
         """
 
         is_css_file = isinstance(style, Path)

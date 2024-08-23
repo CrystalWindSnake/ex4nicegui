@@ -64,14 +64,15 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
         Args:
             options (dict): chart setting options dict
             opts (Optional[dict], optional): update options. Defaults to None.
-            ```python
-                {
-                    'notMerge':False,
-                    'lazyUpdate':False,
-                    'silent':False,
-                    'replaceMerge': None,
-                }
-            ```
+
+         .. code-block:: python
+            {
+                'notMerge':False,
+                'lazyUpdate':False,
+                'silent':False,
+                'replaceMerge': None,
+            }
+
             [open echarts setOption docs](https://echarts.apache.org/zh/api.html#echartsInstance.setOption)
 
         """

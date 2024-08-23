@@ -119,14 +119,13 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         ## Examples
 
-        ```python
-        rxui.echarts.from_javascript(
-            r'''(myChart) => {
-                option = {...};
-                myChart.setOption(option);
-            }
-        ''')
-        ```
+        .. code-block:: python
+            rxui.echarts.from_javascript(
+                r'''(myChart) => {
+                    option = {...};
+                    myChart.setOption(option);
+                }
+            ''')
 
         """
         if isinstance(code, Path):
@@ -171,58 +170,57 @@ class EChartsBindableUi(BindableUi[echarts]):
         ---
 
         ### click event:
-        ```python
-        bar = rxui.echarts(opts)
 
-        def on_click(e):
-            ui.notify(f"on_click:{e}")
+        .. code-block:: python
+            bar = rxui.echarts(opts)
 
-        bar.on("click", on_click)
-        ```
+            def on_click(e):
+                ui.notify(f"on_click:{e}")
+
+            bar.on("click", on_click)
 
         ---
 
         ### Use query to trigger callback of the specified component:
 
-        ```python
-        ...
-        def on_line_click(e):
-            ui.notify(e)
+        .. code-block:: python
+            ...
+            def on_line_click(e):
+                ui.notify(e)
 
-        bar.on("click", on_line_click,query='series.line')
-        ```
+            bar.on("click", on_line_click,query='series.line')
+
 
         ---
         ### only trigger for specified series
-        ```python
 
-        opts = {
-            "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
-            "yAxis": {
-                "type": "category",
-                "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
-            },
-            "series": [
-                {
-                    "name": "first",
-                    "type": "bar",
-                    "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        .. code-block:: python
+            opts = {
+                "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+                "yAxis": {
+                    "type": "category",
+                    "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
                 },
-                {
-                    "name": "second",
-                    "type": "bar",
-                    "data": [19325, 23438, 31000, 121594, 134141, 681807],
-                },
-            ],
-        }
+                "series": [
+                    {
+                        "name": "first",
+                        "type": "bar",
+                        "data": [18203, 23489, 29034, 104970, 131744, 630230],
+                    },
+                    {
+                        "name": "second",
+                        "type": "bar",
+                        "data": [19325, 23438, 31000, 121594, 134141, 681807],
+                    },
+                ],
+            }
 
-        bar = rxui.echarts(opts)
+            bar = rxui.echarts(opts)
 
-        def on_first_series_mouseover(e):
-            ui.notify(f"on_first_series_mouseover:{e}")
+            def on_first_series_mouseover(e):
+                ui.notify(f"on_first_series_mouseover:{e}")
 
-        bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
-        ```
+            bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
 
         ---
         """

@@ -228,26 +228,26 @@ class DataSourceFacade(Generic[_TData]):
 
         Support pyecharts
 
-        ```py
-        import pandas as pd
-        from ex4nicegui import bi
-        from pyecharts.charts import Bar
+        .. code-block:: python
+            import pandas as pd
+            from ex4nicegui import bi
+            from pyecharts.charts import Bar
 
-        df = pd.DataFrame({"name": list("abcdc"), "value": range(5)})
-        ds = bi.data_source(df)
+            df = pd.DataFrame({"name": list("abcdc"), "value": range(5)})
+            ds = bi.data_source(df)
 
-        @ds.ui_echarts
-        def bar(data: pd.DataFrame):
-            c = (
-                Bar()
-                .add_xaxis(data["name"].tolist())
-                .add_yaxis("value", data["value"].tolist())
-            )
+            @ds.ui_echarts
+            def bar(data: pd.DataFrame):
+                c = (
+                    Bar()
+                    .add_xaxis(data["name"].tolist())
+                    .add_yaxis("value", data["value"].tolist())
+                )
 
-            return c
+                return c
 
-        bar.classes("h-[20rem]")
-        ```
+            bar.classes("h-[20rem]")
+
 
         """
         return ui_echarts(self, fn)
