@@ -24,6 +24,7 @@ from ex4nicegui.utils.signals import (
     on,
 )
 from ex4nicegui.utils.clientScope import new_scope
+from ex4nicegui.utils.types import _TMaybeRef as TMaybeRef
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.text_element import TextElement
 from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
@@ -105,8 +106,12 @@ class BindableUi(Generic[TWidget]):
     def __exit__(self, *_):
         self.element.default_slot.__exit__(*_)
 
-    def tooltip(self, text: str) -> Self:
-        cast(ui.element, self.element).tooltip(text)
+    def tooltip(self, text: TMaybeRef[str]) -> Self:
+        from ex4nicegui.reactive.officials.tooltip import TooltipBindableUi
+
+        with self:
+            TooltipBindableUi(text)
+
         return self
 
     def add_slot(self, name: str, template: Optional[str] = None):
