@@ -3,7 +3,7 @@ from nicegui.element import Element
 from nicegui import ui
 from ex4nicegui.utils.clientScope import _CLIENT_SCOPE_MANAGER
 from ex4nicegui.utils.signals import (
-    TReadonlyRef,
+    Ref,
     on,
     to_ref,
     to_ref_wrapper,
@@ -21,7 +21,7 @@ from typing import (
     TypeVar,
     Generic,
     Union,
-    cast,
+    Literal,
 )
 from functools import partial
 from dataclasses import dataclass
@@ -38,35 +38,90 @@ class VforItem(Empty):
 
 
 class VforContainer(Element, component="vfor.js"):
-    def __init__(self) -> None:
+    def __init__(self, transition_props: Optional[Dict[str, Any]] = None) -> None:
         super().__init__()
         self._props["itemIds"] = []
+
+        if transition_props:
+            self._props["transitionProps"] = transition_props
 
     def update_items(self, item_ids: List[Dict]):
         self._props["itemIds"] = item_ids
         self.update()
 
 
+def wrapper_getter_setter(ref: Ref, index: Ref[int], *keys: Union[str, int]):
+    proxy = ref.value
+
+    def getter():
+        item = proxy[index.value]
+        result = item
+
+        for k in keys:
+            result = result[k]
+        return result
+
+    def setter(value):
+        item = proxy[index.value]
+
+        if len(keys) == 0:
+            proxy[index.value] = value
+
+        if len(keys) == 1:
+            item[keys[0]] = value
+            return
+
+        obj = item[keys[0]]
+        for k in keys[1:-1]:
+            obj = obj[k]
+        obj[keys[-1]] = value
+
+    return getter, setter
+
+
+class VforStoreItem(Generic[_T], RefWrapper[_T]):
+    def __init__(
+        self,
+        source: _T_data,
+        index: Ref[int],
+        keys: Optional[List[Union[str, int]]] = None,
+    ) -> None:
+        self._source = source
+        self._data_index = index
+        self._keys = keys or []
+
+        getter, setter = wrapper_getter_setter(source, index, *self._keys)
+        super().__init__(getter, setter)
+
+    def __getitem__(self, key: Union[str, int]):
+        return VforStoreItem(self._source, self._data_index, self._keys + [key])
+
+
 class VforStore(Generic[_T]):
     def __init__(self, source: _T_data, index: int) -> None:
         self._source = source
+        self._raw_index = index
         self._data_index = to_ref(index)
 
     @property
     def row_index(self):
+        """Returns the responsive index of the current row."""
         return self._data_index
 
-    def get(self) -> TReadonlyRef[_T]:
-        def base_setter(value):
-            to_value(self._source)[self._data_index.value] = value
+    @property
+    def raw_index(self):
+        """Returns the index of the current row."""
+        return self._raw_index
 
-        wrapper = to_ref_wrapper(
-            lambda: to_value(self._source)[self._data_index.value],
-            base_setter,
-        )
-        wrapper._is_readonly = True
+    def get_item(self) -> _T:
+        """Returns the current item."""
+        return to_value(self._source)[self.raw_index]  # type: ignore
 
-        return cast(TReadonlyRef, wrapper)
+    def get(self) -> Ref[_T]:
+        """Returns a ref object of the current item.
+        Suitable for immutable types such as `int`, `str`, `float`, etc.
+        """
+        return VforStoreItem(self._source, self._data_index)  # type: ignore
 
     def update(self, index: int):
         self._data_index.value = index
@@ -78,10 +133,6 @@ class StoreItem:
     store: VforStore
     elementId: int
     scope: Scope
-
-
-def _get_key_with_index(idx: int, data: Any):
-    return idx
 
 
 def _get_key_with_getter(attr: str, idx: int, data: Any):
@@ -128,9 +179,9 @@ class vfor(Generic[_T]):
         *,
         key: Optional[Union[str, Callable[[int, Any], Any]]] = None,
     ) -> None:
-        self._vfor_container = VforContainer()
         self._data = to_ref_wrapper(lambda: data) if is_reactive(data) else data
-        self._get_key = _get_key_with_index
+        self._get_key = vfor.index_key
+        self._transition_props = {}
 
         if isinstance(key, str):
             self._get_key = partial(_get_key_with_getter, key)
@@ -139,11 +190,27 @@ class vfor(Generic[_T]):
 
         self._store_map: Dict[Union[Any, int], StoreItem] = {}
 
+    def transition_group(
+        self,
+        css=True,
+        name: Optional[str] = "list",
+        duration: Optional[float] = None,
+        type: Optional[Literal["transition", "animation"]] = None,
+        mode: Optional[Literal["in-out", "out-in", "default"]] = None,
+        appear=False,
+    ):
+        kws = {k: v for k, v in locals().items() if k != "self" and v is not None}
+        self._transition_props.update(**kws)
+
+        return self
+
     def __call__(self, fn: Callable[[Any], None]):
+        _vfor_container = VforContainer(self._transition_props)
+
         def build_element(index: int, value):
             key = self._get_key(index, value)
 
-            with self._vfor_container, VforItem() as element:
+            with _vfor_container, VforItem() as element:
                 store = VforStore(self._data, index)  # type: ignore
                 scope = _CLIENT_SCOPE_MANAGER.new_scope()
 
@@ -153,17 +220,26 @@ class vfor(Generic[_T]):
 
             return key, element, store, scope
 
-        for idx, value in enumerate(to_value(self._data)):  # type: ignore
-            key, element, store, scope = build_element(idx, value)
-            self._store_map[key] = StoreItem(store, element.id, scope)
-
         ng_client = ui.context.client
 
-        @on(self._data, deep=True)
+        @on(self._data, deep=True, priority_level=-1)
         def _():
             data_map = {
                 self._get_key(idx, d): d for idx, d in enumerate(to_value(self._data))
             }
+
+            # remove item if it's not in the new data
+            remove_items = [
+                (key, value)
+                for key, value in self._store_map.items()
+                if key not in data_map
+            ]
+
+            for key, item in remove_items:
+                target = ng_client.elements.get(item.elementId)
+                _vfor_container.remove(target)  # type: ignore
+                item.scope.dispose()
+                del self._store_map[key]
 
             for idx, (key, value) in enumerate(data_map.items()):
                 store_item = self._store_map.get(key)
@@ -177,22 +253,17 @@ class vfor(Generic[_T]):
                     key, element, store, score = build_element(idx, value)
                     self._store_map[key] = StoreItem(store, element.id, score)
 
-            # remove item
-            remove_items = [
-                (key, value)
-                for key, value in self._store_map.items()
-                if key not in data_map
+            item_ids = [
+                {"key": key, "elementId": self._store_map.get(key).elementId}  # type: ignore
+                for key in data_map.keys()
             ]
 
-            for key, item in remove_items:
-                target = ng_client.elements.get(item.elementId)
-                self._vfor_container.remove(target)  # type: ignore
-                item.scope.dispose()
-                del self._store_map[key]
+            _vfor_container.update_items(item_ids)
 
-            self._vfor_container.update_items(
-                [
-                    {"key": key, "elementId": self._store_map.get(key).elementId}  # type: ignore
-                    for key in data_map.keys()
-                ]
-            )
+    @staticmethod
+    def value_key(_, data):
+        return data
+
+    @staticmethod
+    def index_key(idx, _):
+        return idx

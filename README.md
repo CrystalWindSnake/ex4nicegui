@@ -168,6 +168,135 @@ ui.run()
 ---
 
 
+
+## ViewModel
+在 `v0.7.0` 版本中，引入 `ViewModel` 类，用于管理一组响应式数据。
+
+下面是一个简单的计算器示例：
+
+1. 当用户修改数值输入框或符号选择框，右侧会自动显示计算结果
+2. 当结果小于 0 时，结果显示为红色，否则为黑色
+
+```python
+from ex4nicegui import rxui
+
+class Calculator(rxui.ViewModel):
+    num1 = rxui.var(0)
+    sign = rxui.var("+")
+    num2 = rxui.var(0)
+
+    def result(self):
+        # 当 num1,sign,num2 任意一个值发生变化时，result 也会重新计算
+        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+
+# 每个对象拥有独立的数据
+calc = Calculator()
+
+with ui.row(align_items="center"):
+    rxui.number(value=calc.num1, label="Number 1")
+    rxui.select(value=calc.sign, options=["+", "-", "*", "/"], label="Sign")
+    rxui.number(value=calc.num2, label="Number 2")
+    ui.label("=")
+    rxui.label(calc.result).bind_color(
+        lambda: "red" if calc.result() < 0 else "black"
+    )
+
+```
+
+### cached_var
+
+上面的示例中，由于使用了两次 `calc.result` 。因此，每当 `num1`, `sign`, `num2` 任意一个值发生变化时，`result` 都会执行2次。
+
+实际上，第二次的计算是多余的。我们可以通过添加 `rxui.cached_var` 装饰器，避免多余的计算。
+
+```python
+class Calculator(rxui.ViewModel):
+    ...
+
+    @rxui.cached_var
+    def result(self):
+        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+
+...
+```
+
+---
+
+### 使用列表
+
+当数据为可变对象时，比如列表，字典等，需要提供工厂函数传给 `rxui.var`
+
+
+```python
+class Home(rxui.ViewModel):
+    persons= rxui.var(lambda: [])
+
+```
+
+下面的示例，每个 person 使用卡片展示。最上方显示所有人的平均年龄。当个人年龄大于平均年龄，卡片外边框将变为红色。
+通过 `number` 组件修改年龄，一切都会自动更新。
+
+```python
+from ex4nicegui import rxui, Ref
+from itertools import count
+
+id_generator = count()
+
+class Person(rxui.ViewModel):
+    name = rxui.var("")
+    age = rxui.var(0)
+
+    def __init__(self, name: str = "", age: int = 0):
+        super().__init__()
+        self.name.value = name
+        self.age.value = age
+        self.id = next(id_generator)
+
+
+class Home(rxui.ViewModel):
+    persons: Ref[List[Person]] = rxui.var(lambda: [])
+
+    def avg_age(self) -> float:
+        if len(self.persons.value) == 0:
+            return 0
+
+        return sum(p.age.value for p in self.persons.value) / len(self.persons.value)
+
+    def sample_data(self):
+        self.persons.value = [
+            Person("alice", 25),
+            Person("bob", 30),
+            Person("charlie", 31),
+            Person("dave", 22),
+            Person("eve", 26),
+            Person("frank", 29),
+        ]
+
+home = Home()
+home.sample_data()
+
+rxui.label(lambda: f"平均年龄: {home.avg_age()}")
+
+
+with ui.row():
+
+    @rxui.vfor(home.persons, key="id")
+    def _(store: rxui.VforStore[Person]):
+        person = store.get_item()
+        with rxui.card().classes("outline").bind_classes(
+            {
+                "outline-red-500": lambda: person.age.value > home.avg_age(),
+            }
+        ):
+            rxui.input(value=person.name, placeholder="名字")
+            rxui.number(value=person.age, min=1, max=100, step=1, placeholder="年龄")
+
+```
+
+更多复杂的应用，可以查看 [examples](./examples)
+
+---
+
 ## 响应式
 
 ```python
