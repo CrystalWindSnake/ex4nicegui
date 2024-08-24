@@ -140,15 +140,19 @@ def test_default_value(browser: BrowserManager, page_path: str):
     assert name_select.get_selected_values() == ["a", "b"]
     assert cls_select.get_selected_values() == ["c1"]
 
-    assert table.get_data() == [
-        ["a", "c1", "0"],
-        ["b", "c1", "2"],
-    ]
+    table.expect_table_values(
+        [
+            ["a", "c1", "0"],
+            ["b", "c1", "2"],
+        ]
+    )
 
-    assert table1.get_data() == [
-        ["a", "c1", "0"],
-        ["b", "c1", "200"],
-    ]
+    table1.expect_table_values(
+        [
+            ["a", "c1", "0"],
+            ["b", "c1", "200"],
+        ]
+    )
 
 
 def test_update_options(browser: BrowserManager, page_path: str):

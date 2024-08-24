@@ -351,43 +351,29 @@ class AggridUtils(BaseUiUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
         super().__init__(page, target_locator)
 
-    def expect_cell_to_be_visible(self, cell_values: List):
-        for cell_value in cell_values:
-            expect(
-                self.target_locator.get_by_role(
-                    "gridcell",
-                    name=cell_value,
-                    exact=True,
-                )
-            ).to_be_visible()
+    def expect_table_values(self, rows_values: List[List]):
+        table_body = self.target_locator.locator("css=.ag-body")
 
-    def expect_selection_cell_to_be_visible(self, cell_values: List):
-        for cell_value in cell_values:
-            expect(
-                self.target_locator.get_by_role("gridcell")
-                .locator("div")
-                .filter(has_text="a")
-            ).to_be_visible()
+        rows = table_body.get_by_role("row")
+        expect(rows).to_have_count(len(rows_values))
 
-    def expect_cell_not_to_be_visible(self, cell_values: List):
-        for cell_value in cell_values:
-            expect(
-                self.target_locator.get_by_role(
-                    "gridcell",
-                    name=cell_value,
-                    exact=True,
-                )
-            ).not_to_be_visible()
+        for i in range(len(rows_values)):
+            cells = rows.nth(i).get_by_role("gridcell")
+            expect(cells).to_have_count(len(rows_values[i]))
+
+            for j in range(len(rows_values[i])):
+                cell = cells.nth(j)
+                expect(cell).to_have_text(str(rows_values[i][j]))
+
+    def expect_row_count(self, count: int):
+        expect(
+            self.target_locator.locator(".ag-body-viewport").get_by_role("row")
+        ).to_have_count(count)
 
     def get_rows(
         self,
     ):
         return self.target_locator.locator(".ag-body-viewport").get_by_role("row").all()
-
-    def get_data(self):
-        return [
-            row.get_by_role("gridcell").all_inner_texts() for row in self.get_rows()
-        ]
 
     def get_cells(self):
         rows = self.get_rows()

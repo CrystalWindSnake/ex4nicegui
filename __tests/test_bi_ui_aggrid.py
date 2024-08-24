@@ -6,10 +6,16 @@ from ex4nicegui import bi
 
 
 def test_base(browser: BrowserManager, page_path: str):
+    data = [
+        ["f", 1],
+        ["a", 2],
+        ["c", 3],
+        ["b", 1],
+    ]
+
     @ui.page(page_path)
     def _():
-        data = pd.DataFrame({"name": ["f", "a", "c", "b"], "age": [1, 2, 3, 1]})
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(data, columns=["name", "age"])
 
         source = bi.data_source(df)
         source.ui_aggrid().classes("target")
@@ -17,7 +23,7 @@ def test_base(browser: BrowserManager, page_path: str):
     page = browser.open(page_path)
 
     target = page.Aggrid(".target")
-    target.expect_cell_to_be_visible(list("facb"))
+    target.expect_table_values(data)
 
 
 def test_options_define(browser: BrowserManager, page_path: str):
