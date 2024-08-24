@@ -30,36 +30,38 @@ def test_aggrid(browser: BrowserManager, page_path: str):
 
 
 def test_aggrid_from_dataframe(browser: BrowserManager, page_path: str):
+    df = pd.DataFrame(
+        {
+            "date": pd.date_range("today", periods=4),
+            "name": list("abcd"),
+            "value": range(4),
+        }
+    )
+
     @ui.page(page_path)
     def _():
-        r_df = to_ref(
-            pd.DataFrame(
-                {
-                    "date": pd.date_range("today", periods=4),
-                    "name": list("abcd"),
-                    "value": range(4),
-                }
-            )
-        )
+        r_df = to_ref(df)
         rxui.aggrid.from_pandas(r_df).classes("max-h-40 target")
         # test lambda display
         rxui.aggrid.from_pandas(lambda: r_df.value.head(2))
 
     page = browser.open(page_path)
 
-    page.Aggrid(".target").expect_cell_to_be_visible(list("abcd"))
+    page.Aggrid(".target").expect_table_values(df.values.tolist())
 
 
 def test_aggrid_from_dataframe_columns_define_fn(
     browser: BrowserManager, page_path: str
 ):
+    df = pd.DataFrame({"name": list("abcd"), "value": range(4)})
+
     @ui.page(page_path)
     def _():
-        r_df = to_ref(pd.DataFrame({"name": list("abcd"), "value": range(4)}))
+        r_df = to_ref(df)
         rxui.aggrid.from_pandas(
             r_df, columns_define_fn=lambda col: {"checkboxSelection": col == "name"}
         ).classes("max-h-40 target")
 
     page = browser.open(page_path)
 
-    page.Aggrid(".target").expect_selection_cell_to_be_visible(list("abcd"))
+    page.Aggrid(".target").expect_table_values(df.values.tolist())

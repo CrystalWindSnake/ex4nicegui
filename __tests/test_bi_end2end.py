@@ -86,17 +86,16 @@ def test_remove_filters(browser: BrowserManager, page_path: str):
 
     assert bar_chart.get_options()["series"][0]["data"] == [4]
 
-    assert len(table1.get_rows()) == 1
-    assert len(table2.get_rows()) == 1
+    table1.expect_row_count(1)
+    table2.expect_row_count(1)
 
     remove_filters_btn.click()
 
     assert cls_radio.get_all_labels() == ["c1", "c2"]
-
     assert bar_chart.get_options()["series"][0]["data"] == [0, 1, 2, 3, 4]
 
-    assert len(table1.get_rows()) == 5
-    assert len(table2.get_rows()) == 3
+    table1.expect_row_count(5)
+    table2.expect_row_count(3)
 
 
 def test_reload_source(browser: BrowserManager, page_path: str):
@@ -173,8 +172,8 @@ def test_reload_source(browser: BrowserManager, page_path: str):
         ["a", "c2", "1"],
     ]
 
-    assert table1.get_data() == except_data
-    assert table2.get_data() == except_data
+    table1.expect_table_values(except_data)
+    table2.expect_table_values(except_data)
 
     assert name_radio.get_all_labels() == ["a"]
     assert cls_radio.get_all_labels() == ["类别1", "c2"]
@@ -190,8 +189,8 @@ def test_reload_source(browser: BrowserManager, page_path: str):
         ["y", "cls2", "4", "104"],
     ]
 
-    assert table1.get_data() == except_all_data
-    assert table2.get_data() == except_all_data[:3]
+    table1.expect_table_values(except_all_data)
+    table2.expect_table_values(except_all_data[:3])
 
     assert name_radio.get_all_labels() == ["x", "m", "n", "y"]
     assert cls_radio.get_all_labels() == ["new 类别1", "cls2"]
@@ -204,8 +203,8 @@ def test_reload_source(browser: BrowserManager, page_path: str):
         ["x", "cls2", "1", "101"],
     ]
 
-    assert table1.get_data() == except_data
-    assert table2.get_data() == except_data
+    table1.expect_table_values(except_data)
+    table2.expect_table_values(except_data)
 
     assert name_radio.get_all_labels() == ["x"]
     assert cls_radio.get_all_labels() == ["new 类别1", "cls2"]
