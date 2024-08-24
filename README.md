@@ -1,6 +1,10 @@
 # ex4nicegui
-[ENGLISH README](./README.en.md)
 
+<div align="center">
+
+简体中文| [English](./README.en.md)
+
+</div>
 
 - [教程](#教程)
 - [安装](#-安装)
