@@ -297,6 +297,25 @@ with ui.row():
 
 ```
 
+如果你觉得 `rxui.vfor` 代码过于复杂，可以使用 `effect_refreshable` 装饰器代替。
+
+```python
+from ex4nicegui import rxui, Ref,effect_refreshable
+...
+
+# 明确指定监控 home.persons 变化，可以避免意味刷新
+@effect_refreshable.on(home.persons)
+def _():
+    
+    for person in home.persons.value:
+        ...
+        rxui.number(value=person.age, min=1, max=100, step=1, placeholder="年龄")
+...
+```
+
+需要注意到，每当 `home.persons` 列表变化时(比如新增或删除元素)，`effect_refreshable` 装饰的函数都会重新执行。意味着所有元素都会重新创建。
+
+
 更多复杂的应用，可以查看 [examples](./examples)
 
 ---

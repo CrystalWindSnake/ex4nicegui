@@ -217,7 +217,7 @@ class Calculator(rxui.ViewModel):
 
 ---
 
-### 使用列表
+### for list and dict data
 
 When the data is mutable, such as lists or dictionaries, a factory function must be supplied to `rxui.var`.
 
@@ -287,6 +287,25 @@ with ui.row():
             rxui.number(value=person.age, min=1, max=100, step=1, placeholder="age")
 
 ```
+
+If you find the `rxui.vfor` code too complex, you can use the `effect_refreshable` decorator instead.
+
+```python
+from ex4nicegui import rxui, Ref, effect_refreshable
+...
+
+# Explicitly specifying to monitor changes in `home.persons` can prevent unintended refreshes.
+@effect_refreshable.on(home.persons)
+def _():
+    
+    for person in home.persons.value:
+        ...
+        rxui.number(value=person.age, min=1, max=100, step=1, placeholder="Age")
+...
+```
+
+Note that whenever the `home.persons` list changes (such as when elements are added or removed), the function decorated with `effect_refreshable` will be re-executed. This means that all elements will be recreated.
+
 
 For more complex applications, please refer to the [examples](./examples)
 
