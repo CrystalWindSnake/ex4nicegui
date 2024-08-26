@@ -626,59 +626,68 @@ see [todo list examples](./examples/todomvc/)
 ### vfor
 Render list components based on list responsive data. Each component is updated on demand. Data items support dictionaries or objects of any type
 
+Starting from version `v0.7.0`, it is recommended to use in conjunction with `rxui.ViewModel`. Unlike using the `effect_refreshable` decorator, `vfor` does not recreate all elements but updates existing ones.
+
+Below is an example of card sorting, where cards are always sorted by age. When you modify the age data in a card, the cards adjust their order in real time. However, the cursor focus does not leave the input field.
+
 ```python
+from typing import List
 from nicegui import ui
-from ex4nicegui.reactive import rxui
-from ex4nicegui import deep_ref, ref_computed
-from typing import Dict
-
-# refs
-items = deep_ref(
-    [
-        {"id": 1, "message": "foo", "done": False},
-        {"id": 2, "message": "bar", "done": True},
-    ]
-)
-
-# ref_computeds
-@ref_computed
-def done_count_info():
-    return f"done count:{sum(item['done'] for item in items.value)}"
-
-# method
-def check():
-    for item in items.value:
-        item["done"] = not item["done"]
+from ex4nicegui import rxui, deep_ref as ref, Ref
 
 
-# ui
-rxui.label(done_count_info)
-ui.button("check", on_click=check)
+class Person(rxui.ViewModel):
+    def __init__(self, name: str, age: int) -> None:
+        self.name = name
+        self.age = ref(age)
 
 
-@rxui.vfor(items,key='id')
-def _(store: rxui.VforStore[Dict]):
-    # function to build the interface for each row of data
-    item = store.get()  # Get responsive object with `store.get`
-    mes = rxui.vmodel(item.value['message'])
+class MyApp(rxui.ViewModel):
+    persons: Ref[List[Person]] = rxui.var(lambda: [])
+    order = rxui.var("asc")
 
-    # Enter the content of the input box, 
-    # you can see the title of the radio box changes synchronously
-    with ui.card():
-        with ui.row():
-            rxui.input(value=mes)
-            rxui.label(lambda: f"{mes.value=!s}")
-        rxui.checkbox(text=mes, value=rxui.vmodel(item.value['done']))
+    def sort_by_age(self):
+        return sorted(
+            self.persons.value,
+            key=lambda p: p.age.value,
+            reverse=self.order.value == "desc",
+        )
 
+    @staticmethod
+    def create():
+        persons = [
+            Person(name="Alice", age=25),
+            Person(name="Bob", age=30),
+            Person(name="Charlie", age=20),
+            Person(name="Dave", age=35),
+            Person(name="Eve", age=28),
+        ]
+        app = MyApp()
+        app.persons.value = persons
+        return app
+
+
+# UI
+app = MyApp.create()
+
+with rxui.tabs(app.order):
+    rxui.tab("asc", "Ascending")
+    rxui.tab("desc", "Descending")
+
+
+@rxui.vfor(app.sort_by_age, key="name")
+def each_person(s: rxui.VforStore[Person]):
+    person = s.get_item()
+
+    with ui.card(), ui.row(align_items="center"):
+        rxui.label(person.name)
+        rxui.number(value=person.age, step=1, min=0, max=100)
 ```
 
-- `rxui.vfor` decorator to custom function
-    - The first argument is passed to the responsive list. Each item in the list can be a dictionary or other object (`dataclasses` etc.)
-    - Second parameter `key`: In order to be able to keep track of the identity of each node, and thus reuse and reorder existing elements, you can provide a unique key for the block corresponding to each element. The default(`None`) is to use the list element index.
-- The custom function takes one argument. The current row's  can be retrieved via `store.get`, which is a responsive object.
-
-
-> vfor are created only when new data is added.
+- The `rxui.vfor` decorator is applied to a custom function.
+    - The first argument is the reactive list. Note that there is no need to call `app.sort_by_age`.
+    - The second argument `key`: To track each node's identifier and thus reuse and reorder existing elements, you can provide a unique key for each block corresponding to an element. By default, the list element index is used. In the example, it is assumed that each person's name is unique.
+- The custom function takes one parameter. You can obtain the current row's object via `store.get_item`. Since `Person` itself inherits from `rxui.ViewModel`, its properties can be directly bound to components.
 
 
 ---

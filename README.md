@@ -633,66 +633,79 @@ rxui.input(value=rxui.vmodel(data.value['a']))
 - 第二个输入框由于使用函数，将得到读取响应性(第三个输入框输入值，将得到同步)
 - 第三个输入框，使用 `rxui.vmodel` 包裹，即可实现双向绑定
 
-> 如果使用 `rxui.ViewModel` ，可能你完全不需要使用 `vmodel`
+> 如果使用 `rxui.ViewModel` ，你可能不需要使用 `vmodel`
 
 可参考 [todo list 案例](./examples/todomvc/)
 
 ---
 
 ### vfor
-基于列表响应式数据，渲染列表组件。每项组件按需更新。数据项支持字典或任意类型对象
+基于列表响应式数据，渲染列表组件。每项组件按需更新。数据项支持字典或任意类型对象。
+
+从 `v0.7.0` 版本开始，建议配合 `rxui.ViewModel` 使用。与使用 `effect_refreshable` 装饰器不同，`vfor` 不会重新创建所有的元素，而是更新已存在的元素。
+
+下面是卡片排序例子，卡片总是按年龄排序。当你修改某个卡片中的年龄数据时，卡片会实时调整顺序。但是，光标焦点不会离开输入框。
+
 
 ```python
+from typing import List
 from nicegui import ui
-from ex4nicegui.reactive import rxui
-from ex4nicegui import deep_ref, ref_computed
-from typing import Dict
+from ex4nicegui import rxui, deep_ref as ref, Ref
 
-# refs
-items = deep_ref(
-    [
-        {"id": 1, "message": "foo", "done": False},
-        {"id": 2, "message": "bar", "done": True},
-    ]
-)
 
-# ref_computeds
-@ref_computed
-def done_count_info():
-    return f"done count:{sum(item['done'] for item in items.value)}"
+class Person(rxui.ViewModel):
+    def __init__(self, name: str, age: int) -> None:
+        self.name = name
+        self.age = ref(age)
 
-# method
-def check():
-    for item in items.value:
-        item["done"] = not item["done"]
+
+class MyApp(rxui.ViewModel):
+    persons: Ref[List[Person]] = rxui.var(lambda: [])
+    order = rxui.var("asc")
+
+    def sort_by_age(self):
+        return sorted(
+            self.persons.value,
+            key=lambda p: p.age.value,
+            reverse=self.order.value == "desc",
+        )
+
+    @staticmethod
+    def create():
+        persons = [
+            Person(name="Alice", age=25),
+            Person(name="Bob", age=30),
+            Person(name="Charlie", age=20),
+            Person(name="Dave", age=35),
+            Person(name="Eve", age=28),
+        ]
+        app = MyApp()
+        app.persons.value = persons
+        return app
 
 
 # ui
-rxui.label(done_count_info)
-ui.button("check", on_click=check)
+app = MyApp.create()
+
+with rxui.tabs(app.order):
+    rxui.tab("asc", "Ascending")
+    rxui.tab("desc", "Descending")
 
 
-@rxui.vfor(items,key='id')
-def _(store: rxui.VforStore[Dict]):
-    # 函数中构建每一行数据的界面
-    item = store.get()  # 通过 store.get 获取对应行的响应式对象(相当于每行的数据 to_ref(...))
-    mes = rxui.vmodel(item.value['message']) # 复杂结构默认没有双向绑定，需要使用 `vmodel`
+@rxui.vfor(app.sort_by_age, key="name")
+def each_person(s: rxui.VforStore[Person]):
+    person = s.get_item()
 
-    # 输入框输入内容，可以看到单选框的标题同步变化
-    with ui.card():
-        with ui.row():
-            rxui.input(value=mes)
-            rxui.label(lambda: f"{mes.value=!s}")
-        rxui.checkbox(text=mes, value=rxui.vmodel(item.value['done']))
+    with ui.card(), ui.row(align_items="center"):
+        rxui.label(person.name)
+        rxui.number(value=person.age, step=1, min=0, max=100)
 
 ```
 
 - `rxui.vfor` 装饰器到自定义函数
-    - 第一个参数传入响应式列表。列表中每一项可以是字典或其他对象(`dataclasses` 等等)
-    - 第二个参数 `key`: 为了可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你可以为每个元素对应的块提供一个唯一的 key 。默认情况使用列表元素索引。
-- 自定义函数带有一个参数。通过 `store.get` 可以获取当前行的响应式对象
-
-> vfor 渲染的项目，只有在新增数据时，才会创建
+    - 第一个参数传入响应式列表。注意，无须调用 `app.sort_by_age`
+    - 第二个参数 `key`: 为了可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你可以为每个元素对应的块提供一个唯一的 key 。默认情况使用列表元素索引。例子中假定每个人的名字唯一。
+- 自定义函数带有一个参数。通过 `store.get_item` 可以获取当前行的对象。由于 Person 本身继承自 `rxui.ViewModel`，所以它的各项属性可以直接绑定到组件。
 
 
 ---
