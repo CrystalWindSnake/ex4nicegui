@@ -429,15 +429,15 @@ When the button is clicked, the value of `a.value` is modified, triggering a rec
 
 > `ref_computed` is read-only `to_ref`
 
-If you prefer to organize your code by class, ``ref_computed`` also supports acting on instance methods
+Starting from version `v0.7.0`, it is not recommended to use `ref_computed` for instance methods. You can use `rxui.ViewModel` and apply the `rxui.cached_var` decorator instead.
 
 ```python
-class MyState.
-    def __init__(self) -> None.
+class MyState(rxui.ViewModel):
+    def __init__(self) -> None:
         self.r_text = to_ref("")
 
-    @ref_computed
-    def post_text(self): return self.r_text.value
+    @rxui.cached_var
+    def post_text(self):
         return self.r_text.value + "post"
 
 state = MyState()
@@ -588,14 +588,19 @@ rxui.input(value=data.value["a"])
 rxui.input(value=lambda: data.value["a"])
 
 # two-way binding
+rxui.input(value=rxui.vmodel(data,'a'))
+
+# also two-way binding, but not recommended
 rxui.input(value=rxui.vmodel(data.value["a"]))
 ```
 
-- The first input box will be completely unresponsive because the code is equivalent to passing in a value `1` directly
+- The first input box will be completely unresponsive because the code is equivalent to `rxui.input(value=1)`
 - The second input box will get read responsiveness due to the use of a function.
 - The third input box, wrapped in `rxui.vmodel`, can be bi-directionally bound.
 
-Most use `vmodel` with `vfor`, see [todo list examples](./examples/todomvc/)
+> If you use `rxui.ViewModel`, you may find that you don't need to use `vmodel` at all.
+
+see [todo list examples](./examples/todomvc/)
 
 ---
 

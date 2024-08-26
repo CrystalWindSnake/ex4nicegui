@@ -441,15 +441,14 @@ ui.button("change", on_click=change_value)
 
 > `ref_computed` 是只读的 `to_ref`
 
-
-如果你更喜欢通过类组织代码，`ref_computed` 同样支持作用到实例方法上
+从 `v0.7.0` 版本开始，不建议使用 `ref_computed` 应用实例方法。你可以使用 `rxui.ViewModel`，并使用 `rxui.cached_var` 装饰器
 
 ```python
-class MyState:
+class MyState(rxui.ViewModel):
     def __init__(self) -> None:
         self.r_text = to_ref("")
 
-    @ref_computed
+    @rxui.cached_var
     def post_text(self):
         return self.r_text.value + "post"
 
@@ -604,15 +603,22 @@ rxui.input(value=data.value["a"])
 rxui.input(value=lambda: data.value["a"])
 
 # 要使用 vmodel 才能双向绑定
-rxui.input(value=rxui.vmodel(data.value["a"]))
+rxui.input(value=rxui.vmodel(data, "a"))
+
+# 也可以直接使用，但不推荐
+rxui.input(value=rxui.vmodel(data.value['a']))
+
 ```
 
-- 第一个输入框将完全失去响应性，因为代码等价于直接传入一个数值`1`
+- 第一个输入框将完全失去响应性，因为代码等价于 `rxui.input(value=1)`
 - 第二个输入框由于使用函数，将得到读取响应性(第三个输入框输入值，将得到同步)
 - 第三个输入框，使用 `rxui.vmodel` 包裹，即可实现双向绑定
 
-多数在配合 `vfor` 时使用 `vmodel`,可参考 [todo list 案例](./examples/todomvc/)
+> 如果使用 `rxui.ViewModel` ，可能你完全不需要使用 `vmodel`
 
+可参考 [todo list 案例](./examples/todomvc/)
+
+---
 
 ### vfor
 基于列表响应式数据，渲染列表组件。每项组件按需更新。数据项支持字典或任意类型对象
