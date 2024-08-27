@@ -13,6 +13,9 @@ English| [简体中文](./README.md)
 
 An extension library for [nicegui](https://github.com/zauberzeug/nicegui). It has built-in responsive components and fully implements data-responsive interface programming.
 
+![todo-app](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/todo-app.02.gif)
+
+[more examples](https://github.com/CrystalWindSnake/ex4nicegui-examples)
 
 ## 📦 Install
 
