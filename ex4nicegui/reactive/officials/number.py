@@ -80,14 +80,14 @@ class NumberBindableUi(BindableUi[ui.number]):
         return super().bind_prop(prop, value)
 
     def bind_value(self, value: TGetterOrReadonlyRef[float]):
-        @self._ui_effect
+        @self._ui_signal_on(value)
         def _():
             self.element.set_value(to_value(value))
 
         return self
 
     def _bind_precision(self, precision: TGetterOrReadonlyRef[int]):
-        @self._ui_signal_on(precision, onchanges=True)
+        @self._ui_signal_on(precision)
         def _():
             self.element.precision = to_value(precision)
             self.element.sanitize()

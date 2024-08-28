@@ -35,7 +35,6 @@ class SwitchBindableUi(BindableUi[ui.switch]):
         )
 
         value_kws = pc.get_values_kws()
-        value_kws.update({"value": 0 if value is None else value})
 
         element = ui.switch(**value_kws)
         super().__init__(element)  # type: ignore
@@ -54,7 +53,7 @@ class SwitchBindableUi(BindableUi[ui.switch]):
         return super().bind_prop(prop, value)
 
     def bind_value(self, value: TGetterOrReadonlyRef[bool]):
-        @self._ui_effect
+        @self._ui_signal_on(value)
         def _():
             self.element.set_value(to_value(value))
 
