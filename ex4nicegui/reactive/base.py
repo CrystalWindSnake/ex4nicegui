@@ -73,7 +73,9 @@ class BindableUi(Generic[TWidget]):
 
     @property
     def _ui_signal_on(self):
-        return partial(on, scope=self._effect_scope)
+        """equivalent to `on`, but with the effect scope,and with `onchanges`=True"""
+
+        return partial(on, scope=self._effect_scope, onchanges=True)
 
     def props(self, add: Optional[str] = None, *, remove: Optional[str] = None):
         cast(ui.element, self.element).props(add, remove=remove)

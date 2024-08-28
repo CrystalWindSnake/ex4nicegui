@@ -44,10 +44,8 @@ class IconBindableUi(BindableUi[ui.icon], TextColorableMixin):
         return super().bind_prop(prop, value)
 
     def bind_name(self, name: TGetterOrReadonlyRef):
-        @self._ui_effect
+        @self._ui_signal_on(name)
         def _():
-            ele = cast(TextColorElement, self.element)
-            ele._props["name"] = to_value(name)
-            ele.update()
+            self.element.set_name(to_value(name))
 
         return self

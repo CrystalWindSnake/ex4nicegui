@@ -54,7 +54,7 @@ class SwitchBindableUi(BindableUi[ui.switch]):
         return super().bind_prop(prop, value)
 
     def bind_value(self, value: TGetterOrReadonlyRef[bool]):
-        @self._ui_effect
+        @self._ui_signal_on(value)
         def _():
             self.element.set_value(to_value(value))
 

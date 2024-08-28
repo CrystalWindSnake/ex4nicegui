@@ -32,6 +32,6 @@ class ImageBindableUi(BindableUi[ui.image]):
         return super().bind_prop(prop, value)
 
     def bind_source(self, source: TGetterOrReadonlyRef[Union[str, Path]]):
-        @self._ui_effect
+        @self._ui_signal_on(source, deep=False)
         def _():
             self.element.set_source(to_value(source))

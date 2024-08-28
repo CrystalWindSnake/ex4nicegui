@@ -37,9 +37,8 @@ class LabelBindableUi(BindableUi[ui.label], HtmlTextColorableMixin):
         return super().bind_prop(prop, value)
 
     def bind_text(self, text: TGetterOrReadonlyRef):
-        @self._ui_effect
+        @self._ui_signal_on(text)
         def _():
             self.element.set_text(str(to_value(text)))
-            self.element.update()
 
         return self

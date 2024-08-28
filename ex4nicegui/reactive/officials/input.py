@@ -60,15 +60,14 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
         return super().bind_prop(prop, value)
 
     def bind_value(self, value: TGetterOrReadonlyRef[str]):
-        @self._ui_effect
+        @self._ui_signal_on(value)
         def _():
             self.element.set_value(to_value(value))
-            self.element.update()
 
         return self
 
     def bind_password(self, password: TGetterOrReadonlyRef[bool]):
-        @self._ui_effect
+        @self._ui_signal_on(password)
         def _():
             self.element._props["type"] = "password" if to_value(password) else "text"
             self.element.update()

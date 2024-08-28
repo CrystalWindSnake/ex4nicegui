@@ -84,14 +84,14 @@ class SelectBindableUi(BindableUi[ui.select]):
         return super().bind_prop(prop, value)
 
     def bind_options(self, options: TGetterOrReadonlyRef):
-        @self._ui_effect()
+        @self._ui_signal_on(options, deep=True)
         def _():
             self.element.set_options(to_value(options))
 
         return self
 
     def bind_value(self, value: TGetterOrReadonlyRef):
-        @self._ui_effect()
+        @self._ui_signal_on(value, deep=False)
         def _():
             cast(ValueElement, self.element).set_value(to_raw(to_value(value)) or None)
 
