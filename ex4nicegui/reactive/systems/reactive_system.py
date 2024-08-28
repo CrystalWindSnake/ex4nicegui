@@ -1,9 +1,9 @@
 from typing import Callable, Dict
-from ex4nicegui.utils.signals import to_value
+from ex4nicegui.utils.signals import to_value, to_raw
 
 
 def convert_kws_ref2value(kws: Dict) -> Dict:
-    return {key: to_value(value) for key, value in kws.items()}
+    return {key: to_raw(to_value(value)) for key, value in kws.items()}
 
 
 def inject_method(obj, method_name: str, new_handle: Callable):
