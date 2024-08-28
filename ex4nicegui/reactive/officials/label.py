@@ -18,7 +18,9 @@ class LabelBindableUi(BindableUi[ui.label], HtmlTextColorableMixin):
     ) -> None:
         pc = ParameterClassifier(locals(), maybeRefs=["text"], events=[])
 
-        element = ui.label(**pc.get_values_kws())
+        init_kws = pc.get_values_kws()
+        init_kws.update({"text": str(init_kws.get("text", ""))})
+        element = ui.label(**init_kws)
         super().__init__(element)
 
         for key, value in pc.get_bindings().items():
