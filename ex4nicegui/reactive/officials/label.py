@@ -3,6 +3,7 @@ from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     to_value,
+    to_raw,
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
@@ -37,8 +38,8 @@ class LabelBindableUi(BindableUi[ui.label], HtmlTextColorableMixin):
         return super().bind_prop(prop, value)
 
     def bind_text(self, text: TGetterOrReadonlyRef):
-        @self._ui_signal_on(text)
+        @self._ui_signal_on(text, deep=True)
         def _():
-            self.element.set_text(str(to_value(text)))
+            self.element.set_text(str(to_raw(to_value(text))))
 
         return self

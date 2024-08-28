@@ -139,7 +139,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         return super().bind_prop(prop, value)
 
     def bind_options(self, options: TGetterOrReadonlyRef[Dict]):
-        @self._ui_signal_on(options)
+        @self._ui_signal_on(options, deep=True)
         def _():
             ele = self.element
             ele.update_options(to_raw(to_value(options)), self.__update_setting)

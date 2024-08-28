@@ -91,7 +91,7 @@ class SelectBindableUi(BindableUi[ui.select]):
         return self
 
     def bind_value(self, value: TGetterOrReadonlyRef):
-        @self._ui_signal_on(value, deep=False)
+        @self._ui_signal_on(value, deep=True)
         def _():
             cast(ValueElement, self.element).set_value(to_raw(to_value(value)) or None)
 
