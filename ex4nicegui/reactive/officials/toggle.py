@@ -4,7 +4,6 @@ from typing import (
     List,
     Optional,
     TypeVar,
-    cast,
     Dict,
     Union,
 )
@@ -16,7 +15,6 @@ from ex4nicegui.utils.signals import (
     to_raw,
 )
 from nicegui import ui
-from nicegui.elements.mixins.value_element import ValueElement
 from .base import BindableUi
 
 T = TypeVar("T")

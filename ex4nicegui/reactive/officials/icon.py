@@ -1,6 +1,5 @@
 from typing import (
     Optional,
-    cast,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.signals import (
@@ -9,9 +8,6 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from nicegui.elements.mixins.color_elements import (
-    TextColorElement,
-)
 from .base import BindableUi
 from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
 

@@ -1,8 +1,7 @@
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed, effect, deep_ref
+from ex4nicegui import to_ref, ref_computed, effect
 from .screen import BrowserManager
-import pytest
 
 
 def test_const_str(browser: BrowserManager, page_path: str):
