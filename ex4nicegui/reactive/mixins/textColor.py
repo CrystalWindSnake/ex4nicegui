@@ -22,7 +22,7 @@ class TextColorableMixin(Protocol):
         ...
 
     def _bind_text_color(self, color: TGetterOrReadonlyRef[str]):
-        @self._ui_signal_on(color)  # type: ignore
+        @self._ui_signal_on(color, onchanges=False)  # type: ignore
         def _(state: WatchedState):
             if state.previous is not None:
                 color_system.remove_text_color(self.element, state.previous)
