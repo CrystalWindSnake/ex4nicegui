@@ -432,6 +432,10 @@ class ChipUtils(LabelUtils):
     pass
 
 
+class BadgeUtils(LabelUtils):
+    pass
+
+
 class InputUtils(BaseUiUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
         super().__init__(page, target_locator)

@@ -190,6 +190,9 @@ class PageUtils:
     def Chip(self, selector: Union[str, Locator]):
         return utils.ChipUtils(self._page, selector)
 
+    def Badge(self, selector: Union[str, Locator]):
+        return utils.BadgeUtils(self._page, selector)
+
     def ColorPicker(self, selector: Union[str, Locator]):
         return utils.ColorPickerUtils(self._page, selector)
 

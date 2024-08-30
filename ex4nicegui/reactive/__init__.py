@@ -57,6 +57,7 @@ from .officials.chip import ChipBindableUi as chip
 from .officials.tooltip import TooltipBindableUi as tooltip
 from .officials.toggle import ToggleBindableUi as toggle
 from .officials.avatar import AvatarBindableUi as avatar
+from .officials.badge import BadgeBindableUi as badge
 
 from .local_file_picker import local_file_picker
 from .UseDraggable.UseDraggable import use_draggable
@@ -136,4 +137,5 @@ __all__ = [
     "tooltip",
     "toggle",
     "avatar",
+    "badge",
 ]
