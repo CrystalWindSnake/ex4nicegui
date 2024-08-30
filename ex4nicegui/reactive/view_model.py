@@ -24,7 +24,7 @@ class ViewModel(NoProxy):
 
     @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#ViewModel
 
-    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#ViewModel
+    @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#viewmodel
 
     Example:
     .. code-block:: python
