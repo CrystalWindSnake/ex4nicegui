@@ -169,6 +169,9 @@ class PageUtils:
     def Select(self, selector: Union[str, Locator]):
         return utils.SelectUtils(self._page, selector)
 
+    def Toggle(self, selector: Union[str, Locator]):
+        return utils.ToggleUtils(self._page, selector)
+
     def Radio(self, selector: Union[str, Locator]):
         return utils.RadioUtils(self._page, selector)
 

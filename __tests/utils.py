@@ -157,6 +157,28 @@ class SelectUtils(BaseUiUtils):
         self.target_locator.press("Enter")
 
 
+class ToggleUtils(BaseUiUtils):
+    def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
+        super().__init__(page, target_locator)
+
+    def expect_selected(self, value: str):
+        expect(
+            self.target_locator.locator(
+                'css=button[aria-pressed="true"]', has_text=value
+            )
+        ).to_have_count(1)
+
+    def expect_not_selected(self, value: str):
+        expect(
+            self.target_locator.locator(
+                'css=button[aria-pressed="true"]', has_text=value
+            )
+        ).to_have_count(0)
+
+    def click_select(self, value: str):
+        self.target_locator.locator("css=button", has_text=value).click()
+
+
 class ColorPickerUtils(BaseUiUtils):
     def __init__(self, page: Page, target_locator: Union[str, Locator]) -> None:
         super().__init__(page, target_locator)
