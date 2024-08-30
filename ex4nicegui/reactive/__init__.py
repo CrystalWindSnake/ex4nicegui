@@ -55,6 +55,7 @@ from .officials.tab_panels import LazyTabPanelsBindableUi as lazy_tab_panels
 from .q_pagination import PaginationBindableUi as q_pagination
 from .officials.chip import ChipBindableUi as chip
 from .officials.tooltip import TooltipBindableUi as tooltip
+from .officials.toggle import ToggleBindableUi as toggle
 
 from .local_file_picker import local_file_picker
 from .UseDraggable.UseDraggable import use_draggable
@@ -132,4 +133,5 @@ __all__ = [
     "chip",
     "dialog",
     "tooltip",
+    "toggle",
 ]
