@@ -151,9 +151,9 @@ def cached_var(func: Callable[..., _T]) -> ReadonlyRef[_T]:
         class MyVm(rxui.ViewModel):
             name = rxui.var("John")
 
-        @rxui.cached_var
-        def uppper_name(self):
-            return self.name.value.upper()
+            @rxui.cached_var
+            def uppper_name(self):
+                return self.name.value.upper()
 
     """
     setattr(func, _CACHED_VARS_FLAG, None)
