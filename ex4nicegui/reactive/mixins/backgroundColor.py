@@ -21,7 +21,7 @@ class BackgroundColorableMixin(Protocol):
         ...
 
     def _bind_background_color(self, value: TGetterOrReadonlyRef[str]):
-        @self._ui_signal_on(value)  # type: ignore
+        @self._ui_signal_on(value, onchanges=False)  # type: ignore
         def _(state: WatchedState):
             if state.previous is not None:
                 color_system.remove_background_color(self.element, state.previous)
