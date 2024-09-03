@@ -1,4 +1,3 @@
-import re
 from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
@@ -21,7 +20,7 @@ def test_base(browser: BrowserManager, page_path: str):
     row = page.Base(".target")
     checkbox = page.Checkbox(".checkbox")
 
-    row.expect.to_have_class(re.compile(r"wrap"))
+    row.expect_to_have_style("flex-wrap", "wrap")
 
     checkbox.click()
-    row.expect.not_to_have_class(re.compile(r"wrap"))
+    row.expect_to_have_style("flex-wrap", "nowrap")

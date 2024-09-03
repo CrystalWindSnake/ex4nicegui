@@ -4,12 +4,13 @@ from typing import (
     Optional,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.utils.signals import _TMaybeRef as TMaybeRef, to_value
+from ex4nicegui.reactive.mixins.flexLayout import FlexAlignItemsMixin, FlexWrapMixin
+from ex4nicegui.utils.signals import TMaybeRef
 from nicegui import ui
 from .base import BindableUi
 
 
-class RowBindableUi(BindableUi[ui.row]):
+class RowBindableUi(BindableUi[ui.row], FlexAlignItemsMixin, FlexWrapMixin):
     def __init__(
         self,
         *,
@@ -26,19 +27,12 @@ class RowBindableUi(BindableUi[ui.row]):
             self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, value: TMaybeRef):
-        print(f"bind_prop: {prop} {value}")
-        if prop == "wrap":
-            return self.bind_wrap(value)
-        if prop == "align-items":
-            return self.bind_align_items(value)
+        if FlexAlignItemsMixin._bind_specified_props(self, prop, value):
+            return self
+        if FlexWrapMixin._bind_specified_props(self, prop, value):
+            return self
 
         return super().bind_prop(prop, value)
-
-    def bind_wrap(self, value: TMaybeRef):
-        self.bind_classes({"wrap": value})
-
-    def bind_align_items(self, value: TMaybeRef):
-        self.bind_classes(lambda: f"items-{to_value(value)}")
 
     def __enter__(self):
         self.element.__enter__()
