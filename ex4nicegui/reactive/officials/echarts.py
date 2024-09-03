@@ -34,7 +34,7 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         value_kws = pc.get_values_kws()
 
-        element = echarts(**value_kws).classes("grow self-stretch h-[16rem]")
+        element = echarts(**value_kws).classes("nicegui-echart")
 
         super().__init__(element)  # type: ignore
 
