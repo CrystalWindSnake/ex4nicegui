@@ -10,11 +10,9 @@ NG_ROOT = Path(nicegui.__file__).parent / "elements"
 
 EX4_LIBS_ROOT = Path(__file__).parent.parent.parent / "libs"
 
-exposed_libraries = [
+dependencies = [
     NG_ROOT / "lib/mermaid/mermaid.esm.min.mjs",
     EX4_LIBS_ROOT / "d3/*.js",
-]
-extra_libraries = [
     NG_ROOT / "lib/mermaid/*.js",
 ]
 
@@ -27,8 +25,7 @@ class NodeClickEventArguments(UiEventArguments):
 class Mermaid(  # type: ignore
     ContentElement,
     component="mermaid.js",
-    exposed_libraries=exposed_libraries,  # type: ignore
-    extra_libraries=extra_libraries,  # type: ignore
+    dependencies=dependencies,  # type: ignore
 ):
     CONTENT_PROP = "content"
 
