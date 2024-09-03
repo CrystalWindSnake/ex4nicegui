@@ -223,6 +223,23 @@ def test_pyecharts(browser: BrowserManager, page_path: str):
     assert "formatter" in chart_opts["yAxis"][0]["axisLabel"]
 
 
+def test_pyecharts_from_fn(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        data = to_ref([0.1, 0.2])
+
+        def bar_chart():
+            return Bar().add_xaxis(["A", "B"]).add_yaxis("ratio", data.value)
+
+        rxui.echarts.from_pyecharts(bar_chart).classes("target")
+
+    page = browser.open(page_path)
+
+    target = page.ECharts(".target")
+
+    target.assert_canvas_exists()
+
+
 def test_click_event(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
