@@ -112,7 +112,7 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
             self.run_method("echarts_on", ui_event_name, query)
 
     def run_chart_method(
-        self, name: str, *args, timeout: float = 1, check_interval: float = 0.01
+        self, name: str, *args, timeout: float = 1
     ) -> AwaitableResponse:
         """Run a method of the JSONEditor instance.
 
@@ -133,5 +133,4 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
             name,
             *args,
             timeout=timeout,
-            check_interval=check_interval,
         )
