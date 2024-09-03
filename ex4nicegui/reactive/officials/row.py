@@ -1,17 +1,25 @@
 from typing import (
     Any,
+    Literal,
+    Optional,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.utils.signals import (
-    _TMaybeRef as TMaybeRef,
-)
+from ex4nicegui.reactive.mixins.flexLayout import FlexAlignItemsMixin, FlexWrapMixin
+from ex4nicegui.utils.signals import TMaybeRef
 from nicegui import ui
 from .base import BindableUi
 
 
-class RowBindableUi(BindableUi[ui.row]):
-    def __init__(self, *, wrap: TMaybeRef[bool] = True) -> None:
-        pc = ParameterClassifier(locals(), maybeRefs=["wrap"], events=[])
+class RowBindableUi(BindableUi[ui.row], FlexAlignItemsMixin, FlexWrapMixin):
+    def __init__(
+        self,
+        *,
+        wrap: TMaybeRef[bool] = True,
+        align_items: Optional[
+            TMaybeRef[Literal["start", "end", "center", "baseline", "stretch"]]
+        ] = None,
+    ) -> None:
+        pc = ParameterClassifier(locals(), maybeRefs=["wrap", "align_items"], events=[])
         element = ui.row(**pc.get_values_kws())
 
         super().__init__(element)
@@ -19,13 +27,12 @@ class RowBindableUi(BindableUi[ui.row]):
             self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, value: TMaybeRef):
-        if prop == "wrap":
-            return self.bind_wrap(value)
+        if FlexAlignItemsMixin._bind_specified_props(self, prop, value):
+            return self
+        if FlexWrapMixin._bind_specified_props(self, prop, value):
+            return self
 
         return super().bind_prop(prop, value)
-
-    def bind_wrap(self, value: TMaybeRef):
-        self.bind_classes({"wrap": value})
 
     def __enter__(self):
         self.element.__enter__()
