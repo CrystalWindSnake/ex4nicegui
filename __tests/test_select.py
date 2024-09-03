@@ -1,6 +1,7 @@
+from typing import Optional
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed, effect, deep_ref
+from ex4nicegui import to_ref, ref_computed, effect, deep_ref, Ref
 from .screen import BrowserManager
 import pytest
 
@@ -17,7 +18,7 @@ def test_const_str(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str(browser: BrowserManager, page_path: str):
-    r_str = to_ref("")
+    r_str: Ref[Optional[str]] = to_ref(None)
 
     @ui.page(page_path)
     def _():
