@@ -94,13 +94,14 @@ class EChartsBindableUi(BindableUi[echarts]):
 
     @classmethod
     def from_pyecharts(cls, chart: TMaybeRef):
-        if is_ref(chart):
+        if is_ref(chart) or callable(chart):
 
             @ref_computed
             def chart_opt():
-                if not bool(chart.value):
+                chart_value = to_value(chart)
+                if not bool(chart_value):
                     return {}
-                return PyechartsUtils._chart2opts(chart.value)
+                return PyechartsUtils._chart2opts(chart_value)
 
             return cls(chart_opt)
 
