@@ -228,7 +228,10 @@ class EChartsBindableUi(BindableUi[echarts]):
         return self
 
     def run_chart_method(
-        self, name: str, *args, timeout: float = 1, check_interval: float = 0.01
+        self,
+        name: str,
+        *args,
+        timeout: float = 1,
     ) -> AwaitableResponse:
         """Run a method of the JSONEditor instance.
 
@@ -240,7 +243,6 @@ class EChartsBindableUi(BindableUi[echarts]):
         :param name: name of the method (a prefix ":" indicates that the arguments are JavaScript expressions)
         :param args: arguments to pass to the method (Python objects or JavaScript expressions)
         :param timeout: timeout in seconds (default: 1 second)
-        :param check_interval: interval in seconds to check for a response (default: 0.01 seconds)
 
         :return: AwaitableResponse that can be awaited to get the result of the method call
         """
@@ -248,7 +250,6 @@ class EChartsBindableUi(BindableUi[echarts]):
             name,
             *args,
             timeout=timeout,
-            check_interval=check_interval,
         )
 
 

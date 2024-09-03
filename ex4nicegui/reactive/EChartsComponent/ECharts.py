@@ -23,7 +23,7 @@ NG_ROOT = Path(nicegui.__file__).parent / "elements"
 libraries = [NG_ROOT / "lib/echarts/echarts.min.js"]
 
 
-class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ignore
+class echarts(Element, component="ECharts.js", dependencies=libraries):  # type: ignore
     def __init__(
         self,
         options: Optional[dict] = None,
@@ -112,7 +112,7 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
             self.run_method("echarts_on", ui_event_name, query)
 
     def run_chart_method(
-        self, name: str, *args, timeout: float = 1, check_interval: float = 0.01
+        self, name: str, *args, timeout: float = 1
     ) -> AwaitableResponse:
         """Run a method of the JSONEditor instance.
 
@@ -124,7 +124,6 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
         :param name: name of the method (a prefix ":" indicates that the arguments are JavaScript expressions)
         :param args: arguments to pass to the method (Python objects or JavaScript expressions)
         :param timeout: timeout in seconds (default: 1 second)
-        :param check_interval: interval in seconds to check for a response (default: 0.01 seconds)
 
         :return: AwaitableResponse that can be awaited to get the result of the method call
         """
@@ -133,5 +132,4 @@ class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ig
             name,
             *args,
             timeout=timeout,
-            check_interval=check_interval,
         )
