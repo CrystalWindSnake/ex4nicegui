@@ -10,7 +10,7 @@ keywords = ["nicegui", "ex4nicegui", "webui"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-nicegui = "^1.4.25"
+nicegui = "^2.0.0"
 signe = "^0.4.20"
 executing = "^2.0.1"
 
