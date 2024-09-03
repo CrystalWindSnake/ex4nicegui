@@ -1,3 +1,4 @@
+import 'echarts'
 import { convertDynamicProperties } from "../../static/utils/dynamic_properties.js";
 
 function collectMapRegisterTask() {
@@ -54,10 +55,8 @@ const mapRegisterTasks = collectMapRegisterTask();
 export default {
   template: "<div></div>",
   async mounted() {
-    await this.$nextTick(); // wait for Tailwind classes to be applied
-
+    await new Promise((resolve) => setTimeout(resolve, 0)); // wait for Tailwind classes to be applied
     this.chart = echarts.init(this.$el, this.theme);
-
     this.resizeObs = new ResizeObserver(this.chart.resize)
 
     // Prevent interruption of chart animations due to resize operations.

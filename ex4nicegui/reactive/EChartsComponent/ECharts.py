@@ -23,7 +23,7 @@ NG_ROOT = Path(nicegui.__file__).parent / "elements"
 libraries = [NG_ROOT / "lib/echarts/echarts.min.js"]
 
 
-class echarts(Element, component="ECharts.js", libraries=libraries):  # type: ignore
+class echarts(Element, component="ECharts.js", dependencies=libraries):  # type: ignore
     def __init__(
         self,
         options: Optional[dict] = None,
