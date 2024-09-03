@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Dict, cast
+from typing import Any, Callable, List, Optional, Dict, Union, cast
 
 
 from ex4nicegui.utils.signals import (
@@ -26,7 +26,9 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
         password_toggle_button: TMaybeRef[bool] = False,
         on_change: Optional[Callable[..., Any]] = None,
         autocomplete: Optional[TMaybeRef[List[str]]] = None,
-        validation: Dict[str, Callable[..., bool]] = {},
+        validation: Optional[
+            Union[Callable[..., Optional[str]], Dict[str, Callable[..., bool]]]
+        ] = None,
     ) -> None:
         pc = ParameterClassifier(
             locals(),

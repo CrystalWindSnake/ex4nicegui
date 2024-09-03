@@ -37,7 +37,9 @@ class NumberBindableUi(BindableUi[ui.number]):
         suffix: Optional[TMaybeRef[str]] = None,
         format: Optional[TMaybeRef[str]] = None,
         on_change: Optional[Callable[..., Any]] = None,
-        validation: Dict[str, Callable[..., bool]] = {},
+        validation: Optional[
+            Union[Callable[..., Optional[str]], Dict[str, Callable[..., bool]]]
+        ] = None,
     ) -> None:
         pc = ParameterClassifier(
             locals(),
