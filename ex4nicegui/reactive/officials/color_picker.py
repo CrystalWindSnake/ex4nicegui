@@ -5,6 +5,7 @@ from typing import (
     cast,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
@@ -18,7 +19,7 @@ from nicegui.events import handle_event
 from .base import BindableUi
 
 
-class ColorPickerBindableUi(BindableUi[ui.color_picker]):
+class ColorPickerBindableUi(BindableUi[ui.color_picker], ValueElementMixin[bool]):
     def __init__(
         self,
         color: TMaybeRef[str] = "",
@@ -69,8 +70,8 @@ class ColorPickerBindableUi(BindableUi[ui.color_picker]):
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
 
         return super().bind_prop(prop, value)
 
@@ -78,13 +79,6 @@ class ColorPickerBindableUi(BindableUi[ui.color_picker]):
         @self._ui_effect
         def _():
             self.element.set_color(to_value(color))
-
-        return self
-
-    def bind_value(self, value: TGetterOrReadonlyRef[bool]):
-        @self._ui_signal_on(value)
-        def _():
-            self.element.set_value(to_value(value))
 
         return self
 

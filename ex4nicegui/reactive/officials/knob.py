@@ -12,12 +12,11 @@ from ex4nicegui.utils.signals import (
 from nicegui import ui
 from .base import BindableUi, DisableableMixin
 from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 
 
 class KnobBindableUi(
-    BindableUi[ui.knob],
-    DisableableMixin,
-    TextColorableMixin,
+    BindableUi[ui.knob], DisableableMixin, TextColorableMixin, ValueElementMixin[float]
 ):
     def __init__(
         self,
@@ -62,16 +61,9 @@ class KnobBindableUi(
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
         if prop == "color":
             return self.bind_color(value)
 
         return super().bind_prop(prop, value)
-
-    def bind_value(self, value: TGetterOrReadonlyRef[float]):
-        @self._ui_signal_on(value)
-        def _():
-            self.element.set_value(to_value(value))
-
-        return self
