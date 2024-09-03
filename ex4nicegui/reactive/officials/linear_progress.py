@@ -5,7 +5,6 @@ from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
-    to_value,
 )
 from nicegui import ui
 

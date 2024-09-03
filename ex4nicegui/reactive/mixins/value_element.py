@@ -1,9 +1,7 @@
 from typing import Any, Callable, Protocol, Generic, TypeVar
-from typing_extensions import Self
 import signe
 from ex4nicegui.utils.signals import to_value, TMaybeRef
 from nicegui.elements.mixins.value_element import ValueElement
-from ex4nicegui.utils.types import TGetterOrReadonlyRef
 
 T = TypeVar("T", contravariant=True)
 

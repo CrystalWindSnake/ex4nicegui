@@ -6,7 +6,6 @@ from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
-    to_value,
 )
 from nicegui import ui
 from .base import BindableUi

@@ -6,7 +6,6 @@ from typing import (
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
-    to_value,
     TGetterOrReadonlyRef,
 )
 from nicegui import ui
