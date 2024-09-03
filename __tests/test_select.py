@@ -63,7 +63,7 @@ def test_clearable(browser: BrowserManager, page_path: str):
 
 
 def test_option_change(browser: BrowserManager, page_path: str):
-    r_str = to_ref("")
+    r_str = to_ref(None)
     r_has_data = to_ref(False)
 
     @ref_computed

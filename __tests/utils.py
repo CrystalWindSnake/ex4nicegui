@@ -140,7 +140,7 @@ class SelectUtils(BaseUiUtils):
         ).all_inner_texts()
 
     def click_cancel(self):
-        self.page.get_by_role("button", name="cancel").click()
+        self.page.get_by_label("Clear").click()
 
     def click_and_select(self, *values: str):
         self.click()
