@@ -40,10 +40,10 @@ pip install ex4nicegui -U
 
 ## 🦄 使用
 
+![](./asset/sync_input.gif)
 ```python
 from nicegui import ui
-from ex4nicegui import ref_computed, effect, to_ref
-from ex4nicegui.reactive import rxui
+from ex4nicegui import rxui, ref_computed, effect, to_ref
 
 # 定义响应式数据
 r_input = to_ref("")
@@ -54,7 +54,65 @@ rxui.label(r_input)
 
 ui.run()
 ```
-![](./asset/sync_input.gif)
+
+
+---
+
+![colors](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/colors.01.gif)
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui, to_ref
+
+ui.select.default_props("outlined dense").default_classes("min-w-[20ch]")
+
+colors = ["red", "green", "blue", "yellow", "purple", "white"]
+
+color = to_ref("blue")
+bg_color = to_ref("red")
+
+# 函数中通过访问 `ref` 或其他关联函数获取值，一切会自动同步更新
+def bg_text():
+    return f"当前背景颜色为{bg_color.value}"
+
+
+# ui
+rxui.select(colors, value=color, label="选择字体颜色")
+rxui.select(colors, value=bg_color, label="选择背景颜色")
+
+rxui.label(bg_text).bind_style({"background-color": bg_color})
+
+# with lambda
+rxui.label(lambda: f"字体颜色为{color.value}").bind_style({"color": color})
+
+from nicegui import ui
+from ex4nicegui import rxui, to_ref
+
+ui.radio.default_props("inline")
+
+# 定义视图数据
+colors = ["red", "green", "blue", "yellow", "purple", "white"]
+color = to_ref("blue")
+bg_color = to_ref("red")
+
+
+## 函数中通过访问 `ref` 或其他关联函数获取值，一切会自动同步更新
+def bg_text():
+    return f"Current background color is {bg_color.value}"
+
+
+# 界面
+
+with ui.row(align_items="center"):
+    rxui.radio(colors, value=color)
+    ## 可以使用 lambda
+    rxui.label(lambda: f"Font color is {color.value}").bind_style({"color": color})
+
+with ui.row(align_items="center"):
+    rxui.radio(colors, value=bg_color)
+    ## 直接绑定函数
+    rxui.label(bg_text).bind_style({"background-color": bg_color})
+```
 
 
 ### 提供 echarts 图表组件
