@@ -9,7 +9,7 @@
 - [教程](#教程)
 - [安装](#-安装)
 - [使用](#-使用)
-- [功能](#-功能)
+- [图表](#-图表)
 - [BI 模块](#bi-模块)
 
 对 [nicegui](https://github.com/zauberzeug/nicegui) 做的扩展库。内置响应式组件，完全实现数据响应式界面编程。
@@ -89,126 +89,6 @@ with ui.row(align_items="center"):
     ## 直接绑定函数
     rxui.label(bg_text).bind_style({"background-color": bg_color})
 ```
-
-
-### 提供 echarts 图表组件
-
-```python
-from nicegui import ui
-from ex4nicegui import ref_computed, effect, to_ref
-from ex4nicegui.reactive import rxui
-
-r_input = to_ref("")
-
-# ref_computed 创建只读响应式变量
-# 函数中使用任意其他响应式变量，会自动关联
-@ref_computed
-def cp_echarts_opts():
-    return {
-        "title": {"text": r_input.value}, #字典中使用任意响应式变量，通过 .value 获取值
-        "xAxis": {
-            "type": "category",
-            "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        },
-        "yAxis": {"type": "value"},
-        "series": [
-            {
-                "data": [120, 200, 150, 80, 70, 110, 130],
-                "type": "bar",
-                "showBackground": True,
-                "backgroundStyle": {"color": "rgba(180, 180, 180, 0.2)"},
-            }
-        ],
-    }
-
-input = rxui.input("输入内容，图表标题会同步", value=r_input)
-# 通过响应式组件对象的 element 属性，获取原生 nicegui 组件对象
-input.element.classes("w-full")
-
-rxui.echarts(cp_echarts_opts)
-
-ui.run()
-```
-![](./asset/asyc_echarts_title.gif)
-
-
-### echarts 图表鼠标事件
-
-`on` 函数参数 `event_name` 以及 `query` 使用,查看[echarts 事件中文文档](https://echarts.apache.org/handbook/zh/concepts/event/)
-
-
-以下例子绑定鼠标单击事件
-```python
-from nicegui import ui
-from ex4nicegui.reactive import rxui
-
-opts = {
-    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
-    "yAxis": {
-        "type": "category",
-        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
-    },
-    "series": [
-        {
-            "name": "first",
-            "type": "bar",
-            "data": [18203, 23489, 29034, 104970, 131744, 630230],
-        },
-        {
-            "name": "second",
-            "type": "bar",
-            "data": [19325, 23438, 31000, 121594, 134141, 681807],
-        },
-    ],
-}
-
-bar = rxui.echarts(opts)
-
-def on_click(e: rxui.echarts.EChartsMouseEventArguments):
-    ui.notify(f"on_click:{e.seriesName}:{e.name}:{e.value}")
-
-
-bar.on("click", on_click)
-```
-
-
-以下例子只针对指定系列触发鼠标划过事件
-```python
-from nicegui import ui
-from ex4nicegui.reactive import rxui
-
-opts = {
-    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
-    "yAxis": {
-        "type": "category",
-        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
-    },
-    "series": [
-        {
-            "name": "first",
-            "type": "bar",
-            "data": [18203, 23489, 29034, 104970, 131744, 630230],
-        },
-        {
-            "name": "second",
-            "type": "bar",
-            "data": [19325, 23438, 31000, 121594, 134141, 681807],
-        },
-    ],
-}
-
-bar = rxui.echarts(opts)
-
-def on_first_series_mouseover(e: rxui.echarts.EChartsMouseEventArguments):
-    ui.notify(f"on_first_series_mouseover:{e.seriesName}:{e.name}:{e.value}")
-
-
-bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
-
-ui.run()
-```
----
-
 
 
 ## ViewModel
@@ -341,7 +221,7 @@ with ui.row():
 from ex4nicegui import rxui, Ref,effect_refreshable
 ...
 
-# 明确指定监控 home.persons 变化，可以避免意味刷新
+# 明确指定监控 home.persons 变化，可以避免意外刷新
 @effect_refreshable.on(home.persons)
 def _():
     
@@ -357,6 +237,127 @@ def _():
 更多复杂的应用，可以查看 [examples](./examples)
 
 ---
+
+## 图表
+
+### 提供 echarts 图表组件
+
+```python
+from nicegui import ui
+from ex4nicegui import ref_computed, effect, to_ref
+from ex4nicegui.reactive import rxui
+
+r_input = to_ref("")
+
+# ref_computed 创建只读响应式变量
+# 函数中使用任意其他响应式变量，会自动关联
+@ref_computed
+def cp_echarts_opts():
+    return {
+        "title": {"text": r_input.value}, #字典中使用任意响应式变量，通过 .value 获取值
+        "xAxis": {
+            "type": "category",
+            "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        },
+        "yAxis": {"type": "value"},
+        "series": [
+            {
+                "data": [120, 200, 150, 80, 70, 110, 130],
+                "type": "bar",
+                "showBackground": True,
+                "backgroundStyle": {"color": "rgba(180, 180, 180, 0.2)"},
+            }
+        ],
+    }
+
+input = rxui.input("输入内容，图表标题会同步", value=r_input)
+# 通过响应式组件对象的 element 属性，获取原生 nicegui 组件对象
+input.element.classes("w-full")
+
+rxui.echarts(cp_echarts_opts)
+
+ui.run()
+```
+![](./asset/asyc_echarts_title.gif)
+
+
+### echarts 图表鼠标事件
+
+`on` 函数参数 `event_name` 以及 `query` 使用,查看[echarts 事件中文文档](https://echarts.apache.org/handbook/zh/concepts/event/)
+
+
+以下例子绑定鼠标单击事件
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_click(e: rxui.echarts.EChartsMouseEventArguments):
+    ui.notify(f"on_click:{e.seriesName}:{e.name}:{e.value}")
+
+
+bar.on("click", on_click)
+```
+
+
+以下例子只针对指定系列触发鼠标划过事件
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_first_series_mouseover(e: rxui.echarts.EChartsMouseEventArguments):
+    ui.notify(f"on_first_series_mouseover:{e.seriesName}:{e.name}:{e.value}")
+
+
+bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
+
+ui.run()
+```
+---
+
 
 ## 响应式
 

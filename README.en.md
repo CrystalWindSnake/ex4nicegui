@@ -78,127 +78,6 @@ with ui.row(align_items="center"):
     rxui.label(bg_text).bind_style({"background-color": bg_color})
 ```
 
-## 🚀 Features
-
-### echarts components
-
-```python
-from nicegui import ui
-from ex4nicegui import ref_computed, effect, to_ref
-from ex4nicegui.reactive import rxui
-
-r_input = to_ref("")
-
-
-# ref_computed Creates a read-only reactive variable
-# Functions can use any other reactive variables automatically when they are associated
-@ref_computed
-def cp_echarts_opts():
-    return {
-        "title": {"text": r_input.value}, #In the dictionary, use any reactive variable. Get the value by .value
-        "xAxis": {
-            "type": "category",
-            "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        },
-        "yAxis": {"type": "value"},
-        "series": [
-            {
-                "data": [120, 200, 150, 80, 70, 110, 130],
-                "type": "bar",
-                "showBackground": True,
-                "backgroundStyle": {"color": "rgba(180, 180, 180, 0.2)"},
-            }
-        ],
-    }
-
-
-input = rxui.input("Enter the content, and the chart title will be synchronized", value=r_input)
-
-# Get the native nicegui component object through the element attribute of the responsive component object
-input.element.classes("w-full")
-
-rxui.echarts(cp_echarts_opts).classes('h-[20rem]')
-
-ui.run()
-```
-![](./asset/asyc_echarts_title.gif)
-
-
-### echarts mouse events
-
-the `on` function parameters `event_name` and `query` to view the[echarts English Documentation](https://echarts.apache.org/handbook/en/concepts/event/)
-
-
-The following example binds the mouse click event
-```python
-from nicegui import ui
-from ex4nicegui.reactive import rxui
-
-opts = {
-    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
-    "yAxis": {
-        "type": "category",
-        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
-    },
-    "series": [
-        {
-            "name": "first",
-            "type": "bar",
-            "data": [18203, 23489, 29034, 104970, 131744, 630230],
-        },
-        {
-            "name": "second",
-            "type": "bar",
-            "data": [19325, 23438, 31000, 121594, 134141, 681807],
-        },
-    ],
-}
-
-bar = rxui.echarts(opts)
-
-def on_click(e: rxui.echarts.EChartsMouseEventArguments):
-    ui.notify(f"on_click:{e.seriesName}:{e.name}:{e.value}")
-
-bar.on("click", on_click)
-```
-
-
-The following example only triggers the mouseover event for a specified series.
-```python
-from nicegui import ui
-from ex4nicegui.reactive import rxui
-
-opts = {
-    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
-    "yAxis": {
-        "type": "category",
-        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
-    },
-    "series": [
-        {
-            "name": "first",
-            "type": "bar",
-            "data": [18203, 23489, 29034, 104970, 131744, 630230],
-        },
-        {
-            "name": "second",
-            "type": "bar",
-            "data": [19325, 23438, 31000, 121594, 134141, 681807],
-        },
-    ],
-}
-
-bar = rxui.echarts(opts)
-
-def on_first_series_mouseover(e: rxui.echarts.EChartsMouseEventArguments):
-    ui.notify(f"on_first_series_mouseover:{e.seriesName}:{e.name}:{e.value}")
-
-
-bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
-
-ui.run()
-```
----
 
 ## ViewModel
 In version v0.7.0, the `ViewModel` class has been incorporated to facilitate the management of reactive data sets. Below is an illustrative example utilizing a basic calculator interface:
@@ -343,6 +222,128 @@ Note that whenever the `home.persons` list changes (such as when elements are ad
 
 For more complex applications, please refer to the [examples](./examples)
 
+---
+
+## 🚀 Features
+
+### echarts components
+
+```python
+from nicegui import ui
+from ex4nicegui import ref_computed, effect, to_ref
+from ex4nicegui.reactive import rxui
+
+r_input = to_ref("")
+
+
+# ref_computed Creates a read-only reactive variable
+# Functions can use any other reactive variables automatically when they are associated
+@ref_computed
+def cp_echarts_opts():
+    return {
+        "title": {"text": r_input.value}, #In the dictionary, use any reactive variable. Get the value by .value
+        "xAxis": {
+            "type": "category",
+            "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        },
+        "yAxis": {"type": "value"},
+        "series": [
+            {
+                "data": [120, 200, 150, 80, 70, 110, 130],
+                "type": "bar",
+                "showBackground": True,
+                "backgroundStyle": {"color": "rgba(180, 180, 180, 0.2)"},
+            }
+        ],
+    }
+
+
+input = rxui.input("Enter the content, and the chart title will be synchronized", value=r_input)
+
+# Get the native nicegui component object through the element attribute of the responsive component object
+input.element.classes("w-full")
+
+rxui.echarts(cp_echarts_opts).classes('h-[20rem]')
+
+ui.run()
+```
+![](./asset/asyc_echarts_title.gif)
+
+
+### echarts mouse events
+
+the `on` function parameters `event_name` and `query` to view the[echarts English Documentation](https://echarts.apache.org/handbook/en/concepts/event/)
+
+
+The following example binds the mouse click event
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_click(e: rxui.echarts.EChartsMouseEventArguments):
+    ui.notify(f"on_click:{e.seriesName}:{e.name}:{e.value}")
+
+bar.on("click", on_click)
+```
+
+
+The following example only triggers the mouseover event for a specified series.
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+
+opts = {
+    "xAxis": {"type": "value", "boundaryGap": [0, 0.01]},
+    "yAxis": {
+        "type": "category",
+        "data": ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+    },
+    "series": [
+        {
+            "name": "first",
+            "type": "bar",
+            "data": [18203, 23489, 29034, 104970, 131744, 630230],
+        },
+        {
+            "name": "second",
+            "type": "bar",
+            "data": [19325, 23438, 31000, 121594, 134141, 681807],
+        },
+    ],
+}
+
+bar = rxui.echarts(opts)
+
+def on_first_series_mouseover(e: rxui.echarts.EChartsMouseEventArguments):
+    ui.notify(f"on_first_series_mouseover:{e.seriesName}:{e.name}:{e.value}")
+
+
+bar.on("mouseover", on_first_series_mouseover, query={"seriesName": "first"})
+
+ui.run()
+```
 ---
 
 ## responsive
