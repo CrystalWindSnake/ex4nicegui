@@ -6,15 +6,18 @@ from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
-    to_value,
 )
 from nicegui import ui
 from .base import BindableUi, DisableableMixin
 from ex4nicegui.reactive.mixins.backgroundColor import BackgroundColorableMixin
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 
 
 class CircularProgressBindableUi(
-    BindableUi[ui.circular_progress], DisableableMixin, BackgroundColorableMixin
+    BindableUi[ui.circular_progress],
+    DisableableMixin,
+    BackgroundColorableMixin,
+    ValueElementMixin[float],
 ):
     def __init__(
         self,
@@ -50,16 +53,9 @@ class CircularProgressBindableUi(
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
         if prop == "color":
             return self.bind_color(value)
 
         return super().bind_prop(prop, value)
-
-    def bind_value(self, value: TGetterOrReadonlyRef[float]):
-        @self._ui_signal_on(value)
-        def _():
-            self.element.set_value(to_value(value))
-
-        return self

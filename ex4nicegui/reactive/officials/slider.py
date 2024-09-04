@@ -16,14 +16,14 @@ from ex4nicegui.utils.signals import (
 from nicegui import ui
 from nicegui.events import handle_event
 from .base import BindableUi, DisableableMixin
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 
 
 _TSliderValue = TypeVar("_TSliderValue", float, int, None)
 
 
 class SliderBindableUi(
-    BindableUi[ui.slider],
-    DisableableMixin,
+    BindableUi[ui.slider], DisableableMixin, ValueElementMixin[_TSliderValue]
 ):
     def __init__(
         self,
@@ -59,18 +59,10 @@ class SliderBindableUi(
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
 
         return super().bind_prop(prop, value)
-
-    def bind_value(self, value: TGetterOrReadonlyRef[float]):
-        @self._ui_signal_on(value)
-        def _():
-            self.element.set_value(to_value(value))
-            self.element.update()
-
-        return self
 
 
 class LazySliderBindableUi(SliderBindableUi):

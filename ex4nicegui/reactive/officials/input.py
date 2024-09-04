@@ -13,9 +13,14 @@ from nicegui import ui
 from nicegui.events import handle_event
 from .base import BindableUi, DisableableMixin
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 
 
-class InputBindableUi(BindableUi[ui.input], DisableableMixin):
+class InputBindableUi(
+    BindableUi[ui.input],
+    DisableableMixin,
+    ValueElementMixin[str],
+):
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
@@ -54,19 +59,12 @@ class InputBindableUi(BindableUi[ui.input], DisableableMixin):
             self.bind_prop(key, value)  # type: ignore
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
         if prop == "password":
             return self.bind_password(value)
 
         return super().bind_prop(prop, value)
-
-    def bind_value(self, value: TGetterOrReadonlyRef[str]):
-        @self._ui_signal_on(value)
-        def _():
-            self.element.set_value(to_value(value))
-
-        return self
 
     def bind_password(self, password: TGetterOrReadonlyRef[bool]):
         @self._ui_signal_on(password)

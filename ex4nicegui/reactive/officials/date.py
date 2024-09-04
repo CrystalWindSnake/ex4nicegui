@@ -1,11 +1,11 @@
 from typing import Any, Callable, List, Optional, TypeVar
 from typing_extensions import TypedDict
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
-    to_value,
 )
 from nicegui import ui
 from .base import BindableUi
@@ -18,7 +18,7 @@ _TDateValue = TypeVar(
 )
 
 
-class DateBindableUi(BindableUi[ui.date]):
+class DateBindableUi(BindableUi[ui.date], ValueElementMixin[_TDateValue]):
     def __init__(
         self,
         value: Optional[TMaybeRef[_TDateValue]] = None,
@@ -63,14 +63,7 @@ class DateBindableUi(BindableUi[ui.date]):
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
 
         return super().bind_prop(prop, value)
-
-    def bind_value(self, value: TGetterOrReadonlyRef[bool]):
-        @self._ui_signal_on(value)
-        def _():
-            self.element.set_value(to_value(value))
-
-        return self

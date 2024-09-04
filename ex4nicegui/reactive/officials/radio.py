@@ -4,7 +4,6 @@ from typing import (
     List,
     Optional,
     TypeVar,
-    cast,
     Dict,
     Union,
 )
@@ -15,13 +14,13 @@ from ex4nicegui.utils.signals import (
     to_value,
 )
 from nicegui import ui
-from nicegui.elements.mixins.value_element import ValueElement
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 from .base import BindableUi
 
 T = TypeVar("T")
 
 
-class RadioBindableUi(BindableUi[ui.radio]):
+class RadioBindableUi(BindableUi[ui.radio], ValueElementMixin[Any]):
     def __init__(
         self,
         options: Union[TMaybeRef[List], TMaybeRef[Dict]],
@@ -52,8 +51,8 @@ class RadioBindableUi(BindableUi[ui.radio]):
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
 
         if prop == "options":
             return self.bind_options(value)
@@ -64,12 +63,5 @@ class RadioBindableUi(BindableUi[ui.radio]):
         @self._ui_signal_on(options, deep=True)
         def _():
             self.element.set_options(to_value(options))
-
-        return self
-
-    def bind_value(self, value: TGetterOrReadonlyRef):
-        @self._ui_signal_on(value)
-        def _():
-            cast(ValueElement, self.element).set_value(to_value(value))
 
         return self

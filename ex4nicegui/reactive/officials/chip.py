@@ -9,12 +9,14 @@ from nicegui import ui
 from .base import BindableUi
 from ex4nicegui.reactive.mixins.backgroundColor import BackgroundColorableMixin
 from ex4nicegui.reactive.mixins.textColor import TextColorableMixin
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 
 
 class ChipBindableUi(
     BindableUi[ui.chip],
     BackgroundColorableMixin,
     TextColorableMixin,
+    ValueElementMixin[bool],
 ):
     def __init__(
         self,
@@ -29,6 +31,7 @@ class ChipBindableUi(
         on_selection_change: Optional[Callable[..., Any]] = None,
         removable: TMaybeRef[bool] = False,
         on_value_change: Optional[Callable[..., Any]] = None,
+        value: TMaybeRef[bool] = True,
     ) -> None:
         pc = ParameterClassifier(
             locals(),
@@ -40,11 +43,15 @@ class ChipBindableUi(
                 "selectable",
                 "selected",
                 "removable",
+                "value",
             ],
+            v_model=("value", "on_value_change"),
             events=["on_click", "on_selection_change", "on_value_change"],
         )
 
-        element = ui.chip(**pc.get_values_kws())
+        kws = pc.get_values_kws()
+        kws.pop("value", None)
+        element = ui.chip(**kws)
         super().__init__(element)
 
         for key, value in pc.get_bindings().items():
@@ -55,6 +62,9 @@ class ChipBindableUi(
         return self.element.text
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
+
         if prop == "text":
             return self.bind_text(value)
 

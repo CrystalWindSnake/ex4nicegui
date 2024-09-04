@@ -7,6 +7,7 @@ from typing import (
     Union,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
+from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
@@ -22,7 +23,7 @@ def _default_vmodel_args_getter(e):
     return e.sender.value
 
 
-class NumberBindableUi(BindableUi[ui.number]):
+class NumberBindableUi(BindableUi[ui.number], ValueElementMixin[Union[float, int]]):
     def __init__(
         self,
         label: Optional[TMaybeRef[str]] = None,
@@ -73,20 +74,13 @@ class NumberBindableUi(BindableUi[ui.number]):
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if prop == "value":
-            return self.bind_value(value)
+        if ValueElementMixin._bind_specified_props(self, prop, value):
+            return self
 
         if prop == "precision":
             return self._bind_precision(value)
 
         return super().bind_prop(prop, value)
-
-    def bind_value(self, value: TGetterOrReadonlyRef[float]):
-        @self._ui_signal_on(value)
-        def _():
-            self.element.set_value(to_value(value))
-
-        return self
 
     def _bind_precision(self, precision: TGetterOrReadonlyRef[int]):
         @self._ui_signal_on(precision)
