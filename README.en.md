@@ -145,20 +145,20 @@ In the following example, each person is displayed using a card. The average age
 Age modifications are made through the `number` component, triggering automatic updates across the display.
 
 ```python
+from typing import List
 from ex4nicegui import rxui, Ref
 from itertools import count
+from nicegui import ui
 
 id_generator = count()
 
 class Person(rxui.ViewModel):
-    name = rxui.var("")
-    age = rxui.var(0)
-
-    def __init__(self, name: str = "", age: int = 0):
+    def __init__(self, name: str, age: int):
         super().__init__()
-        self.name.value = name
-        self.age.value = age
+        self.name = rxui.var(name)
+        self.age = rxui.var(age)
         self.id = next(id_generator)
+
 
 
 class Home(rxui.ViewModel):
@@ -199,6 +199,7 @@ with ui.row():
             rxui.input(value=person.name, placeholder="name")
             rxui.number(value=person.age, min=1, max=100, step=1, placeholder="age")
 
+ui.run()
 ```
 
 If you find the `rxui.vfor` code too complex, you can use the `effect_refreshable` decorator instead.

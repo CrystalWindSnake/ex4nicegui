@@ -159,19 +159,18 @@ class Home(rxui.ViewModel):
 通过 `number` 组件修改年龄，一切都会自动更新。
 
 ```python
+from typing import List
 from ex4nicegui import rxui, Ref
 from itertools import count
+from nicegui import ui
 
 id_generator = count()
 
 class Person(rxui.ViewModel):
-    name = rxui.var("")
-    age = rxui.var(0)
-
-    def __init__(self, name: str = "", age: int = 0):
+    def __init__(self, name: str, age: int):
         super().__init__()
-        self.name.value = name
-        self.age.value = age
+        self.name = rxui.var(name)
+        self.age = rxui.var(age)
         self.id = next(id_generator)
 
 
@@ -213,6 +212,7 @@ with ui.row():
             rxui.input(value=person.name, placeholder="名字")
             rxui.number(value=person.age, min=1, max=100, step=1, placeholder="年龄")
 
+ui.run()
 ```
 
 如果你觉得 `rxui.vfor` 代码过于复杂，可以使用 `effect_refreshable` 装饰器代替。
