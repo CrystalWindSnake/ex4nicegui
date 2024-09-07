@@ -9,7 +9,7 @@
 - [教程](#教程)
 - [安装](#-安装)
 - [使用](#-使用)
-- [功能](#-功能)
+- [图表](#-图表)
 - [BI 模块](#bi-模块)
 
 对 [nicegui](https://github.com/zauberzeug/nicegui) 做的扩展库。内置响应式组件，完全实现数据响应式界面编程。
@@ -40,10 +40,10 @@ pip install ex4nicegui -U
 
 ## 🦄 使用
 
+![](./asset/sync_input.gif)
 ```python
 from nicegui import ui
-from ex4nicegui import ref_computed, effect, to_ref
-from ex4nicegui.reactive import rxui
+from ex4nicegui import rxui, ref_computed, effect, to_ref
 
 # 定义响应式数据
 r_input = to_ref("")
@@ -54,8 +54,191 @@ rxui.label(r_input)
 
 ui.run()
 ```
-![](./asset/sync_input.gif)
 
+
+---
+
+![colors](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/colors.01.gif)
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui, to_ref
+
+ui.radio.default_props("inline")
+
+# 定义视图数据
+colors = ["red", "green", "blue", "yellow", "purple", "white"]
+color = to_ref("blue")
+bg_color = to_ref("red")
+
+
+## 函数中通过访问 `ref` 或其他关联函数获取值，一切会自动同步更新
+def bg_text():
+    return f"Current background color is {bg_color.value}"
+
+
+# 界面
+
+with ui.row(align_items="center"):
+    rxui.radio(colors, value=color)
+    ## 可以使用 lambda
+    rxui.label(lambda: f"Font color is {color.value}").bind_style({"color": color})
+
+with ui.row(align_items="center"):
+    rxui.radio(colors, value=bg_color)
+    ## 直接绑定函数
+    rxui.label(bg_text).bind_style({"background-color": bg_color})
+```
+
+
+## ViewModel
+在 `v0.7.0` 版本中，引入 `ViewModel` 类，用于管理一组响应式数据。
+
+下面是一个简单的计算器示例：
+
+1. 当用户修改数值输入框或符号选择框，右侧会自动显示计算结果
+2. 当结果小于 0 时，结果显示为红色，否则为黑色
+
+```python
+from ex4nicegui import rxui
+
+class Calculator(rxui.ViewModel):
+    num1 = rxui.var(0)
+    sign = rxui.var("+")
+    num2 = rxui.var(0)
+
+    def result(self):
+        # 当 num1,sign,num2 任意一个值发生变化时，result 也会重新计算
+        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+
+# 每个对象拥有独立的数据
+calc = Calculator()
+
+with ui.row(align_items="center"):
+    rxui.number(value=calc.num1, label="Number 1")
+    rxui.select(value=calc.sign, options=["+", "-", "*", "/"], label="Sign")
+    rxui.number(value=calc.num2, label="Number 2")
+    ui.label("=")
+    rxui.label(calc.result).bind_color(
+        lambda: "red" if calc.result() < 0 else "black"
+    )
+
+```
+
+### cached_var
+
+上面的示例中，由于使用了两次 `calc.result` 。因此，每当 `num1`, `sign`, `num2` 任意一个值发生变化时，`result` 都会执行2次。
+
+实际上，第二次的计算是多余的。我们可以通过添加 `rxui.cached_var` 装饰器，避免多余的计算。
+
+```python
+class Calculator(rxui.ViewModel):
+    ...
+
+    @rxui.cached_var
+    def result(self):
+        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+
+...
+```
+
+---
+
+### 使用列表
+
+当数据为可变对象时，比如列表，字典等，需要提供工厂函数传给 `rxui.var`
+
+
+```python
+class Home(rxui.ViewModel):
+    persons= rxui.var(lambda: [])
+
+```
+
+下面的示例，每个 person 使用卡片展示。最上方显示所有人的平均年龄。当个人年龄大于平均年龄，卡片外边框将变为红色。
+通过 `number` 组件修改年龄，一切都会自动更新。
+
+```python
+from typing import List
+from ex4nicegui import rxui, Ref
+from itertools import count
+from nicegui import ui
+
+id_generator = count()
+
+class Person(rxui.ViewModel):
+    def __init__(self, name: str, age: int):
+        super().__init__()
+        self.name = rxui.var(name)
+        self.age = rxui.var(age)
+        self.id = next(id_generator)
+
+
+class Home(rxui.ViewModel):
+    persons: Ref[List[Person]] = rxui.var(lambda: [])
+
+    def avg_age(self) -> float:
+        if len(self.persons.value) == 0:
+            return 0
+
+        return sum(p.age.value for p in self.persons.value) / len(self.persons.value)
+
+    def sample_data(self):
+        self.persons.value = [
+            Person("alice", 25),
+            Person("bob", 30),
+            Person("charlie", 31),
+            Person("dave", 22),
+            Person("eve", 26),
+            Person("frank", 29),
+        ]
+
+home = Home()
+home.sample_data()
+
+rxui.label(lambda: f"平均年龄: {home.avg_age()}")
+
+
+with ui.row():
+
+    @rxui.vfor(home.persons, key="id")
+    def _(store: rxui.VforStore[Person]):
+        person = store.get_item()
+        with rxui.card().classes("outline").bind_classes(
+            {
+                "outline-red-500": lambda: person.age.value > home.avg_age(),
+            }
+        ):
+            rxui.input(value=person.name, placeholder="名字")
+            rxui.number(value=person.age, min=1, max=100, step=1, placeholder="年龄")
+
+ui.run()
+```
+
+如果你觉得 `rxui.vfor` 代码过于复杂，可以使用 `effect_refreshable` 装饰器代替。
+
+```python
+from ex4nicegui import rxui, Ref,effect_refreshable
+...
+
+# 明确指定监控 home.persons 变化，可以避免意外刷新
+@effect_refreshable.on(home.persons)
+def _():
+    
+    for person in home.persons.value:
+        ...
+        rxui.number(value=person.age, min=1, max=100, step=1, placeholder="年龄")
+...
+```
+
+需要注意到，每当 `home.persons` 列表变化时(比如新增或删除元素)，`effect_refreshable` 装饰的函数都会重新执行。意味着所有元素都会重新创建。
+
+
+更多复杂的应用，可以查看 [examples](./examples)
+
+---
+
+## 图表
 
 ### 提供 echarts 图表组件
 
@@ -175,154 +358,6 @@ ui.run()
 ```
 ---
 
-
-
-## ViewModel
-在 `v0.7.0` 版本中，引入 `ViewModel` 类，用于管理一组响应式数据。
-
-下面是一个简单的计算器示例：
-
-1. 当用户修改数值输入框或符号选择框，右侧会自动显示计算结果
-2. 当结果小于 0 时，结果显示为红色，否则为黑色
-
-```python
-from ex4nicegui import rxui
-
-class Calculator(rxui.ViewModel):
-    num1 = rxui.var(0)
-    sign = rxui.var("+")
-    num2 = rxui.var(0)
-
-    def result(self):
-        # 当 num1,sign,num2 任意一个值发生变化时，result 也会重新计算
-        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
-
-# 每个对象拥有独立的数据
-calc = Calculator()
-
-with ui.row(align_items="center"):
-    rxui.number(value=calc.num1, label="Number 1")
-    rxui.select(value=calc.sign, options=["+", "-", "*", "/"], label="Sign")
-    rxui.number(value=calc.num2, label="Number 2")
-    ui.label("=")
-    rxui.label(calc.result).bind_color(
-        lambda: "red" if calc.result() < 0 else "black"
-    )
-
-```
-
-### cached_var
-
-上面的示例中，由于使用了两次 `calc.result` 。因此，每当 `num1`, `sign`, `num2` 任意一个值发生变化时，`result` 都会执行2次。
-
-实际上，第二次的计算是多余的。我们可以通过添加 `rxui.cached_var` 装饰器，避免多余的计算。
-
-```python
-class Calculator(rxui.ViewModel):
-    ...
-
-    @rxui.cached_var
-    def result(self):
-        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
-
-...
-```
-
----
-
-### 使用列表
-
-当数据为可变对象时，比如列表，字典等，需要提供工厂函数传给 `rxui.var`
-
-
-```python
-class Home(rxui.ViewModel):
-    persons= rxui.var(lambda: [])
-
-```
-
-下面的示例，每个 person 使用卡片展示。最上方显示所有人的平均年龄。当个人年龄大于平均年龄，卡片外边框将变为红色。
-通过 `number` 组件修改年龄，一切都会自动更新。
-
-```python
-from ex4nicegui import rxui, Ref
-from itertools import count
-
-id_generator = count()
-
-class Person(rxui.ViewModel):
-    name = rxui.var("")
-    age = rxui.var(0)
-
-    def __init__(self, name: str = "", age: int = 0):
-        super().__init__()
-        self.name.value = name
-        self.age.value = age
-        self.id = next(id_generator)
-
-
-class Home(rxui.ViewModel):
-    persons: Ref[List[Person]] = rxui.var(lambda: [])
-
-    def avg_age(self) -> float:
-        if len(self.persons.value) == 0:
-            return 0
-
-        return sum(p.age.value for p in self.persons.value) / len(self.persons.value)
-
-    def sample_data(self):
-        self.persons.value = [
-            Person("alice", 25),
-            Person("bob", 30),
-            Person("charlie", 31),
-            Person("dave", 22),
-            Person("eve", 26),
-            Person("frank", 29),
-        ]
-
-home = Home()
-home.sample_data()
-
-rxui.label(lambda: f"平均年龄: {home.avg_age()}")
-
-
-with ui.row():
-
-    @rxui.vfor(home.persons, key="id")
-    def _(store: rxui.VforStore[Person]):
-        person = store.get_item()
-        with rxui.card().classes("outline").bind_classes(
-            {
-                "outline-red-500": lambda: person.age.value > home.avg_age(),
-            }
-        ):
-            rxui.input(value=person.name, placeholder="名字")
-            rxui.number(value=person.age, min=1, max=100, step=1, placeholder="年龄")
-
-```
-
-如果你觉得 `rxui.vfor` 代码过于复杂，可以使用 `effect_refreshable` 装饰器代替。
-
-```python
-from ex4nicegui import rxui, Ref,effect_refreshable
-...
-
-# 明确指定监控 home.persons 变化，可以避免意味刷新
-@effect_refreshable.on(home.persons)
-def _():
-    
-    for person in home.persons.value:
-        ...
-        rxui.number(value=person.age, min=1, max=100, step=1, placeholder="年龄")
-...
-```
-
-需要注意到，每当 `home.persons` 列表变化时(比如新增或删除元素)，`effect_refreshable` 装饰的函数都会重新执行。意味着所有元素都会重新创建。
-
-
-更多复杂的应用，可以查看 [examples](./examples)
-
----
 
 ## 响应式
 
