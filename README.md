@@ -15,9 +15,9 @@
 对 [nicegui](https://github.com/zauberzeug/nicegui) 做的扩展库。内置响应式组件，完全实现数据响应式界面编程。
 
 
-![todo-app](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/todo-app.02.gif)
+![todo-app](https://gitee.com/carson_add/ex4nicegui-examples/raw/main/asset/todo-app.01.gif)
 
-[查看更多示例](https://github.com/CrystalWindSnake/ex4nicegui-examples)
+[查看更多示例](https://gitee.com/carson_add/ex4nicegui-examples)
 
 ## 教程
 [头条文章-秒杀官方实现，python界面库，去掉90%事件代码的nicegui](https://www.toutiao.com/item/7253786340574265860/)
@@ -58,7 +58,7 @@ ui.run()
 
 ---
 
-![colors](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/colors.01.gif)
+![colors](https://gitee.com/carson_add/ex4nicegui-examples/raw/main/asset/colors.01.gif)
 
 ```python
 from nicegui import ui
