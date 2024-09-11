@@ -97,11 +97,11 @@ class ListProxy(list, Generic[_T]):
     @overload
     def __add__(self, value: list[_T], /) -> list[_T]: ...
     @overload
-    def __add__(self, value: list[_S], /) -> list[_S | _T]: ...
+    def __add__(self, value: list[_S], /) -> list[Union[_S, _T]]: ...
 
     def __add__(
         self, value: Union[list[_T], list[_S]], /
-    ) -> Union[list[_T], list[_S | _T]]:
+    ) -> Union[list[_T], list[Union[_S, _T]]]:
         return self._ref.value.__add__(value)
 
     def __iadd__(self, value: Iterable[_T], /) -> Self:  # type: ignore[misc]

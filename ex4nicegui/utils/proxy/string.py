@@ -5,6 +5,7 @@ from typing import (
     Optional,
     SupportsIndex,
     Tuple,
+    Union,
     overload,
 )
 from typing_extensions import LiteralString
@@ -64,7 +65,7 @@ class StringProxy(str):
 
     def endswith(
         self,
-        suffix: str | Tuple[str, ...],
+        suffix: Union[str, Tuple[str, ...]],
         start: Optional[SupportsIndex] = ...,
         end: Optional[SupportsIndex] = ...,
         /,
@@ -173,11 +174,11 @@ class StringProxy(str):
 
     @overload
     def lstrip(
-        self: LiteralString, chars: LiteralString | None = None, /
+        self: LiteralString, chars: Optional[LiteralString] = None, /
     ) -> LiteralString: ...
     @overload
-    def lstrip(self, chars: str | None = None, /) -> str: ...  # type: ignore[misc]
-    def lstrip(self, chars: str | None = None, /) -> str:
+    def lstrip(self, chars: Optional[str] = None, /) -> str: ...  # type: ignore[misc]
+    def lstrip(self, chars: Optional[str] = None, /) -> str:
         return self._ref.value.lstrip(chars)
 
     @overload
@@ -261,7 +262,7 @@ class StringProxy(str):
     @overload
     def rsplit(
         self: LiteralString,
-        sep: LiteralString | None = None,
+        sep: Optional[LiteralString] = None,
         maxsplit: SupportsIndex = -1,
     ) -> list[LiteralString]: ...
     @overload
@@ -275,24 +276,24 @@ class StringProxy(str):
 
     @overload
     def rstrip(
-        self: LiteralString, chars: LiteralString | None = None, /
+        self: LiteralString, chars: Optional[LiteralString] = None, /
     ) -> LiteralString: ...
     @overload
-    def rstrip(self, chars: str | None = None, /) -> str: ...  # type: ignore[misc]
-    def rstrip(self, chars: str | None = None, /):
+    def rstrip(self, chars: Optional[str] = None, /) -> str: ...  # type: ignore[misc]
+    def rstrip(self, chars: Optional[str] = None, /):
         return self._ref.value.rstrip(chars)
 
     @overload
     def split(
         self: LiteralString,
-        sep: LiteralString | None = None,
+        sep: Optional[LiteralString] = None,
         maxsplit: SupportsIndex = -1,
     ) -> list[LiteralString]: ...
     @overload
     def split(
-        self, sep: str | None = None, maxsplit: SupportsIndex = -1
+        self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1
     ) -> list[str]: ...  # type: ignore[misc]
-    def split(self, sep: str | None = None, maxsplit: SupportsIndex = -1):
+    def split(self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1):
         return self._ref.value.split(sep, maxsplit)
 
     @overload
@@ -306,7 +307,7 @@ class StringProxy(str):
 
     def startswith(
         self,
-        prefix: str | Tuple[str, ...],
+        prefix: Union[str, Tuple[str, ...]],
         start: Optional[SupportsIndex] = ...,
         end: Optional[SupportsIndex] = ...,
         /,
@@ -315,11 +316,11 @@ class StringProxy(str):
 
     @overload
     def strip(
-        self: LiteralString, chars: LiteralString | None = None, /
+        self: LiteralString, chars: Optional[LiteralString] = None, /
     ) -> LiteralString: ...
     @overload
-    def strip(self, chars: str | None = None, /) -> str: ...  # type: ignore[misc]
-    def strip(self, chars: str | None = None, /):
+    def strip(self, chars: Optional[str] = None, /) -> str: ...  # type: ignore[misc]
+    def strip(self, chars: Optional[str] = None, /):
         return self._ref.value.strip(chars)
 
     @overload
@@ -370,7 +371,7 @@ class StringProxy(str):
     def __ge__(self, value: str, /) -> bool:
         return self._ref.value.__ge__(value)
 
-    def __getitem__(self, key: SupportsIndex | slice, /) -> str:
+    def __getitem__(self, key: Union[SupportsIndex, slice], /) -> str:
         return self._ref.value.__getitem__(key)
 
     def __gt__(self, value: str, /) -> bool:
@@ -397,7 +398,7 @@ class StringProxy(str):
 
     @overload
     def __mod__(
-        self: LiteralString, value: LiteralString | Tuple[LiteralString, ...], /
+        self: LiteralString, value: Union[LiteralString, Tuple[LiteralString, ...]], /
     ) -> LiteralString: ...
     @overload
     def __mod__(self, value: Any, /) -> str: ...
