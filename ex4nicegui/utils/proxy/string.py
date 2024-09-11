@@ -11,7 +11,6 @@ from typing import (
 from typing_extensions import LiteralString
 from collections.abc import Iterator
 import sys
-from ex4nicegui.utils.signals import to_ref
 
 
 class StringProxy(str):
@@ -20,6 +19,8 @@ class StringProxy(str):
         return obj
 
     def __init__(self, string: str):
+        from ex4nicegui.utils.signals import to_ref
+
         self._ref = to_ref(string)
 
     def __str__(self):
@@ -268,7 +269,7 @@ class StringProxy(str):
     @overload
     def rsplit(
         self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1
-    ) -> list[str]: ...  # type: ignore[misc]
+    ) -> List[str]: ...  # type: ignore[misc]
     def rsplit(
         self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1
     ) -> List[str]:
@@ -288,20 +289,20 @@ class StringProxy(str):
         self: LiteralString,
         sep: Optional[LiteralString] = None,
         maxsplit: SupportsIndex = -1,
-    ) -> list[LiteralString]: ...
+    ) -> List[LiteralString]: ...
     @overload
     def split(
         self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1
-    ) -> list[str]: ...  # type: ignore[misc]
+    ) -> List[str]: ...  # type: ignore[misc]
     def split(self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1):
         return self._ref.value.split(sep, maxsplit)
 
     @overload
     def splitlines(
         self: LiteralString, keepends: bool = False
-    ) -> list[LiteralString]: ...
+    ) -> List[LiteralString]: ...
     @overload
-    def splitlines(self, keepends: bool = False) -> list[str]: ...  # type: ignore[misc]
+    def splitlines(self, keepends: bool = False) -> List[str]: ...  # type: ignore[misc]
     def splitlines(self, keepends: bool = False):
         return self._ref.value.splitlines(keepends)
 
@@ -435,17 +436,18 @@ class StringDescriptor:
         if instance is None:
             return self
 
-        proxy = instance.__dict__.get(self.name)
+        proxy = instance.__dict__.get(self.name, None)
         if proxy is None:
             proxy = StringProxy(self.value)
             instance.__dict__[self.name] = proxy
 
+        proxy._ref.value
         return proxy
 
     def __set__(self, instance: object, value: str) -> None:
-        proxy = instance.__dict__.get(self.name)
+        proxy = instance.__dict__.get(self.name, None)
         if proxy is None:
-            proxy = StringProxy(self.value)
+            proxy = StringProxy(value)
             instance.__dict__[self.name] = proxy
 
         proxy._ref.value = value

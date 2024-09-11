@@ -12,7 +12,6 @@ from typing import (
     overload,
 )
 from typing_extensions import Self
-from ex4nicegui.utils.signals import deep_ref
 
 _T = TypeVar("_T")
 _S = TypeVar("_S")
@@ -20,6 +19,8 @@ _S = TypeVar("_S")
 
 class ListProxy(list, Generic[_T]):
     def __init__(self, value: List[_T]):
+        from ex4nicegui.utils.signals import deep_ref
+
         super().__init__(value)
         self._ref = deep_ref(value)
 
@@ -149,15 +150,16 @@ class ListDescriptor:
         if instance is None:
             return self
 
-        proxy = instance.__dict__.get(self.name)
+        proxy = instance.__dict__.get(self.name, None)
         if proxy is None:
             proxy = ListProxy(self.value)
             instance.__dict__[self.name] = proxy
 
+        proxy._ref.value
         return proxy
 
     def __set__(self, instance: object, value: List) -> None:
-        proxy = instance.__dict__.get(self.name)
+        proxy = instance.__dict__.get(self.name, None)
         if proxy is None:
             proxy = ListProxy(self.value)
             instance.__dict__[self.name] = proxy

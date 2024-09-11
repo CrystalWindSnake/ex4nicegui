@@ -26,6 +26,7 @@ from .types import (
 )
 from .refWrapper import RefWrapper, to_ref_wrapper  # noqa: F401
 from .refComputed import ref_computed  # noqa: F401
+from ex4nicegui.utils.proxy import to_ref_if_base_type_proxy
 
 T = TypeVar("T")
 
@@ -143,6 +144,8 @@ _T_effect_refreshable_refs = Union[
 class effect_refreshable:
     def __init__(self, fn: Callable, refs: _T_effect_refreshable_refs = []) -> None:
         self._fn = fn
+
+        refs = to_ref_if_base_type_proxy(refs)
 
         if isinstance(refs, Sequence):
             ref_arg = [ref for ref in refs if self._is_valid_ref(ref)]
