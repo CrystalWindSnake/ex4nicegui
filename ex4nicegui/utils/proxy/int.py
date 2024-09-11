@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import (
-    Any,
     Literal,
     Optional,
     SupportsIndex,
@@ -8,6 +7,7 @@ from typing import (
     Union,
 )
 import sys
+from . import utils
 
 
 class IntProxy(int):
@@ -80,86 +80,86 @@ class IntProxy(int):
             return True
 
     def __add__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__add__(_to_value(value))
+        return self._ref.value.__add__(utils.to_value(value))
 
     def __sub__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__sub__(_to_value(value))
+        return self._ref.value.__sub__(utils.to_value(value))
 
     def __mul__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__mul__(_to_value(value))
+        return self._ref.value.__mul__(utils.to_value(value))
 
     def __floordiv__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__floordiv__(_to_value(value))
+        return self._ref.value.__floordiv__(utils.to_value(value))
 
     def __truediv__(self, value: Union[int, IntProxy]) -> float:
-        return self._ref.value.__truediv__(_to_value(value))
+        return self._ref.value.__truediv__(utils.to_value(value))
 
     def __mod__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__mod__(_to_value(value))
+        return self._ref.value.__mod__(utils.to_value(value))
 
     def __divmod__(self, value: Union[int, IntProxy]) -> Tuple[int, int]:
-        return self._ref.value.__divmod__(_to_value(value))
+        return self._ref.value.__divmod__(utils.to_value(value))
 
     def __radd__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__radd__(_to_value(value))
+        return self._ref.value.__radd__(utils.to_value(value))
 
     def __rsub__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rsub__(_to_value(value))
+        return self._ref.value.__rsub__(utils.to_value(value))
 
     def __rmul__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rmul__(_to_value(value))
+        return self._ref.value.__rmul__(utils.to_value(value))
 
     def __rfloordiv__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rfloordiv__(_to_value(value))
+        return self._ref.value.__rfloordiv__(utils.to_value(value))
 
     def __rtruediv__(self, value: Union[int, IntProxy]) -> float:
-        return self._ref.value.__rtruediv__(_to_value(value))
+        return self._ref.value.__rtruediv__(utils.to_value(value))
 
     def __rmod__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rmod__(_to_value(value))
+        return self._ref.value.__rmod__(utils.to_value(value))
 
     def __rdivmod__(self, value: Union[int, IntProxy]) -> Tuple[int, int]:
-        return self._ref.value.__rdivmod__(_to_value(value))
+        return self._ref.value.__rdivmod__(utils.to_value(value))
 
     def __pow__(
         self, value: Union[int, IntProxy], mod: Optional[int] = None
     ) -> Union[int, float]:
-        return self._ref.value.__pow__(_to_value(value), mod)
+        return self._ref.value.__pow__(utils.to_value(value), mod)
 
     def __rpow__(
         self, value: Union[int, IntProxy], mod: Optional[int] = None
     ) -> Union[int, float]:
-        return self._ref.value.__rpow__(_to_value(value), mod)
+        return self._ref.value.__rpow__(utils.to_value(value), mod)
 
     def __and__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__and__(_to_value(value))
+        return self._ref.value.__and__(utils.to_value(value))
 
     def __or__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__or__(_to_value(value))
+        return self._ref.value.__or__(utils.to_value(value))
 
     def __xor__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__xor__(_to_value(value))
+        return self._ref.value.__xor__(utils.to_value(value))
 
     def __lshift__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__lshift__(_to_value(value))
+        return self._ref.value.__lshift__(utils.to_value(value))
 
     def __rshift__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rshift__(_to_value(value))
+        return self._ref.value.__rshift__(utils.to_value(value))
 
     def __rand__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rand__(_to_value(value))
+        return self._ref.value.__rand__(utils.to_value(value))
 
     def __ror__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__ror__(_to_value(value))
+        return self._ref.value.__ror__(utils.to_value(value))
 
     def __rxor__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rxor__(_to_value(value))
+        return self._ref.value.__rxor__(utils.to_value(value))
 
     def __rlshift__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rlshift__(_to_value(value))
+        return self._ref.value.__rlshift__(utils.to_value(value))
 
     def __rrshift__(self, value: Union[int, IntProxy]) -> int:
-        return self._ref.value.__rrshift__(_to_value(value))
+        return self._ref.value.__rrshift__(utils.to_value(value))
 
     def __neg__(self) -> int:
         return self._ref.value.__neg__()
@@ -220,32 +220,3 @@ class IntProxy(int):
 
     def __index__(self) -> int:
         return self._ref.value.__index__()
-
-
-class IntDescriptor:
-    def __init__(self, name: str, value: int) -> None:
-        self.value = value
-        self.name = name
-
-    def __get__(self, instance: object, owner: Any):
-        if instance is None:
-            return self
-
-        proxy = instance.__dict__.get(self.name, None)
-        if proxy is None:
-            proxy = IntProxy(self.value)
-            instance.__dict__[self.name] = proxy
-        proxy._ref.value
-        return proxy
-
-    def __set__(self, instance: object, value: int) -> None:
-        proxy = instance.__dict__.get(self.name, None)
-        if proxy is None:
-            proxy = IntProxy(value)
-            instance.__dict__[self.name] = proxy
-
-        proxy._ref.value = value
-
-
-def _to_value(value: Union[int, IntProxy]) -> int:
-    return value._ref.value if isinstance(value, IntProxy) else value

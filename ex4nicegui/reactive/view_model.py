@@ -13,9 +13,8 @@ from ex4nicegui.utils.signals import (
 from ex4nicegui.utils.types import ReadonlyRef
 from functools import partial
 from signe.core.reactive import NoProxy
-from ex4nicegui.utils.proxy.int import IntDescriptor
-from ex4nicegui.utils.proxy.string import StringDescriptor
-from ex4nicegui.utils.proxy.list import ListDescriptor
+from ex4nicegui.utils.proxy.descriptor import class_var_setter
+
 
 _CACHED_VARS_FLAG = "__vm_cached__"
 
@@ -60,14 +59,7 @@ class ViewModel(NoProxy):
         )
 
         for name, value in need_vars:
-            if isinstance(value, str):
-                setattr(cls, name, StringDescriptor(name, value))
-            elif isinstance(value, int):
-                setattr(cls, name, IntDescriptor(name, value))
-            elif isinstance(value, list):
-                setattr(cls, name, ListDescriptor(name, value))
-            else:
-                pass
+            class_var_setter(cls, name, value)
 
     @staticmethod
     def display(model: Union[ViewModel, Type]):

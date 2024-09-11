@@ -12,6 +12,8 @@ from typing import (
     overload,
 )
 from typing_extensions import Self
+from . import utils
+
 
 _T = TypeVar("_T")
 _S = TypeVar("_S")
@@ -103,20 +105,20 @@ class ListProxy(list, Generic[_T]):
     def __add__(
         self, value: Union[List[_T], List[_S]], /
     ) -> Union[List[_T], List[Union[_S, _T]]]:
-        return self._ref.value.__add__(value)
+        return self._ref.value.__add__(utils.to_value(value))
 
     def __iadd__(self, value: Iterable[_T], /) -> Self:  # type: ignore[misc]
-        self._ref.value.__iadd__(value)
+        self._ref.value.__iadd__(utils.to_value(value))
         return self
 
     def __mul__(self, value: SupportsIndex, /) -> List[_T]:
-        return self._ref.value.__mul__(value)
+        return self._ref.value.__mul__(utils.to_value(value))
 
     def __rmul__(self, value: SupportsIndex, /) -> List[_T]:
-        return self._ref.value.__rmul__(value)
+        return self._ref.value.__rmul__(utils.to_value(value))
 
     def __imul__(self, value: SupportsIndex, /) -> Self:
-        self._ref.value.__imul__(value)
+        self._ref.value.__imul__(utils.to_value(value))
         return self
 
     def __contains__(self, key: object, /) -> bool:
@@ -126,42 +128,16 @@ class ListProxy(list, Generic[_T]):
         return self._ref.value.__reversed__()
 
     def __gt__(self, value: List[_T], /) -> bool:
-        return self._ref.value.__gt__(value)
+        return self._ref.value.__gt__(utils.to_value(value))
 
     def __ge__(self, value: List[_T], /) -> bool:
-        return self._ref.value.__ge__(value)
+        return self._ref.value.__ge__(utils.to_value(value))
 
     def __lt__(self, value: List[_T], /) -> bool:
-        return self._ref.value.__lt__(value)
+        return self._ref.value.__lt__(utils.to_value(value))
 
     def __le__(self, value: List[_T], /) -> bool:
-        return self._ref.value.__le__(value)
+        return self._ref.value.__le__(utils.to_value(value))
 
     def __eq__(self, value: object, /) -> bool:
-        return self._ref.value.__eq__(value)
-
-
-class ListDescriptor:
-    def __init__(self, name: str, value: List) -> None:
-        self.value = value
-        self.name = name
-
-    def __get__(self, instance: object, owner: Any):
-        if instance is None:
-            return self
-
-        proxy = instance.__dict__.get(self.name, None)
-        if proxy is None:
-            proxy = ListProxy(self.value)
-            instance.__dict__[self.name] = proxy
-
-        proxy._ref.value
-        return proxy
-
-    def __set__(self, instance: object, value: List) -> None:
-        proxy = instance.__dict__.get(self.name, None)
-        if proxy is None:
-            proxy = ListProxy(self.value)
-            instance.__dict__[self.name] = proxy
-
-        proxy._ref.value = value
+        return self._ref.value.__eq__(utils.to_value(value))

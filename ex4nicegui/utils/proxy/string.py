@@ -11,6 +11,7 @@ from typing import (
 )
 from typing_extensions import LiteralString
 import sys
+from . import utils
 
 
 class StringProxy(str):
@@ -361,7 +362,7 @@ class StringProxy(str):
     @overload
     def __add__(self, value: str, /) -> str: ...  # type: ignore[misc]
     def __add__(self, value: str):
-        return self._ref.value.__add__(value)
+        return self._ref.value.__add__(utils.to_value(value))
 
     def __contains__(self, key: str, /) -> bool:
         return self._ref.value.__contains__(key)
@@ -425,29 +426,3 @@ class StringProxy(str):
 
     def __getnewargs__(self) -> Tuple[str]:
         return self._ref.value.__getnewargs__()
-
-
-class StringDescriptor:
-    def __init__(self, name: str, value: str) -> None:
-        self.value = value
-        self.name = name
-
-    def __get__(self, instance: object, owner: Any):
-        if instance is None:
-            return self
-
-        proxy = instance.__dict__.get(self.name, None)
-        if proxy is None:
-            proxy = StringProxy(self.value)
-            instance.__dict__[self.name] = proxy
-
-        proxy._ref.value
-        return proxy
-
-    def __set__(self, instance: object, value: str) -> None:
-        proxy = instance.__dict__.get(self.name, None)
-        if proxy is None:
-            proxy = StringProxy(value)
-            instance.__dict__[self.name] = proxy
-
-        proxy._ref.value = value
