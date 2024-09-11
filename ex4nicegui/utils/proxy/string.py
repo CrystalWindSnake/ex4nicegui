@@ -6,13 +6,10 @@ from typing import (
     SupportsIndex,
     LiteralString,
     overload,
-    TypeVar,
 )
 from collections.abc import Iterator
 import sys
 from ex4nicegui.utils.signals import to_ref
-
-_T = TypeVar("_T")
 
 
 class StringProxy(str):
@@ -425,3 +422,28 @@ class StringProxy(str):
 
     def __getnewargs__(self) -> tuple[str]:
         return self._ref.value.__getnewargs__()
+
+
+class StringDescriptor:
+    def __init__(self, name: str, value: str) -> None:
+        self.value = value
+        self.name = name
+
+    def __get__(self, instance: object, owner: Any):
+        if instance is None:
+            return self
+
+        proxy = instance.__dict__.get(self.name)
+        if proxy is None:
+            proxy = StringProxy(self.value)
+            instance.__dict__[self.name] = proxy
+
+        return proxy
+
+    def __set__(self, instance: object, value: str) -> None:
+        proxy = instance.__dict__.get(self.name)
+        if proxy is None:
+            proxy = StringProxy(self.value)
+            instance.__dict__[self.name] = proxy
+
+        proxy._ref.value = value

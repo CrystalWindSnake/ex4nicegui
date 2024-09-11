@@ -1,9 +1,9 @@
 from typing import (
+    Any,
     Literal,
     Optional,
     SupportsIndex,
     Union,
-    TypeVar,
 )
 import sys
 from ex4nicegui.utils.signals import to_ref
@@ -213,3 +213,28 @@ class IntProxy(int):
 
     def __index__(self) -> int:
         return self._ref.value.__index__()
+
+
+class IntDescriptor:
+    def __init__(self, name: str, value: int) -> None:
+        self.value = value
+        self.name = name
+
+    def __get__(self, instance: object, owner: Any):
+        if instance is None:
+            return self
+
+        proxy = instance.__dict__.get(self.name)
+        if proxy is None:
+            proxy = IntProxy(self.value)
+            instance.__dict__[self.name] = proxy
+
+        return proxy
+
+    def __set__(self, instance: object, value: int) -> None:
+        proxy = instance.__dict__.get(self.name)
+        if proxy is None:
+            proxy = IntProxy(self.value)
+            instance.__dict__[self.name] = proxy
+
+        proxy._ref.value = value
