@@ -15,6 +15,7 @@ from functools import partial
 from signe.core.reactive import NoProxy
 from ex4nicegui.utils.proxy.int import IntDescriptor
 from ex4nicegui.utils.proxy.string import StringDescriptor
+from ex4nicegui.utils.proxy.list import ListDescriptor
 
 _CACHED_VARS_FLAG = "__vm_cached__"
 
@@ -63,6 +64,8 @@ class ViewModel(NoProxy):
                 setattr(cls, name, StringDescriptor(name, value))
             elif isinstance(value, int):
                 setattr(cls, name, IntDescriptor(name, value))
+            elif isinstance(value, list):
+                setattr(cls, name, ListDescriptor(name, value))
             else:
                 pass
 
