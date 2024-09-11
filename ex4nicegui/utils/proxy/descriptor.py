@@ -5,6 +5,8 @@ from .list import ListProxy
 from .string import StringProxy
 from .float import FloatProxy
 from .bool import BoolProxy
+from .date import DateProxy
+import datetime
 
 T = TypeVar("T")
 
@@ -62,6 +64,11 @@ class BoolDescriptor(ProxyDescriptor[bool]):
         super().__init__(name, value, BoolProxy)
 
 
+class DateDescriptor(ProxyDescriptor[datetime.date]):
+    def __init__(self, name: str, value: datetime.date) -> None:
+        super().__init__(name, value, lambda x: DateProxy(x.year, x.month, x.day))
+
+
 def class_var_setter(cls: Type, name: str, value) -> None:
     if isinstance(value, str):
         setattr(cls, name, StringDescriptor(name, value))
@@ -73,5 +80,7 @@ def class_var_setter(cls: Type, name: str, value) -> None:
         setattr(cls, name, FloatDescriptor(name, value))
     elif isinstance(value, bool):
         setattr(cls, name, BoolDescriptor(name, value))
+    elif isinstance(value, datetime.date):
+        setattr(cls, name, DateDescriptor(name, value))
     else:
         pass
