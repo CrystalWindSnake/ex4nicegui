@@ -4,6 +4,7 @@ from .int import IntProxy
 from .list import ListProxy
 from .string import StringProxy
 from .float import FloatProxy
+from .bool import BoolProxy
 
 T = TypeVar("T")
 
@@ -56,6 +57,11 @@ class FloatDescriptor(ProxyDescriptor[float]):
         super().__init__(name, value, FloatProxy)
 
 
+class BoolDescriptor(ProxyDescriptor[bool]):
+    def __init__(self, name: str, value: bool) -> None:
+        super().__init__(name, value, BoolProxy)
+
+
 def class_var_setter(cls: Type, name: str, value) -> None:
     if isinstance(value, str):
         setattr(cls, name, StringDescriptor(name, value))
@@ -65,5 +71,7 @@ def class_var_setter(cls: Type, name: str, value) -> None:
         setattr(cls, name, ListDescriptor(name, value))
     elif isinstance(value, float):
         setattr(cls, name, FloatDescriptor(name, value))
+    elif isinstance(value, bool):
+        setattr(cls, name, BoolDescriptor(name, value))
     else:
         pass
