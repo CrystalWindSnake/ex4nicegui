@@ -7,9 +7,9 @@ from typing import (
     Tuple,
     Union,
     overload,
+    Iterator,
 )
 from typing_extensions import LiteralString
-from collections.abc import Iterator
 import sys
 
 
