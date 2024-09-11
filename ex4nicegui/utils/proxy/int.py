@@ -3,6 +3,7 @@ from typing import (
     Literal,
     Optional,
     SupportsIndex,
+    Tuple,
     Union,
 )
 import sys
@@ -19,7 +20,7 @@ class IntProxy(int):
     def __str__(self) -> str:
         return str(self._ref.value)
 
-    def as_integer_ratio(self) -> tuple[int, Literal[1]]:
+    def as_integer_ratio(self) -> Tuple[int, Literal[1]]:
         return self._ref.value.as_integer_ratio()
 
     @property
@@ -94,7 +95,7 @@ class IntProxy(int):
     def __mod__(self, value: int) -> int:
         return self._ref.value.__mod__(value)
 
-    def __divmod__(self, value: int) -> tuple[int, int]:
+    def __divmod__(self, value: int) -> Tuple[int, int]:
         return self._ref.value.__divmod__(value)
 
     def __radd__(self, value: int) -> int:
@@ -115,7 +116,7 @@ class IntProxy(int):
     def __rmod__(self, value: int) -> int:
         return self._ref.value.__rmod__(value)
 
-    def __rdivmod__(self, value: int) -> tuple[int, int]:
+    def __rdivmod__(self, value: int) -> Tuple[int, int]:
         return self._ref.value.__rdivmod__(value)
 
     def __pow__(self, value: int, mod: Optional[int] = None) -> Union[int, float]:
@@ -175,7 +176,7 @@ class IntProxy(int):
     def __round__(self, ndigits: SupportsIndex = 0) -> int:
         return self._ref.value.__round__(ndigits)
 
-    def __getnewargs__(self) -> tuple[int]:
+    def __getnewargs__(self) -> Tuple[int]:
         return self._ref.value.__getnewargs__()
 
     def __eq__(self, value: object) -> bool:

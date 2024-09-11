@@ -4,6 +4,7 @@ from typing import (
     List,
     Optional,
     SupportsIndex,
+    Tuple,
     overload,
 )
 from typing_extensions import LiteralString
@@ -63,7 +64,7 @@ class StringProxy(str):
 
     def endswith(
         self,
-        suffix: str | tuple[str, ...],
+        suffix: str | Tuple[str, ...],
         start: Optional[SupportsIndex] = ...,
         end: Optional[SupportsIndex] = ...,
         /,
@@ -182,10 +183,10 @@ class StringProxy(str):
     @overload
     def partition(
         self: LiteralString, sep: LiteralString, /
-    ) -> tuple[LiteralString, LiteralString, LiteralString]: ...
+    ) -> Tuple[LiteralString, LiteralString, LiteralString]: ...
     @overload
-    def partition(self, sep: str, /) -> tuple[str, str, str]: ...  # type: ignore[misc]
-    def partition(self, sep: str, /) -> tuple[str, str, str]:
+    def partition(self, sep: str, /) -> Tuple[str, str, str]: ...  # type: ignore[misc]
+    def partition(self, sep: str, /) -> Tuple[str, str, str]:
         return self._ref.value.partition(sep)
 
     @overload
@@ -251,10 +252,10 @@ class StringProxy(str):
     @overload
     def rpartition(
         self: LiteralString, sep: LiteralString, /
-    ) -> tuple[LiteralString, LiteralString, LiteralString]: ...
+    ) -> Tuple[LiteralString, LiteralString, LiteralString]: ...
     @overload
-    def rpartition(self, sep: str, /) -> tuple[str, str, str]: ...  # type: ignore[misc]
-    def rpartition(self, sep: str, /) -> tuple[str, str, str]:
+    def rpartition(self, sep: str, /) -> Tuple[str, str, str]: ...  # type: ignore[misc]
+    def rpartition(self, sep: str, /) -> Tuple[str, str, str]:
         return self._ref.value.rpartition(sep)
 
     @overload
@@ -305,7 +306,7 @@ class StringProxy(str):
 
     def startswith(
         self,
-        prefix: str | tuple[str, ...],
+        prefix: str | Tuple[str, ...],
         start: Optional[SupportsIndex] = ...,
         end: Optional[SupportsIndex] = ...,
         /,
@@ -396,7 +397,7 @@ class StringProxy(str):
 
     @overload
     def __mod__(
-        self: LiteralString, value: LiteralString | tuple[LiteralString, ...], /
+        self: LiteralString, value: LiteralString | Tuple[LiteralString, ...], /
     ) -> LiteralString: ...
     @overload
     def __mod__(self, value: Any, /) -> str: ...
@@ -420,7 +421,7 @@ class StringProxy(str):
     def __rmul__(self, value: SupportsIndex):
         return self._ref.value.__rmul__(value)
 
-    def __getnewargs__(self) -> tuple[str]:
+    def __getnewargs__(self) -> Tuple[str]:
         return self._ref.value.__getnewargs__()
 
 
