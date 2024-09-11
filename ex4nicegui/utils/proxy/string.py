@@ -4,9 +4,9 @@ from typing import (
     List,
     Optional,
     SupportsIndex,
-    LiteralString,
     overload,
 )
+from typing_extensions import LiteralString
 from collections.abc import Iterator
 import sys
 from ex4nicegui.utils.signals import to_ref
