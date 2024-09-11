@@ -264,7 +264,7 @@ class StringProxy(str):
         self: LiteralString,
         sep: Optional[LiteralString] = None,
         maxsplit: SupportsIndex = -1,
-    ) -> list[LiteralString]: ...
+    ) -> List[LiteralString]: ...
     @overload
     def rsplit(
         self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1

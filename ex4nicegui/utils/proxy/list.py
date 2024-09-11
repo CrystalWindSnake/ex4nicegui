@@ -54,7 +54,7 @@ class ListProxy(list, Generic[_T]):
     # Signature of `list.sort` should be kept inline with `collections.UserList.sort()`
     # and multiprocessing.managers.ListProxy.sort()
     #
-    # Use list[SupportsRichComparisonT] for the first overload rather than [SupportsRichComparison]
+    # Use List[SupportsRichComparisonT] for the first overload rather than [SupportsRichComparison]
     # to work around invariance
     @overload
     def sort(self: list, *, key: None = None, reverse: bool = False) -> None: ...
@@ -75,9 +75,9 @@ class ListProxy(list, Generic[_T]):
     @overload
     def __getitem__(self, i: SupportsIndex, /) -> _T: ...
     @overload
-    def __getitem__(self, s: slice, /) -> list[_T]: ...
+    def __getitem__(self, s: slice, /) -> List[_T]: ...
 
-    def __getitem__(self, i: Union[SupportsIndex, slice], /) -> Union[_T, list[_T]]:
+    def __getitem__(self, i: Union[SupportsIndex, slice], /) -> Union[_T, List[_T]]:
         return self._ref.value.__getitem__(i)
 
     @overload
@@ -95,23 +95,23 @@ class ListProxy(list, Generic[_T]):
 
     # Overloading looks unnecessary, but is needed to work around complex mypy problems
     @overload
-    def __add__(self, value: list[_T], /) -> list[_T]: ...
+    def __add__(self, value: List[_T], /) -> List[_T]: ...
     @overload
-    def __add__(self, value: list[_S], /) -> list[Union[_S, _T]]: ...
+    def __add__(self, value: List[_S], /) -> List[Union[_S, _T]]: ...
 
     def __add__(
-        self, value: Union[list[_T], list[_S]], /
-    ) -> Union[list[_T], list[Union[_S, _T]]]:
+        self, value: Union[List[_T], List[_S]], /
+    ) -> Union[List[_T], List[Union[_S, _T]]]:
         return self._ref.value.__add__(value)
 
     def __iadd__(self, value: Iterable[_T], /) -> Self:  # type: ignore[misc]
         self._ref.value.__iadd__(value)
         return self
 
-    def __mul__(self, value: SupportsIndex, /) -> list[_T]:
+    def __mul__(self, value: SupportsIndex, /) -> List[_T]:
         return self._ref.value.__mul__(value)
 
-    def __rmul__(self, value: SupportsIndex, /) -> list[_T]:
+    def __rmul__(self, value: SupportsIndex, /) -> List[_T]:
         return self._ref.value.__rmul__(value)
 
     def __imul__(self, value: SupportsIndex, /) -> Self:
@@ -124,16 +124,16 @@ class ListProxy(list, Generic[_T]):
     def __reversed__(self) -> Iterator[_T]:
         return self._ref.value.__reversed__()
 
-    def __gt__(self, value: list[_T], /) -> bool:
+    def __gt__(self, value: List[_T], /) -> bool:
         return self._ref.value.__gt__(value)
 
-    def __ge__(self, value: list[_T], /) -> bool:
+    def __ge__(self, value: List[_T], /) -> bool:
         return self._ref.value.__ge__(value)
 
-    def __lt__(self, value: list[_T], /) -> bool:
+    def __lt__(self, value: List[_T], /) -> bool:
         return self._ref.value.__lt__(value)
 
-    def __le__(self, value: list[_T], /) -> bool:
+    def __le__(self, value: List[_T], /) -> bool:
         return self._ref.value.__le__(value)
 
     def __eq__(self, value: object, /) -> bool:
