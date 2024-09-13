@@ -54,6 +54,9 @@ class ListProxy(list, Generic[_T]):
     def remove(self, value: _T, /) -> None:
         self._ref.value.remove(value)
 
+    def reverse(self) -> None:
+        return self._ref.value.reverse()
+
     # Signature of `list.sort` should be kept inline with `collections.UserList.sort()`
     # and multiprocessing.managers.ListProxy.sort()
     #
