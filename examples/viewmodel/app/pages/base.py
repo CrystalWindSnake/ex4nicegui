@@ -34,17 +34,18 @@ class State(rxui.ViewModel):
             return "text-gray-500"
 
 
-ui.number.default_props("outlined dense")
-ui.select.default_props("outlined dense")
-
-
 def index():
+    number_props = "outlined dense"
+    select_props = "outlined dense"
+
     state = State()
 
     with ui.row(align_items="center"):
-        rxui.number(value=state.a, label="a").element.mark("a")
-        rxui.select(state._sign_options, value=state.sign, label="sign")
-        rxui.number(value=state.b, label="b").element.mark("b")
+        rxui.number(value=state.a, label="a").element.mark("a").props(number_props)
+        rxui.select(state._sign_options, value=state.sign, label="sign").props(
+            select_props
+        )
+        rxui.number(value=state.b, label="b").element.mark("b").props(number_props)
         ui.label("=")
         rxui.label(text=state.result).classes("text-xl font-bold").bind_classes(
             state.result_style

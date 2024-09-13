@@ -28,6 +28,8 @@ from dataclasses import dataclass
 from signe.core.scope import Scope
 from ex4nicegui.reactive.systems.object_system import get_attribute
 from ex4nicegui.reactive.empty import Empty
+from ex4nicegui.utils.proxy import to_ref_if_base_type_proxy
+
 
 _T = TypeVar("_T")
 _T_data = Union[List[Any], TGetterOrReadonlyRef[List[Any]], RefWrapper]
@@ -178,6 +180,8 @@ class vfor(Generic[_T]):
         *,
         key: Optional[Union[str, Callable[[int, Any], Any]]] = None,
     ) -> None:
+        data = to_ref_if_base_type_proxy(data)
+
         self._data = to_ref_wrapper(lambda: data) if is_reactive(data) else data
         self._get_key = vfor.index_key
         self._transition_props = {}

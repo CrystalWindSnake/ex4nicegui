@@ -12,16 +12,15 @@ class State(rxui.ViewModel):
         self.number -= 1
 
 
-ui.number.default_props("outlined dense")
-ui.button.default_props("round dense outline")
-
-
 def index():
+    number_props = "outlined dense"
+    button_props = "round dense outline"
+
     state = State()
 
     rxui.label(lambda: f"Counter: {state.number}")
 
     with ui.row(align_items="center"):
-        ui.button(icon="remove", on_click=state.decrement)
-        rxui.number(value=state.number).classes("w-[8ch]")
-        ui.button(icon="add", on_click=state.increment)
+        ui.button(icon="remove", on_click=state.decrement).props(button_props)
+        rxui.number(value=state.number).classes("w-[8ch]").props(number_props)
+        ui.button(icon="add", on_click=state.increment).props(button_props)
