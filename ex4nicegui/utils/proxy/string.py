@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import (
     Any,
     Iterable,
@@ -393,7 +394,7 @@ class StringProxy(str):
         return self._ref.value.__le__(value)
 
     def __len__(self) -> int:
-        return self._ref.value.__len__()
+        return 0 if self._ref.value is None else self._ref.value.__len__()
 
     def __lt__(self, value: str, /) -> bool:
         return self._ref.value.__lt__(value)
