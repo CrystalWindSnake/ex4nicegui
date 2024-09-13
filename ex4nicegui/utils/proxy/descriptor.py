@@ -52,9 +52,9 @@ class IntDescriptor(ProxyDescriptor[int]):
         super().__init__(name, value, IntProxy)
 
 
-class ListDescriptor(ProxyDescriptor[List]):
-    def __init__(self, name: str, value: List) -> None:
-        super().__init__(name, value, ListProxy)
+class ListDescriptor(ProxyDescriptor[Callable[[], List]]):
+    def __init__(self, name: str, value: Callable[[], List]) -> None:
+        super().__init__(name, value, lambda x: ListProxy(x()))
 
 
 class DictDescriptor(ProxyDescriptor[Dict]):
@@ -87,12 +87,12 @@ class DateDescriptor(ProxyDescriptor[datetime.date]):
         super().__init__(name, value, lambda x: DateProxy(x.year, x.month, x.day))
 
 
-def class_var_setter(cls: Type, name: str, value) -> None:
+def class_var_setter(cls: Type, name: str, value, list_var_flat: str) -> None:
     if value is None or isinstance(value, str):
         setattr(cls, name, StringDescriptor(name, value))
     elif isinstance(value, int):
         setattr(cls, name, IntDescriptor(name, value))
-    elif isinstance(value, list):
+    elif callable(value) and hasattr(value, list_var_flat):
         setattr(cls, name, ListDescriptor(name, value))
     elif isinstance(value, dict):
         pass  # TODO

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Union, Type, TypeVar
+from typing import Callable, List, Union, Type, TypeVar
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -17,6 +17,7 @@ from ex4nicegui.utils.proxy.descriptor import class_var_setter
 
 
 _CACHED_VARS_FLAG = "__vm_cached__"
+_LIST_VAR_FLAG = "__vm_list_var__"
 
 _T = TypeVar("_T")
 
@@ -59,7 +60,7 @@ class ViewModel(NoProxy):
         )
 
         for name, value in need_vars:
-            class_var_setter(cls, name, value)
+            class_var_setter(cls, name, value, _LIST_VAR_FLAG)
 
     @staticmethod
     def display(model: Union[ViewModel, Type]):
@@ -149,6 +150,34 @@ def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Va
     if callable(value):
         return deep_ref(value())
     return deep_ref(value)
+
+
+def list_var(factory: Callable[[], List[_T_Var_Value]]) -> List[_T_Var_Value]:
+    """Create implicitly proxied reactive variables for lists. Use them just like ordinary lists while maintaining reactivity. Only use within rxui.ViewModel.
+
+    Args:
+        factory (Callable[[], List[_T_Var_Value]]): A factory function that returns a new list.
+
+    Example:
+    .. code-block:: python
+        from ex4nicegui import rxui
+        class State(rxui.ViewModel):
+            data = rxui.list_var(lambda: [1, 2, 3])
+
+            def append_data(self):
+                self.data.append(len(self.data) + 1)
+
+            def display_data(self):
+                return ",".join(map(str, self.data))
+
+        state = State()
+        ui.button("Append", on_click=state.append_data)
+        rxui.label(state.display_data)
+
+    """
+    assert callable(factory), "factory must be a callable"
+    setattr(factory, _LIST_VAR_FLAG, None)
+    return factory  # type: ignore
 
 
 def cached_var(func: Callable[..., _T]) -> ReadonlyRef[_T]:
