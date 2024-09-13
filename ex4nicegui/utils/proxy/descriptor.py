@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Type, TypeVar, Generic
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Generic
 from .base import ProxyProtocol
 from .int import IntProxy
 from .list import ListProxy
@@ -6,6 +6,7 @@ from .string import StringProxy
 from .float import FloatProxy
 from .bool import BoolProxy
 from .date import DateProxy
+from .dict import DictProxy
 import datetime
 
 T = TypeVar("T")
@@ -56,6 +57,11 @@ class ListDescriptor(ProxyDescriptor[List]):
         super().__init__(name, value, ListProxy)
 
 
+class DictDescriptor(ProxyDescriptor[Dict]):
+    def __init__(self, name: str, value: Dict) -> None:
+        super().__init__(name, value, DictProxy)
+
+
 class StringDescriptor(ProxyDescriptor[str]):
     def __init__(self, name: str, value: str) -> None:
         def rebuild_proxy(proxy: ProxyProtocol) -> ProxyProtocol:
@@ -88,6 +94,9 @@ def class_var_setter(cls: Type, name: str, value) -> None:
         setattr(cls, name, IntDescriptor(name, value))
     elif isinstance(value, list):
         setattr(cls, name, ListDescriptor(name, value))
+    elif isinstance(value, dict):
+        pass  # TODO
+        # setattr(cls, name, DictDescriptor(name, value))
     elif isinstance(value, float):
         setattr(cls, name, FloatDescriptor(name, value))
     elif isinstance(value, bool):
