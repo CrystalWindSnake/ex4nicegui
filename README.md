@@ -8,6 +8,8 @@
 
 - [教程](#教程)
 - [安装](#-安装)
+- [示例项目](#示例项目)
+- [入门](#入门)
 - [使用](#-使用)
 - [图表](#-图表)
 - [BI 模块](#bi-模块)
@@ -35,6 +37,197 @@ pip install ex4nicegui -U
 ## 示例项目
 - [入门](./examples/basic/)
 - [todo list mvc](./examples/todomvc/)
+
+---
+
+## 入门
+
+我们从一个简单的计数器应用开始，用户可以通过点击按钮让计数增加或减少。
+
+![counter](https://gitee.com/carson_add/ex4nicegui-examples/raw/main/asset/counter.01.gif)
+
+下面是完整代码：
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui
+
+# 数据状态代码
+class Counter(rxui.ViewModel):
+    count: int = 0
+
+    def increment(self):
+        self.count += 1
+
+    def decrement(self):
+        self.count -= 1
+
+# 界面代码
+counter = Counter()
+
+with ui.row(align_items="center"):
+    ui.button("-1", on_click=counter.decrement)
+    rxui.label(counter.count)
+    ui.button("+1", on_click=counter.increment)
+
+ui.run()
+```
+
+---
+现在看更多细节。`ex4nicegui` 遵从数据驱动方式定义界面。状态数据定义应用程序中所有可以变化的数据。
+
+下面是 `Counter` 状态数据定义：
+
+```python
+class Counter(rxui.ViewModel):
+    count: int = 0
+```
+
+- 自定义类需要继承 `rxui.ViewModel`
+- 这里定义了一个变量 `count`，表示计数器的当前值，初始值为 0
+
+接着，在类中定义一系列操作数据的方法：
+```python
+def increment(self):
+    self.count += 1
+
+def decrement(self):
+    self.count -= 1
+```
+
+- 这些都是实例方法，可以修改 `count` 变量的值
+
+
+然后，在界面代码中，实例化 `Counter` 的对象。
+```python
+counter = Counter()
+```
+
+
+我们通过 `rxui.label` 组件绑定 `count` 变量。把操作数据的方法绑定到按钮点击事件上。
+```python
+ui.button("-1", on_click=counter.decrement)
+rxui.label(counter.count)
+ui.button("+1", on_click=counter.increment)
+```
+
+- 我们需要使用 `rxui` 命名空间下的 `label` 组件，而不是 `nicegui` 命名空间下的 `label` 组件。
+- `rxui.label` 组件绑定 `counter.count` 变量，当 `counter.count` 变化时，`rxui.label` 组件自动更新。
+- `ui.button` 组件绑定 `counter.decrement` 和 `counter.increment` 方法，点击按钮时调用相应方法。
+
+
+> 在复杂项目中，`Counter` 定义的代码可以放到单独的模块中，然后在界面代码中导入。
+
+注意，当类变量名前面带有下划线时，数据状态不会自动更新。
+
+```python
+class Counter(rxui.ViewModel):
+    count: int = 0 # 响应式数据，能自动同步界面
+    _count: int = 0 # 这里的下划线表示私有变量，不会自动同步界面
+
+```
+
+---
+
+### 二次计算
+
+接着前面的例子，我们再添加一个功能。当计数器的值小于 0 时，字体显示为红色，大于 0 时显示为绿色，否则显示为黑色。
+
+```python
+# 数据状态代码
+class Counter(rxui.ViewModel):
+    count: int = 0
+
+    def text_color(self):
+        if self.count > 0:
+            return "green"
+        elif self.count < 0:
+            return "red"
+        else:
+            return "black"
+
+    def increment(self):
+        self.count += 1
+
+    def decrement(self):
+        self.count -= 1
+
+# 界面代码
+counter = Counter()
+
+with ui.row(align_items="center"):
+    ui.button("-1", on_click=counter.decrement)
+    rxui.label(counter.count).bind_color(counter.text_color)
+    ui.button("+1", on_click=counter.increment)
+```
+
+颜色值是依据计数器当前值计算得到的。属于二次计算。通过定义普通的实例函数即可。
+
+```python
+def text_color(self):
+    if self.count > 0:
+        return "green"
+    elif self.count < 0:
+        return "red"
+    else:
+        return "black"
+```
+
+
+然后，通过 `rxui.label` 组件的 `bind_color` 方法绑定 `text_color` 方法，使得颜色值自动更新。
+```python
+rxui.label(counter.count).bind_color(counter.text_color)
+```
+
+### 二次计数缓存
+现在，我们在计数器下方使用文字，显示当前计数器的颜色文本值。
+
+```python
+...
+# 数据状态代码
+class Counter(rxui.ViewModel):
+    ...
+
+# 界面代码
+counter = Counter()
+
+with ui.row(align_items="center"):
+    ui.button("-1", on_click=counter.decrement)
+    rxui.label(counter.count).bind_color(counter.text_color)
+    ui.button("+1", on_click=counter.increment)
+
+rxui.label(lambda: f"当前计数器值为 {counter.count}, 颜色值为 {counter.text_color()}")
+```
+
+- 当二次计算非常简单时，可以直接使用 lambda 表达式
+
+上面的代码中，有两个地方使用了 `counter.text_color` 方法。当 `counter.count` 变化时，`counter.text_color` 会执行两次计算。第二次计算是多余的。
+
+为了避免多余的计算，我们可以把 `counter.text_color` 缓存起来。
+
+```python
+# 数据状态代码
+class Counter(rxui.ViewModel):
+    count: int = 0
+
+    @rxui.cached_var
+    def text_color(self):
+        if self.count > 0:
+            return "green"
+        elif self.count < 0:
+            return "red"
+        else:
+            return "black"
+
+```
+
+- `rxui.cached_var` 装饰器可以把函数结果缓存起来，避免多余的计算。
+
+### 列表
+
+
+
+
 
 ---
 
