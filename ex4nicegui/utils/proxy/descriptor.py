@@ -1,3 +1,4 @@
+import sys
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Generic
 from .base import ProxyProtocol
 from .int import IntProxy
@@ -8,6 +9,7 @@ from .bool import BoolProxy
 from .date import DateProxy
 from .dict import DictProxy
 import datetime
+import warnings
 
 T = TypeVar("T")
 
@@ -88,6 +90,15 @@ class DateDescriptor(ProxyDescriptor[datetime.date]):
 
 
 def class_var_setter(cls: Type, name: str, value, list_var_flat: str) -> None:
+    if isinstance(value, list):
+        with warnings.catch_warnings():
+            warnings.showwarning = _custom_showwarning
+            warnings.warn(
+                f"The variable [{cls.__name__}.{name}] will be shared multiple instances. Please use list_var for definition.\n {name} = rxui.list_var(lambda:[1,2,3])",
+                stacklevel=3,
+            )
+        return
+
     if value is None or isinstance(value, str):
         setattr(cls, name, StringDescriptor(name, value))
     elif isinstance(value, int):
@@ -105,3 +116,7 @@ def class_var_setter(cls: Type, name: str, value, list_var_flat: str) -> None:
         setattr(cls, name, DateDescriptor(name, value))
     else:
         pass
+
+
+def _custom_showwarning(message, category, filename, lineno, file=None, line=None):
+    sys.stderr.write(f"{filename}:{lineno}: {category.__name__}: {message}\n")
