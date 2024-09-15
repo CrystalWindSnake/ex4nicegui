@@ -53,7 +53,7 @@ class FloatProxy(float):
     def __mod__(self, value: float, /) -> float:
         return self._ref.value.__mod__(utils.to_value(value))
 
-    def __divmod__(self, value: float, /) -> tuple[float, float]:
+    def __divmod__(self, value: float, /) -> Tuple[float, float]:
         return self._ref.value.__divmod__(utils.to_value(value))
 
     @overload
@@ -84,13 +84,13 @@ class FloatProxy(float):
     def __rmod__(self, value: float, /) -> float:
         return self._ref.value.__rmod__(utils.to_value(value))
 
-    def __rdivmod__(self, value: float, /) -> tuple[float, float]:
+    def __rdivmod__(self, value: float, /) -> Tuple[float, float]:
         return self._ref.value.__rdivmod__(utils.to_value(value))
 
     def __rpow__(self, value, mod: None = None, /) -> float:
         return self._ref.value.__rpow__(utils.to_value(value), mod)  # type: ignore
 
-    def __getnewargs__(self) -> tuple[float]:
+    def __getnewargs__(self) -> Tuple[float]:
         return (self._ref.value,)
 
     def __trunc__(self) -> int:
