@@ -212,3 +212,120 @@ def test_cached_var(browser: BrowserManager, page_path: str):
     label_lower_name.expect_equal_text("Hello, alice!")
 
     assert counter["lower name"] == 2
+
+
+class TestWithImplicit:
+    def test_by_instance(self, browser: BrowserManager, page_path: str):
+        class Countr(rxui.ViewModel):
+            count = 0
+
+            def increment(self):
+                self.count += 1
+
+            def decrement(self):
+                self.count -= 1
+
+            def plus_one(self):
+                return self.count + 1
+
+            def text(self):
+                return f"Count: {self.count}, plus one: {self.plus_one()}"
+
+        @ui.page(page_path)
+        def _():
+            c = Countr()
+            ui.button("Decrement", on_click=c.decrement).classes("btn-decrement")
+            rxui.label(c.count).classes("label-count")
+            ui.button("Increment", on_click=c.increment).classes("btn-increment")
+            rxui.label(c.text).classes("label-text")
+
+        page = browser.open(page_path)
+        btn_decrement = page.Button(".btn-decrement")
+        label_count = page.Label(".label-count")
+        btn_increment = page.Button(".btn-increment")
+        label_text = page.Label(".label-text")
+
+        # test initial value
+        label_count.expect_equal_text("0")
+        label_text.expect_equal_text("Count: 0, plus one: 1")
+
+        # test increment
+        btn_increment.click()
+        label_count.expect_equal_text("1")
+        label_text.expect_equal_text("Count: 1, plus one: 2")
+
+        # test decrement
+        btn_decrement.click()
+        label_count.expect_equal_text("0")
+        label_text.expect_equal_text("Count: 0, plus one: 1")
+
+    def test_use_list_var(self, browser: BrowserManager, page_path: str):
+        class Numbers(rxui.ViewModel):
+            numbers = rxui.list_var(lambda: [1, 2, 3])
+
+            def add_number(self):
+                new_value = max(self.numbers) + 1
+                self.numbers.append(new_value)
+
+            def pop_number(self):
+                self.numbers.pop()
+
+            def reversed_with_slice(self):
+                self.numbers = self.numbers[::-1]
+
+            def reversed_method(self):
+                self.numbers.reverse()
+
+            def reversed(self):
+                self.numbers = list(reversed(self.numbers))
+
+        @ui.page(page_path)
+        def _():
+            numbers = Numbers()
+            ui.button("Add number", on_click=numbers.add_number).classes(
+                "btn-add-number"
+            )
+            ui.button("Pop number", on_click=numbers.pop_number).classes(
+                "btn-pop-number"
+            )
+            ui.button(
+                "Reversed with slice", on_click=numbers.reversed_with_slice
+            ).classes("btn-reversed-with-slice")
+            ui.button("Reversed method", on_click=numbers.reversed_method).classes(
+                "btn-reversed-method"
+            )
+            ui.button("Reversed", on_click=numbers.reversed).classes("btn-reversed")
+            rxui.label(lambda: ",".join(map(str, numbers.numbers))).classes(
+                "label-numbers"
+            )
+
+        page = browser.open(page_path)
+        btn_add_number = page.Button(".btn-add-number")
+        btn_pop_number = page.Button(".btn-pop-number")
+        btn_reversed_with_slice = page.Button(".btn-reversed-with-slice")
+        btn_reversed_method = page.Button(".btn-reversed-method")
+        btn_reversed = page.Button(".btn-reversed")
+        label_numbers = page.Label(".label-numbers")
+
+        # test initial value
+        label_numbers.expect_equal_text("1,2,3")
+
+        # test add number
+        btn_add_number.click()
+        label_numbers.expect_equal_text("1,2,3,4")
+
+        # test pop number
+        btn_pop_number.click()
+        label_numbers.expect_equal_text("1,2,3")
+
+        # test reversed with slice
+        btn_reversed_with_slice.click()
+        label_numbers.expect_equal_text("3,2,1")
+
+        # test reversed method
+        btn_reversed_method.click()
+        label_numbers.expect_equal_text("1,2,3")
+
+        # test reversed
+        btn_reversed.click()
+        label_numbers.expect_equal_text("3,2,1")
