@@ -1,9 +1,5 @@
 import sys
-from typing import (
-    Dict,
-    Iterator,
-    TypeVar,
-)
+from typing import Dict, Iterator, TypeVar, Generic
 import datetime
 from .string import StringProxy
 from .int import IntProxy
@@ -14,13 +10,12 @@ from .date import DateProxy
 from signe import to_raw
 from ex4nicegui.utils.signals import to_ref_wrapper
 
-from weakref import WeakValueDictionary
 
 _KT = TypeVar("_KT")
 _VT = TypeVar("_VT")
 
 
-class DictProxy(dict[_KT, _VT]):
+class DictProxy(dict, Generic[_KT, _VT]):
     def __init__(self, value: Dict):
         from ex4nicegui.utils.signals import deep_ref
 
@@ -29,7 +24,7 @@ class DictProxy(dict[_KT, _VT]):
 
         self.__key_cache = {}
 
-    def copy(self) -> dict[_KT, _VT]:
+    def copy(self) -> Dict[_KT, _VT]:
         return to_raw(self._ref.value).copy()
 
     def keys(self):
@@ -39,8 +34,6 @@ class DictProxy(dict[_KT, _VT]):
         return to_raw(self._ref.value).values()
 
     def items(self):
-        # print("items")
-        # return ((k, self[k]) for k in self.keys())
         return to_raw(self._ref.value).items()
 
     def get(self, key: _KT, default, /):
