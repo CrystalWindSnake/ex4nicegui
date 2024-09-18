@@ -27,7 +27,7 @@ class TextareaBindableUi(BindableUi[ui.textarea], ValueElementMixin[str]):
         placeholder: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[str] = "",
         on_change: Optional[Callable[..., Any]] = None,
-        validation: Dict[str, Callable[..., bool]] = {},
+        validation: Optional[Dict[str, Callable[..., bool]]] = None,
     ) -> None:
         pc = ParameterClassifier(
             locals(),
@@ -68,7 +68,7 @@ class LazyTextareaBindableUi(TextareaBindableUi):
         placeholder: Optional[TMaybeRef[str]] = None,
         value: TMaybeRef[str] = "",
         on_change: Optional[Callable[..., Any]] = None,
-        validation: Dict[str, Callable[..., bool]] = {},
+        validation: Optional[Dict[str, Callable[..., bool]]] = None,
     ) -> None:
         org_value = value
         is_setter_value = is_setter_ref(value)
