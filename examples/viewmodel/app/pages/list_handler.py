@@ -3,7 +3,12 @@ from ex4nicegui import rxui
 
 
 class AppState(rxui.ViewModel):
-    nums = [1, 2, 3, 4, 5]
+    nums = []
+    # nums = [1,2,3] ❌
+
+    def __init__(self):
+        super().__init__()
+        self.nums = [1, 2, 3]
 
     def append(self, num: int):
         self.nums.append(num)
