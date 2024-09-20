@@ -16,7 +16,6 @@ English| [简体中文](./README.md)
     - [List Looping](#list-looping)
   - [apis](#apis)
     - [ViewModel](#viewmodel)
-      - [cached\_var](#cached_var)
       - [for list and dict data](#for-list-and-dict-data)
     - [reactive](#reactive)
       - [`to_ref`](#to_ref)
@@ -388,13 +387,14 @@ In version v0.7.0, the `ViewModel` class has been incorporated to facilitate the
 from ex4nicegui import rxui
 
 class Calculator(rxui.ViewModel):
-    num1 = rxui.var(0)
-    sign = rxui.var("+")
-    num2 = rxui.var(0)
+    num1 = 0
+    sign = "+"
+    num2 = 0
 
+    @rxui.cached_var
     def result(self):
         # When any of the values of num1, sign, or num2 changes, the result is recalculated accordingly.
-        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+        return eval(f"{self.num1}{self.sign}{self.num2}")
 
 # Each object possesses its own independent data.
 calc = Calculator()
@@ -408,23 +408,6 @@ with ui.row(align_items="center"):
         lambda: "red" if calc.result() < 0 else "black"
     )
 
-```
-
-#### cached_var
-
-In the preceding example, due to the use of `calc.result` twice, every time any of the values `num1`, `sign`, or `num2` undergoes a change, `result` is executed twice
-
-In reality, the second computation is redundant. We can circumvent this unnecessary calculation by applying the `rxui.cached_var` decorator, which ensures that the result is cached and only recalculated when necessary.
-
-```python
-class Calculator(rxui.ViewModel):
-    ...
-
-    @rxui.cached_var
-    def result(self):
-        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
-
-...
 ```
 
 ---

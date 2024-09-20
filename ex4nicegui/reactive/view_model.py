@@ -205,7 +205,7 @@ def cached_var(func: Callable[..., _T]) -> ReadonlyRef[_T]:
     .. code-block:: python
         from ex4nicegui import rxui
         class MyVm(rxui.ViewModel):
-            name = rxui.var("John")
+            name = "John"
 
             @rxui.cached_var
             def uppper_name(self):

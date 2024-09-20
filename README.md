@@ -28,7 +28,6 @@
     - [列表循环](#列表循环)
   - [apis](#apis)
     - [ViewModel](#viewmodel)
-      - [cached\_var](#cached_var)
       - [使用列表](#使用列表)
     - [响应式](#响应式)
       - [`to_ref`](#to_ref)
@@ -399,13 +398,14 @@ def _():
 from ex4nicegui import rxui
 
 class Calculator(rxui.ViewModel):
-    num1 = rxui.var(0)
-    sign = rxui.var("+")
-    num2 = rxui.var(0)
+    num1 = 0
+    sign = "+"
+    num2 = 0
 
+    @rxui.cached_var
     def result(self):
         # 当 num1,sign,num2 任意一个值发生变化时，result 也会重新计算
-        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
+        return eval(f"{self.num1}{self.sign}{self.num2}")
 
 # 每个对象拥有独立的数据
 calc = Calculator()
@@ -420,25 +420,6 @@ with ui.row(align_items="center"):
     )
 
 ```
-
-#### cached_var
-
-上面的示例中，由于使用了两次 `calc.result` 。因此，每当 `num1`, `sign`, `num2` 任意一个值发生变化时，`result` 都会执行2次。
-
-实际上，第二次的计算是多余的。我们可以通过添加 `rxui.cached_var` 装饰器，避免多余的计算。
-
-```python
-class Calculator(rxui.ViewModel):
-    ...
-
-    @rxui.cached_var
-    def result(self):
-        return eval(f"{self.num1.value}{self.sign.value}{self.num2.value}")
-
-...
-```
-
----
 
 #### 使用列表
 
