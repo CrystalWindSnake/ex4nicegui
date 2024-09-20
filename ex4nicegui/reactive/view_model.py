@@ -34,15 +34,30 @@ class ViewModel(NoProxy):
         from ex4nicegui import rxui
 
         class MyVm(rxui.ViewModel):
-            count = rxui.var(0)
-            data = rxui.var(lambda: [1,2,3])
+            count = 0
+            data = []
+            nums = rxui.list_var(lambda: [1, 2, 3])
+
+            def __init__(self):
+                super().__init__()
+                self.data = [1, 2, 3]
+
+            def increment(self):
+                self.count += 1
+
+            def add_data(self):
+                self.data.append(4)
+
 
         vm = MyVm()
 
         rxui.label(vm.count)
         rxui.number(value=vm.count)
 
-
+        ui.button("Increment", on_click=vm.increment)
+        ui.button("Add Data", on_click=vm.add_data)
+        rxui.label(vm.data)
+        rxui.label(vm.nums)
     """
 
     def __init__(self):
