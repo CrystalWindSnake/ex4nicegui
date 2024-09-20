@@ -181,7 +181,7 @@ def text_color(self):
 rxui.label(counter.count).bind_color(counter.text_color)
 ```
 
-### 二次计数缓存
+### 二次计算缓存
 现在，我们在计数器下方使用文字，显示当前计数器的颜色文本值。
 
 ```python
