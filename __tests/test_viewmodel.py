@@ -259,6 +259,87 @@ class TestWithImplicit:
         label_count.expect_equal_text("0")
         label_text.expect_equal_text("Count: 0, plus one: 1")
 
+    def test_use_empty_list(self, browser: BrowserManager, page_path: str):
+        class Numbers(rxui.ViewModel):
+            nums = []
+
+            def __init__(self):
+                super().__init__()
+                self.nums = [1, 2, 3]
+
+            def add_number(self):
+                new_value = max(self.nums) + 1
+                self.nums.append(new_value)
+
+            def pop_number(self):
+                self.nums.pop()
+
+            def reversed_with_slice(self):
+                self.nums = self.nums[::-1]
+
+            def reversed_method(self):
+                self.nums.reverse()
+
+            def reversed(self):
+                self.nums = list(reversed(self.nums))
+
+            def display_nums(self):
+                return ", ".join(map(str, self.nums))
+
+            def get_new_num(self):
+                return max(self.nums) + 1
+
+        @ui.page(page_path)
+        def _():
+            numbers = Numbers()
+            ui.button("Add number", on_click=numbers.add_number).classes(
+                "btn-add-number"
+            )
+            ui.button("Pop number", on_click=numbers.pop_number).classes(
+                "btn-pop-number"
+            )
+            ui.button(
+                "Reversed with slice", on_click=numbers.reversed_with_slice
+            ).classes("btn-reversed-with-slice")
+            ui.button("Reversed method", on_click=numbers.reversed_method).classes(
+                "btn-reversed-method"
+            )
+            ui.button("Reversed", on_click=numbers.reversed).classes("btn-reversed")
+            rxui.label(lambda: ",".join(map(str, numbers.nums))).classes(
+                "label-numbers"
+            )
+
+        page = browser.open(page_path)
+        btn_add_number = page.Button(".btn-add-number")
+        btn_pop_number = page.Button(".btn-pop-number")
+        btn_reversed_with_slice = page.Button(".btn-reversed-with-slice")
+        btn_reversed_method = page.Button(".btn-reversed-method")
+        btn_reversed = page.Button(".btn-reversed")
+        label_numbers = page.Label(".label-numbers")
+
+        # test initial value
+        label_numbers.expect_equal_text("1,2,3")
+
+        # test add number
+        btn_add_number.click()
+        label_numbers.expect_equal_text("1,2,3,4")
+
+        # test pop number
+        btn_pop_number.click()
+        label_numbers.expect_equal_text("1,2,3")
+
+        # test reversed with slice
+        btn_reversed_with_slice.click()
+        label_numbers.expect_equal_text("3,2,1")
+
+        # test reversed method
+        btn_reversed_method.click()
+        label_numbers.expect_equal_text("1,2,3")
+
+        # test reversed
+        btn_reversed.click()
+        label_numbers.expect_equal_text("3,2,1")
+
     def test_use_list_var(self, browser: BrowserManager, page_path: str):
         class Numbers(rxui.ViewModel):
             numbers = rxui.list_var(lambda: [1, 2, 3])
@@ -329,3 +410,68 @@ class TestWithImplicit:
         # test reversed
         btn_reversed.click()
         label_numbers.expect_equal_text("3,2,1")
+
+    def test_use_list_independent(self, browser: BrowserManager, page_path: str):
+        class Numbers(rxui.ViewModel):
+            numbers = []
+
+            def change_values_1(self):
+                self.numbers = [1, 2, 3]
+
+            def change_values_2(self):
+                self.numbers = [4, 5, 6]
+
+        @ui.page(page_path)
+        def _():
+            numbers1 = Numbers()
+            numbers2 = Numbers()
+            ui.button("change values 1", on_click=numbers1.change_values_1).classes(
+                "btn-change-values-1"
+            )
+            ui.button("change values 2", on_click=numbers2.change_values_2).classes(
+                "btn-change-values-2"
+            )
+            rxui.label(lambda: ",".join(map(str, numbers1.numbers))).classes(
+                "label-numbers-1"
+            )
+            rxui.label(lambda: ",".join(map(str, numbers2.numbers))).classes(
+                "label-numbers-2"
+            )
+
+        page = browser.open(page_path)
+        btn_change_values_1 = page.Button(".btn-change-values-1")
+        btn_change_values_2 = page.Button(".btn-change-values-2")
+        label_numbers_1 = page.Label(".label-numbers-1")
+        label_numbers_2 = page.Label(".label-numbers-2")
+
+        btn_change_values_1.click()
+        btn_change_values_2.click()
+
+        label_numbers_1.expect_equal_text("1,2,3")
+        label_numbers_2.expect_equal_text("4,5,6")
+
+    def test_str_to_none(self, browser: BrowserManager, page_path: str):
+        class State(rxui.ViewModel):
+            text = ""
+
+        @ui.page(page_path)
+        def _():
+            state = State()
+
+            rxui.label(text=state.text).classes("label-text")
+            rxui.input(value=state.text).props("clearable").classes("input-text")
+
+        page = browser.open(page_path)
+        label_text = page.Label(".label-text")
+        input_text = page.Input(".input-text")
+
+        # test initial value
+        label_text.expect_equal_text("")
+
+        # test input value
+        input_text.fill_text("hello")
+        label_text.expect_equal_text("hello")
+
+        # test clear input
+        input_text.click_cancel_icon()
+        label_text.expect_equal_text("None")
