@@ -7,7 +7,7 @@ English| [简体中文](./README.md)
 </div>
 
 - [Install](#-install)
-- [Usage](#-usage)
+- [Guide](#-guide)
 - [Features](#-features)
 - [BI Module](#bi-module)
 
@@ -337,56 +337,6 @@ def _():
 > It is recommended to always specify dependencies using `.on` to avoid unexpected refreshes.
 
 ---
-
-## 🦄 Usage
-![](./asset/sync_input.gif)
-```python
-from nicegui import ui
-from ex4nicegui import rxui, ref_computed, effect, to_ref
-
-# Define responsive data
-r_input = to_ref("")
-
-# Pass in the responsive data according to the nicegui usage method.
-rxui.input(value=r_input)
-rxui.label(r_input)
-
-ui.run()
-```
-
----
-
-![colors](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/colors.01.gif)
-
-```python
-from nicegui import ui
-from ex4nicegui import rxui, to_ref
-
-ui.radio.default_props("inline")
-
-# Define responsive data
-colors = ["red", "green", "blue", "yellow", "purple", "white"]
-color = to_ref("blue")
-bg_color = to_ref("red")
-
-
-## Within the function, accessing `ref` or other associated functions will automatically synchronize updates
-def bg_text():
-    return f"Current background color is {bg_color.value}"
-
-
-# UI
-
-with ui.row(align_items="center"):
-    rxui.radio(colors, value=color)
-    ## With lambda
-    rxui.label(lambda: f"Font color is {color.value}").bind_style({"color": color})
-
-with ui.row(align_items="center"):
-    rxui.radio(colors, value=bg_color)
-    ## With function
-    rxui.label(bg_text).bind_style({"background-color": bg_color})
-```
 
 
 ## ViewModel
