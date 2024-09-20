@@ -1,8 +1,9 @@
-from typing import List, Union, Dict
-from ex4nicegui import rxui, on, Ref, ref
+from typing import List, Union, Dict, Literal
+from ex4nicegui import rxui, on, Ref, ref, effect_refreshable
 from nicegui import ui
 from .screen import BrowserManager
 import json
+import pytest
 
 
 def list_dict_to_text(value: Union[List, Dict]):
@@ -535,7 +536,13 @@ class TestWithImplicit:
 
 
 class TestWithImplicitEnd2End:
-    def test_person_cards_with_vfor(self, browser: BrowserManager, page_path: str):
+    @pytest.mark.parametrize("fot_type", ["vfor", "refreshable"])
+    def test_person_cards_with_vfor(
+        self,
+        browser: BrowserManager,
+        page_path: str,
+        fot_type: Literal["vfor", "refreshable"],
+    ):
         from itertools import count
 
         id_generator = count()
@@ -552,6 +559,7 @@ class TestWithImplicitEnd2End:
 
         class Home(rxui.ViewModel):
             persons: List[Person] = []
+            deleted_person_index = 0
 
             def avg_age(self) -> float:
                 if len(self.persons) == 0:
@@ -567,6 +575,10 @@ class TestWithImplicitEnd2End:
                     sum(len(p.name) for p in self.persons) / len(self.persons), 2
                 )
 
+            def delete_person(self):
+                if self.deleted_person_index < len(self.persons):
+                    del self.persons[self.deleted_person_index]
+
             def sample_data(self):
                 self.persons = [
                     Person("alice", 25),
@@ -579,6 +591,25 @@ class TestWithImplicitEnd2End:
 
         @ui.page(page_path)
         def _():
+            # components
+            def create_person_card(home: Home, person: Person, index: int):
+                with rxui.card().classes("outline").bind_classes(
+                    {
+                        "outline-red-500": lambda: person.age > home.avg_age(),
+                    }
+                ).classes(f"person-card-{index}"):
+                    rxui.input(value=person.name, placeholder="名字").classes(
+                        f"input-name-{index}"
+                    )
+                    rxui.number(
+                        value=person.age,
+                        min=1,
+                        max=100,
+                        step=1,
+                        placeholder="年龄",
+                    ).classes(f"input-age-{index}")
+
+            # UI code
             home = Home()
             home.sample_data()
 
@@ -587,28 +618,35 @@ class TestWithImplicitEnd2End:
                 "label-avg-name-length"
             )
 
+            rxui.number(
+                value=home.deleted_person_index,
+                min=0,
+                max=lambda: len(home.persons) - 1,
+                step=1,
+            )
+            ui.button("删除", on_click=home.delete_person).classes("btn-delete")
+
             with ui.row():
+                if fot_type == "vfor":
 
-                @rxui.vfor(home.persons, key="id")
-                def _(store: rxui.VforStore[Person]):
-                    person = store.get_item()
-                    index = store.raw_index
+                    @rxui.vfor(home.persons, key="id")
+                    def _(store: rxui.VforStore[Person]):
+                        person = store.get_item()
+                        index = store.raw_index
 
-                    with rxui.card().classes("outline").bind_classes(
-                        {
-                            "outline-red-500": lambda: person.age > home.avg_age(),
-                        }
-                    ).classes(f"person-card-{index}"):
-                        rxui.input(value=person.name, placeholder="名字").classes(
-                            f"input-name-{index}"
-                        )
-                        rxui.number(
-                            value=person.age, min=1, max=100, step=1, placeholder="年龄"
-                        ).classes(f"input-age-{index}")
+                        create_person_card(home, person, index)
+
+                else:
+
+                    @effect_refreshable.on(home.persons)
+                    def _():
+                        for index, person in enumerate(home.persons):
+                            create_person_card(home, person, index)
 
         page = browser.open(page_path)
         label_avg_age = page.Label(".label-avg-age")
         label_avg_name_length = page.Label(".label-avg-name-length")
+        btn_delete = page.Button(".btn-delete")
         input_name_0 = page.Input(".input-name-0")
         input_age_0 = page.Number(".input-age-0")
 
@@ -645,7 +683,7 @@ class TestWithImplicitEnd2End:
 
         # change age of the 4th person
         input_age_3.fill_text("30")
-        input_name_3.fill_text("daviddddd")
+        input_name_3.fill_text("daveddddd")
 
         # test updated value
         label_avg_age.expect_equal_text("avg age: 27.17")
@@ -657,3 +695,10 @@ class TestWithImplicitEnd2End:
         cards[3].expect_to_contain_class("outline-red-500")
         cards[4].expect_not_to_contain_class("outline-red-500")
         cards[5].expect_to_contain_class("outline-red-500")
+
+        # delete the 1st person
+        btn_delete.click()
+
+        # test updated value
+        label_avg_age.expect_equal_text("avg age: 29.2")
+        label_avg_name_length.expect_equal_text("avg name length: 5.4")
