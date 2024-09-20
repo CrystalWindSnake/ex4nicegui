@@ -29,8 +29,8 @@ English| [简体中文](./README.md)
     - [functionality](#functionality)
       - [vmodel](#vmodel)
       - [vfor](#vfor)
-      - [Bind class names](#bind-class-names)
-      - [bind-style](#bind-style)
+      - [bind\_classes](#bind_classes)
+      - [bind\_style](#bind_style)
       - [bind\_prop](#bind_prop)
       - [rxui.echarts](#rxuiecharts)
         - [echarts mouse events](#echarts-mouse-events)
@@ -906,7 +906,7 @@ def each_person(s: rxui.VforStore[Person]):
 ---
 
 
-#### Bind class names
+#### bind_classes
 
 All component classes provide `bind_classes` for binding `class`, supporting three different data structures.
 
@@ -968,7 +968,7 @@ rxui.label("binding to single string").bind_classes(bg_color_class)
 
 ---
 
-#### bind-style
+#### bind_style
 
 ```python
 from nicegui import ui

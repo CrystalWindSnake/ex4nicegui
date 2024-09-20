@@ -41,8 +41,8 @@
     - [组件功能](#组件功能)
       - [vmodel](#vmodel)
       - [vfor](#vfor)
-      - [绑定类名](#绑定类名)
-      - [bind-style](#bind-style)
+      - [bind\_classes](#bind_classes)
+      - [bind\_style](#bind_style)
       - [bind\_prop](#bind_prop)
       - [rxui.echarts](#rxuiecharts)
         - [echarts 图表鼠标事件](#echarts-图表鼠标事件)
@@ -925,7 +925,7 @@ def each_person(s: rxui.VforStore[Person]):
 
 ---
 
-#### 绑定类名
+#### bind_classes
 
 所有的组件类提供 `bind_classes` 用于绑定 `class`，支持三种不同的数据结构。
 
@@ -988,7 +988,7 @@ rxui.label("binding to single string").bind_classes(bg_color_class)
 
 ---
 
-#### bind-style
+#### bind_style
 
 ```python
 from nicegui import ui
