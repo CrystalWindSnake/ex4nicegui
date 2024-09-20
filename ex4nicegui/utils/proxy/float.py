@@ -3,9 +3,9 @@ from typing import Any, Optional, SupportsIndex, Tuple, overload
 from . import utils
 
 
-class FloatProxy(float):
-    def __new__(cls, value):
-        return super().__new__(cls, value)
+class FloatProxy:
+    # def __new__(cls, value):
+    #     return super().__new__(cls, value)
 
     def __init__(self, value: float):
         from ex4nicegui.utils.signals import to_ref
@@ -36,25 +36,25 @@ class FloatProxy(float):
         return self._ref.value.conjugate()
 
     def __add__(self, value: float, /) -> float:
-        return self._ref.value.__add__(utils.to_value(value))
+        return self._ref.value.__add__(float(utils.to_value(value)))
 
     def __sub__(self, value: float, /) -> float:
-        return self._ref.value.__sub__(utils.to_value(value))
+        return self._ref.value.__sub__(float(utils.to_value(value)))
 
     def __mul__(self, value: float, /) -> float:
-        return self._ref.value.__mul__(utils.to_value(value))
+        return self._ref.value.__mul__(float(utils.to_value(value)))
 
     def __floordiv__(self, value: float, /) -> float:
-        return self._ref.value.__floordiv__(utils.to_value(value))
+        return self._ref.value.__floordiv__(float(utils.to_value(value)))
 
     def __truediv__(self, value: float, /) -> float:
-        return self._ref.value.__truediv__(utils.to_value(value))
+        return self._ref.value.__truediv__(float(utils.to_value(value)))
 
     def __mod__(self, value: float, /) -> float:
-        return self._ref.value.__mod__(utils.to_value(value))
+        return self._ref.value.__mod__(float(utils.to_value(value)))
 
     def __divmod__(self, value: float, /) -> Tuple[float, float]:
-        return self._ref.value.__divmod__(utils.to_value(value))
+        return self._ref.value.__divmod__(float(utils.to_value(value)))
 
     @overload
     def __pow__(self, value: int, mod: None = None, /) -> float: ...
@@ -64,31 +64,31 @@ class FloatProxy(float):
     def __pow__(self, value: float, mod: None = None, /) -> Any: ...
 
     def __pow__(self, value: float, mod: None = None, /) -> Any:
-        return self._ref.value.__pow__(utils.to_value(value), mod)
+        return self._ref.value.__pow__(float(utils.to_value(value)), mod)
 
     def __radd__(self, value: float, /) -> float:
-        return self._ref.value.__radd__(utils.to_value(value))
+        return self._ref.value.__radd__(float(utils.to_value(value)))
 
     def __rsub__(self, value: float, /) -> float:
-        return self._ref.value.__rsub__(utils.to_value(value))
+        return self._ref.value.__rsub__(float(utils.to_value(value)))
 
     def __rmul__(self, value: float, /) -> float:
-        return self._ref.value.__rmul__(utils.to_value(value))
+        return self._ref.value.__rmul__(float(utils.to_value(value)))
 
     def __rfloordiv__(self, value: float, /) -> float:
-        return self._ref.value.__rfloordiv__(utils.to_value(value))
+        return self._ref.value.__rfloordiv__(float(utils.to_value(value)))
 
     def __rtruediv__(self, value: float, /) -> float:
-        return self._ref.value.__rtruediv__(utils.to_value(value))
+        return self._ref.value.__rtruediv__(float(utils.to_value(value)))
 
     def __rmod__(self, value: float, /) -> float:
-        return self._ref.value.__rmod__(utils.to_value(value))
+        return self._ref.value.__rmod__(float(utils.to_value(value)))
 
     def __rdivmod__(self, value: float, /) -> Tuple[float, float]:
-        return self._ref.value.__rdivmod__(utils.to_value(value))
+        return self._ref.value.__rdivmod__(float(utils.to_value(value)))
 
     def __rpow__(self, value, mod: None = None, /) -> float:
-        return self._ref.value.__rpow__(utils.to_value(value), mod)  # type: ignore
+        return self._ref.value.__rpow__(float(utils.to_value(value)), mod)  # type: ignore
 
     def __getnewargs__(self) -> Tuple[float]:
         return (self._ref.value,)
@@ -113,22 +113,22 @@ class FloatProxy(float):
         return self._ref.value.__round__(ndigits)
 
     def __eq__(self, value: object, /) -> bool:
-        return self._ref.value.__eq__(utils.to_value(value))
+        return self._ref.value.__eq__(float(utils.to_value(value)))
 
     def __ne__(self, value: object, /) -> bool:
-        return self._ref.value.__ne__(utils.to_value(value))
+        return self._ref.value.__ne__(float(utils.to_value(value)))
 
     def __lt__(self, value: float, /) -> bool:
-        return self._ref.value.__lt__(utils.to_value(value))
+        return self._ref.value.__lt__(float(utils.to_value(value)))
 
     def __le__(self, value: float, /) -> bool:
-        return self._ref.value.__le__(utils.to_value(value))
+        return self._ref.value.__le__(float(utils.to_value(value)))
 
     def __gt__(self, value: float, /) -> bool:
-        return self._ref.value.__gt__(utils.to_value(value))
+        return self._ref.value.__gt__(float(utils.to_value(value)))
 
     def __ge__(self, value: float, /) -> bool:
-        return self._ref.value.__ge__(utils.to_value(value))
+        return self._ref.value.__ge__(float(utils.to_value(value)))
 
     def __neg__(self) -> float:
         return self._ref.value.__neg__()

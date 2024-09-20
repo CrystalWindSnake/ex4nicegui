@@ -475,3 +475,60 @@ class TestWithImplicit:
         # test clear input
         input_text.click_cancel_icon()
         label_text.expect_equal_text("None")
+
+    def test_compare_int_float(self, browser: BrowserManager, page_path: str):
+        class State(rxui.ViewModel):
+            a = 0
+
+            def total_age(self):
+                return 0.0 + self.a
+
+            def lt(self):
+                return 0.0 < self.a
+
+            def gt(self):
+                return 0.0 > self.a
+
+            def eq(self):
+                return 0.0 == self.a
+
+            def ne(self):
+                return 0 != self.a
+
+        @ui.page(page_path)
+        def _():
+            state = State()
+
+            rxui.number(value=state.a, min=0, max=100, step=1, label="Age A").classes(
+                "input-a"
+            )
+            rxui.label(lambda: f"Total age: {state.total_age()}").classes(
+                "label-total-age"
+            )
+            rxui.label(lambda: f"a < 0: {state.lt()}").classes("label-lt")
+            rxui.label(lambda: f"a > 0: {state.gt()}").classes("label-gt")
+            rxui.label(lambda: f"a == 0: {state.eq()}").classes("label-eq")
+            rxui.label(lambda: f"a!= 0: {state.ne()}").classes("label-ne")
+
+        page = browser.open(page_path)
+        input_a = page.Number(".input-a")
+        label_total_age = page.Label(".label-total-age")
+        label_lt = page.Label(".label-lt")
+        label_gt = page.Label(".label-gt")
+        label_eq = page.Label(".label-eq")
+        label_ne = page.Label(".label-ne")
+
+        # test initial value
+        label_total_age.expect_equal_text("Total age: 0")
+        label_lt.expect_equal_text("a < 0: False")
+        label_gt.expect_equal_text("a > 0: False")
+        label_eq.expect_equal_text("a == 0: True")
+        label_ne.expect_equal_text("a!= 0: False")
+
+        # test input value
+        input_a.fill_text("1")
+        label_total_age.expect_equal_text("Total age: 1.0")
+        label_lt.expect_equal_text("a < 0: True")
+        label_gt.expect_equal_text("a > 0: False")
+        label_eq.expect_equal_text("a == 0: False")
+        label_ne.expect_equal_text("a!= 0: True")
