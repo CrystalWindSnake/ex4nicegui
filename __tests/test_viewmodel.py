@@ -532,3 +532,128 @@ class TestWithImplicit:
         label_gt.expect_equal_text("a > 0: False")
         label_eq.expect_equal_text("a == 0: False")
         label_ne.expect_equal_text("a!= 0: True")
+
+
+class TestWithImplicitEnd2End:
+    def test_person_cards_with_vfor(self, browser: BrowserManager, page_path: str):
+        from itertools import count
+
+        id_generator = count()
+
+        class Person(rxui.ViewModel):
+            name = ""
+            age = 0
+
+            def __init__(self, name: str, age: int):
+                super().__init__()
+                self.name = name
+                self.age = age
+                self.id = next(id_generator)
+
+        class Home(rxui.ViewModel):
+            persons: List[Person] = []
+
+            def avg_age(self) -> float:
+                if len(self.persons) == 0:
+                    return 0
+
+                return round(sum(p.age for p in self.persons) / len(self.persons), 2)
+
+            def avg_name_length(self):
+                if len(self.persons) == 0:
+                    return 0
+
+                return round(
+                    sum(len(p.name) for p in self.persons) / len(self.persons), 2
+                )
+
+            def sample_data(self):
+                self.persons = [
+                    Person("alice", 25),
+                    Person("bob", 30),
+                    Person("charlie", 31),
+                    Person("dave", 22),
+                    Person("eve", 26),
+                    Person("frank", 29),
+                ]
+
+        @ui.page(page_path)
+        def _():
+            home = Home()
+            home.sample_data()
+
+            rxui.label(lambda: f"avg age: {home.avg_age()}").classes("label-avg-age")
+            rxui.label(lambda: f"avg name length: {home.avg_name_length()}").classes(
+                "label-avg-name-length"
+            )
+
+            with ui.row():
+
+                @rxui.vfor(home.persons, key="id")
+                def _(store: rxui.VforStore[Person]):
+                    person = store.get_item()
+                    index = store.raw_index
+
+                    with rxui.card().classes("outline").bind_classes(
+                        {
+                            "outline-red-500": lambda: person.age > home.avg_age(),
+                        }
+                    ).classes(f"person-card-{index}"):
+                        rxui.input(value=person.name, placeholder="名字").classes(
+                            f"input-name-{index}"
+                        )
+                        rxui.number(
+                            value=person.age, min=1, max=100, step=1, placeholder="年龄"
+                        ).classes(f"input-age-{index}")
+
+        page = browser.open(page_path)
+        label_avg_age = page.Label(".label-avg-age")
+        label_avg_name_length = page.Label(".label-avg-name-length")
+        input_name_0 = page.Input(".input-name-0")
+        input_age_0 = page.Number(".input-age-0")
+
+        input_name_3 = page.Input(".input-name-3")
+        input_age_3 = page.Number(".input-age-3")
+
+        cards = [page.Base(f".person-card-{i}") for i in range(6)]
+
+        # test initial value
+        label_avg_age.expect_equal_text("avg age: 27.17")
+        label_avg_name_length.expect_equal_text("avg name length: 4.5")
+
+        cards[0].expect_not_to_contain_class("outline-red-500")
+        cards[1].expect_to_contain_class("outline-red-500")
+        cards[2].expect_to_contain_class("outline-red-500")
+        cards[3].expect_not_to_contain_class("outline-red-500")
+        cards[4].expect_not_to_contain_class("outline-red-500")
+        cards[5].expect_to_contain_class("outline-red-500")
+
+        # change age of the first person
+        input_age_0.fill_text("17")
+        input_name_0.fill_text("alicexxx")
+
+        # test updated value
+        label_avg_age.expect_equal_text("avg age: 25.83")
+        label_avg_name_length.expect_equal_text("avg name length: 5.0")
+
+        cards[0].expect_not_to_contain_class("outline-red-500")
+        cards[1].expect_to_contain_class("outline-red-500")
+        cards[2].expect_to_contain_class("outline-red-500")
+        cards[3].expect_not_to_contain_class("outline-red-500")
+        cards[4].expect_to_contain_class("outline-red-500")
+        cards[5].expect_to_contain_class("outline-red-500")
+
+        # change age of the 4th person
+        input_age_3.fill_text("30")
+        input_name_3.fill_text("daviddddd")
+
+        # test updated value
+        label_avg_age.expect_equal_text("avg age: 27.17")
+        label_avg_name_length.expect_equal_text("avg name length: 5.83")
+
+        cards[0].expect_not_to_contain_class("outline-red-500")
+        cards[1].expect_to_contain_class("outline-red-500")
+        cards[2].expect_to_contain_class("outline-red-500")
+        cards[3].expect_to_contain_class("outline-red-500")
+        cards[4].expect_not_to_contain_class("outline-red-500")
+        cards[5].expect_to_contain_class("outline-red-500")
