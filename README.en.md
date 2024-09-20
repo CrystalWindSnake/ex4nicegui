@@ -16,7 +16,7 @@ English| [简体中文](./README.md)
     - [List Looping](#list-looping)
   - [apis](#apis)
     - [ViewModel](#viewmodel)
-      - [for list and dict data](#for-list-and-dict-data)
+      - [for list data](#for-list-data)
     - [reactive](#reactive)
       - [`to_ref`](#to_ref)
       - [`deep_ref`](#deep_ref)
@@ -412,15 +412,7 @@ with ui.row(align_items="center"):
 
 ---
 
-#### for list and dict data
-
-When the data is mutable, such as lists or dictionaries, a factory function must be supplied to `rxui.var`.
-
-```python
-class Home(rxui.ViewModel):
-    persons= rxui.var(lambda: [])
-
-```
+#### for list data
 
 In the following example, each person is displayed using a card. The average age of all individuals is shown at the top. When an individual's age exceeds the average age, the card's border turns red.
 
@@ -434,26 +426,42 @@ from nicegui import ui
 
 id_generator = count()
 
+
 class Person(rxui.ViewModel):
+    name = ""
+    age = 0
+
     def __init__(self, name: str, age: int):
         super().__init__()
-        self.name = rxui.var(name)
-        self.age = rxui.var(age)
+        self.name = name
+        self.age = age
         self.id = next(id_generator)
 
 
 
 class Home(rxui.ViewModel):
-    persons: Ref[List[Person]] = rxui.var(lambda: [])
+    persons: List[Person] = []
+    deleted_person_index = 0
 
+    @rxui.cached_var
     def avg_age(self) -> float:
-        if len(self.persons.value) == 0:
+        if len(self.persons) == 0:
             return 0
 
-        return sum(p.age.value for p in self.persons.value) / len(self.persons.value)
+        return round(sum(p.age for p in self.persons) / len(self.persons), 2)
+
+    def avg_name_length(self):
+        if len(self.persons) == 0:
+            return 0
+
+        return round(sum(len(p.name) for p in self.persons) / len(self.persons), 2)
+
+    def delete_person(self):
+        if self.deleted_person_index < len(self.persons):
+            del self.persons[int(self.deleted_person_index)]
 
     def sample_data(self):
-        self.persons.value = [
+        self.persons = [
             Person("alice", 25),
             Person("bob", 30),
             Person("charlie", 31),
@@ -466,7 +474,12 @@ home = Home()
 home.sample_data()
 
 rxui.label(lambda: f"avg age: {home.avg_age()}")
+rxui.label(lambda: f"avg name length: {home.avg_name_length()}")
 
+rxui.number(
+    value=home.deleted_person_index, min=0, max=lambda: len(home.persons) - 1, step=1
+)
+ui.button("delete", on_click=home.delete_person)
 
 with ui.row():
 

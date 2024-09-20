@@ -423,45 +423,51 @@ with ui.row(align_items="center"):
 
 #### 使用列表
 
-当数据为可变对象时，比如列表，字典等，需要提供工厂函数传给 `rxui.var`
-
-
-```python
-class Home(rxui.ViewModel):
-    persons= rxui.var(lambda: [])
-
-```
-
 下面的示例，每个 person 使用卡片展示。最上方显示所有人的平均年龄。当个人年龄大于平均年龄，卡片外边框将变为红色。
 通过 `number` 组件修改年龄，一切都会自动更新。
 
 ```python
 from typing import List
-from ex4nicegui import rxui, Ref
+from ex4nicegui import rxui
 from itertools import count
 from nicegui import ui
 
 id_generator = count()
 
 class Person(rxui.ViewModel):
+    name = ""
+    age = 0
+
     def __init__(self, name: str, age: int):
         super().__init__()
-        self.name = rxui.var(name)
-        self.age = rxui.var(age)
+        self.name = name
+        self.age = age
         self.id = next(id_generator)
 
 
 class Home(rxui.ViewModel):
-    persons: Ref[List[Person]] = rxui.var(lambda: [])
+    persons: List[Person] = []
+    deleted_person_index = 0
 
+    @rxui.cached_var
     def avg_age(self) -> float:
-        if len(self.persons.value) == 0:
+        if len(self.persons) == 0:
             return 0
 
-        return sum(p.age.value for p in self.persons.value) / len(self.persons.value)
+        return round(sum(p.age for p in self.persons) / len(self.persons), 2)
+
+    def avg_name_length(self):
+        if len(self.persons) == 0:
+            return 0
+
+        return round(sum(len(p.name) for p in self.persons) / len(self.persons), 2)
+
+    def delete_person(self):
+        if self.deleted_person_index < len(self.persons):
+            del self.persons[int(self.deleted_person_index)]
 
     def sample_data(self):
-        self.persons.value = [
+        self.persons = [
             Person("alice", 25),
             Person("bob", 30),
             Person("charlie", 31),
@@ -470,11 +476,17 @@ class Home(rxui.ViewModel):
             Person("frank", 29),
         ]
 
+
 home = Home()
 home.sample_data()
 
 rxui.label(lambda: f"平均年龄: {home.avg_age()}")
+rxui.label(lambda: f"平均名字长度: {home.avg_name_length()}")
 
+rxui.number(
+    value=home.deleted_person_index, min=0, max=lambda: len(home.persons) - 1, step=1
+)
+ui.button("删除", on_click=home.delete_person)
 
 with ui.row():
 
@@ -483,7 +495,7 @@ with ui.row():
         person = store.get_item()
         with rxui.card().classes("outline").bind_classes(
             {
-                "outline-red-500": lambda: person.age.value > home.avg_age(),
+                "outline-red-500": lambda: person.age > home.avg_age(),
             }
         ):
             rxui.input(value=person.name, placeholder="名字")
