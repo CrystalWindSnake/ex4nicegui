@@ -28,6 +28,316 @@ pip install ex4nicegui -U
 - [todo list mvc](./examples/todomvc/)
 
 
+---
+
+## Guide
+
+We start with a simple counter application where users can increase or decrease the count by clicking buttons.
+
+![counter](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/counter.gif)
+
+Here is the complete code:
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui
+
+# Data state code
+class Counter(rxui.ViewModel):
+    count: int = 0
+
+    def increment(self):
+        self.count += 1
+
+    def decrement(self):
+        self.count -= 1
+
+# UI code
+counter = Counter()
+
+with ui.row(align_items="center"):
+    ui.button(icon="remove", on_click=counter.decrement)
+    rxui.label(counter.count).bind_color(counter.text_color)
+    ui.button(icon="add", on_click=counter.increment)
+
+ui.run()
+```
+
+---
+
+Now let's dive into more details. `ex4nicegui` follows a data-driven approach to define the user interface. State data defines all the mutable data in the application.
+
+Here is the state data definition for `Counter`:
+
+```python
+class Counter(rxui.ViewModel):
+    count: int = 0
+```
+
+- Custom classes need to inherit from `rxui.ViewModel`.
+- A variable `count` is defined here, representing the current value of the counter, with an initial value of 0.
+
+Next, define a series of methods to manipulate the data within the class:
+```python
+def increment(self):
+    self.count += 1
+
+def decrement(self):
+    self.count -= 1
+```
+
+- These are instance methods that can modify the value of the `count` variable.
+
+
+Then, in the UI code, instantiate an object of `Counter`.
+```python
+counter = Counter()
+```
+
+
+We bind the `count` variable to the `rxui.label` component and bind the data manipulation methods to button click events.
+
+```python
+ui.button(icon="remove", on_click=counter.decrement)
+rxui.label(counter.count)
+ui.button(icon="add", on_click=counter.increment)
+```
+
+- We need to use the `label` component from the `rxui` namespace, not the `label` component from the `nicegui` namespace.
+- The `rxui.label` component binds to the `counter.count` variable, and it automatically updates when `counter.count` changes.
+- The `ui.button` component binds to the `counter.decrement` and `counter.increment` methods, which are called when the buttons are clicked.
+
+
+> In complex projects, the `Counter` definition can be placed in a separate module and imported into the UI code.
+
+Note that when a class variable name is prefixed with an underscore, the data state will not be automatically updated.
+
+```python
+class Counter(rxui.ViewModel):
+    count: int = 0  # Reactive data, automatically synchronized with the UI
+    _count: int = 0  # The underscore here indicates a private variable, which will not be automatically synchronized with the UI
+```
+
+---
+
+### Computation
+
+Continuing from the previous example, let's add another feature. When the counter value is less than 0, the text color should be red; when greater than 0, it should be green; otherwise, it should be black.
+
+```python
+# Data state code
+class Counter(rxui.ViewModel):
+    count: int = 0
+
+    def text_color(self):
+        if self.count > 0:
+            return "green"
+        elif self.count < 0:
+            return "red"
+        else:
+            return "black"
+
+    def increment(self):
+        self.count += 1
+
+    def decrement(self):
+        self.count -= 1
+
+# UI code
+counter = Counter()
+
+with ui.row(align_items="center"):
+    ui.button(icon="remove", on_click=counter.decrement)
+    rxui.label(counter.count).bind_color(counter.text_color)
+    ui.button(icon="add", on_click=counter.increment)
+```
+
+The color value is computed based on the current value of the counter. This is a derived computation, which can be achieved by defining an ordinary instance method.
+
+```python
+def text_color(self):
+    if self.count > 0:
+        return "green"
+    elif self.count < 0:
+        return "red"
+    else:
+        return "black"
+```
+
+
+Then, bind the `text_color` method to the `rxui.label` component using the `bind_color` method to ensure the color value updates automatically.
+
+```python
+rxui.label(counter.count).bind_color(counter.text_color)
+```
+
+### Caching
+Now, we will display the current counter value and its color text below the counter.
+
+```python
+...
+#  Data state code
+class Counter(rxui.ViewModel):
+    ...
+
+#  UI code
+counter = Counter()
+
+with ui.row(align_items="center"):
+    ui.button(icon="remove", on_click=counter.decrement)
+    rxui.label(counter.count).bind_color(counter.text_color)
+    ui.button(icon="add", on_click=counter.increment)
+
+rxui.label(lambda: f"Current counter value is {counter.count}, color value is {counter.text_color()}")
+```
+
+- When the derived computation is very simple, you can directly use a lambda expression.
+
+In the code above, the `counter.text_color` method is used in two places. When `counter.count` changes, `counter.text_color` is computed twice, and the second computation is redundant.
+
+To avoid the redundant computation, we can cache the result of `counter.text_color`.
+
+```python
+# Data state code
+class Counter(rxui.ViewModel):
+    count: int = 0
+
+    @rxui.cached_var
+    def text_color(self):
+        if self.count > 0:
+            return "green"
+        elif self.count < 0:
+            return "red"
+        else:
+            return "black"
+
+```
+
+- The `rxui.cached_var` decorator can cache the result of a function to avoid redundant computations.
+
+### list data
+
+The following example demonstrates how to use lists.
+
+```python
+
+class AppState(rxui.ViewModel):
+    nums = []
+    # nums = [1,2,3] ❌ If initialization is needed, it must be set in the `__init__` method.
+
+    def __init__(self):
+        super().__init__()
+        self.nums = [1, 2, 3]
+
+    def append(self):
+        new_num = max(self.nums) + 1
+        self.nums.append(new_num)
+
+    def pop(self):
+        self.nums.pop()
+
+    def reverse(self):
+        self.nums.reverse()
+
+    def display_nums(self):
+        return ", ".join(map(str, self.nums))
+
+
+# UI code
+state = AppState()
+
+with ui.row(align_items="center"):
+    ui.button("append", on_click=state.append)
+    ui.button("pop", on_click=state.pop)
+    ui.button("reverse", on_click=state.reverse)
+
+rxui.label(state.display_nums)
+
+```
+
+If you need to initialize a list when defining it, it is recommended to set it in the `__init__` method.
+
+```python
+class AppState(rxui.ViewModel):
+    nums = []
+    # nums = [1,2,3] ❌ If initialization is needed, it must be set in the `__init__` method.
+
+    def __init__(self):
+        super().__init__()
+        self.nums = [1, 2, 3]
+
+    ...
+```
+
+Another way is to use `rxui.list_var`.
+
+
+
+```python
+class AppState(rxui.ViewModel):
+    # nums = []
+    # nums = [1,2,3] ❌
+    nums = rxui.list_var(lambda: [1, 2, 3])
+
+    ...
+```
+
+- The parameter for `rxui.list_var` is a function that returns a list.
+
+
+### List Looping
+
+After defining a list, we can use the `effect_refreshable.on` decorator to display the list data in the UI.
+
+In the following example, the UI will dynamically display the icon selected from a dropdown.
+```python
+from ex4nicegui import rxui, effect_refreshable
+
+
+class AppState(rxui.ViewModel):
+    icons = []
+    _option_icons = ["font_download", "warning", "format_size", "print"]
+
+
+state = AppState()
+
+# UI code
+with ui.row(align_items="center"):
+
+    @effect_refreshable.on(state.icons)
+    def _():
+        for icon in state.icons:
+            ui.icon(icon, size="2rem")
+
+
+rxui.select(state._option_icons, value=state.icons, multiple=True)
+```
+
+Here, `@effect_refreshable.on(state.icons)` explicitly specifies the dependency. When `state.icons` changes, the `_` function will be re-executed.
+
+```python
+@effect_refreshable.on(state.icons)
+def _():
+    # This code will re-execute when `state.icons` changes.
+    ...
+```
+
+> Note that each execution will clear the content inside. This is the data-driven version of `ui.refreshable`.
+
+In principle, you don't need to specify the data to monitor using `.on`. Any "reactive data" used within the function will be automatically monitored.
+```python
+@effect_refreshable # Not using .on(state.icons)
+def _():
+    # This reads `state.icons`, so it will be automatically monitored
+    for icon in state.icons:
+        ui.icon(icon, size="2rem")
+
+```
+
+> It is recommended to always specify dependencies using `.on` to avoid unexpected refreshes.
+
+---
+
 ## 🦄 Usage
 ![](./asset/sync_input.gif)
 ```python

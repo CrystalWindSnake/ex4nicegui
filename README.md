@@ -19,6 +19,8 @@
 
 ![todo-app](https://gitee.com/carson_add/ex4nicegui-examples/raw/main/asset/todo-app.01.gif)
 
+![todo-app](https://gitee.com/carson_add/ex4nicegui-examples/raw/main/asset/todo-app.02.gif)
+
 [查看更多示例](https://gitee.com/carson_add/ex4nicegui-examples)
 
 ## 教程
@@ -44,7 +46,7 @@ pip install ex4nicegui -U
 
 我们从一个简单的计数器应用开始，用户可以通过点击按钮让计数增加或减少。
 
-![counter](https://gitee.com/carson_add/ex4nicegui-examples/raw/main/asset/counter.01.gif)
+![counter](https://gitee.com/carson_add/ex4nicegui-examples/raw/main/asset/counter.gif)
 
 下面是完整代码：
 
@@ -66,9 +68,10 @@ class Counter(rxui.ViewModel):
 counter = Counter()
 
 with ui.row(align_items="center"):
-    ui.button("-1", on_click=counter.decrement)
+    ui.button(icon="remove", on_click=counter.decrement)
     rxui.label(counter.count)
-    ui.button("+1", on_click=counter.increment)
+    ui.button(icon="add", on_click=counter.increment)
+
 
 ui.run()
 ```
@@ -106,9 +109,9 @@ counter = Counter()
 
 我们通过 `rxui.label` 组件绑定 `count` 变量。把操作数据的方法绑定到按钮点击事件上。
 ```python
-ui.button("-1", on_click=counter.decrement)
+ui.button(icon="remove", on_click=counter.decrement)
 rxui.label(counter.count)
-ui.button("+1", on_click=counter.increment)
+ui.button(icon="add", on_click=counter.increment)
 ```
 
 - 我们需要使用 `rxui` 命名空间下的 `label` 组件，而不是 `nicegui` 命名空间下的 `label` 组件。
@@ -156,9 +159,9 @@ class Counter(rxui.ViewModel):
 counter = Counter()
 
 with ui.row(align_items="center"):
-    ui.button("-1", on_click=counter.decrement)
+    ui.button(icon="remove", on_click=counter.decrement)
     rxui.label(counter.count).bind_color(counter.text_color)
-    ui.button("+1", on_click=counter.increment)
+    ui.button(icon="add", on_click=counter.increment)
 ```
 
 颜色值是依据计数器当前值计算得到的。属于二次计算。通过定义普通的实例函数即可。
@@ -192,9 +195,9 @@ class Counter(rxui.ViewModel):
 counter = Counter()
 
 with ui.row(align_items="center"):
-    ui.button("-1", on_click=counter.decrement)
+    ui.button(icon="remove", on_click=counter.decrement)
     rxui.label(counter.count).bind_color(counter.text_color)
-    ui.button("+1", on_click=counter.increment)
+    ui.button(icon="add", on_click=counter.increment)
 
 rxui.label(lambda: f"当前计数器值为 {counter.count}, 颜色值为 {counter.text_color()}")
 ```
@@ -225,8 +228,122 @@ class Counter(rxui.ViewModel):
 
 ### 列表
 
+下面的示例，展示了如何使用列表。
+
+```python
+
+class AppState(rxui.ViewModel):
+    nums = []
+    # nums = [1,2,3] ❌ 如果需要初始化，必须在 __init__ 中设置
+
+    def __init__(self):
+        super().__init__()
+        self.nums = [1, 2, 3]
+
+    def append(self):
+        new_num = max(self.nums) + 1
+        self.nums.append(new_num)
+
+    def pop(self):
+        self.nums.pop()
+
+    def reverse(self):
+        self.nums.reverse()
+
+    def display_nums(self):
+        return ", ".join(map(str, self.nums))
 
 
+# 界面代码
+state = AppState()
+
+with ui.row(align_items="center"):
+    ui.button("append", on_click=state.append)
+    ui.button("pop", on_click=state.pop)
+    ui.button("reverse", on_click=state.reverse)
+
+rxui.label(state.display_nums)
+
+```
+
+如果你需要在定义列表时，初始化列表，建议在 `__init__` 中设置。
+```python
+class AppState(rxui.ViewModel):
+    nums = []
+    # nums = [1,2,3] ❌ 如果需要初始化，必须在 __init__ 中设置
+
+    def __init__(self):
+        super().__init__()
+        self.nums = [1, 2, 3]
+
+    ...
+```
+
+另一种方式是使用 `rxui.list_var`
+
+```python
+class AppState(rxui.ViewModel):
+    # nums = []
+    # nums = [1,2,3] ❌ 如果需要初始化，必须在 __init__ 中设置
+    nums = rxui.list_var(lambda: [1, 2, 3])
+
+    ...
+```
+
+- `rxui.list_var` 参数是一个返回列表的函数
+
+
+### 列表循环
+
+定义列表后，我们可以用 `effect_refreshable.on` 装饰器，在界面中展示列表数据。
+
+下面的例子中，界面会动态展示下拉框选中的图标
+
+```python
+from ex4nicegui import rxui, effect_refreshable
+
+
+class AppState(rxui.ViewModel):
+    icons = []
+    _option_icons = ["font_download", "warning", "format_size", "print"]
+
+
+state = AppState()
+
+# 界面代码
+with ui.row(align_items="center"):
+
+    @effect_refreshable.on(state.icons)
+    def _():
+        for icon in state.icons:
+            ui.icon(icon, size="2rem")
+
+
+rxui.select(state._option_icons, value=state.icons, multiple=True)
+```
+
+其中，`@effect_refreshable.on(state.icons)` 明确指定了依赖关系。当 `state.icons` 变化时，`_` 函数会重新执行。
+
+```python
+@effect_refreshable.on(state.icons)
+def _():
+    # 这里的代码会在 state.icons 变化时重新执行
+    ...
+```
+
+> 注意，每次执行，里面的内容都会被清除。这是数据驱动版本的 `ui.refreshable`
+
+原则上，可以不通过 `.on` 指定监控的数据，只要函数中使用到的"响应式数据"，都会自动监控
+```python
+@effect_refreshable # 没有使用 .on(state.icons)
+def _():
+    # 这里读取了 state.icons，因此会自动监控
+    for icon in state.icons:
+        ui.icon(icon, size="2rem")
+
+```
+
+> 建议总是通过 `.on` 指定依赖关系，避免预料之外的刷新
 
 
 ---
