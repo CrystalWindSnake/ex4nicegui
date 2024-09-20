@@ -6,10 +6,46 @@ English| [简体中文](./README.md)
 
 </div>
 
-- [Install](#-install)
-- [Guide](#-guide)
-- [Features](#-features)
-- [BI Module](#bi-module)
+- [ex4nicegui](#ex4nicegui)
+  - [📦 Install](#-install)
+  - [examples](#examples)
+  - [Guide](#guide)
+    - [Computation](#computation)
+    - [Caching](#caching)
+    - [list data](#list-data)
+    - [List Looping](#list-looping)
+  - [apis](#apis)
+    - [ViewModel](#viewmodel)
+      - [cached\_var](#cached_var)
+      - [for list and dict data](#for-list-and-dict-data)
+    - [reactive](#reactive)
+      - [`to_ref`](#to_ref)
+      - [`deep_ref`](#deep_ref)
+      - [`effect`](#effect)
+      - [`ref_computed`](#ref_computed)
+      - [`async_computed`](#async_computed)
+      - [`on`](#on)
+      - [`new_scope`](#new_scope)
+    - [functionality](#functionality)
+      - [vmodel](#vmodel)
+      - [vfor](#vfor)
+      - [Bind class names](#bind-class-names)
+      - [bind-style](#bind-style)
+      - [bind\_prop](#bind_prop)
+      - [rxui.echarts](#rxuiecharts)
+        - [echarts mouse events](#echarts-mouse-events)
+        - [rxui.echarts.from\_javascript](#rxuiechartsfrom_javascript)
+        - [rxui.echarts.register\_map](#rxuiechartsregister_map)
+    - [tab\_panels](#tab_panels)
+    - [lazy\_tab\_panels](#lazy_tab_panels)
+    - [scoped\_style](#scoped_style)
+    - [BI Module](#bi-module)
+      - [`bi.data_source`](#bidata_source)
+      - [ui\_select](#ui_select)
+      - [ui\_table](#ui_table)
+      - [ui\_aggrid](#ui_aggrid)
+
+
 
 An extension library for [nicegui](https://github.com/zauberzeug/nicegui). It has built-in responsive components and fully implements data-responsive interface programming.
 
@@ -339,7 +375,10 @@ def _():
 ---
 
 
-## ViewModel
+
+## apis
+
+### ViewModel
 In version v0.7.0, the `ViewModel` class has been incorporated to facilitate the management of reactive data sets. Below is an illustrative example utilizing a basic calculator interface:
 
 1. Upon modification of the numerical input fields or selection of arithmetic symbols by the user, the resultant value is instantaneously reflected on the display panel.
@@ -371,7 +410,7 @@ with ui.row(align_items="center"):
 
 ```
 
-### cached_var
+#### cached_var
 
 In the preceding example, due to the use of `calc.result` twice, every time any of the values `num1`, `sign`, or `num2` undergoes a change, `result` is executed twice
 
@@ -390,7 +429,7 @@ class Calculator(rxui.ViewModel):
 
 ---
 
-### for list and dict data
+#### for list and dict data
 
 When the data is mutable, such as lists or dictionaries, a factory function must be supplied to `rxui.var`.
 
@@ -485,9 +524,496 @@ For more complex applications, please refer to the [examples](./examples)
 
 ---
 
-## 🚀 Features
+### reactive
 
-### echarts components
+```python
+from ex4nicegui import (
+    to_ref,
+    ref_computed,
+    on,
+    effect,
+    effect_refreshable,
+    batch,
+    event_batch,
+    deep_ref,
+)
+```
+Commonly used `to_ref`,`deep_ref`,`effect`,`ref_computed`,`on`
+
+#### `to_ref`
+Defines responsive objects, read and written by `.value`.
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+a.value =2
+b.value = 'new text'
+
+print(a.value)
+```
+
+When the value is a complex object, responsiveness of nested objects is not maintained by default.
+
+```python
+a = to_ref([1,2])
+
+@effect
+def _().
+    print(len(a.value))
+
+# doesn't trigger the effect
+a.value.append(10)
+
+# the whole substitution will be triggered
+a.value = [1,2,10]
+```
+
+Depth responsiveness is obtained when `is_deep` is set to `True`.
+
+```python
+a = to_ref([1,2],is_deep=True)
+
+@effect
+def _():
+    print('len:',len(a.value))
+
+# print 3
+a.value.append(10)
+
+```
+
+> `deep_ref` is equivalent to `to_ref` if `is_deep` is set to `True`.
+---
+
+#### `deep_ref`
+Equivalent to `to_ref` when `is_deep` is set to `True`.
+
+Especially useful when the data source is a list, dictionary or custom class. Objects obtained via `.value` are proxies
+
+```python
+data = [1,2,3]
+data_ref = deep_ref(data)
+
+assert data_ref.value is not data
+```
+
+You can get the raw object with `to_raw`.
+```python
+from ex4nicegui import to_raw, deep_ref
+
+data = [1, 2, 3]
+data_ref = deep_ref(data)
+
+assert data_ref.value is not data
+assert to_raw(data_ref.value) is data
+```
+
+---
+
+#### `effect`
+Accepts a function and automatically monitors changes to the responsive objects used in the function to automatically execute the function.
+
+```python
+a = to_ref(1)
+b = to_ref("text")
+
+
+@effect
+def auto_run_when_ref_value():
+    print(f"a:{a.value}")
+
+
+def change_value():
+    a.value = 2
+    b.value = "new text"
+
+
+ui.button("change", on_click=change_value)
+```
+
+The first time the effect is executed, the function `auto_run_when_ref_value` will be executed once. After that, clicking on the button changes the value of `a` (via `a.value`) and the function `auto_run_when_ref_value` is executed again.
+
+> Never spread a lot of data processing logic across multiple `on`s or `effects`s, which should be mostly interface manipulation logic rather than responsive data processing logic
+
+---
+
+#### `ref_computed`
+As with `effect`, `ref_computed` can also return results from functions. Typically used for secondary computation from `to_ref`.
+
+```python
+a = to_ref(1)
+a_square = ref_computed(lambda: a.value * 2)
+
+
+@effect
+def effect1():
+    print(f"a_square:{a_square.value}")
+
+
+def change_value():
+    a.value = 2
+
+
+ui.button("change", on_click=change_value)
+```
+
+When the button is clicked, the value of `a.value` is modified, triggering a recalculation of `a_square`. As the value of `a_square` is read in `effect1`, it triggers `effect1` to execute the
+
+> `ref_computed` is read-only `to_ref`
+
+Starting from version `v0.7.0`, it is not recommended to use `ref_computed` for instance methods. You can use `rxui.ViewModel` and apply the `rxui.cached_var` decorator instead.
+
+```python
+class MyState(rxui.ViewModel):
+    def __init__(self) -> None:
+        self.r_text = to_ref("")
+
+    @rxui.cached_var
+    def post_text(self):
+        return self.r_text.value + "post"
+
+state = MyState()
+
+rxui.input(value=state.r_text)
+rxui.label(state.post_text)
+```
+
+---
+
+#### `async_computed`
+Use `async_computed` when asynchronous functions are required for computed.
+
+```python
+
+# Simulate asynchronous functions that take a long time to execute
+async def long_time_query(input: str):
+    await asyncio.sleep(2)
+    num = random.randint(20, 100)
+    return f"query result[{input=}]:{num=}"
+
+
+search = to_ref("")
+evaluating = to_ref(False)
+
+@async_computed(search, evaluating=evaluating, init="")
+async def search_result():
+    return await long_time_query(search.value)
+
+rxui.lazy_input(value=search)
+
+rxui.label(
+    lambda: "Query in progress" if evaluating.value else "Enter content in input box above and return to search"
+)
+rxui.label(search_result)
+
+```
+
+- The first argument to `async_computed` must explicitly specify the responsive data to be monitored. Multiple responses can be specified using a list.
+- Parameter `evaluating` is responsive data of type bool, which is `True` while the asynchronous function is executing, and `False` after the computation is finished.
+- Parameter `init` specifies the initial result
+
+---
+
+#### `on`
+Similar to `effect`, but `on` needs to explicitly specify the responsive object to monitor.
+
+```python
+
+a1 = to_ref(1)
+a2 = to_ref(10)
+b = to_ref("text")
+
+
+@on(a1)
+def watch_a1_only():
+    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
+
+
+@on([a1, b], onchanges=True)
+def watch_a1_and_b():
+    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
+
+
+def change_a1():
+    a1.value += 1
+    ui.notify("change_a1")
+
+
+ui.button("change a1", on_click=change_a1)
+
+
+def change_a2():
+    a2.value += 1
+    ui.notify("change_a2")
+
+
+ui.button("change a2", on_click=change_a2)
+
+
+def change_b():
+    b.value += "x"
+    ui.notify("change_b")
+
+
+ui.button("change b", on_click=change_b)
+
+```
+
+- If the parameter `onchanges` is True (the default value is False), the specified function will not be executed at binding time.
+
+> Never spread a lot of data processing logic across multiple `on`s or `effects`s, which should be mostly interface manipulation logic rather than responsive data processing logic
+
+---
+
+#### `new_scope`
+
+By default, all watch functions are automatically destroyed when the client connection is disconnected. For finer-grained control, the `new_scope` function can be utilized.
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui, to_ref, effect, new_scope
+
+a = to_ref(0.0)
+
+scope1 = new_scope()
+
+@scope1.run
+def _():
+    @effect
+    def _():
+        print(f"scope 1:{a.value}")
+
+
+rxui.number(value=a)
+rxui.button("dispose scope 1", on_click=scope1.dispose)
+```
+
+---
+
+### functionality
+
+#### vmodel
+Create two-way bindings on form input elements or components.
+
+Bidirectional bindings are supported by default for `ref` simple value types
+```python
+from ex4nicegui import rxui, to_ref, deep_ref
+
+data = to_ref("init")
+
+rxui.label(lambda: f"{data.value=}")
+# two-way binding 
+rxui.input(value=data)
+```
+- Simple value types are generally immutable values such as `str`, `int`, etc.
+
+When using complex data structures, `deep_ref` is used to keep nested values responsive.
+```python
+data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
+
+rxui.label(lambda: f"{data.value=!s}")
+
+# No binding effect
+rxui.input(value=data.value["a"])
+
+# readonly binding
+rxui.input(value=lambda: data.value["a"])
+
+# two-way binding
+rxui.input(value=rxui.vmodel(data,'a'))
+
+# also two-way binding, but not recommended
+rxui.input(value=rxui.vmodel(data.value["a"]))
+```
+
+- The first input box will be completely unresponsive because the code is equivalent to `rxui.input(value=1)`
+- The second input box will get read responsiveness due to the use of a function.
+- The third input box, wrapped in `rxui.vmodel`, can be bi-directionally bound.
+
+> If you use `rxui.ViewModel`, you may find that you don't need to use `vmodel` at all.
+
+see [todo list examples](./examples/todomvc/)
+
+---
+
+#### vfor
+Render list components based on list responsive data. Each component is updated on demand. Data items support dictionaries or objects of any type
+
+Starting from version `v0.7.0`, it is recommended to use in conjunction with `rxui.ViewModel`. Unlike using the `effect_refreshable` decorator, `vfor` does not recreate all elements but updates existing ones.
+
+Below is an example of card sorting, where cards are always sorted by age. When you modify the age data in a card, the cards adjust their order in real time. However, the cursor focus does not leave the input field.
+
+```python
+from typing import List
+from nicegui import ui
+from ex4nicegui import rxui, deep_ref as ref, Ref
+
+
+class Person(rxui.ViewModel):
+    def __init__(self, name: str, age: int) -> None:
+        self.name = name
+        self.age = ref(age)
+
+
+class MyApp(rxui.ViewModel):
+    persons: Ref[List[Person]] = rxui.var(lambda: [])
+    order = rxui.var("asc")
+
+    def sort_by_age(self):
+        return sorted(
+            self.persons.value,
+            key=lambda p: p.age.value,
+            reverse=self.order.value == "desc",
+        )
+
+    @staticmethod
+    def create():
+        persons = [
+            Person(name="Alice", age=25),
+            Person(name="Bob", age=30),
+            Person(name="Charlie", age=20),
+            Person(name="Dave", age=35),
+            Person(name="Eve", age=28),
+        ]
+        app = MyApp()
+        app.persons.value = persons
+        return app
+
+
+# UI
+app = MyApp.create()
+
+with rxui.tabs(app.order):
+    rxui.tab("asc", "Ascending")
+    rxui.tab("desc", "Descending")
+
+
+@rxui.vfor(app.sort_by_age, key="name")
+def each_person(s: rxui.VforStore[Person]):
+    person = s.get_item()
+
+    with ui.card(), ui.row(align_items="center"):
+        rxui.label(person.name)
+        rxui.number(value=person.age, step=1, min=0, max=100)
+```
+
+- The `rxui.vfor` decorator is applied to a custom function.
+    - The first argument is the reactive list. Note that there is no need to call `app.sort_by_age`.
+    - The second argument `key`: To track each node's identifier and thus reuse and reorder existing elements, you can provide a unique key for each block corresponding to an element. By default, the list element index is used. In the example, it is assumed that each person's name is unique.
+- The custom function takes one parameter. You can obtain the current row's object via `store.get_item`. Since `Person` itself inherits from `rxui.ViewModel`, its properties can be directly bound to components.
+
+
+---
+
+
+#### Bind class names
+
+All component classes provide `bind_classes` for binding `class`, supporting three different data structures.
+
+Bind dictionaries
+
+```python
+bg_color = to_ref(False)
+has_error = to_ref(False)
+
+rxui.label("test").bind_classes({"bg-blue": bg_color, "text-red": has_error})
+
+rxui.switch("bg_color", value=bg_color)
+rxui.switch("has_error", value=has_error)
+```
+
+Dictionary key  is the class name, and a dictionary value of  a responsive variable with value `bool`. When the responsive value is `True`, the class name is applied to the component `class`.
+
+---
+
+Bind a responsive variable whose return value is a dictionary.
+
+```python
+bg_color = to_ref(False)
+has_error = to_ref(False)
+
+class_obj = ref_computed(
+    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
+)
+
+rxui.switch("bg_color", value=bg_color)
+rxui.switch("has_error", value=has_error)
+rxui.label("bind to ref_computed").bind_classes(class_obj)
+
+# or direct function passing
+rxui.label("bind to ref_computed").bind_classes(
+    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
+)
+```
+
+---
+
+Bind to list
+
+```python
+bg_color = to_ref("red")
+bg_color_class = ref_computed(lambda: f"bg-{bg_color.value}")
+
+text_color = to_ref("green")
+text_color_class = ref_computed(lambda: f"text-{text_color.value}")
+
+rxui.select(["red", "green", "yellow"], label="bg color", value=bg_color)
+rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
+
+rxui.label("binding to arrays").bind_classes([bg_color_class, text_color_class])
+rxui.label("binding to single string").bind_classes(bg_color_class)
+```
+
+- Each element in the list is a responsive variable that returns the class name
+
+---
+
+#### bind-style
+
+```python
+from nicegui import ui
+from ex4nicegui.reactive import rxui
+from ex4nicegui.utils.signals import to_ref
+
+
+bg_color = to_ref("blue")
+text_color = to_ref("red")
+
+rxui.label("test").bind_style(
+    {
+        "background-color": bg_color,
+        "color": text_color,
+    }
+)
+
+rxui.select(["blue", "green", "yellow"], label="bg color", value=bg_color)
+rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
+```
+
+`bind_style` passed into dictionary, `key` is style name, `value` is style value, responsive string
+
+---
+
+#### bind_prop
+Binds a property.
+
+```python
+label = to_ref("hello")
+
+rxui.button("").bind_prop("label", label)
+# Functions are also permissible
+rxui.button("").bind_prop(
+    "label", lambda: f"{label.value} world"
+)
+
+rxui.input(value=label)
+```
+
+---
+
+#### rxui.echarts
+Charting with echarts
+
 
 ```python
 from nicegui import ui
@@ -531,7 +1057,7 @@ ui.run()
 ![](./asset/asyc_echarts_title.gif)
 
 
-### echarts mouse events
+##### echarts mouse events
 
 the `on` function parameters `event_name` and `query` to view the[echarts English Documentation](https://echarts.apache.org/handbook/en/concepts/event/)
 
@@ -607,499 +1133,10 @@ ui.run()
 ```
 ---
 
-## responsive
 
-```python
-from ex4nicegui import (
-    to_ref,
-    ref_computed,
-    on,
-    effect,
-    effect_refreshable,
-    batch,
-    event_batch,
-    deep_ref,
-)
-```
-Commonly used `to_ref`,`deep_ref`,`effect`,`ref_computed`,`on`
 
-### `to_ref`
-Defines responsive objects, read and written by `.value`.
-```python
-a = to_ref(1)
-b = to_ref("text")
 
-a.value =2
-b.value = 'new text'
-
-print(a.value)
-```
-
-When the value is a complex object, responsiveness of nested objects is not maintained by default.
-
-```python
-a = to_ref([1,2])
-
-@effect
-def _().
-    print(len(a.value))
-
-# doesn't trigger the effect
-a.value.append(10)
-
-# the whole substitution will be triggered
-a.value = [1,2,10]
-```
-
-Depth responsiveness is obtained when `is_deep` is set to `True`.
-
-```python
-a = to_ref([1,2],is_deep=True)
-
-@effect
-def _():
-    print('len:',len(a.value))
-
-# print 3
-a.value.append(10)
-
-```
-
-> `deep_ref` is equivalent to `to_ref` if `is_deep` is set to `True`.
----
-
-### `deep_ref`
-Equivalent to `to_ref` when `is_deep` is set to `True`.
-
-Especially useful when the data source is a list, dictionary or custom class. Objects obtained via `.value` are proxies
-
-```python
-data = [1,2,3]
-data_ref = deep_ref(data)
-
-assert data_ref.value is not data
-```
-
-You can get the raw object with `to_raw`.
-```python
-from ex4nicegui import to_raw, deep_ref
-
-data = [1, 2, 3]
-data_ref = deep_ref(data)
-
-assert data_ref.value is not data
-assert to_raw(data_ref.value) is data
-```
-
----
-
-### `effect`
-Accepts a function and automatically monitors changes to the responsive objects used in the function to automatically execute the function.
-
-```python
-a = to_ref(1)
-b = to_ref("text")
-
-
-@effect
-def auto_run_when_ref_value():
-    print(f"a:{a.value}")
-
-
-def change_value():
-    a.value = 2
-    b.value = "new text"
-
-
-ui.button("change", on_click=change_value)
-```
-
-The first time the effect is executed, the function `auto_run_when_ref_value` will be executed once. After that, clicking on the button changes the value of `a` (via `a.value`) and the function `auto_run_when_ref_value` is executed again.
-
-> Never spread a lot of data processing logic across multiple `on`s or `effects`s, which should be mostly interface manipulation logic rather than responsive data processing logic
-
----
-
-### `ref_computed`
-As with `effect`, `ref_computed` can also return results from functions. Typically used for secondary computation from `to_ref`.
-
-```python
-a = to_ref(1)
-a_square = ref_computed(lambda: a.value * 2)
-
-
-@effect
-def effect1():
-    print(f"a_square:{a_square.value}")
-
-
-def change_value():
-    a.value = 2
-
-
-ui.button("change", on_click=change_value)
-```
-
-When the button is clicked, the value of `a.value` is modified, triggering a recalculation of `a_square`. As the value of `a_square` is read in `effect1`, it triggers `effect1` to execute the
-
-> `ref_computed` is read-only `to_ref`
-
-Starting from version `v0.7.0`, it is not recommended to use `ref_computed` for instance methods. You can use `rxui.ViewModel` and apply the `rxui.cached_var` decorator instead.
-
-```python
-class MyState(rxui.ViewModel):
-    def __init__(self) -> None:
-        self.r_text = to_ref("")
-
-    @rxui.cached_var
-    def post_text(self):
-        return self.r_text.value + "post"
-
-state = MyState()
-
-rxui.input(value=state.r_text)
-rxui.label(state.post_text)
-```
-
----
-
-### `async_computed`
-Use `async_computed` when asynchronous functions are required for computed.
-
-```python
-
-# Simulate asynchronous functions that take a long time to execute
-async def long_time_query(input: str):
-    await asyncio.sleep(2)
-    num = random.randint(20, 100)
-    return f"query result[{input=}]:{num=}"
-
-
-search = to_ref("")
-evaluating = to_ref(False)
-
-@async_computed(search, evaluating=evaluating, init="")
-async def search_result():
-    return await long_time_query(search.value)
-
-rxui.lazy_input(value=search)
-
-rxui.label(
-    lambda: "Query in progress" if evaluating.value else "Enter content in input box above and return to search"
-)
-rxui.label(search_result)
-
-```
-
-- The first argument to `async_computed` must explicitly specify the responsive data to be monitored. Multiple responses can be specified using a list.
-- Parameter `evaluating` is responsive data of type bool, which is `True` while the asynchronous function is executing, and `False` after the computation is finished.
-- Parameter `init` specifies the initial result
-
----
-
-### `on`
-Similar to `effect`, but `on` needs to explicitly specify the responsive object to monitor.
-
-```python
-
-a1 = to_ref(1)
-a2 = to_ref(10)
-b = to_ref("text")
-
-
-@on(a1)
-def watch_a1_only():
-    print(f"watch_a1_only ... a1:{a1.value},a2:{a2.value}")
-
-
-@on([a1, b], onchanges=True)
-def watch_a1_and_b():
-    print(f"watch_a1_and_b ... a1:{a1.value},a2:{a2.value},b:{b.value}")
-
-
-def change_a1():
-    a1.value += 1
-    ui.notify("change_a1")
-
-
-ui.button("change a1", on_click=change_a1)
-
-
-def change_a2():
-    a2.value += 1
-    ui.notify("change_a2")
-
-
-ui.button("change a2", on_click=change_a2)
-
-
-def change_b():
-    b.value += "x"
-    ui.notify("change_b")
-
-
-ui.button("change b", on_click=change_b)
-
-```
-
-- If the parameter `onchanges` is True (the default value is False), the specified function will not be executed at binding time.
-
-> Never spread a lot of data processing logic across multiple `on`s or `effects`s, which should be mostly interface manipulation logic rather than responsive data processing logic
-
----
-
-### `new_scope`
-
-By default, all watch functions are automatically destroyed when the client connection is disconnected. For finer-grained control, the `new_scope` function can be utilized.
-
-```python
-from nicegui import ui
-from ex4nicegui import rxui, to_ref, effect, new_scope
-
-a = to_ref(0.0)
-
-scope1 = new_scope()
-
-@scope1.run
-def _():
-    @effect
-    def _():
-        print(f"scope 1:{a.value}")
-
-
-rxui.number(value=a)
-rxui.button("dispose scope 1", on_click=scope1.dispose)
-```
-
----
-
-## functionality
-
-### vmodel
-Create two-way bindings on form input elements or components.
-
-Bidirectional bindings are supported by default for `ref` simple value types
-```python
-from ex4nicegui import rxui, to_ref, deep_ref
-
-data = to_ref("init")
-
-rxui.label(lambda: f"{data.value=}")
-# two-way binding 
-rxui.input(value=data)
-```
-- Simple value types are generally immutable values such as `str`, `int`, etc.
-
-When using complex data structures, `deep_ref` is used to keep nested values responsive.
-```python
-data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
-
-rxui.label(lambda: f"{data.value=!s}")
-
-# No binding effect
-rxui.input(value=data.value["a"])
-
-# readonly binding
-rxui.input(value=lambda: data.value["a"])
-
-# two-way binding
-rxui.input(value=rxui.vmodel(data,'a'))
-
-# also two-way binding, but not recommended
-rxui.input(value=rxui.vmodel(data.value["a"]))
-```
-
-- The first input box will be completely unresponsive because the code is equivalent to `rxui.input(value=1)`
-- The second input box will get read responsiveness due to the use of a function.
-- The third input box, wrapped in `rxui.vmodel`, can be bi-directionally bound.
-
-> If you use `rxui.ViewModel`, you may find that you don't need to use `vmodel` at all.
-
-see [todo list examples](./examples/todomvc/)
-
----
-
-### vfor
-Render list components based on list responsive data. Each component is updated on demand. Data items support dictionaries or objects of any type
-
-Starting from version `v0.7.0`, it is recommended to use in conjunction with `rxui.ViewModel`. Unlike using the `effect_refreshable` decorator, `vfor` does not recreate all elements but updates existing ones.
-
-Below is an example of card sorting, where cards are always sorted by age. When you modify the age data in a card, the cards adjust their order in real time. However, the cursor focus does not leave the input field.
-
-```python
-from typing import List
-from nicegui import ui
-from ex4nicegui import rxui, deep_ref as ref, Ref
-
-
-class Person(rxui.ViewModel):
-    def __init__(self, name: str, age: int) -> None:
-        self.name = name
-        self.age = ref(age)
-
-
-class MyApp(rxui.ViewModel):
-    persons: Ref[List[Person]] = rxui.var(lambda: [])
-    order = rxui.var("asc")
-
-    def sort_by_age(self):
-        return sorted(
-            self.persons.value,
-            key=lambda p: p.age.value,
-            reverse=self.order.value == "desc",
-        )
-
-    @staticmethod
-    def create():
-        persons = [
-            Person(name="Alice", age=25),
-            Person(name="Bob", age=30),
-            Person(name="Charlie", age=20),
-            Person(name="Dave", age=35),
-            Person(name="Eve", age=28),
-        ]
-        app = MyApp()
-        app.persons.value = persons
-        return app
-
-
-# UI
-app = MyApp.create()
-
-with rxui.tabs(app.order):
-    rxui.tab("asc", "Ascending")
-    rxui.tab("desc", "Descending")
-
-
-@rxui.vfor(app.sort_by_age, key="name")
-def each_person(s: rxui.VforStore[Person]):
-    person = s.get_item()
-
-    with ui.card(), ui.row(align_items="center"):
-        rxui.label(person.name)
-        rxui.number(value=person.age, step=1, min=0, max=100)
-```
-
-- The `rxui.vfor` decorator is applied to a custom function.
-    - The first argument is the reactive list. Note that there is no need to call `app.sort_by_age`.
-    - The second argument `key`: To track each node's identifier and thus reuse and reorder existing elements, you can provide a unique key for each block corresponding to an element. By default, the list element index is used. In the example, it is assumed that each person's name is unique.
-- The custom function takes one parameter. You can obtain the current row's object via `store.get_item`. Since `Person` itself inherits from `rxui.ViewModel`, its properties can be directly bound to components.
-
-
----
-
-
-### Bind class names
-
-All component classes provide `bind_classes` for binding `class`, supporting three different data structures.
-
-Bind dictionaries
-
-```python
-bg_color = to_ref(False)
-has_error = to_ref(False)
-
-rxui.label("test").bind_classes({"bg-blue": bg_color, "text-red": has_error})
-
-rxui.switch("bg_color", value=bg_color)
-rxui.switch("has_error", value=has_error)
-```
-
-Dictionary key  is the class name, and a dictionary value of  a responsive variable with value `bool`. When the responsive value is `True`, the class name is applied to the component `class`.
-
----
-
-Bind a responsive variable whose return value is a dictionary.
-
-```python
-bg_color = to_ref(False)
-has_error = to_ref(False)
-
-class_obj = ref_computed(
-    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
-)
-
-rxui.switch("bg_color", value=bg_color)
-rxui.switch("has_error", value=has_error)
-rxui.label("bind to ref_computed").bind_classes(class_obj)
-
-# or direct function passing
-rxui.label("bind to ref_computed").bind_classes(
-    lambda: {"bg-blue": bg_color.value, "text-red": has_error.value}
-)
-```
-
----
-
-Bind to list
-
-```python
-bg_color = to_ref("red")
-bg_color_class = ref_computed(lambda: f"bg-{bg_color.value}")
-
-text_color = to_ref("green")
-text_color_class = ref_computed(lambda: f"text-{text_color.value}")
-
-rxui.select(["red", "green", "yellow"], label="bg color", value=bg_color)
-rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
-
-rxui.label("binding to arrays").bind_classes([bg_color_class, text_color_class])
-rxui.label("binding to single string").bind_classes(bg_color_class)
-```
-
-- Each element in the list is a responsive variable that returns the class name
-
----
-
-### bind-style
-
-```python
-from nicegui import ui
-from ex4nicegui.reactive import rxui
-from ex4nicegui.utils.signals import to_ref
-
-
-bg_color = to_ref("blue")
-text_color = to_ref("red")
-
-rxui.label("test").bind_style(
-    {
-        "background-color": bg_color,
-        "color": text_color,
-    }
-)
-
-rxui.select(["blue", "green", "yellow"], label="bg color", value=bg_color)
-rxui.select(["red", "green", "yellow"], label="text color", value=text_color)
-```
-
-`bind_style` passed into dictionary, `key` is style name, `value` is style value, responsive string
-
----
-
-### bind_prop
-Binds a property.
-
-```python
-label = to_ref("hello")
-
-rxui.button("").bind_prop("label", label)
-# Functions are also permissible
-rxui.button("").bind_prop(
-    "label", lambda: f"{label.value} world"
-)
-
-rxui.input(value=label)
-```
-
----
-
-### rxui.echarts
-Charting with echarts
-
----
-
-#### rxui.echarts.from_javascript
+##### rxui.echarts.from_javascript
 Create echart from javascript code
 
 ```python
@@ -1166,7 +1203,7 @@ rxui.echarts.from_javascript(
 
 ---
 
-#### rxui.echarts.register_map
+##### rxui.echarts.register_map
 Register a map.
 
 ```python
@@ -1208,67 +1245,6 @@ rxui.echarts.register_map(
 ```
 
 ---
-
-### gsap
-
-js animation library. [gsap documentation](https://gsap.com/docs/v3/)
-
-```python
-from nicegui import ui
-from ex4nicegui import gsap
-```
-
-#### gsap.from_
-
-Set the start property, the animation will transition from the set property to the original position
-
-```python
-
-ui.label("test from").classes("target")
-gsap.from_(".target", {"x": 50,'duration':1})
-
-```
-
-After the screen is loaded, the starting position of the text is shifted to the right by 50px, and then moved to the original position within 1 second.
-
-- Arguments `targets` are css selectors.
-- Arguments `vars` are attribute values
-
----
-
-#### gsap.to
-
-Set the end property, the animation will transition from the original property to the set property.
-
-```python
-
-ui.label("test to").classes("target")
-gsap.to(".target", {"x": 50,'duration':1})
-
-```
-
-After loading the screen, the text will be moved back 50px from the original position within 1 second.
-
-- Arguments `targets` are css selectors.
-- Arguments `vars` are attribute values
-
----
-
-#### gsap.run_script
-
-Setting up animations by writing js
-
-```python
-
-gsap.run_script(
-            r"""function setGsap(gsap) {
-    gsap.to('.target',{"duration": 0.3,y:60})
-}
-""")
-```
-
-- The parameter `script` can be text or a file with a js extension `Path`.
-- The name of the defined js function doesn't matter, the first argument is a gsap object.
 
 ---
 
@@ -1372,7 +1348,7 @@ with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
 
 ---
 
-## BI Module
+### BI Module
 
 Create an interactive data visualization report using the minimal API.
 
@@ -1497,7 +1473,6 @@ def details_page(name: str):
 ui.run()
 ```
 
-### Details
 
 #### `bi.data_source`
 The data source is the core concept of the BI module, and all data linkage is based on this. In the current version (0.4.3), there are two ways to create a data source.
