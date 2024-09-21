@@ -216,26 +216,22 @@ class BindableUi(Generic[TWidget]):
         cast(ui.element, self.element).clear()
 
     @overload
-    def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]) -> Self:
-        ...
+    def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]) -> Self: ...
 
     @overload
-    def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]) -> Self:
-        ...
+    def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]) -> Self: ...
 
     @overload
-    def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]) -> Self:
-        ...
+    def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]) -> Self: ...
 
     @overload
-    def bind_classes(self, classes: TGetterOrReadonlyRef[str]) -> Self:
-        ...
+    def bind_classes(self, classes: TGetterOrReadonlyRef[str]) -> Self: ...
 
     def bind_classes(self, classes: _T_bind_classes_type) -> Self:
         """data binding is manipulating an element's class list
 
-        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-class-names
-        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#%E7%BB%91%E5%AE%9A%E7%B1%BB%E5%90%8D
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind_classes
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bind_classes
 
         Args:
             classes (_T_bind_classes_type): dict of refs | ref to dict | str ref | list of refs
@@ -315,8 +311,8 @@ class BindableUi(Generic[TWidget]):
     def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
         """data binding is manipulating an element's style
 
-        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind-style
-        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bind-style
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind_style
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#bind_style
 
         Args:
             style (Dict[str, Union[ReadonlyRef[str], Ref[str]]]): dict of style name and ref value

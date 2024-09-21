@@ -15,6 +15,7 @@ from ex4nicegui.reactive.systems.reactive_system import (
     convert_kws_ref2value,
     inject_method,
 )
+from ex4nicegui.utils.proxy import is_base_type_proxy
 
 
 class ParameterClassifier:
@@ -34,7 +35,7 @@ class ParameterClassifier:
             exclude.append(extend_kws)
 
         self._args: Dict[str, Any] = {
-            k: v
+            k: v._ref if is_base_type_proxy(v) else v
             for k, v in args.items()
             if k != "self" and k[0] != "_" and (k not in exclude)
         }

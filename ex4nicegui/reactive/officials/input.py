@@ -90,7 +90,7 @@ class LazyInputBindableUi(InputBindableUi):
         password_toggle_button: TMaybeRef[bool] = False,
         on_change: Optional[Callable[..., Any]] = None,
         autocomplete: Optional[TMaybeRef[List[str]]] = None,
-        validation: Dict[str, Callable[..., bool]] = {},
+        validation: Optional[Dict[str, Callable[..., bool]]] = None,
     ) -> None:
         org_value = value
         is_setter_value = is_setter_ref(value)

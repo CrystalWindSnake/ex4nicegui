@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Union, Type, TypeVar
+from typing import Callable, List, Union, Type, TypeVar
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -13,8 +13,11 @@ from ex4nicegui.utils.signals import (
 from ex4nicegui.utils.types import ReadonlyRef
 from functools import partial
 from signe.core.reactive import NoProxy
+from ex4nicegui.utils.proxy.descriptor import class_var_setter
+
 
 _CACHED_VARS_FLAG = "__vm_cached__"
+_LIST_VAR_FLAG = "__vm_list_var__"
 
 _T = TypeVar("_T")
 
@@ -31,15 +34,30 @@ class ViewModel(NoProxy):
         from ex4nicegui import rxui
 
         class MyVm(rxui.ViewModel):
-            count = rxui.var(0)
-            data = rxui.var(lambda: [1,2,3])
+            count = 0
+            data = []
+            nums = rxui.list_var(lambda: [1, 2, 3])
+
+            def __init__(self):
+                super().__init__()
+                self.data = [1, 2, 3]
+
+            def increment(self):
+                self.count += 1
+
+            def add_data(self):
+                self.data.append(4)
+
 
         vm = MyVm()
 
         rxui.label(vm.count)
         rxui.number(value=vm.count)
 
-
+        ui.button("Increment", on_click=vm.increment)
+        ui.button("Add Data", on_click=vm.add_data)
+        rxui.label(vm.data)
+        rxui.label(vm.nums)
     """
 
     def __init__(self):
@@ -48,6 +66,16 @@ class ViewModel(NoProxy):
                 setattr(self, name, deep_ref(to_value(value)))
             if callable(value) and hasattr(value, _CACHED_VARS_FLAG):
                 setattr(self, name, computed(partial(value, self)))
+
+    def __init_subclass__(cls) -> None:
+        need_vars = (
+            (name, value)
+            for name, value in vars(cls).items()
+            if not name.startswith("_")
+        )
+
+        for name, value in need_vars:
+            class_var_setter(cls, name, value, _LIST_VAR_FLAG)
 
     @staticmethod
     def display(model: Union[ViewModel, Type]):
@@ -139,6 +167,34 @@ def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Va
     return deep_ref(value)
 
 
+def list_var(factory: Callable[[], List[_T_Var_Value]]) -> List[_T_Var_Value]:
+    """Create implicitly proxied reactive variables for lists. Use them just like ordinary lists while maintaining reactivity. Only use within rxui.ViewModel.
+
+    Args:
+        factory (Callable[[], List[_T_Var_Value]]): A factory function that returns a new list.
+
+    Example:
+    .. code-block:: python
+        from ex4nicegui import rxui
+        class State(rxui.ViewModel):
+            data = rxui.list_var(lambda: [1, 2, 3])
+
+            def append_data(self):
+                self.data.append(len(self.data) + 1)
+
+            def display_data(self):
+                return ",".join(map(str, self.data))
+
+        state = State()
+        ui.button("Append", on_click=state.append_data)
+        rxui.label(state.display_data)
+
+    """
+    assert callable(factory), "factory must be a callable"
+    setattr(factory, _LIST_VAR_FLAG, None)
+    return factory  # type: ignore
+
+
 def cached_var(func: Callable[..., _T]) -> ReadonlyRef[_T]:
     """A decorator to cache the result of a function. Only use within rxui.ViewModel.
 
@@ -149,7 +205,7 @@ def cached_var(func: Callable[..., _T]) -> ReadonlyRef[_T]:
     .. code-block:: python
         from ex4nicegui import rxui
         class MyVm(rxui.ViewModel):
-            name = rxui.var("John")
+            name = "John"
 
             @rxui.cached_var
             def uppper_name(self):

@@ -26,6 +26,10 @@ from .types import (
 )
 from .refWrapper import RefWrapper, to_ref_wrapper  # noqa: F401
 from .refComputed import ref_computed  # noqa: F401
+from ex4nicegui.utils.proxy import (
+    to_ref_if_base_type_proxy,
+    to_value_if_base_type_proxy,
+)
 
 T = TypeVar("T")
 
@@ -61,6 +65,7 @@ def to_value(obj: Union[_TMaybeRef[T], RefWrapper]) -> T:
         to_value(to_ref(1))  # 1
 
     """
+    obj = to_value_if_base_type_proxy(obj)
     if is_ref(obj):
         return obj.value  # type: ignore
     if isinstance(obj, Callable):
@@ -144,6 +149,8 @@ class effect_refreshable:
     def __init__(self, fn: Callable, refs: _T_effect_refreshable_refs = []) -> None:
         self._fn = fn
 
+        refs = to_ref_if_base_type_proxy(refs)
+
         if isinstance(refs, Sequence):
             ref_arg = [ref for ref in refs if self._is_valid_ref(ref)]
         else:
@@ -188,7 +195,7 @@ class effect_refreshable:
 
 
 def on(
-    refs: Union[TGetterOrReadonlyRef, RefWrapper, Sequence[TGetterOrReadonlyRef]],
+    refs: Union[TGetterOrReadonlyRef, RefWrapper, Sequence[TGetterOrReadonlyRef], Any],
     onchanges=False,
     priority_level=1,
     effect_kws: Optional[Dict[str, Any]] = None,
@@ -212,6 +219,7 @@ def on(
     if not isinstance(refs, Sequence):
         refs = [refs]  # type: ignore
 
+    refs = (to_ref_if_base_type_proxy(ref) for ref in refs)
     refs = [(lambda: ref.value) if isinstance(ref, RefWrapper) else ref for ref in refs]  # type: ignore
 
     effect_kws.update({"priority_level": priority_level})
