@@ -13,9 +13,10 @@ from typing import (
 from typing_extensions import LiteralString
 import sys
 from . import utils
+from .base import Proxy
 
 
-class StringProxy(str):
+class StringProxy(Proxy, str):
     def __new__(cls, value):
         obj = super().__new__(cls, value)
         return obj

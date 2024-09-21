@@ -1,15 +1,8 @@
-from .string import StringProxy
-from .int import IntProxy
-from .list import ListProxy
-from .float import FloatProxy
-from .bool import BoolProxy
-from .date import DateProxy
+from .base import Proxy
 
 
 def is_base_type_proxy(obj):
-    return isinstance(
-        obj, (StringProxy, IntProxy, ListProxy, FloatProxy, BoolProxy, DateProxy)
-    )
+    return isinstance(obj, Proxy)
 
 
 def to_ref_if_base_type_proxy(obj):

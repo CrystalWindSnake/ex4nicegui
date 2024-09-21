@@ -1,5 +1,6 @@
-from typing import Any, TypeVar
+from typing import Any
+from .base import Proxy
 
 
 def to_value(value: Any):
-    return value._ref.value if hasattr(value, "_ref") else value
+    return value._ref.value if isinstance(value, Proxy) else value
