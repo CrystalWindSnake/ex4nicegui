@@ -48,6 +48,8 @@ _T_bind_classes_type = Union[
     _T_bind_classes_type_ref_dict,
     _T_bind_classes_type_single,
     _T_bind_classes_type_array,
+    Dict[str, bool],
+    List[str],
 ]
 
 
@@ -219,10 +221,16 @@ class BindableUi(Generic[TWidget]):
     def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]) -> Self: ...
 
     @overload
+    def bind_classes(self, classes: Dict[str, bool]) -> Self: ...
+
+    @overload
     def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]) -> Self: ...
 
     @overload
     def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]) -> Self: ...
+
+    @overload
+    def bind_classes(self, classes: List[str]) -> Self: ...
 
     @overload
     def bind_classes(self, classes: TGetterOrReadonlyRef[str]) -> Self: ...
@@ -267,46 +275,39 @@ class BindableUi(Generic[TWidget]):
 
         """
         if isinstance(classes, dict):
-            for name, ref_obj in classes.items():
+            self._bind_classes_for_str_fn(
+                lambda: " ".join(
+                    name for name, value in classes.items() if to_value(value)
+                )
+            )
 
-                @self._ui_effect
-                def _(name=name, ref_obj=ref_obj):
-                    if to_value(ref_obj):
-                        self.classes(add=name)
-                    else:
-                        self.classes(remove=name)
-
+        elif isinstance(classes, list):
+            self._bind_classes_for_str_fn(
+                lambda: " ".join(to_value(c) for c in classes)
+            )
         elif is_ref(classes) or isinstance(classes, Callable):
             ref_obj = to_value(classes)  # type: ignore
 
             if isinstance(ref_obj, dict):
 
-                @self._ui_effect
-                def _():
-                    for name, value in cast(Dict, to_value(classes)).items():  # type: ignore
-                        if value:
-                            self.classes(add=name)
-                        else:
-                            self.classes(remove=name)
+                def classes_str():
+                    return " ".join(
+                        name
+                        for name, value in to_value(classes).items()  # type: ignore
+                        if to_value(value)
+                    )
+
+                self._bind_classes_for_str_fn(classes_str)
+
             else:
-                self._bind_single_class(cast(_T_bind_classes_type_single, classes))
-
-        elif isinstance(classes, list):
-            for ref_name in classes:
-                self._bind_single_class(ref_name)
+                self._bind_classes_for_str_fn(classes)  # type: ignore
 
         return self
 
-    def _bind_single_class(self, class_name: _T_bind_classes_type_single):
-        if is_ref(class_name) or isinstance(class_name, Callable):
-
-            @on(class_name)
-            def _(state: WatchedState):
-                self.classes(add=state.current, remove=state.previous)
-        else:
-            self.classes(class_name)  # type: ignore
-
-        return self
+    def _bind_classes_for_str_fn(self, classes_str: TGetterOrReadonlyRef[str]):
+        @self._ui_signal_on(classes_str, onchanges=False, deep=False)
+        def _(state: WatchedState):
+            self.classes(add=state.current, remove=state.previous)
 
     def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
         """data binding is manipulating an element's style
