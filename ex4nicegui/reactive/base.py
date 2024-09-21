@@ -181,7 +181,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_visible(self, value: TGetterOrReadonlyRef[bool]):
+    def bind_visible(self, value: TMaybeRef[bool]):
         @self._ui_effect
         def _():
             element = cast(ui.element, self.element)
@@ -189,7 +189,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_not_visible(self, value: TGetterOrReadonlyRef[bool]):
+    def bind_not_visible(self, value: TMaybeRef[bool]):
         return self.bind_visible(lambda: not to_value(value))
 
     def on(
