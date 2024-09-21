@@ -23,6 +23,18 @@ class BoolProxy:
     def __ne__(self, other):
         return self._ref.value.__ne__(utils.to_value(other))
 
+    def __lt__(self, value) -> bool:
+        return self._ref.value.__lt__(bool(utils.to_value(value)))
+
+    def __le__(self, value) -> bool:
+        return self._ref.value.__le__(bool(utils.to_value(value)))
+
+    def __gt__(self, value) -> bool:
+        return self._ref.value.__gt__(bool(utils.to_value(value)))
+
+    def __ge__(self, value) -> bool:
+        return self._ref.value.__ge__(bool(utils.to_value(value)))
+
     def __and__(self, other):
         return self._ref.value.__and__(utils.to_value(other))
 
