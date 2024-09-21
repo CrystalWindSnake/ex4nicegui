@@ -162,7 +162,7 @@ class BindableUi(Generic[TWidget]):
         """data binding is manipulating an element's props
 
         Args:
-            props (TMaybeRef[str]):  a reference to the props to bind to
+            props (Union[Dict[str, TMaybeRef[Any]], TMaybeRef[str]]): dict of prop name and ref value
 
         ## usage
 
@@ -174,6 +174,10 @@ class BindableUi(Generic[TWidget]):
                 return f'{"flat" if flat.value else ""} {"size=" + size.value}'
 
             rxui.button("click me").bind_props(props_str)
+            rxui.button("click me").bind_props({
+                "outlined": outlined,
+                "size": size,
+            })
 
         """
         if isinstance(props, dict):
