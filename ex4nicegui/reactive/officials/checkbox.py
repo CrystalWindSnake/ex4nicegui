@@ -35,9 +35,6 @@ class CheckboxBindableUi(
         )
 
         value_kws = pc.get_values_kws()
-
-        print("=" * 10)
-        print(value_kws)
         element = ui.checkbox(**value_kws)
         super().__init__(element)  # type: ignore
 
