@@ -239,6 +239,46 @@ def test_bind_prop(browser: BrowserManager, page_path: str):
     expect(target2).to_have_attribute("prop", "hello foo world")
 
 
+def test_bind_props(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        label = to_ref("hello")
+        bool_prop = to_ref(False)
+
+        def get_props_str():
+            return f'prop="{label.value}"'
+
+        rxui.element("div").props('innerText="target1"').bind_props(get_props_str)
+        rxui.element("div").props('innerText="target2"').bind_props(
+            {
+                "prop": label,
+                "bool-prop": bool_prop,
+            }
+        )
+
+        rxui.input(value=label).classes("input")
+        rxui.checkbox(value=bool_prop).classes("checkbox")
+
+    page = browser.open(page_path)
+    pw_page = page._page
+
+    target1 = pw_page.get_by_text("target1")
+    target2 = pw_page.get_by_text("target2")
+    input = page.Input(".input")
+    checkbox = page.Checkbox(".checkbox")
+
+    expect(target1).to_have_attribute("prop", "hello")
+    expect(target2).to_have_attribute("prop", "hello")
+    expect(target2).not_to_have_attribute("bool-prop", "")
+
+    input.fill_text("hello foo")
+    checkbox.click()
+
+    expect(target1).to_have_attribute("prop", "hello foo")
+    expect(target2).to_have_attribute("prop", "hello foo")
+    expect(target2).to_have_attribute("bool-prop", "true")
+
+
 def test_handle_delete(browser: BrowserManager, page_path: str):
     @fn
     def caller():

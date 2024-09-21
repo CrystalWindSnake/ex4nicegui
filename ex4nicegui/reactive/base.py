@@ -152,7 +152,13 @@ class BindableUi(Generic[TWidget]):
         """
         return self.element.remove(element)
 
-    def bind_props(self, props: TMaybeRef[str]):
+    @overload
+    def bind_props(self, props: Dict[str, TMaybeRef[Any]]) -> Self: ...
+
+    @overload
+    def bind_props(self, props: TMaybeRef[str]) -> Self: ...
+
+    def bind_props(self, props: Union[Dict[str, TMaybeRef[Any]], TMaybeRef[str]]):
         """data binding is manipulating an element's props
 
         Args:
@@ -165,13 +171,30 @@ class BindableUi(Generic[TWidget]):
             size = to_ref("xs")
 
             def props_str():
-                return f"outlined={outlined.value} size={size.value}"
+                return f'{"flat" if flat.value else ""} {"size=" + size.value}'
 
             rxui.button("click me").bind_props(props_str)
 
         """
+        if isinstance(props, dict):
 
-        @self._ui_signal_on(props, onchanges=False, deep=False)
+            def props_str():
+                props_dict = (
+                    f'{name if isinstance(raw_value,bool) else f"{name}={raw_value}"}'
+                    for name, value in props.items()
+                    if (raw_value := to_value(value))
+                )
+
+                return " ".join(props_dict)
+
+            self._bind_props_for_str_fn(props_str)
+        else:
+            self._bind_props_for_str_fn(props)
+
+        return self
+
+    def _bind_props_for_str_fn(self, props_str: TMaybeRef[str]):
+        @self._ui_signal_on(props_str, onchanges=False, deep=False)
         def _(state: WatchedState):
             self.props(add=state.current, remove=state.previous)
 
