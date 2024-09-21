@@ -8,10 +8,7 @@ from typing import (
 )
 
 import signe
-from ex4nicegui.utils.signals import (
-    TGetterOrReadonlyRef,
-    to_value,
-)
+from ex4nicegui.utils.signals import to_value, TMaybeRef
 from nicegui.elements.mixins.disableable_element import DisableableElement
 
 
@@ -22,10 +19,9 @@ class DisableableMixin(Protocol):
     _ui_effect: Callable[[Callable[..., Any]], signe.Effect[None]]
 
     @property
-    def element(self) -> DisableableElement:
-        ...
+    def element(self) -> DisableableElement: ...
 
-    def bind_enabled(self, value: TGetterOrReadonlyRef[bool]):
+    def bind_enabled(self, value: TMaybeRef[bool]):
         @self._ui_effect
         def _():
             raw_value = to_value(value)
@@ -34,7 +30,7 @@ class DisableableMixin(Protocol):
 
         return self
 
-    def bind_disable(self, value: TGetterOrReadonlyRef[bool]):
+    def bind_disable(self, value: TMaybeRef[bool]):
         @self._ui_effect
         def _():
             raw_value = not to_value(value)

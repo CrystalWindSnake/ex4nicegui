@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, List, Union, Type, TypeVar
+from typing import Any, Callable, List, Union, Type, TypeVar
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -14,7 +14,9 @@ from ex4nicegui.utils.types import ReadonlyRef
 from functools import partial
 from signe.core.reactive import NoProxy
 from ex4nicegui.utils.proxy.descriptor import class_var_setter
-
+from ex4nicegui.utils.proxy.bool import BoolProxy
+from ex4nicegui.utils.proxy.int import IntProxy
+from ex4nicegui.utils.proxy.float import FloatProxy
 
 _CACHED_VARS_FLAG = "__vm_cached__"
 _LIST_VAR_FLAG = "__vm_list_var__"
@@ -94,6 +96,18 @@ class ViewModel(NoProxy):
             )
 
         return result
+
+    @staticmethod
+    def is_bool(value: Any):
+        return isinstance(value, bool) or isinstance(value, BoolProxy)
+
+    @staticmethod
+    def is_int(value: Any):
+        return isinstance(value, int) or isinstance(value, IntProxy)
+
+    @staticmethod
+    def is_float(value: Any):
+        return isinstance(value, float) or isinstance(value, FloatProxy)
 
 
 def _recursive_to_value(value_or_model):

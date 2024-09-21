@@ -92,6 +92,8 @@ class DateDescriptor(ProxyDescriptor[datetime.date]):
 def class_var_setter(cls: Type, name: str, value, list_var_flat: str) -> None:
     if value is None or isinstance(value, str):
         setattr(cls, name, StringDescriptor(name, value))
+    elif isinstance(value, bool):
+        setattr(cls, name, BoolDescriptor(name, value))
     elif isinstance(value, int):
         setattr(cls, name, IntDescriptor(name, value))
     elif callable(value) and hasattr(value, list_var_flat):
@@ -112,8 +114,6 @@ def class_var_setter(cls: Type, name: str, value, list_var_flat: str) -> None:
         # setattr(cls, name, DictDescriptor(name, value))
     elif isinstance(value, float):
         setattr(cls, name, FloatDescriptor(name, value))
-    elif isinstance(value, bool):
-        setattr(cls, name, BoolDescriptor(name, value))
     elif isinstance(value, datetime.date):
         setattr(cls, name, DateDescriptor(name, value))
     else:

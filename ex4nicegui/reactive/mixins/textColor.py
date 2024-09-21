@@ -9,6 +9,7 @@ import signe
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     WatchedState,
+    TMaybeRef,
 )
 from nicegui import ui
 from ex4nicegui.reactive.systems import color_system
@@ -18,10 +19,9 @@ class TextColorableMixin(Protocol):
     _ui_signal_on: Callable[[Callable[[TGetterOrReadonlyRef[str]], Any]], signe.Effect]
 
     @property
-    def element(self) -> ui.element:
-        ...
+    def element(self) -> ui.element: ...
 
-    def _bind_text_color(self, color: TGetterOrReadonlyRef[str]):
+    def _bind_text_color(self, color: TMaybeRef[str]):
         @self._ui_signal_on(color, onchanges=False)  # type: ignore
         def _(state: WatchedState):
             if state.previous is not None:
@@ -31,7 +31,7 @@ class TextColorableMixin(Protocol):
 
             self.element.update()
 
-    def bind_color(self, color: TGetterOrReadonlyRef[str]):
+    def bind_color(self, color: TMaybeRef[str]):
         """bind text color to the element
 
         Args:
@@ -46,16 +46,14 @@ class HtmlTextColorableMixin(Protocol):
     _ui_signal_on: Callable[[Callable[[TGetterOrReadonlyRef[str]], Any]], signe.Effect]
 
     @property
-    def element(self) -> ui.element:
-        ...
+    def element(self) -> ui.element: ...
 
-    def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
-        ...
+    def bind_style(self, style: Dict[str, TMaybeRef[Any]]): ...
 
-    def _bind_text_color(self, value: TGetterOrReadonlyRef[str]):
+    def _bind_text_color(self, value: TMaybeRef[str]):
         return self.bind_style({"color": value})
 
-    def bind_color(self, color: TGetterOrReadonlyRef[str]):
+    def bind_color(self, color: TMaybeRef[str]):
         """bind text color to the element
 
         Args:

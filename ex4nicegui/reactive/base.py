@@ -48,6 +48,8 @@ _T_bind_classes_type = Union[
     _T_bind_classes_type_ref_dict,
     _T_bind_classes_type_single,
     _T_bind_classes_type_array,
+    Dict[str, bool],
+    List[str],
 ]
 
 
@@ -150,6 +152,56 @@ class BindableUi(Generic[TWidget]):
         """
         return self.element.remove(element)
 
+    @overload
+    def bind_props(self, props: Dict[str, TMaybeRef[Any]]) -> Self: ...
+
+    @overload
+    def bind_props(self, props: TMaybeRef[str]) -> Self: ...
+
+    def bind_props(self, props: Union[Dict[str, TMaybeRef[Any]], TMaybeRef[str]]):
+        """data binding is manipulating an element's props
+
+        Args:
+            props (Union[Dict[str, TMaybeRef[Any]], TMaybeRef[str]]): dict of prop name and ref value
+
+        ## usage
+
+        .. code-block:: python
+            outlined = to_ref(True)
+            size = to_ref("xs")
+
+            def props_str():
+                return f'{"flat" if flat.value else ""} {"size=" + size.value}'
+
+            rxui.button("click me").bind_props(props_str)
+            rxui.button("click me").bind_props({
+                "outlined": outlined,
+                "size": size,
+            })
+
+        """
+        if isinstance(props, dict):
+
+            def props_str():
+                props_dict = (
+                    f"""{name if isinstance(raw_value,bool) else f"{name}='{raw_value}'"}"""
+                    for name, value in props.items()
+                    if (raw_value := to_value(value))
+                )
+
+                return " ".join(props_dict)
+
+            self._bind_props_for_str_fn(props_str)
+        else:
+            self._bind_props_for_str_fn(props)
+
+        return self
+
+    def _bind_props_for_str_fn(self, props_str: TMaybeRef[str]):
+        @self._ui_signal_on(props_str, onchanges=False, deep=False)
+        def _(state: WatchedState):
+            self.props(add=state.current, remove=state.previous)
+
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef[Any]):
         """data binding is manipulating an element's property
 
@@ -179,7 +231,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_visible(self, value: TGetterOrReadonlyRef[bool]):
+    def bind_visible(self, value: TMaybeRef[bool]):
         @self._ui_effect
         def _():
             element = cast(ui.element, self.element)
@@ -187,7 +239,7 @@ class BindableUi(Generic[TWidget]):
 
         return self
 
-    def bind_not_visible(self, value: TGetterOrReadonlyRef[bool]):
+    def bind_not_visible(self, value: TMaybeRef[bool]):
         return self.bind_visible(lambda: not to_value(value))
 
     def on(
@@ -219,10 +271,16 @@ class BindableUi(Generic[TWidget]):
     def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]) -> Self: ...
 
     @overload
+    def bind_classes(self, classes: Dict[str, bool]) -> Self: ...
+
+    @overload
     def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]) -> Self: ...
 
     @overload
     def bind_classes(self, classes: List[TGetterOrReadonlyRef[str]]) -> Self: ...
+
+    @overload
+    def bind_classes(self, classes: List[str]) -> Self: ...
 
     @overload
     def bind_classes(self, classes: TGetterOrReadonlyRef[str]) -> Self: ...
@@ -267,48 +325,47 @@ class BindableUi(Generic[TWidget]):
 
         """
         if isinstance(classes, dict):
-            for name, ref_obj in classes.items():
+            self._bind_classes_for_str_fn(
+                lambda: " ".join(
+                    name for name, value in classes.items() if to_value(value)
+                )
+            )
 
-                @self._ui_effect
-                def _(name=name, ref_obj=ref_obj):
-                    if to_value(ref_obj):
-                        self.classes(add=name)
-                    else:
-                        self.classes(remove=name)
-
+        elif isinstance(classes, list):
+            self._bind_classes_for_str_fn(
+                lambda: " ".join(to_value(c) for c in classes)
+            )
         elif is_ref(classes) or isinstance(classes, Callable):
             ref_obj = to_value(classes)  # type: ignore
 
             if isinstance(ref_obj, dict):
 
-                @self._ui_effect
-                def _():
-                    for name, value in cast(Dict, to_value(classes)).items():  # type: ignore
-                        if value:
-                            self.classes(add=name)
-                        else:
-                            self.classes(remove=name)
+                def classes_str():
+                    return " ".join(
+                        name
+                        for name, value in to_value(classes).items()  # type: ignore
+                        if to_value(value)
+                    )
+
+                self._bind_classes_for_str_fn(classes_str)
+
             else:
-                self._bind_single_class(cast(_T_bind_classes_type_single, classes))
-
-        elif isinstance(classes, list):
-            for ref_name in classes:
-                self._bind_single_class(ref_name)
+                self._bind_classes_for_str_fn(classes)  # type: ignore
 
         return self
 
-    def _bind_single_class(self, class_name: _T_bind_classes_type_single):
-        if is_ref(class_name) or isinstance(class_name, Callable):
+    def _bind_classes_for_str_fn(self, classes_str: TGetterOrReadonlyRef[str]):
+        @self._ui_signal_on(classes_str, onchanges=False, deep=False)
+        def _(state: WatchedState):
+            self.classes(add=state.current, remove=state.previous)
 
-            @on(class_name)
-            def _(state: WatchedState):
-                self.classes(add=state.current, remove=state.previous)
-        else:
-            self.classes(class_name)  # type: ignore
+    @overload
+    def bind_style(self, style: TMaybeRef[str]) -> Self: ...
 
-        return self
+    @overload
+    def bind_style(self, style: Dict[str, TMaybeRef[Any]]) -> Self: ...
 
-    def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
+    def bind_style(self, style: Union[TMaybeRef[str], Dict[str, TMaybeRef[Any]]]):
         """data binding is manipulating an element's style
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind_style
@@ -333,15 +390,20 @@ class BindableUi(Generic[TWidget]):
 
         """
         if isinstance(style, dict):
-            for name, ref_obj in style.items():
-                if is_ref(ref_obj) or isinstance(ref_obj, Callable):
-
-                    @self._ui_effect
-                    def _(name=name, ref_obj=ref_obj):
-                        self.element._style[name] = str(to_value(ref_obj))
-                        self.element.update()
+            self._bind_style_for_str_fn(
+                lambda: ";".join(
+                    f"{name}:{to_value(value)}" for name, value in style.items()
+                )
+            )
+        else:
+            self._bind_style_for_str_fn(style)
 
         return self
+
+    def _bind_style_for_str_fn(self, style_str: TMaybeRef[str]):
+        @self._ui_signal_on(style_str, onchanges=False, deep=False)
+        def _(state: WatchedState):
+            self.style(add=state.current, remove=state.previous)
 
     def scoped_style(self, selector: str, style: Union[str, Path]):
         """add scoped style to the element
