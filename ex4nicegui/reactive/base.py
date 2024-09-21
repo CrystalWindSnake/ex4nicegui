@@ -180,7 +180,7 @@ class BindableUi(Generic[TWidget]):
 
             def props_str():
                 props_dict = (
-                    f'{name if isinstance(raw_value,bool) else f"{name}={raw_value}"}'
+                    f"""{name if isinstance(raw_value,bool) else f"{name}='{raw_value}'"}"""
                     for name, value in props.items()
                     if (raw_value := to_value(value))
                 )
