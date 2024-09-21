@@ -309,7 +309,13 @@ class BindableUi(Generic[TWidget]):
         def _(state: WatchedState):
             self.classes(add=state.current, remove=state.previous)
 
-    def bind_style(self, style: Dict[str, TGetterOrReadonlyRef[Any]]):
+    @overload
+    def bind_style(self, style: TMaybeRef[str]) -> Self: ...
+
+    @overload
+    def bind_style(self, style: Dict[str, TMaybeRef[Any]]) -> Self: ...
+
+    def bind_style(self, style: Union[TMaybeRef[str], Dict[str, TMaybeRef[Any]]]):
         """data binding is manipulating an element's style
 
         @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#bind_style
@@ -334,15 +340,20 @@ class BindableUi(Generic[TWidget]):
 
         """
         if isinstance(style, dict):
-            for name, ref_obj in style.items():
-                if is_ref(ref_obj) or isinstance(ref_obj, Callable):
-
-                    @self._ui_effect
-                    def _(name=name, ref_obj=ref_obj):
-                        self.element._style[name] = str(to_value(ref_obj))
-                        self.element.update()
+            self._bind_style_for_str_fn(
+                lambda: ";".join(
+                    f"{name}:{to_value(value)}" for name, value in style.items()
+                )
+            )
+        else:
+            self._bind_style_for_str_fn(style)
 
         return self
+
+    def _bind_style_for_str_fn(self, style_str: TMaybeRef[str]):
+        @self._ui_signal_on(style_str, onchanges=False, deep=False)
+        def _(state: WatchedState):
+            self.style(add=state.current, remove=state.previous)
 
     def scoped_style(self, selector: str, style: Union[str, Path]):
         """add scoped style to the element
