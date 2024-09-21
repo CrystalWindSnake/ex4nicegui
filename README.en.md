@@ -59,7 +59,7 @@ pip install ex4nicegui -U
 ```
 
 ## examples
-- [basic](./examples/basic/)
+- [basic](./examples/viewmodel/)
 - [todo list mvc](./examples/todomvc/)
 
 

@@ -72,7 +72,7 @@ pip install ex4nicegui -U
 
 
 ## 示例项目
-- [入门](./examples/basic/)
+- [入门](./examples/viewmodel/)
 - [todo list mvc](./examples/todomvc/)
 
 ---
