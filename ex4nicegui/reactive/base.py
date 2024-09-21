@@ -152,6 +152,29 @@ class BindableUi(Generic[TWidget]):
         """
         return self.element.remove(element)
 
+    def bind_props(self, props: TMaybeRef[str]):
+        """data binding is manipulating an element's props
+
+        Args:
+            props (TMaybeRef[str]):  a reference to the props to bind to
+
+        ## usage
+
+        .. code-block:: python
+            outlined = to_ref(True)
+            size = to_ref("xs")
+
+            def props_str():
+                return f"outlined={outlined.value} size={size.value}"
+
+            rxui.button("click me").bind_props(props_str)
+
+        """
+
+        @self._ui_signal_on(props, onchanges=False, deep=False)
+        def _(state: WatchedState):
+            self.props(add=state.current, remove=state.previous)
+
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef[Any]):
         """data binding is manipulating an element's property
 
