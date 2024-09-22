@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, List, Union, Type, TypeVar
+from typing import Any, Callable, List, Optional, Union, Type, TypeVar, overload
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -17,6 +17,9 @@ from ex4nicegui.utils.proxy.descriptor import class_var_setter
 from ex4nicegui.utils.proxy.bool import BoolProxy
 from ex4nicegui.utils.proxy.int import IntProxy
 from ex4nicegui.utils.proxy.float import FloatProxy
+from ex4nicegui.utils.proxy.base import Proxy
+from ex4nicegui.utils.proxy import to_value_if_base_type_proxy
+from ex4nicegui.utils.proxy.descriptor import ProxyDescriptor
 
 _CACHED_VARS_FLAG = "__vm_cached__"
 _LIST_VAR_FLAG = "__vm_list_var__"
@@ -79,8 +82,76 @@ class ViewModel(NoProxy):
         for name, value in need_vars:
             class_var_setter(cls, name, value, _LIST_VAR_FLAG)
 
+    @overload
     @staticmethod
-    def display(model: Union[ViewModel, Type]):
+    def on_refs_changed(vm: ViewModel): ...
+
+    @overload
+    @staticmethod
+    def on_refs_changed(
+        vm: ViewModel, callback: Optional[Callable[[], Any]] = None
+    ): ...
+
+    @staticmethod
+    def on_refs_changed(vm: ViewModel, callback: Optional[Callable[[], Any]] = None):
+        if callback is None:
+
+            def wrapper(fn: Callable[[], Any]):
+                return ViewModel.on_refs_changed(vm, fn)
+
+            return wrapper
+
+        refs = ViewModel.get_refs(vm)
+
+        @on(refs, onchanges=True, deep=False)
+        def _():
+            callback()
+
+    @staticmethod
+    def get_refs(vm: ViewModel):
+        """Get all the refs of a ViewModel.
+
+        Args:
+            vm (ViewModel): The ViewModel to get refs from.
+
+
+        """
+        var_names = [
+            name
+            for name, value in vm.__class__.__dict__.items()
+            if isinstance(value, ProxyDescriptor)
+        ]
+
+        return [getattr(vm, name) for name in var_names]
+
+    @staticmethod
+    def to_value(value: Union[ViewModel, Proxy, List, dict]):
+        """Convert a ViewModel, Proxy, List, or dict to a value.
+
+        Args:
+            value (Union[ViewModel, Proxy, List, dict]):  The value to convert.
+
+        """
+        if isinstance(value, list):
+            return [ViewModel.to_value(v) for v in value]
+
+        if isinstance(value, dict):
+            return {k: ViewModel.to_value(v) for k, v in value.items()}
+
+        if isinstance(value, ViewModel):
+            return {
+                k: ViewModel.to_value(v)
+                for k, v in value.__dict__.items()
+                if not k.startswith("_")
+            }
+
+        if isinstance(value, Proxy):
+            return to_value_if_base_type_proxy(value)
+
+        return value
+
+    @staticmethod
+    def _display(model: Union[ViewModel, Type]):
         result = to_ref("")
 
         watch_refs = _recursive_to_refs(model)

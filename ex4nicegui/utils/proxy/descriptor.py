@@ -10,6 +10,7 @@ from .date import DateProxy
 from .dict import DictProxy
 import datetime
 import warnings
+from . import to_value_if_base_type_proxy
 
 T = TypeVar("T")
 
@@ -41,9 +42,10 @@ class ProxyDescriptor(Generic[T]):
         return proxy
 
     def __set__(self, instance: object, value: T) -> None:
+        value = to_value_if_base_type_proxy(value)
         proxy = instance.__dict__.get(self.name, None)
         if proxy is None:
-            proxy = self._proxy_builder(value)
+            proxy = self._proxy_builder(value)  # type: ignore
             instance.__dict__[self.name] = proxy
 
         proxy._ref.value = value  # type: ignore

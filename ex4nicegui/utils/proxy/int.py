@@ -8,9 +8,10 @@ from typing import (
 )
 import sys
 from . import utils
+from .base import Proxy
 
 
-class IntProxy:
+class IntProxy(Proxy):
     # def __new__(cls, value):
     #     return super().__new__(cls, value)
 

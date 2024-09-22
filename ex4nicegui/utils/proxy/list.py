@@ -13,13 +13,14 @@ from typing import (
 )
 from typing_extensions import Self
 from . import utils
+from .base import Proxy
 
 
 _T = TypeVar("_T")
 _S = TypeVar("_S")
 
 
-class ListProxy(list, Generic[_T]):
+class ListProxy(Proxy, list, Generic[_T]):
     def __init__(self, value: List[_T]):
         from ex4nicegui.utils.signals import deep_ref
 

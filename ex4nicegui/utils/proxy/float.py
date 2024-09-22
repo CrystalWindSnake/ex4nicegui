@@ -1,9 +1,10 @@
 import sys
 from typing import Any, Optional, SupportsIndex, Tuple, overload
 from . import utils
+from .base import Proxy
 
 
-class FloatProxy:
+class FloatProxy(Proxy):
     # def __new__(cls, value):
     #     return super().__new__(cls, value)
 

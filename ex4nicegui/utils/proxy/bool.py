@@ -1,8 +1,9 @@
 from typing import Tuple
 from . import utils
+from .base import Proxy
 
 
-class BoolProxy:
+class BoolProxy(Proxy):
     def __init__(self, value: bool):
         from ex4nicegui.utils.signals import to_ref
 

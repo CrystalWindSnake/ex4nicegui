@@ -1,8 +1,9 @@
 from . import utils
 import datetime
+from .base import Proxy
 
 
-class DateProxy(datetime.date):
+class DateProxy(Proxy, datetime.date):
     def __new__(cls, year, month=None, day=None):
         return super().__new__(cls, year, month, day)
 
