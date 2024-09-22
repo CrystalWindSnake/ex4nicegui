@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, List, Union, Type, TypeVar
+from typing import Any, Callable, List, Optional, Union, Type, TypeVar, overload
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -81,6 +81,31 @@ class ViewModel(NoProxy):
 
         for name, value in need_vars:
             class_var_setter(cls, name, value, _LIST_VAR_FLAG)
+
+    @overload
+    @staticmethod
+    def on_refs_changed(vm: ViewModel): ...
+
+    @overload
+    @staticmethod
+    def on_refs_changed(
+        vm: ViewModel, callback: Optional[Callable[[], Any]] = None
+    ): ...
+
+    @staticmethod
+    def on_refs_changed(vm: ViewModel, callback: Optional[Callable[[], Any]] = None):
+        if callback is None:
+
+            def wrapper(fn: Callable[[], Any]):
+                return ViewModel.on_refs_changed(vm, fn)
+
+            return wrapper
+
+        refs = ViewModel.get_refs(vm)
+
+        @on(refs, onchanges=True, deep=False)
+        def _():
+            callback()
 
     @staticmethod
     def get_refs(vm: ViewModel):
