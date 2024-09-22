@@ -17,46 +17,6 @@
 
 ---
 
-- [ex4nicegui](#ex4nicegui)
-  - [教程](#教程)
-  - [📦 安装](#-安装)
-  - [示例项目](#示例项目)
-  - [入门](#入门)
-    - [二次计算](#二次计算)
-    - [二次计算缓存](#二次计算缓存)
-    - [列表](#列表)
-    - [列表循环](#列表循环)
-  - [apis](#apis)
-    - [ViewModel](#viewmodel)
-      - [使用列表](#使用列表)
-    - [响应式](#响应式)
-      - [`to_ref`](#to_ref)
-      - [`deep_ref`](#deep_ref)
-      - [`effect`](#effect)
-      - [`ref_computed`](#ref_computed)
-      - [`async_computed`](#async_computed)
-      - [`on`](#on)
-      - [`new_scope`](#new_scope)
-    - [组件功能](#组件功能)
-      - [vmodel](#vmodel)
-      - [vfor](#vfor)
-      - [bind\_classes](#bind_classes)
-      - [bind\_style](#bind_style)
-      - [bind\_prop](#bind_prop)
-      - [rxui.echarts](#rxuiecharts)
-        - [echarts 图表鼠标事件](#echarts-图表鼠标事件)
-        - [rxui.echarts.from\_javascript](#rxuiechartsfrom_javascript)
-        - [rxui.echarts.register\_map](#rxuiechartsregister_map)
-      - [tab\_panels](#tab_panels)
-      - [lazy\_tab\_panels](#lazy_tab_panels)
-      - [scoped\_style](#scoped_style)
-    - [BI 模块](#bi-模块)
-      - [`bi.data_source`](#bidata_source)
-      - [ui\_select](#ui_select)
-      - [ui\_table](#ui_table)
-      - [ui\_aggrid](#ui_aggrid)
-
----
 
 ## 教程
 [头条文章-秒杀官方实现，python界面库，去掉90%事件代码的nicegui](https://www.toutiao.com/item/7253786340574265860/)
@@ -69,11 +29,6 @@
 ```
 pip install ex4nicegui -U
 ```
-
-
-## 示例项目
-- [入门](./examples/viewmodel/)
-- [todo list mvc](./examples/todomvc/)
 
 ---
 
@@ -380,6 +335,48 @@ def _():
 
 > 建议总是通过 `.on` 指定依赖关系，避免预料之外的刷新
 
+
+---
+
+
+
+- [ex4nicegui](#ex4nicegui)
+  - [教程](#教程)
+  - [📦 安装](#-安装)
+  - [入门](#入门)
+    - [二次计算](#二次计算)
+    - [二次计算缓存](#二次计算缓存)
+    - [列表](#列表)
+    - [列表循环](#列表循环)
+  - [apis](#apis)
+    - [ViewModel](#viewmodel)
+      - [使用列表](#使用列表)
+    - [响应式](#响应式)
+      - [`to_ref`](#to_ref)
+      - [`deep_ref`](#deep_ref)
+      - [`effect`](#effect)
+      - [`ref_computed`](#ref_computed)
+      - [`async_computed`](#async_computed)
+      - [`on`](#on)
+      - [`new_scope`](#new_scope)
+    - [组件功能](#组件功能)
+      - [vmodel](#vmodel)
+      - [vfor](#vfor)
+      - [bind\_classes](#bind_classes)
+      - [bind\_style](#bind_style)
+      - [bind\_prop](#bind_prop)
+      - [rxui.echarts](#rxuiecharts)
+        - [echarts 图表鼠标事件](#echarts-图表鼠标事件)
+        - [rxui.echarts.from\_javascript](#rxuiechartsfrom_javascript)
+        - [rxui.echarts.register\_map](#rxuiechartsregister_map)
+      - [tab\_panels](#tab_panels)
+      - [lazy\_tab\_panels](#lazy_tab_panels)
+      - [scoped\_style](#scoped_style)
+    - [BI 模块](#bi-模块)
+      - [`bi.data_source`](#bidata_source)
+      - [ui\_select](#ui_select)
+      - [ui\_table](#ui_table)
+      - [ui\_aggrid](#ui_aggrid)
 
 ---
 

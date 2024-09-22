@@ -6,46 +6,6 @@ English| [简体中文](./README.md)
 
 </div>
 
-- [ex4nicegui](#ex4nicegui)
-  - [📦 Install](#-install)
-  - [examples](#examples)
-  - [Guide](#guide)
-    - [Computation](#computation)
-    - [Caching](#caching)
-    - [list data](#list-data)
-    - [List Looping](#list-looping)
-  - [apis](#apis)
-    - [ViewModel](#viewmodel)
-      - [for list data](#for-list-data)
-    - [reactive](#reactive)
-      - [`to_ref`](#to_ref)
-      - [`deep_ref`](#deep_ref)
-      - [`effect`](#effect)
-      - [`ref_computed`](#ref_computed)
-      - [`async_computed`](#async_computed)
-      - [`on`](#on)
-      - [`new_scope`](#new_scope)
-    - [functionality](#functionality)
-      - [vmodel](#vmodel)
-      - [vfor](#vfor)
-      - [bind\_classes](#bind_classes)
-      - [bind\_style](#bind_style)
-      - [bind\_prop](#bind_prop)
-      - [rxui.echarts](#rxuiecharts)
-        - [echarts mouse events](#echarts-mouse-events)
-        - [rxui.echarts.from\_javascript](#rxuiechartsfrom_javascript)
-        - [rxui.echarts.register\_map](#rxuiechartsregister_map)
-    - [tab\_panels](#tab_panels)
-    - [lazy\_tab\_panels](#lazy_tab_panels)
-    - [scoped\_style](#scoped_style)
-    - [BI Module](#bi-module)
-      - [`bi.data_source`](#bidata_source)
-      - [ui\_select](#ui_select)
-      - [ui\_table](#ui_table)
-      - [ui\_aggrid](#ui_aggrid)
-
-
-
 An extension library for [nicegui](https://github.com/zauberzeug/nicegui). It has built-in responsive components and fully implements data-responsive interface programming.
 
 ![todo-app](https://github.com/CrystalWindSnake/ex4nicegui-examples/blob/main/asset/todo-app.02.gif)
@@ -57,11 +17,6 @@ An extension library for [nicegui](https://github.com/zauberzeug/nicegui). It ha
 ```
 pip install ex4nicegui -U
 ```
-
-## examples
-- [basic](./examples/viewmodel/)
-- [todo list mvc](./examples/todomvc/)
-
 
 ---
 
@@ -373,7 +328,43 @@ def _():
 
 ---
 
-
+- [ex4nicegui](#ex4nicegui)
+  - [📦 Install](#-install)
+  - [Guide](#guide)
+    - [Computation](#computation)
+    - [Caching](#caching)
+    - [list data](#list-data)
+    - [List Looping](#list-looping)
+  - [apis](#apis)
+    - [ViewModel](#viewmodel)
+      - [for list data](#for-list-data)
+    - [reactive](#reactive)
+      - [`to_ref`](#to_ref)
+      - [`deep_ref`](#deep_ref)
+      - [`effect`](#effect)
+      - [`ref_computed`](#ref_computed)
+      - [`async_computed`](#async_computed)
+      - [`on`](#on)
+      - [`new_scope`](#new_scope)
+    - [functionality](#functionality)
+      - [vmodel](#vmodel)
+      - [vfor](#vfor)
+      - [bind\_classes](#bind_classes)
+      - [bind\_style](#bind_style)
+      - [bind\_prop](#bind_prop)
+      - [rxui.echarts](#rxuiecharts)
+        - [echarts mouse events](#echarts-mouse-events)
+        - [rxui.echarts.from\_javascript](#rxuiechartsfrom_javascript)
+        - [rxui.echarts.register\_map](#rxuiechartsregister_map)
+    - [tab\_panels](#tab_panels)
+    - [lazy\_tab\_panels](#lazy_tab_panels)
+    - [scoped\_style](#scoped_style)
+    - [BI Module](#bi-module)
+      - [`bi.data_source`](#bidata_source)
+      - [ui\_select](#ui_select)
+      - [ui\_table](#ui_table)
+      - [ui\_aggrid](#ui_aggrid)
+---
 
 ## apis
 
