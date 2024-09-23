@@ -58,8 +58,8 @@ class StringProxy(Proxy, str):
     def count(
         self,
         sub: str,
-        start: Optional[SupportsIndex] = ...,
-        end: Optional[SupportsIndex] = ...,
+        start: Optional[SupportsIndex] = None,
+        end: Optional[SupportsIndex] = None,
         /,
     ) -> int:
         return self._ref.value.count(sub, start, end)
@@ -70,8 +70,8 @@ class StringProxy(Proxy, str):
     def endswith(
         self,
         suffix: Union[str, Tuple[str, ...]],
-        start: Optional[SupportsIndex] = ...,
-        end: Optional[SupportsIndex] = ...,
+        start: Optional[SupportsIndex] = None,
+        end: Optional[SupportsIndex] = None,
         /,
     ) -> bool:
         return self._ref.value.endswith(suffix, start, end)
@@ -88,8 +88,8 @@ class StringProxy(Proxy, str):
     def find(
         self,
         sub: str,
-        start: Optional[SupportsIndex] = ...,
-        end: Optional[SupportsIndex] = ...,
+        start: Optional[SupportsIndex] = None,
+        end: Optional[SupportsIndex] = None,
         /,
     ) -> int:
         return self._ref.value.find(sub, start, end)
@@ -109,8 +109,8 @@ class StringProxy(Proxy, str):
     def index(
         self,
         sub: str,
-        start: Optional[SupportsIndex] = ...,
-        end: Optional[SupportsIndex] = ...,
+        start: Optional[SupportsIndex] = None,
+        end: Optional[SupportsIndex] = None,
         /,
     ) -> int:
         return self._ref.value.index(sub, start, end)
@@ -230,8 +230,8 @@ class StringProxy(Proxy, str):
     def rfind(
         self,
         sub: str,
-        start: Optional[SupportsIndex] = ...,
-        end: Optional[SupportsIndex] = ...,
+        start: Optional[SupportsIndex] = None,
+        end: Optional[SupportsIndex] = None,
         /,
     ) -> int:
         return self._ref.value.rfind(sub, start, end)
@@ -239,8 +239,8 @@ class StringProxy(Proxy, str):
     def rindex(
         self,
         sub: str,
-        start: Optional[SupportsIndex] = ...,
-        end: Optional[SupportsIndex] = ...,
+        start: Optional[SupportsIndex] = None,
+        end: Optional[SupportsIndex] = None,
         /,
     ) -> int:
         return self._ref.value.rindex(sub, start, end)
@@ -263,16 +263,6 @@ class StringProxy(Proxy, str):
     def rpartition(self, sep: str, /) -> Tuple[str, str, str]:
         return self._ref.value.rpartition(sep)
 
-    @overload
-    def rsplit(
-        self: LiteralString,
-        sep: Optional[LiteralString] = None,
-        maxsplit: SupportsIndex = -1,
-    ) -> List[LiteralString]: ...
-    @overload
-    def rsplit(
-        self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1
-    ) -> List[str]: ...  # type: ignore[misc]
     def rsplit(
         self, sep: Optional[str] = None, maxsplit: SupportsIndex = -1
     ) -> List[str]:
@@ -312,8 +302,8 @@ class StringProxy(Proxy, str):
     def startswith(
         self,
         prefix: Union[str, Tuple[str, ...]],
-        start: Optional[SupportsIndex] = ...,
-        end: Optional[SupportsIndex] = ...,
+        start: Optional[SupportsIndex] = None,
+        end: Optional[SupportsIndex] = None,
         /,
     ) -> bool:
         return self._ref.value.startswith(prefix, start, end)
