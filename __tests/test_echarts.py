@@ -359,12 +359,12 @@ def test_click_event_in_tab_panels(browser: BrowserManager, page_path: str):
 
         with rxui.tab_panels(current_tab).classes("w-full"):
             with rxui.tab_panel("Tab 1"):
-                rxui.echarts(opts, initOptions={"renderer": "svg"}).classes(
+                rxui.echarts(opts, init_options={"renderer": "svg"}).classes(
                     "chart-1"
                 ).on("click", add_click_count1, query="series")
 
             with ui.tab_panel("Tab 2"):
-                rxui.echarts(opts, initOptions={"renderer": "svg"}).classes(
+                rxui.echarts(opts, init_options={"renderer": "svg"}).classes(
                     "chart-2"
                 ).on("click", add_click_count2, query="series")
 
