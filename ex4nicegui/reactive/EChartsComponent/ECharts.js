@@ -84,6 +84,9 @@ export default {
       }
     });
 
+    // 
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    this.$emit("_chartsCreated")
   },
   beforeDestroy() {
     this.chart.dispose();

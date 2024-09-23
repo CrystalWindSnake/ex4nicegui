@@ -3,6 +3,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    List,
     Optional,
     Union,
 )
@@ -16,7 +17,6 @@ import nicegui
 from .types import (
     _T_event_name,
 )
-from ex4nicegui.reactive.deferredTask import DeferredTask
 from .utils import get_bound_event_args, create_event_handler_args
 
 NG_ROOT = Path(nicegui.__file__).parent / "elements"
@@ -30,7 +30,7 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
         code: Optional[str] = None,
     ) -> None:
         super().__init__()
-        self.__deferred_task = DeferredTask()
+        self.__deferred_task = _DeferredTask()
 
         if (options is None) and (bool(code) is False):
             raise ValueError("At least one of options and code must be valid.")
@@ -45,6 +45,12 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
 
         self._props["options"] = options
         self._props["code"] = code
+        self._props["deferredTasks"] = []
+
+        def on_chart_created():
+            self.__deferred_task.run()
+
+        self.on("_chartsCreated", on_chart_created)
 
     def update_chart(
         self,
@@ -133,3 +139,18 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
             *args,
             timeout=timeout,
         )
+
+
+class _DeferredTask:
+    def __init__(self):
+        self.tasks: List[Callable[[], None]] = []
+
+    def register(self, task: Callable[[], None]) -> None:
+        self.tasks.append(task)
+
+    def run(self) -> None:
+        for task in self.tasks:
+            task()
+
+        if not nicegui.context.client.shared:
+            self.tasks = []
