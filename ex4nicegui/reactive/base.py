@@ -48,7 +48,7 @@ _T_bind_classes_type = Union[
     _T_bind_classes_type_ref_dict,
     _T_bind_classes_type_single,
     _T_bind_classes_type_array,
-    Dict[str, bool],
+    Dict[str, TMaybeRef[bool]],
     List[str],
 ]
 
@@ -271,7 +271,7 @@ class BindableUi(Generic[TWidget]):
     def bind_classes(self, classes: Dict[str, TGetterOrReadonlyRef[bool]]) -> Self: ...
 
     @overload
-    def bind_classes(self, classes: Dict[str, bool]) -> Self: ...
+    def bind_classes(self, classes: Dict[str, TMaybeRef[bool]]) -> Self: ...
 
     @overload
     def bind_classes(self, classes: TGetterOrReadonlyRef[Dict[str, bool]]) -> Self: ...
