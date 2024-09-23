@@ -3,7 +3,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    List,
     Optional,
     Union,
 )
@@ -28,9 +27,9 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
         self,
         options: Optional[dict] = None,
         code: Optional[str] = None,
+        initOptions: Optional[dict] = None,
     ) -> None:
         super().__init__()
-        self.__deferred_task = _DeferredTask()
 
         if (options is None) and (bool(code) is False):
             raise ValueError("At least one of options and code must be valid.")
@@ -45,12 +44,8 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
 
         self._props["options"] = options
         self._props["code"] = code
-        self._props["deferredTasks"] = []
-
-        def on_chart_created():
-            self.__deferred_task.run()
-
-        self.on("_chartsCreated", on_chart_created)
+        self._props["initOptions"] = initOptions
+        self._props["eventTasks"] = {}
 
     def update_chart(
         self,
@@ -113,9 +108,7 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
         ui_event_name = f"chart:{event_name}"
         super().on(ui_event_name, org_handler, args=get_bound_event_args(event_name))
 
-        @self.__deferred_task.register
-        def _():
-            self.run_method("echarts_on", ui_event_name, query)
+        self._props["eventTasks"][ui_event_name] = query
 
     def run_chart_method(
         self, name: str, *args, timeout: float = 1
@@ -139,18 +132,3 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
             *args,
             timeout=timeout,
         )
-
-
-class _DeferredTask:
-    def __init__(self):
-        self.tasks: List[Callable[[], None]] = []
-
-    def register(self, task: Callable[[], None]) -> None:
-        self.tasks.append(task)
-
-    def run(self) -> None:
-        for task in self.tasks:
-            task()
-
-        if not nicegui.context.client.shared:
-            self.tasks = []

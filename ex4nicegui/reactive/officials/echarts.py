@@ -27,9 +27,12 @@ class EChartsBindableUi(BindableUi[echarts]):
         options: Optional[TMaybeRef[Dict]] = None,
         not_merge: TMaybeRef[Union[bool, None]] = None,
         code: Optional[str] = None,
+        initOptions: Optional[Dict] = None,
     ) -> None:
         pc = ParameterClassifier(
-            locals(), maybeRefs=["options", "code"], exclude=["not_merge"]
+            locals(),
+            maybeRefs=["options", "code", "initOptions"],
+            exclude=["not_merge"],
         )
 
         value_kws = pc.get_values_kws()

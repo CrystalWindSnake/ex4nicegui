@@ -316,9 +316,78 @@ def test_click_event(browser: BrowserManager, page_path: str):
         y_position_offset=+8,
     )
 
-    # page.wait(1000)
-
     lbl_hover.expect_to_have_text("Beta")
+
+
+def test_click_event_in_tab_panels(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        opts = {
+            "xAxis": {"type": "value"},
+            "yAxis": {
+                "type": "category",
+                "data": ["A", "B"],
+                "inverse": True,
+            },
+            "series": [
+                {
+                    "type": "bar",
+                    "data": [0.1, 0.2],
+                }
+            ],
+        }
+
+        names = ["Tab 1", "Tab 2"]
+        current_tab = to_ref(names[0])
+
+        click_count1 = to_ref(0)
+        click_count2 = to_ref(0)
+
+        def add_click_count1():
+            click_count1.value += 1
+
+        def add_click_count2():
+            click_count2.value += 1
+
+        rxui.label(current_tab).classes("lbl_current-tab")
+        rxui.label(click_count1).classes("lbl_click-1")
+        rxui.label(click_count2).classes("lbl_click-2")
+
+        with rxui.tabs(current_tab):
+            for name in names:
+                rxui.tab(name)
+
+        with rxui.tab_panels(current_tab).classes("w-full"):
+            with rxui.tab_panel("Tab 1"):
+                rxui.echarts(opts, initOptions={"renderer": "svg"}).classes(
+                    "chart-1"
+                ).on("click", add_click_count1, query="series")
+
+            with ui.tab_panel("Tab 2"):
+                rxui.echarts(opts, initOptions={"renderer": "svg"}).classes(
+                    "chart-2"
+                ).on("click", add_click_count2, query="series")
+
+    page = browser.open(page_path)
+
+    chart1 = page.ECharts(".chart-1")
+    chart2 = page.ECharts(".chart-2")
+    lbl_current_tab = page.Label(".lbl_current-tab")
+    lbl_click1 = page.Label(".lbl_click-1")
+    lbl_click2 = page.Label(".lbl_click-2")
+
+    chart1.assert_svg_exists()
+
+    chart1.click_svg_last_path(2)
+    lbl_click1.expect_to_have_text("1")
+
+    # switch to tab 2
+    page.locator("css=.q-tab", has_text="Tab 2").click()
+    chart2.assert_svg_exists()
+    lbl_current_tab.expect_equal_text("Tab 2")
+
+    chart2.click_svg_last_path(2)
+    lbl_click2.expect_to_have_text("1")
 
 
 def test_update_opts(browser: BrowserManager, page_path: str):

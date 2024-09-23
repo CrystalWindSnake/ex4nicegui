@@ -13,8 +13,7 @@ class IPropsAble(Protocol):
         add: Optional[str] = None,
         *,
         remove: Optional[str] = None,
-    ) -> Self:
-        ...
+    ) -> Self: ...
 
 
 def set_test_id(element: IPropsAble, id: str):
@@ -220,6 +219,9 @@ class EChartsUtils(BaseUiUtils):
     def assert_canvas_exists(self):
         expect(self.target_locator.locator("css=canvas")).to_be_visible(timeout=5000)
 
+    def assert_svg_exists(self):
+        expect(self.target_locator.locator("css=svg")).to_be_visible(timeout=5000)
+
     def assert_echarts_attachment(self):
         attr = self.target_locator.get_attribute("_echarts_instance_", timeout=10000)
         assert attr is not None
@@ -230,6 +232,12 @@ class EChartsUtils(BaseUiUtils):
         )
 
         return opts
+
+    def click_svg_element(self, selector: str):
+        self.target_locator.locator(selector).click()
+
+    def click_svg_last_path(self, n: int):
+        self.click_svg_element(f"g > path:nth-last-child({n})")
 
     def click_series(
         self,

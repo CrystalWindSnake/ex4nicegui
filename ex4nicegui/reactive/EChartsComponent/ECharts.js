@@ -56,7 +56,8 @@ export default {
   template: "<div></div>",
   async mounted() {
     await new Promise((resolve) => setTimeout(resolve, 0)); // wait for Tailwind classes to be applied
-    this.chart = echarts.init(this.$el, this.theme);
+
+    this.chart = echarts.init(this.$el, this.theme, this.initOptions);
     this.resizeObs = new ResizeObserver(this.chart.resize)
 
     // Prevent interruption of chart animations due to resize operations.
@@ -84,9 +85,11 @@ export default {
       }
     });
 
-    // 
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    this.$emit("_chartsCreated")
+    if (this.eventTasks) {
+      for (const [eventName, query] of Object.entries(this.eventTasks)) {
+        this.echarts_on(eventName, query);
+      }
+    }
   },
   beforeDestroy() {
     this.chart.dispose();
@@ -119,6 +122,8 @@ export default {
   props: {
     options: Object | undefined,
     theme: String | Object | undefined,
+    initOptions: Object | undefined,
     code: String | undefined,
+    eventTasks: Object | undefined,
   },
 };
