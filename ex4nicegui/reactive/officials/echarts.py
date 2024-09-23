@@ -27,9 +27,23 @@ class EChartsBindableUi(BindableUi[echarts]):
         options: Optional[TMaybeRef[Dict]] = None,
         not_merge: TMaybeRef[Union[bool, None]] = None,
         code: Optional[str] = None,
+        init_options: Optional[Dict] = None,
     ) -> None:
+        """Create a new ECharts instance.
+
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#rxuiecharts
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui#rxuiecharts
+
+        Args:
+            options (Optional[TMaybeRef[Dict]], optional): echart options. Defaults to None.
+            not_merge (TMaybeRef[Union[bool, None]], optional): merge options when chart update. Defaults to None.
+            code (Optional[str], optional): javascript code to initialize echart. Defaults to None.
+            init_options (Optional[Dict], optional): echart initialization options. Defaults to None.
+        """
         pc = ParameterClassifier(
-            locals(), maybeRefs=["options", "code"], exclude=["not_merge"]
+            locals(),
+            maybeRefs=["options", "code", "init_options"],
+            exclude=["not_merge"],
         )
 
         value_kws = pc.get_values_kws()

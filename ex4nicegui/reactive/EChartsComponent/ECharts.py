@@ -16,7 +16,6 @@ import nicegui
 from .types import (
     _T_event_name,
 )
-from ex4nicegui.reactive.deferredTask import DeferredTask
 from .utils import get_bound_event_args, create_event_handler_args
 
 NG_ROOT = Path(nicegui.__file__).parent / "elements"
@@ -28,9 +27,9 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
         self,
         options: Optional[dict] = None,
         code: Optional[str] = None,
+        init_options: Optional[dict] = None,
     ) -> None:
         super().__init__()
-        self.__deferred_task = DeferredTask()
 
         if (options is None) and (bool(code) is False):
             raise ValueError("At least one of options and code must be valid.")
@@ -45,6 +44,8 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
 
         self._props["options"] = options
         self._props["code"] = code
+        self._props["initOptions"] = init_options
+        self._props["eventTasks"] = {}
 
     def update_chart(
         self,
@@ -107,9 +108,7 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
         ui_event_name = f"chart:{event_name}"
         super().on(ui_event_name, org_handler, args=get_bound_event_args(event_name))
 
-        @self.__deferred_task.register
-        def _():
-            self.run_method("echarts_on", ui_event_name, query)
+        self._props["eventTasks"][ui_event_name] = query
 
     def run_chart_method(
         self, name: str, *args, timeout: float = 1
