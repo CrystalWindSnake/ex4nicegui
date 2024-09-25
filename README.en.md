@@ -328,6 +328,71 @@ def _():
 
 ---
 
+### Data Persistence
+
+`ViewModel` uses proxy objects to create reactive data. When you need to save the data, you can use `rxui.ViewModel.to_value` to convert it into plain data.
+
+In the following example, clicking the button will display the state data dictionary of `my_app`.
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui
+
+
+class MyApp(rxui.ViewModel):
+    a = 0
+    sign = "+"
+    b = 0
+
+    def show_data(self):
+        # >> {"a": 0, "sign": '+', "b": 0}
+        return rxui.ViewModel.to_value(self)
+
+    def show_a(self):
+        # >> 0
+        return rxui.ViewModel.to_value(self.a)
+
+my_app = MyApp()
+
+rxui.number(value=my_app.a, min=0, max=10)
+rxui.radio(["+", "-", "*", "/"], value=my_app.sign)
+rxui.number(value=my_app.b, min=0, max=10)
+
+ui.button("show data", on_click=lambda: ui.notify(my_app.show_data()))
+```
+
+By combining `rxui.ViewModel.on_refs_changed`, you can automatically save the data to a local file whenever the data changes.
+
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui
+from pathlib import Path
+import json
+
+
+class MyApp(rxui.ViewModel):
+    a = 0
+    sign = "+"
+    b = 0
+
+    _json_path = Path(__file__).parent / "data.json"
+
+    def __init__(self):
+        super().__init__()
+
+        @rxui.ViewModel.on_refs_changed(self)
+        def _():
+            # Automatically save to local file when any of a, sign, b changes
+            self._json_path.write_text(json.dumps(self.show_data()))
+
+    def show_data(self):
+        return rxui.ViewModel.to_value(self)
+...
+```
+
+---
+
 - [ex4nicegui](#ex4nicegui)
   - [📦 Install](#-install)
   - [Guide](#guide)
@@ -335,6 +400,7 @@ def _():
     - [Caching](#caching)
     - [list data](#list-data)
     - [List Looping](#list-looping)
+    - [Data Persistence](#data-persistence)
   - [apis](#apis)
     - [ViewModel](#viewmodel)
       - [for list data](#for-list-data)

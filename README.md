@@ -335,6 +335,71 @@ def _():
 
 > 建议总是通过 `.on` 指定依赖关系，避免预料之外的刷新
 
+---
+
+### 数据持久化
+
+`ViewModel` 使用代理对象创建响应式数据，当需要保存数据时，可以使用 `rxui.ViewModel.to_value` 转换成普通数据.
+
+下面的例子，点击按钮将显示 my_app 的状态数据字典。
+```python
+from nicegui import ui
+from ex4nicegui import rxui
+
+
+class MyApp(rxui.ViewModel):
+    a = 0
+    sign = "+"
+    b = 0
+
+    def show_data(self):
+        # >> {"a": 0, "sign": '+, "b": 0}
+        return rxui.ViewModel.to_value(self)
+
+    def show_a(self):
+        # >> 0
+        return rxui.ViewModel.to_value(self.a)
+
+my_app = MyApp()
+
+rxui.number(value=my_app.a, min=0, max=10)
+rxui.radio(["+", "-", "*", "/"], value=my_app.sign)
+rxui.number(value=my_app.b, min=0, max=10)
+
+ui.button("show data", on_click=lambda: ui.notify(my_app.show_data()))
+
+```
+
+结合 `rxui.ViewModel.on_refs_changed` ，可以在数据变化时，自动保存数据到本地。
+
+```python
+from nicegui import ui
+from ex4nicegui import rxui
+from pathlib import Path
+import json
+
+
+class MyApp(rxui.ViewModel):
+    a = 0
+    sign = "+"
+    b = 0
+
+    _json_path = Path(__file__).parent / "data.json"
+
+    def __init__(self):
+        super().__init__()
+
+        @rxui.ViewModel.on_refs_changed(self)
+        def _():
+            # a, sign, b 任意一个值变化时，自动保存到本地
+            self._json_path.write_text(json.dumps(self.show_data()))
+
+    def show_data(self):
+        return rxui.ViewModel.to_value(self)
+...
+
+```
+
 
 ---
 
@@ -348,6 +413,7 @@ def _():
     - [二次计算缓存](#二次计算缓存)
     - [列表](#列表)
     - [列表循环](#列表循环)
+    - [数据持久化](#数据持久化)
   - [apis](#apis)
     - [ViewModel](#viewmodel)
       - [使用列表](#使用列表)
