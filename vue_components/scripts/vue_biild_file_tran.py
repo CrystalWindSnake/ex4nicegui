@@ -37,7 +37,7 @@ def tran_vue_imports(js_file_name_without_ex: str):
 
         each_as_stms = target.split(",")
 
-        each_const_stms = (as_stem.split("as") for as_stem in each_as_stms)
+        each_const_stms = (as_stem.split(" as ") for as_stem in each_as_stms)
 
         each_const_stms = [
             f"const {as_stem[1].strip()} = Vue.{as_stem[0].strip()}"
