@@ -96,6 +96,12 @@ class LazyTabPanelsBindableUi(TabPanelsBindableUi):
                         panel.try_run_build_fn()
 
     def add_tab_panel(self, name: str):
+        """Add a tab panel.
+
+        Args:
+            name (str):  The name of the tab panel.
+        """
+
         def decorator(fn: Callable[..., Union[None, Awaitable]]):
             with self:
                 panel = lazy_tab_panel(name)
@@ -111,4 +117,10 @@ class LazyTabPanelsBindableUi(TabPanelsBindableUi):
         return decorator
 
     def get_panel(self, name: str) -> lazy_tab_panel:
+        """Get a tab panel by name.
+
+        Args:
+            name (str):  The name of the tab panel.
+
+        """
         return self._panels[name]
