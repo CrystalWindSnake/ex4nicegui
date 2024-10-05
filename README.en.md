@@ -1362,11 +1362,16 @@ with rxui.lazy_tab_panels(current_tab) as panels:
 
     @panels.add_tab_panel("t1")
     def _():
+        # you can use `panels.get_panel` to get the panel component.
+        panels.get_panel("t1").classes("bg-green")
         ui.notify("Hello from t1")
+        ui.label("This is t1")
 
     @panels.add_tab_panel("t2")
     def _():
+        panels.get_panel("t2").style("background-color : red")
         ui.notify("Hello from t2")
+        ui.label("This is t2")
 
 ```
 
