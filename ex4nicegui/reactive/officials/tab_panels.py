@@ -96,25 +96,19 @@ class LazyTabPanelsBindableUi(TabPanelsBindableUi):
                         panel.try_run_build_fn()
 
     def add_tab_panel(self, name: str):
-        return TabPanelDescriptor(self, name)
+        def decorator(fn: Callable[..., Union[None, Awaitable]]):
+            with self:
+                panel = lazy_tab_panel(name)
+            str_name = panel.element._props["name"]
+            self._panels[str_name] = panel
+            panel.build_fn(fn)
 
+            if self.value == name:
+                panel.try_run_build_fn()
 
-class TabPanelDescriptor:
-    def __init__(self, tab_panels: LazyTabPanelsBindableUi, panle_name: str):
-        self.panle_name = panle_name
-        self.tab_panels = tab_panels
+            return panel
 
-    def __call__(self, fn: Callable[..., Union[None, Awaitable]]):
-        with self.tab_panels:
-            panel = lazy_tab_panel(self.panle_name)
-        str_name = panel.element._props["name"]
-        self.tab_panels._panels[str_name] = panel
-        panel.build_fn(fn)
+        return decorator
 
-        if self.tab_panels.value == self.panle_name:
-            panel.try_run_build_fn()
-
-        return panel
-
-    def props(self, **kwargs):
-        pass
+    def get_panel(self, name: str) -> lazy_tab_panel:
+        return self._panels[name]
