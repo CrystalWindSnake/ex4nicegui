@@ -83,6 +83,7 @@ class ToggleBindableUi(BindableUi[ui.toggle]):
     def bind_value(self, value: TGetterOrReadonlyRef):
         @self._ui_signal_on(value, deep=True)
         def _():
+            ParameterClassifier.mark_event_source_as_internal(self.element)
             self.element.set_value(to_raw(to_value(value)) or None)
 
         return self

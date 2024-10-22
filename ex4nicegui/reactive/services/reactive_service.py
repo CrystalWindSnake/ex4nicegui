@@ -18,6 +18,9 @@ from ex4nicegui.reactive.systems.reactive_system import (
 from ex4nicegui.utils.proxy import is_base_type_proxy
 
 
+_EVENT_SOURCE_INTERNAL_FLAG = "__ex4ng_set_value_from_signal_"
+
+
 class ParameterClassifier:
     def __init__(
         self,
@@ -71,7 +74,14 @@ class ParameterClassifier:
             if is_setter_ref(model_value):
 
                 def inject_on_change(e):
-                    model_value.value = self.v_model_arg_getter(e)  # type: ignore
+                    change_from_inner_signal = (
+                        ParameterClassifier.get_event_source_internal_flag(e.sender)
+                    )
+
+                    if not change_from_inner_signal:
+                        model_value.value = self.v_model_arg_getter(e)  # type: ignore
+
+                    ParameterClassifier.remove_event_source_internal_flag(e.sender)
                     handle_event(event, e)
 
                 value_kws.update({event_name: inject_on_change})
@@ -84,6 +94,18 @@ class ParameterClassifier:
             for k, v in self._args.items()
             if (k in self.maybeRefs and (is_ref(v) or isinstance(v, Callable)))
         }
+
+    @staticmethod
+    def mark_event_source_as_internal(element: ui.element):
+        element.__dict__[_EVENT_SOURCE_INTERNAL_FLAG] = True
+
+    @staticmethod
+    def get_event_source_internal_flag(element: ui.element):
+        return element.__dict__.get(_EVENT_SOURCE_INTERNAL_FLAG, False)
+
+    @staticmethod
+    def remove_event_source_internal_flag(element: ui.element):
+        element.__dict__.pop(_EVENT_SOURCE_INTERNAL_FLAG, None)
 
 
 def inject_handle_delete(element: ui.element, on_delete: Callable[[], None]):

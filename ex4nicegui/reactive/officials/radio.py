@@ -62,6 +62,7 @@ class RadioBindableUi(BindableUi[ui.radio], ValueElementMixin[Any]):
     def bind_options(self, options: TGetterOrReadonlyRef):
         @self._ui_signal_on(options, deep=True)
         def _():
+            ParameterClassifier.mark_event_source_as_internal(self.element)
             self.element.set_options(to_value(options))
 
         return self
