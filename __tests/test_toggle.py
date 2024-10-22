@@ -125,3 +125,24 @@ def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
 
     button.click()
     target.expect_selected("m")
+
+
+def test_value_not_in_options(browser: BrowserManager, page_path: str):
+
+    @ui.page(page_path)
+    def _():
+        name = to_ref("")
+        options = ["a", "b"]
+
+
+        rxui.toggle(options, value=name)
+        rxui.label(text=name).classes("label")
+        ui.button("change", on_click=lambda: name.set_value("other")).classes("btn")
+
+    page = browser.open(page_path)
+
+    label = page.Label(".label")
+    button = page.Button(".btn")
+
+    button.click()
+    label.expect_equal_text ("other")
