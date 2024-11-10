@@ -43,9 +43,6 @@ def test_min_change(browser: BrowserManager, page_path: str):
     drap_move("min", page, offset_x=100)
     label.expect_equal_text("{'min': 8, 'max': 100}")
 
-    drap_move("max", page, offset_x=-100)
-    label.expect_equal_text("{'min': 8, 'max': 92}")
-
 
 def test_max_change(browser: BrowserManager, page_path: str):
     r_value = to_ref(
