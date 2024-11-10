@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, Dict
+from typing import Any, Callable, Optional, Dict, cast
 
 
 from ex4nicegui.utils.signals import (
@@ -14,7 +14,7 @@ from ex4nicegui.reactive.mixins.value_element import ValueElementMixin
 class RangeBindableUi(
     BindableUi[ui.range],
     DisableableMixin,
-    ValueElementMixin[str],
+    ValueElementMixin[Dict[str, int]],
 ):
     def __init__(
         self,
@@ -42,4 +42,4 @@ class RangeBindableUi(
 
     @property
     def value(self):
-        return self.element.value
+        return cast(Dict[str, int], self.element.value)
