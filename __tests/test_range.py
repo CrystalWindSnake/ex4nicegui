@@ -23,7 +23,7 @@ def drap_move(type: Literal["min", "max"], page: PageUtils, offset_x: int):
     page._page.mouse.up()
 
 
-def test_base(browser: BrowserManager, page_path: str):
+def test_min_change(browser: BrowserManager, page_path: str):
     r_value = to_ref(
         {
             "min": 0,
@@ -45,3 +45,23 @@ def test_base(browser: BrowserManager, page_path: str):
 
     drap_move("max", page, offset_x=-100)
     label.expect_equal_text("{'min': 8, 'max': 92}")
+
+
+def test_max_change(browser: BrowserManager, page_path: str):
+    r_value = to_ref(
+        {
+            "min": 0,
+            "max": 100,
+        }
+    )
+
+    @ui.page(page_path)
+    def _():
+        rxui.range(min=0, max=100, value=r_value).classes("target")
+        rxui.label(r_value).classes("label")
+
+    page = browser.open(page_path)
+    label = page.Label(".label")
+
+    drap_move("max", page, offset_x=-100)
+    label.expect_equal_text("{'min': 0, 'max': 92}")
