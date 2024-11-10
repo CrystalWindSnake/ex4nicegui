@@ -58,6 +58,8 @@ from .officials.tooltip import TooltipBindableUi as tooltip
 from .officials.toggle import ToggleBindableUi as toggle
 from .officials.avatar import AvatarBindableUi as avatar
 from .officials.badge import BadgeBindableUi as badge
+from .officials.range import RangeBindableUi as range
+
 
 from .local_file_picker import local_file_picker
 from .UseDraggable.UseDraggable import use_draggable
@@ -139,4 +141,5 @@ __all__ = [
     "toggle",
     "avatar",
     "badge",
+    "range",
 ]
