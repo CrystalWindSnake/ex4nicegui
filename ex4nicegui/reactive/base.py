@@ -27,6 +27,7 @@ from ex4nicegui.utils.clientScope import new_scope
 from ex4nicegui.utils.types import _TMaybeRef as TMaybeRef
 from nicegui import Tailwind, ui
 from nicegui.elements.mixins.text_element import TextElement
+from nicegui.elements.mixins.value_element import ValueElement
 from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
 from ex4nicegui.reactive.scopedStyle import ScopedStyle
 from ex4nicegui.reactive.mixins.disableable import DisableableMixin
@@ -222,6 +223,18 @@ class BindableUi(Generic[TWidget]):
             def _():
                 cast(TextElement, self.element).set_text(to_value(value))
                 self.element.update()
+
+            return self
+
+        if prop == "value" and isinstance(self.element, ValueElement):
+
+            @self._ui_effect
+            def _():
+                element = cast(ValueElement, self.element)
+                element.set_value(to_value(value))
+                self.element.update()
+
+            return self
 
         @self._ui_effect
         def _():

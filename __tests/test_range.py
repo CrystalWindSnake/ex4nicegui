@@ -62,3 +62,30 @@ def test_max_change(browser: BrowserManager, page_path: str):
 
     drap_move("max", page, offset_x=-100)
     label.expect_equal_text("{'min': 0, 'max': 92}")
+
+
+def test_ref_value_change(browser: BrowserManager, page_path: str):
+    r_value = to_ref(
+        {
+            "min": 0,
+            "max": 100,
+        }
+    )
+
+    @ui.page(page_path)
+    def _():
+        rxui.range(min=0, max=100, value=r_value).classes("target").props(
+            "label-always"
+        )
+
+        ui.button(
+            "change value", on_click=lambda: r_value.set_value({"min": 10, "max": 90})
+        ).classes("change-btn")
+
+    page = browser.open(page_path)
+    button = page.Button(".change-btn")
+
+    button.click()
+
+    page.should_contain("10")
+    page.should_contain("90")
