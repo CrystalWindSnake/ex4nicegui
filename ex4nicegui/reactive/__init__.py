@@ -59,6 +59,7 @@ from .officials.toggle import ToggleBindableUi as toggle
 from .officials.avatar import AvatarBindableUi as avatar
 from .officials.badge import BadgeBindableUi as badge
 from .officials.range import RangeBindableUi as range
+from .officials.range import LazyRangeBindableUi as lazy_range
 
 
 from .local_file_picker import local_file_picker
@@ -142,4 +143,5 @@ __all__ = [
     "avatar",
     "badge",
     "range",
+    "lazy_range",
 ]
