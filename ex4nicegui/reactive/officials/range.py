@@ -58,6 +58,7 @@ class LazyRangeBindableUi(
         step: TMaybeRef[float] = 1.0,
         value: Optional[TMaybeRef[Dict[str, int]]] = None,
         on_change: Optional[Callable[..., Any]] = None,
+        on_update: Optional[Callable[..., Any]] = None,
     ) -> None:
         """A lazy version of `rxui.range` that only updates the value when the user releases the range.
 
@@ -67,12 +68,14 @@ class LazyRangeBindableUi(
             step (TMaybeRef[float], optional): step size. Defaults to 1.0.
             value (Optional[TMaybeRef[Dict[str, int]]], optional): initial value to set min and max position of the range. Defaults to None.
             on_change (Optional[Callable[..., Any]], optional): callback which is invoked when the user releases the range. Defaults to None.
+            on_update (Optional[Callable[..., Any]], optional): callback which is invoked when the component needs to change. Defaults to None.
         """
         super().__init__(
             min=min,
             max=max,
             step=step,
             value=lambda: to_value(value),  # type: ignore
+            on_change=on_update,
         )
 
         if is_setter_ref(value):

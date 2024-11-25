@@ -80,3 +80,34 @@ def test_on_change_event(browser: BrowserManager, page_path: str):
 
     mouse_up(page)
     label.expect_equal_text("{'min': 8, 'max': 100}")
+
+
+
+def test_on_update_event(browser: BrowserManager, page_path: str):
+    r_value = to_ref(
+        {
+            "min": 0,
+            "max": 100,
+        }
+    )
+
+    @ui.page(page_path)
+    def _():
+        def on_update(e):
+            label.text = str(e.value)
+
+        rxui.lazy_range(min=0, max=100, value=r_value, on_update=on_update).classes(
+            "target"
+        )
+
+        label = ui.label("old").classes("label")
+
+    page = browser.open(page_path)
+    label = page.Label(".label")
+
+    label.expect_equal_text("old")
+    drap_move_and_hold("min", page, offset_x=100)
+    label.expect_equal_text("{'min': 8, 'max': 100}")
+
+    mouse_up(page)
+    label.expect_equal_text("{'min': 8, 'max': 100}")
