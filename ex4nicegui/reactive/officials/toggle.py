@@ -87,6 +87,6 @@ class ToggleBindableUi(BindableUi[ui.toggle]):
             new_value = to_raw(to_value(value))
             if (not isinstance(new_value, bool)) and (not new_value):
                 new_value = None
-            self.element.set_value(to_raw(to_value(value)) or None)
+            self.element.set_value(new_value)
 
         return self
