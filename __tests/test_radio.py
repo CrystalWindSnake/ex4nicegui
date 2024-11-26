@@ -1,6 +1,7 @@
+from typing import Optional
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref
+from ex4nicegui import to_ref, Ref
 from .screen import BrowserManager
 
 
@@ -29,7 +30,7 @@ def test_display(browser: BrowserManager, page_path: str):
 
 
 def test_ref_value(browser: BrowserManager, page_path: str):
-    r_value = to_ref("")
+    r_value = to_ref(None)
 
     @ui.page(page_path)
     def _():
@@ -62,7 +63,7 @@ def test_ref_value(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str_change_value(browser: BrowserManager, page_path: str):
-    r_value = to_ref("")
+    r_value: Ref[Optional[str]] = to_ref(None)
 
     @ui.page(page_path)
     def _():
@@ -85,7 +86,7 @@ def test_ref_str_change_value(browser: BrowserManager, page_path: str):
 
 
 def test_ref_value_dict_options(browser: BrowserManager, page_path: str):
-    r_value = to_ref("")
+    r_value: Ref[Optional[str]] = to_ref(None)
 
     @ui.page(page_path)
     def _():

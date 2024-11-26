@@ -1,6 +1,7 @@
+from typing import Optional
 from ex4nicegui.reactive import rxui
 from nicegui import ui
-from ex4nicegui import to_ref, ref_computed, effect
+from ex4nicegui import to_ref, ref_computed, effect, Ref
 from .screen import BrowserManager
 
 
@@ -16,7 +17,7 @@ def test_const_str(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str(browser: BrowserManager, page_path: str):
-    r_str = to_ref("")
+    r_str: Ref[Optional[str]] = to_ref(None)
 
     @ui.page(page_path)
     def _():
@@ -34,7 +35,7 @@ def test_ref_str(browser: BrowserManager, page_path: str):
     r_str.value = "b"
     target.expect_selected("b")
 
-    r_str.value = ""
+    r_str.value = None
     target.expect_not_selected("a")
     target.expect_not_selected("b")
 
@@ -64,7 +65,7 @@ def test_clearable(browser: BrowserManager, page_path: str):
 
 
 def test_option_change(browser: BrowserManager, page_path: str):
-    r_str = to_ref("")
+    r_value = to_ref(None)
     r_has_data = to_ref(False)
 
     @ref_computed
@@ -76,8 +77,8 @@ def test_option_change(browser: BrowserManager, page_path: str):
     @ui.page(page_path)
     def _():
         rxui.switch("has data", value=r_has_data).classes("switch")
-        rxui.toggle(cp_data, value=r_str).classes("min-w-[20ch] target")
-        rxui.label(r_str).classes("label-str")
+        rxui.toggle(cp_data, value=r_value).classes("min-w-[20ch] target")
+        rxui.label(r_value).classes("label-str")
 
     page = browser.open(page_path)
     target = page.Toggle(".target")
@@ -128,12 +129,10 @@ def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
 
 
 def test_value_not_in_options(browser: BrowserManager, page_path: str):
-
     @ui.page(page_path)
     def _():
-        name = to_ref("")
+        name: Ref[Optional[str]] = to_ref(None)
         options = ["a", "b"]
-
 
         rxui.toggle(options, value=name)
         rxui.label(text=name).classes("label")
@@ -145,4 +144,25 @@ def test_value_not_in_options(browser: BrowserManager, page_path: str):
     button = page.Button(".btn")
 
     button.click()
-    label.expect_equal_text ("other")
+    label.expect_equal_text("other")
+
+
+def test_false_value(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        value = to_ref(True)
+
+        rxui.toggle({True: "dark", False: "light", None: "auto"}, value=value).classes(
+            "target"
+        )
+        ui.button("set to False", on_click=lambda: value.set_value(False)).classes(
+            "btn"
+        )
+
+    page = browser.open(page_path)
+
+    button = page.Button(".btn")
+    target = page.Toggle(".target")
+
+    button.click()
+    target.expect_selected("light")

@@ -4,7 +4,6 @@ from typing import (
     List,
     Optional,
     TypeVar,
-    cast,
     Dict,
     Union,
 )
@@ -16,7 +15,6 @@ from ex4nicegui.utils.signals import (
     to_raw,
 )
 from nicegui import ui
-from nicegui.elements.mixins.value_element import ValueElement
 from .base import BindableUi
 
 T = TypeVar("T")
@@ -94,6 +92,6 @@ class SelectBindableUi(BindableUi[ui.select]):
         @self._ui_signal_on(value, deep=True)
         def _():
             ParameterClassifier.mark_event_source_as_internal(self.element)
-            cast(ValueElement, self.element).set_value(to_raw(to_value(value)) or None)
+            self.element.set_value(to_raw(to_value(value)) or None)
 
         return self
