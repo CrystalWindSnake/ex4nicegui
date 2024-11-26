@@ -128,12 +128,10 @@ def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
 
 
 def test_value_not_in_options(browser: BrowserManager, page_path: str):
-
     @ui.page(page_path)
     def _():
         name = to_ref("")
         options = ["a", "b"]
-
 
         rxui.toggle(options, value=name)
         rxui.label(text=name).classes("label")
@@ -145,4 +143,25 @@ def test_value_not_in_options(browser: BrowserManager, page_path: str):
     button = page.Button(".btn")
 
     button.click()
-    label.expect_equal_text ("other")
+    label.expect_equal_text("other")
+
+
+def test_false_value(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        value = to_ref(True)
+
+        rxui.toggle({True: "dark", False: "light", None: "auto"}, value=value).classes(
+            "target"
+        )
+        ui.button("set to False", on_click=lambda: value.set_value(False)).classes(
+            "btn"
+        )
+
+    page = browser.open(page_path)
+
+    button = page.Button(".btn")
+    target = page.Toggle(".target")
+
+    button.click()
+    target.expect_selected("light")

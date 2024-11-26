@@ -84,6 +84,9 @@ class ToggleBindableUi(BindableUi[ui.toggle]):
         @self._ui_signal_on(value, deep=True)
         def _():
             ParameterClassifier.mark_event_source_as_internal(self.element)
+            new_value = to_raw(to_value(value))
+            if (not isinstance(new_value, bool)) and (not new_value):
+                new_value = None
             self.element.set_value(to_raw(to_value(value)) or None)
 
         return self
