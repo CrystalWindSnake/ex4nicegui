@@ -4,14 +4,10 @@ from typing import (
     List,
     Optional,
     TypeVar,
-    cast,
     Dict,
     Union,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
-from ex4nicegui.reactive.systems.reactive_system import (
-    convert_value_to_none_except_for_false,
-)
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
@@ -19,7 +15,6 @@ from ex4nicegui.utils.signals import (
     to_raw,
 )
 from nicegui import ui
-from nicegui.elements.mixins.value_element import ValueElement
 from .base import BindableUi
 
 T = TypeVar("T")
@@ -97,8 +92,6 @@ class SelectBindableUi(BindableUi[ui.select]):
         @self._ui_signal_on(value, deep=True)
         def _():
             ParameterClassifier.mark_event_source_as_internal(self.element)
-            cast(ValueElement, self.element).set_value(
-                convert_value_to_none_except_for_false(value)
-            )
+            self.element.set_value(to_raw(to_value(value)) or None)
 
         return self

@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, List, Union
 from ex4nicegui.utils.signals import to_value, to_raw, TGetterOrReadonlyRef
 
 
@@ -21,9 +21,12 @@ def inject_method(obj, method_name: str, new_handle: Callable):
         )
 
 
-def convert_value_to_none_except_for_false(value: TGetterOrReadonlyRef):
+def convert_to_none_if_outside_options(
+    value: TGetterOrReadonlyRef, options: Union[List, Dict]
+):
     new_value = to_raw(to_value(value))
-    if (not isinstance(new_value, bool)) and (not new_value):
+
+    if new_value not in options:
         new_value = None
 
     return new_value

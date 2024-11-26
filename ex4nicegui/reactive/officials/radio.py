@@ -9,7 +9,7 @@ from typing import (
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.reactive.systems.reactive_system import (
-    convert_value_to_none_except_for_false,
+    convert_to_none_if_outside_options,
 )
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
@@ -73,7 +73,7 @@ class RadioBindableUi(BindableUi[ui.radio], ValueElementMixin[Any]):
     def bind_value(self, value: TGetterOrReadonlyRef):
         @self._ui_signal_on(value, deep=True)
         def _():
-            ParameterClassifier.mark_event_source_as_internal(self.element)
-            self.element.set_value(convert_value_to_none_except_for_false(value))
+            new_value = convert_to_none_if_outside_options(value, self.element.options)
+            self.element.set_value(new_value)
 
         return self
