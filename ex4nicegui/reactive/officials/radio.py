@@ -8,6 +8,9 @@ from typing import (
     Union,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
+from ex4nicegui.reactive.systems.reactive_system import (
+    convert_value_to_none_except_for_false,
+)
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
@@ -51,8 +54,8 @@ class RadioBindableUi(BindableUi[ui.radio], ValueElementMixin[Any]):
         return self.element.value
 
     def bind_prop(self, prop: str, value: TGetterOrReadonlyRef):
-        if ValueElementMixin._bind_specified_props(self, prop, value):
-            return self
+        if prop == "value":
+            return self.bind_value(value)
 
         if prop == "options":
             return self.bind_options(value)
@@ -64,5 +67,13 @@ class RadioBindableUi(BindableUi[ui.radio], ValueElementMixin[Any]):
         def _():
             ParameterClassifier.mark_event_source_as_internal(self.element)
             self.element.set_options(to_value(options))
+
+        return self
+
+    def bind_value(self, value: TGetterOrReadonlyRef):
+        @self._ui_signal_on(value, deep=True)
+        def _():
+            ParameterClassifier.mark_event_source_as_internal(self.element)
+            self.element.set_value(convert_value_to_none_except_for_false(value))
 
         return self

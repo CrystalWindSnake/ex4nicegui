@@ -8,11 +8,13 @@ from typing import (
     Union,
 )
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
+from ex4nicegui.reactive.systems.reactive_system import (
+    convert_value_to_none_except_for_false,
+)
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
     _TMaybeRef as TMaybeRef,
     to_value,
-    to_raw,
 )
 from nicegui import ui
 from .base import BindableUi
@@ -84,9 +86,6 @@ class ToggleBindableUi(BindableUi[ui.toggle]):
         @self._ui_signal_on(value, deep=True)
         def _():
             ParameterClassifier.mark_event_source_as_internal(self.element)
-            new_value = to_raw(to_value(value))
-            if (not isinstance(new_value, bool)) and (not new_value):
-                new_value = None
-            self.element.set_value(new_value)
+            self.element.set_value(convert_value_to_none_except_for_false(value))
 
         return self
