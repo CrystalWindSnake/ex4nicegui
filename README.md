@@ -443,6 +443,9 @@ class MyApp(rxui.ViewModel):
       - [ui\_select](#ui_select)
       - [ui\_table](#ui_table)
       - [ui\_aggrid](#ui_aggrid)
+    - [toolbox](#toolbox)
+      - [use\_dark](#use_dark)
+      - [use\_breakpoints](#use_breakpoints)
 
 ---
 
@@ -1774,4 +1777,70 @@ source.ui_aggrid(
 - 参数 options 与 nicegui `ui.aggrid` 一致。其中 `columnDefs` 中的键值 `field` 对应数据源的列名，如果不存在，则该配置不会生效
 - `rowData` 键值不会生效。因为表格的数据源始终由 data source 控制
 
+
+
+
+### toolbox
+
+`toolbox` 模块提供了一些常用的工具函数。
+
+```python
+from ex4nicegui import toolbox
+```
+
+#### use_dark
+
+切换暗模式
+
+```python
+from ex4nicegui import rxui, toolbox as tb
+from nicegui import ui
+
+
+@ui.page("/")
+def page():
+    dark = tb.use_dark()
+
+    rxui.label(lambda: f"暗模式: {dark.is_dark.value}")
+    rxui.button(
+        icon=lambda: "sunny" if dark.is_dark.value else "dark_mode",
+        color=lambda: "red" if dark.is_dark.value else "blue",
+        on_click=dark.toggle,
+    ).props("flat round")
+
+```
+
+#### use_breakpoints
+
+响应式断点
+
+```python
+from ex4nicegui import rxui, toolbox as tb
+from nicegui import ui
+
+@ui.page("/")
+def page():
+    options = {"手机": 0, "平板": 640, "笔记本": 1024, "桌面": 1280}
+    bp = tb.use_breakpoints(options)
+    active = bp.reactivity.active()
+    is_between = bp.reactivity.between("手机", "笔记本")
+
+    with ui.card():
+        rxui.label(lambda: f"当前断点: {active.value}")
+        rxui.label(lambda: f"是否在手机-笔记本(不含)之间: {is_between.value}")
+
+        rxui.label(
+            lambda: f'手机(0px - 640px): {active.value == "手机"}'
+        ).bind_classes({"bg-red-300": lambda: active.value == "手机"})
+        rxui.label(
+            lambda: f'平板(640px - 1024px): {active.value == "平板"}'
+        ).bind_classes({"bg-red-300": lambda: active.value == "平板"})
+        rxui.label(
+            lambda: f'笔记本(1024px - 1280px): {active.value == "笔记本"}'
+        ).bind_classes({"bg-red-300": lambda: active.value == "笔记本"})
+        rxui.label(
+            lambda: f'桌面(1280px+): {active.value == "桌面"}'
+        ).bind_classes({"bg-red-300": lambda: active.value == "桌面"})
+
+```
 
