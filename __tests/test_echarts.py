@@ -101,7 +101,7 @@ def test_chart_deep_ref(browser: BrowserManager, page_path: str):
             }
         )
 
-        rxui.number(value=rxui.vmodel(r_opts.value["series"][0]["data"][0])).classes(
+        rxui.number(value=rxui.vmodel(r_opts.value["series"][0]["data"][0])).classes(  # type: ignore
             "number_input"
         )
 
@@ -273,14 +273,14 @@ def test_click_event(browser: BrowserManager, page_path: str):
         def onclick_series(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
-            lbl_click.set_text(e.seriesName)
+            lbl_click.set_text(e.seriesName or "")
 
         chart.on("click", onclick_series)
 
         def on_mouser_over(
             e: rxui.echarts.EChartsMouseEventArguments,
         ):
-            lbl_hover.set_text(e.seriesName)
+            lbl_hover.set_text(e.seriesName or "")
 
         chart.on(
             "mouseover",
