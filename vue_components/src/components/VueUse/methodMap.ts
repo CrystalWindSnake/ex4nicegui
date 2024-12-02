@@ -1,5 +1,6 @@
 import { initBreakpoints } from "./useBreakpoints";
 import { initUseDark } from "./useDark";
+import { initUseQRCode } from "./useQRCode";
 
 export class MethodInfo {
   private methods = new Map<string, Function>();
@@ -18,6 +19,7 @@ export class MethodInfo {
 const methodMap = new Map<string, Function>([
   ["useBreakpoints", initBreakpoints],
   ["useDark", initUseDark],
+  ["useQRCode", initUseQRCode],
 ]);
 
 export function getMethod(

@@ -433,6 +433,7 @@ class MyApp(rxui.ViewModel):
     - [Toolbox](#toolbox)
       - [use\_dark](#use_dark)
       - [use\_breakpoints](#use_breakpoints)
+      - [use\_qr\_code](#use_qr_code)
 ---
 
 ## apis
@@ -1811,4 +1812,20 @@ def page():
         rxui.label(
             lambda: f'Desktop(1280px+): {active.value == "Desktop"}'
         ).bind_classes({"bg-red-300": lambda: active.value == "Desktop"})
+```
+
+#### use_qr_code
+
+Generate QR code
+
+```python
+from ex4nicegui import rxui, to_ref, toolbox as tb
+from nicegui import ui
+
+
+text = to_ref("ex4nicegui")
+qr_code = tb.use_qr_code(text)
+
+rxui.input(value=text)
+rxui.image(qr_code.code).classes("w-20 h-20").props("no-transition")
 ```
