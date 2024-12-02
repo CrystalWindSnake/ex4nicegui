@@ -1798,16 +1798,14 @@ from ex4nicegui import rxui, toolbox as tb
 from nicegui import ui
 
 
-@ui.page("/")
-def page():
-    dark = tb.use_dark()
+dark = tb.use_dark(False)
 
-    rxui.label(lambda: f"暗模式: {dark.is_dark.value}")
-    rxui.button(
-        icon=lambda: "sunny" if dark.is_dark.value else "dark_mode",
-        color=lambda: "red" if dark.is_dark.value else "blue",
-        on_click=dark.toggle,
-    ).props("flat round")
+rxui.label(lambda: f"暗模式: {dark.value}")
+rxui.button(
+    icon=lambda: "sunny" if dark.value else "dark_mode",
+    color=lambda: "red" if dark.value else "blue",
+    on_click=dark.toggle,
+).props("flat round")
 
 ```
 

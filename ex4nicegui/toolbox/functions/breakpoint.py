@@ -35,7 +35,7 @@ class UseBreakpoints:
         """
         self.__options = (options or _QUASAR_BREAKPOINTS).copy()
 
-        self._vue_use = VueUse("useBreakpoints", args=[self.__options])
+        self.__vue_use = VueUse("useBreakpoints", args=[self.__options])
 
         self.__active_value = ""
 
@@ -95,10 +95,10 @@ class UseBreakpoints:
         Args:
             callback (Callable[[str], None]): the callback function to be called.
         """
-        self._vue_use.on_event("active", callback)
+        self.__vue_use.on_event("active", callback)
 
     def __on_active_change_with_mounted(self, callback: Callable[[str], None]):
-        self._vue_use.on_event("activeWithMounted", callback)
+        self.__vue_use.on_event("activeWithMounted", callback)
 
 
 class _Utils:
