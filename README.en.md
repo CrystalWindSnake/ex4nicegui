@@ -1769,16 +1769,14 @@ from ex4nicegui import rxui, toolbox as tb
 from nicegui import ui
 
 
-@ui.page("/")
-def page():
-    dark = tb.use_dark()
+dark = tb.use_dark(False)
 
-    rxui.label(lambda: f"Dark Mode: {dark.is_dark.value}")
-    rxui.button(
-        icon=lambda: "sunny" if dark.is_dark.value else "dark_mode",
-        color=lambda: "red" if dark.is_dark.value else "blue",
-        on_click=dark.toggle,
-    ).props("flat round")
+rxui.label(lambda: f"Dark mode: {dark.value}")
+rxui.button(
+    icon=lambda: "sunny" if dark.value else "dark_mode",
+    color=lambda: "red" if dark.value else "blue",
+    on_click=dark.toggle,
+).props("flat round")
 ```
 
 #### use_breakpoints
@@ -1789,29 +1787,30 @@ Responsive breakpoints
 from ex4nicegui import rxui, toolbox as tb
 from nicegui import ui
 
-@ui.page("/")
-def page():
-    options = {"Phone": 0, "Tablet": 640, "Laptop": 1024, "Desktop": 1280}
-    bp = tb.use_breakpoints(options)
-    active = bp.reactivity.active()
-    is_between = bp.reactivity.between("Phone", "Laptop")
 
-    with ui.card():
-        rxui.label(lambda: f"Current Breakpoint: {active.value}")
-        rxui.label(lambda: f"Is between Phone and Laptop (exclusive): {is_between.value}")
+options = {"Phone": 0, "Tablet": 640, "Laptop": 1024, "Desktop": 1280}
+bp = tb.use_breakpoints(options)
+active = bp.active
+is_between = bp.between("Phone", "Laptop")
 
-        rxui.label(
-            lambda: f'Phone(0px - 640px): {active.value == "Phone"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "Phone"})
-        rxui.label(
-            lambda: f'Tablet(640px - 1024px): {active.value == "Tablet"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "Tablet"})
-        rxui.label(
-            lambda: f'Laptop(1024px - 1280px): {active.value == "Laptop"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "Laptop"})
-        rxui.label(
-            lambda: f'Desktop(1280px+): {active.value == "Desktop"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "Desktop"})
+with ui.card():
+    rxui.label(lambda: f"Current Breakpoint: {active.value}")
+    rxui.label(
+        lambda: f"Is between Phone and Laptop (exclusive): {is_between.value}"
+    ).bind_classes({"text-red-500": is_between})
+
+    rxui.label(lambda: f'Phone(0px - 640px): {active.value == "Phone"}').bind_classes(
+        {"bg-red-300": lambda: active.value == "Phone"}
+    )
+    rxui.label(
+        lambda: f'Tablet(640px - 1024px): {active.value == "Tablet"}'
+    ).bind_classes({"bg-red-300": lambda: active.value == "Tablet"})
+    rxui.label(
+        lambda: f'Laptop(1024px - 1280px): {active.value == "Laptop"}'
+    ).bind_classes({"bg-red-300": lambda: active.value == "Laptop"})
+    rxui.label(lambda: f'Desktop(1280px+): {active.value == "Desktop"}').bind_classes(
+        {"bg-red-300": lambda: active.value == "Desktop"}
+    )
 ```
 
 #### use_qr_code
