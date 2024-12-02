@@ -1819,29 +1819,31 @@ def page():
 from ex4nicegui import rxui, toolbox as tb
 from nicegui import ui
 
-@ui.page("/")
-def page():
-    options = {"手机": 0, "平板": 640, "笔记本": 1024, "桌面": 1280}
-    bp = tb.use_breakpoints(options)
-    active = bp.reactivity.active()
-    is_between = bp.reactivity.between("手机", "笔记本")
 
-    with ui.card():
-        rxui.label(lambda: f"当前断点: {active.value}")
-        rxui.label(lambda: f"是否在手机-笔记本(不含)之间: {is_between.value}")
+options = {"手机": 0, "平板": 640, "笔记本": 1024, "桌面": 1280}
+bp = tb.use_breakpoints(options)
+active = bp.active
+is_between = bp.between("手机", "笔记本")
 
-        rxui.label(
-            lambda: f'手机(0px - 640px): {active.value == "手机"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "手机"})
-        rxui.label(
-            lambda: f'平板(640px - 1024px): {active.value == "平板"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "平板"})
-        rxui.label(
-            lambda: f'笔记本(1024px - 1280px): {active.value == "笔记本"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "笔记本"})
-        rxui.label(
-            lambda: f'桌面(1280px+): {active.value == "桌面"}'
-        ).bind_classes({"bg-red-300": lambda: active.value == "桌面"})
+with ui.card():
+    rxui.label(lambda: f"当前断点: {active.value}")
+    rxui.label(lambda: f"是否在手机-笔记本(不含)之间: {is_between.value}").bind_classes(
+        {"text-red-500": is_between}
+    )
+
+    rxui.label(lambda: f'手机(0px - 640px): {active.value == "手机"}').bind_classes(
+        {"bg-red-300": lambda: active.value == "手机"}
+    )
+    rxui.label(lambda: f'平板(640px - 1024px): {active.value == "平板"}').bind_classes(
+        {"bg-red-300": lambda: active.value == "平板"}
+    )
+    rxui.label(
+        lambda: f'笔记本(1024px - 1280px): {active.value == "笔记本"}'
+    ).bind_classes({"bg-red-300": lambda: active.value == "笔记本"})
+    rxui.label(lambda: f'桌面(1280px+): {active.value == "桌面"}').bind_classes(
+        {"bg-red-300": lambda: active.value == "桌面"}
+    )
+
 
 ```
 

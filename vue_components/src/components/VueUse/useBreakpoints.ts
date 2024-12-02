@@ -2,6 +2,7 @@ import { watch } from "vue";
 import { useBreakpoints } from "@vueuse/core";
 import { MethodInfo } from "./methodMap";
 import * as types from "./types";
+import { onSocketConnect } from "./utils";
 
 export function initBreakpoints(
   points: Record<string, number>,
@@ -9,6 +10,13 @@ export function initBreakpoints(
 ) {
   const breakpoints = useBreakpoints(points);
   const active = breakpoints.active();
+
+  const emitActiveWithMounted = () => {
+    emit("change", {
+      eventName: "activeWithMounted",
+      value: active.value,
+    });
+  };
 
   const methodInfo = new MethodInfo();
 
@@ -32,11 +40,15 @@ export function initBreakpoints(
     }
   );
 
+  onSocketConnect(emitActiveWithMounted);
+
   watch(active, (value) => {
     emit("change", {
       eventName: "active",
       value,
     });
+
+    emitActiveWithMounted();
   });
   return methodInfo;
 }
