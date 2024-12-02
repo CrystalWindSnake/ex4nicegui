@@ -446,6 +446,7 @@ class MyApp(rxui.ViewModel):
     - [toolbox](#toolbox)
       - [use\_dark](#use_dark)
       - [use\_breakpoints](#use_breakpoints)
+      - [use\_qr\_code](#use_qr_code)
 
 ---
 
@@ -1842,5 +1843,22 @@ def page():
             lambda: f'桌面(1280px+): {active.value == "桌面"}'
         ).bind_classes({"bg-red-300": lambda: active.value == "桌面"})
 
+```
+
+
+#### use_qr_code
+
+生成二维码
+
+```python
+from ex4nicegui import rxui, to_ref, toolbox as tb
+from nicegui import ui
+
+
+text = to_ref("ex4nicegui")
+qr_code = tb.use_qr_code(text)
+
+rxui.input(value=text)
+rxui.image(qr_code.code).classes("w-20 h-20").props("no-transition")
 ```
 
