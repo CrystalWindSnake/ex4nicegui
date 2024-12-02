@@ -26,19 +26,7 @@ def create_event_handler_args(
     event_name: _T_event_name, e: GenericEventArguments
 ) -> UiEventArguments:
     if is_mouse_event(event_name):
-        return EChartsMouseEventArguments(
-            sender=e.sender,
-            client=e.client,
-            componentType=e.args["componentType"],
-            seriesType=e.args["seriesType"],
-            seriesIndex=e.args["seriesIndex"],
-            seriesName=e.args["seriesName"],
-            name=e.args["name"],
-            dataIndex=e.args["dataIndex"],
-            data=e.args["data"],
-            dataType=e.args.get("dataType"),
-            value=e.args["value"],
-            color=e.args["color"],
-        )
+        print(e.args)
+        return EChartsMouseEventArguments(sender=e.sender, client=e.client, **e.args)
 
     return GenericEventArguments(sender=e.sender, client=e.client, args=e.args)
