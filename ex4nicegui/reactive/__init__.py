@@ -61,6 +61,7 @@ from .officials.badge import BadgeBindableUi as badge
 from .officials.range import RangeBindableUi as range
 from .officials.range import LazyRangeBindableUi as lazy_range
 from .officials.tree import TreeBindableUi as tree
+from .officials.spinner import SpinnerBindableUi as spinner
 
 from .local_file_picker import local_file_picker
 from .UseDraggable.UseDraggable import use_draggable
@@ -145,4 +146,5 @@ __all__ = [
     "range",
     "lazy_range",
     "tree",
+    "spinner",
 ]
