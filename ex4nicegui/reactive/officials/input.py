@@ -64,9 +64,32 @@ class InputBindableUi(
         if prop == "password":
             return self.bind_password(value)
 
+        if prop == "autocomplete":
+            return self.bind_autocomplete(value)
+
         return super().bind_prop(prop, value)
 
+    def bind_autocomplete(self, autocomplete: TGetterOrReadonlyRef[List[str]]):
+        """Binds the autocomplete attribute of the input element.
+
+        Args:
+            autocomplete (TGetterOrReadonlyRef[List[str]]):  The getter or readonly reference to the autocomplete list.
+        """
+
+        @self._ui_signal_on(autocomplete)
+        def _():
+            self.element.set_autocomplete(to_value(autocomplete))
+
+        return self
+
     def bind_password(self, password: TGetterOrReadonlyRef[bool]):
+        """Binds the password attribute of the input element.
+
+        Args:
+            password (TGetterOrReadonlyRef[bool]): The getter or readonly reference to the password state.
+
+        """
+
         @self._ui_signal_on(password)
         def _():
             self.element._props["type"] = "password" if to_value(password) else "text"

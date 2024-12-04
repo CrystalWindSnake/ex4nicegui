@@ -465,6 +465,11 @@ class InputUtils(BaseUiUtils):
         self.target_locator.get_by_role("button").click()
         return self
 
+    def expect_autocomplete_text(self, inputed_text: str, tips_text: str):
+        expect(self.target_locator.locator(".q-field__native > *")).to_have_text(
+            [inputed_text, tips_text]
+        )
+
     def keyboard_down(self, key: str):
         self.page.keyboard.down(key)
         return self

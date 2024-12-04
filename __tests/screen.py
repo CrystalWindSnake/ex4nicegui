@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import threading
 from typing import Union
 from playwright.sync_api import Browser, Page, Locator, expect
@@ -144,6 +145,12 @@ class PageUtils:
 
     def should_not_contain(self, text: str):
         expect(self._page.locator("body")).not_to_contain_text(text)
+
+    def should_equal_text(self, expected):
+        expected = re.escape(expected)
+        return expect(self._page.locator("body")).to_contain_text(
+            re.compile(f"^{expected}$")
+        )
 
     def get_by_text(self, text: str):
         return self._page.get_by_text(text)

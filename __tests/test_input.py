@@ -45,3 +45,37 @@ def test_input_change_value(browser: BrowserManager, page_path: str):
     label.expect_to_have_text("new value")
 
     assert dummy == "new value"
+
+
+def test_autocomplete(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        autocomplete_options = {
+            0: ["apple", "ant", "apricot"],
+            1: ["banana", "boat", "bar"],
+        }
+
+        text = to_ref("")
+        ac_selected = to_ref(0)
+
+        def autocomplete():
+            return autocomplete_options[ac_selected.value]
+
+        rxui.radio(list(autocomplete_options.keys()), value=ac_selected).classes(
+            "radio"
+        )
+        rxui.input(value=text, autocomplete=autocomplete).classes("input")
+
+    page = browser.open(page_path)
+    radio = page.Radio(".radio")
+    input = page.Input(".input")
+
+    input.fill_text("a")
+    input.expect_autocomplete_text(inputed_text="a", tips_text="pple")
+
+    radio.check_by_label("1")
+    input.fill_text("b")
+    input.expect_autocomplete_text(inputed_text="b", tips_text="anana")
+
+    input.fill_text("bo")
+    input.expect_autocomplete_text(inputed_text="bo", tips_text="at")
