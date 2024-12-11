@@ -80,16 +80,11 @@ def test_ref_change_value(browser: BrowserManager, page_path: str):
     change_range_date = page.Button(".change-range-date")
 
     expect(single_date.get_by_text("Sun, Jan 1").first).to_be_visible()
-    change_range_date.click()
-    # r_single_value.value = "2023-01-02"
+    change_single_date.click()
 
     expect(single_date.get_by_text("Mon, Jan 2").first).to_be_visible()
 
     expect(range_date.get_by_text("6 days").first).to_be_visible()
-    change_single_date.click()
-    # r_range_value.value = [
-    #     {"from": "2023-01-06", "to": "2023-01-10"},
-    #     {"from": "2023-01-15", "to": "2023-01-16"},
-    #     "2023-01-12",  # type: ignore
-    # ]
+    change_range_date.click()
+
     expect(range_date.get_by_text("8 days").first).to_be_visible()

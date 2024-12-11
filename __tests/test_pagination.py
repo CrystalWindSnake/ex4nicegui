@@ -23,7 +23,7 @@ def test_base(browser: BrowserManager, page_path: str):
 
         ui.button(
             "change-max",
-            on_click=lambda: max.set_value(2),
+            on_click=lambda: max.set_value(4),
         ).classes("change-max")
 
         ui.button(
