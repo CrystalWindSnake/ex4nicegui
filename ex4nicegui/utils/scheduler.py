@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import deque
 import signe
 from typing import ClassVar, Dict, TypeVar, Callable, Literal
-from functools import lru_cache
 from nicegui import ui
 
 T = TypeVar("T")
