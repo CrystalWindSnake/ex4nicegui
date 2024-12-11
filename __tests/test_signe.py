@@ -4,11 +4,10 @@ from .screen import BrowserManager
 
 
 def test_batch_event(browser: BrowserManager, page_path: str):
-    a = to_ref(0)
-    b = to_ref(0)
-
     @ui.page(page_path)
     def _():
+        a = to_ref(0)
+        b = to_ref(0)
         lbl_fn_on_times = ui.label("0").classes("label-fn-on-times")
         lbl_fn_effect_times = ui.label("0").classes("label-fn-effect-times")
 

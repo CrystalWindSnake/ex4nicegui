@@ -17,16 +17,16 @@ def test_display(browser: BrowserManager, page_path: str):
 
 
 def test_toggle_side(browser: BrowserManager, page_path: str):
-    r_side = to_ref("left")
-
-    def toggle_side():
-        if r_side.value == "left":
-            r_side.value = "right"
-        else:
-            r_side.value = "left"
-
     @ui.page(page_path)
     def _():
+        r_side = to_ref("left")
+
+        def toggle_side():
+            if r_side.value == "left":
+                r_side.value = "right"
+            else:
+                r_side.value = "left"
+
         with rxui.drawer(r_side):  # type: ignore
             ui.label("drawer showed")
             rxui.label(r_side)
@@ -52,13 +52,13 @@ def test_toggle_side(browser: BrowserManager, page_path: str):
 
 
 def test_toggle_show(browser: BrowserManager, page_path: str):
-    r_show = to_ref(True)
-
-    def toggle_show():
-        r_show.value = not r_show.value
-
     @ui.page(page_path)
     def _():
+        r_show = to_ref(True)
+
+        def toggle_show():
+            r_show.value = not r_show.value
+
         with rxui.drawer(value=r_show):
             ui.label("drawer showed").classes("label")
 

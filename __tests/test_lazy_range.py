@@ -29,15 +29,14 @@ def mouse_up(
 
 
 def test_ref_value_change(browser: BrowserManager, page_path: str):
-    r_value = to_ref(
-        {
-            "min": 0,
-            "max": 100,
-        }
-    )
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(
+            {
+                "min": 0,
+                "max": 100,
+            }
+        )
         rxui.lazy_range(min=0, max=100, value=r_value).classes("target")
         rxui.label(r_value).classes("label")
 
@@ -80,7 +79,6 @@ def test_on_change_event(browser: BrowserManager, page_path: str):
 
     mouse_up(page)
     label.expect_equal_text("{'min': 8, 'max': 100}")
-
 
 
 def test_on_update_event(browser: BrowserManager, page_path: str):

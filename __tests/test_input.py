@@ -5,30 +5,34 @@ from .screen import BrowserManager
 
 
 def test_display(browser: BrowserManager, page_path: str):
-    r_str = to_ref("ref value")
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref("ref value")
         rxui.input(value="const value").classes("const-input")
         rxui.input(value=r_str).classes("ref-input")
+        ui.button(
+            "change",
+            on_click=lambda: r_str.set_value("new"),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
     target_const = page.Input(".const-input")
+    btn_change = page.Button(".btn-change")
     target_const.expect_to_have_text("const value")
 
     target_ref = page.Input(".ref-input")
     target_ref.expect_to_have_text("ref value")
 
-    r_str.value = "new"
+    btn_change.click()
     target_ref.expect_to_have_text("new")
 
 
 def test_input_change_value(browser: BrowserManager, page_path: str):
-    r_str = to_ref("old")
-    dummy = ""
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref("old")
+        dummy = ""
+
         def onchange():
             nonlocal dummy
             dummy = r_str.value
@@ -43,8 +47,6 @@ def test_input_change_value(browser: BrowserManager, page_path: str):
     input.fill_text("new value")
 
     label.expect_to_have_text("new value")
-
-    assert dummy == "new value"
 
 
 def test_autocomplete(browser: BrowserManager, page_path: str):

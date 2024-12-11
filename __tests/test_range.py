@@ -24,15 +24,14 @@ def drap_move(type: Literal["min", "max"], page: PageUtils, offset_x: int):
 
 
 def test_min_change(browser: BrowserManager, page_path: str):
-    r_value = to_ref(
-        {
-            "min": 0,
-            "max": 100,
-        }
-    )
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(
+            {
+                "min": 0,
+                "max": 100,
+            }
+        )
         rxui.range(min=0, max=100, value=r_value).classes("target")
         rxui.label(r_value).classes("label")
 
@@ -45,15 +44,14 @@ def test_min_change(browser: BrowserManager, page_path: str):
 
 
 def test_max_change(browser: BrowserManager, page_path: str):
-    r_value = to_ref(
-        {
-            "min": 0,
-            "max": 100,
-        }
-    )
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(
+            {
+                "min": 0,
+                "max": 100,
+            }
+        )
         rxui.range(min=0, max=100, value=r_value).classes("target")
         rxui.label(r_value).classes("label")
 
@@ -65,15 +63,14 @@ def test_max_change(browser: BrowserManager, page_path: str):
 
 
 def test_ref_value_change(browser: BrowserManager, page_path: str):
-    r_value = to_ref(
-        {
-            "min": 0,
-            "max": 100,
-        }
-    )
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(
+            {
+                "min": 0,
+                "max": 100,
+            }
+        )
         rxui.range(min=0, max=100, value=r_value).classes("target").props(
             "label-always"
         )

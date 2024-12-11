@@ -17,25 +17,31 @@ def test_const_str(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str(browser: BrowserManager, page_path: str):
-    r_str: Ref[Optional[str]] = to_ref(None)
+    values = iter(["a", "b", None])
 
     @ui.page(page_path)
     def _():
+        r_str: Ref[Optional[str]] = to_ref(None)
         rxui.toggle(["a", "b"], value=r_str).classes("min-w-[20ch] target")
+        ui.button(
+            "change",
+            on_click=lambda: r_str.set_value(next(values)),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
     target = page.Toggle(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_not_selected("a")
     target.expect_not_selected("b")
 
-    r_str.value = "a"
+    btn.click()
     target.expect_selected("a")
 
-    r_str.value = "b"
+    btn.click()
     target.expect_selected("b")
 
-    r_str.value = None
+    btn.click()
     target.expect_not_selected("a")
     target.expect_not_selected("b")
 

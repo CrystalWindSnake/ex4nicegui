@@ -5,10 +5,10 @@ from .screen import BrowserManager
 
 
 def test_value_change(browser: BrowserManager, page_path: str):
-    show = to_ref(False)
-
     @ui.page(page_path)
     def _():
+        show = to_ref(False)
+
         def open_dialog():
             show.value = True
 
@@ -33,10 +33,9 @@ def test_value_change(browser: BrowserManager, page_path: str):
 
 
 def test_ref_change(browser: BrowserManager, page_path: str):
-    show = to_ref(False)
-
     @ui.page(page_path)
     def _():
+        show = to_ref(False)
         rxui.checkbox(value=show).classes("checkbox")
 
         with rxui.dialog(value=show), ui.card():
