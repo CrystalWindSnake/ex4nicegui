@@ -5,10 +5,9 @@ from .screen import BrowserManager
 
 
 def test_chip(browser: BrowserManager, page_path: str):
-    r_text = to_ref("chip")
-
     @ui.page(page_path)
     def _():
+        r_text = to_ref("chip")
         rxui.input(value=r_text).classes("input")
         rxui.chip(r_text).classes("chip")
 

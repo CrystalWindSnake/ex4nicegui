@@ -96,29 +96,35 @@ def test_should_can_use_vmodel(browser: BrowserManager, page_path: str):
 
 
 def test_from_pandas(browser: BrowserManager, page_path: str):
-    data = to_ref(
-        pd.DataFrame(
-            {
-                "date": pd.date_range("today", periods=3),
-                "name": ["a", "b", "c"],
-                "age": [1, 2, 3],
-            }
-        )
-    )
-
     @ui.page(page_path)
     def _():
+        data = to_ref(
+            pd.DataFrame(
+                {
+                    "date": pd.date_range("today", periods=3),
+                    "name": ["a", "b", "c"],
+                    "age": [1, 2, 3],
+                }
+            )
+        )
         rxui.table.from_pandas(data).classes("target")
         # test lambda display
         rxui.table.from_pandas(lambda: data.value.head(2))
+        ui.button(
+            "change",
+            on_click=lambda: data.set_value(
+                pd.DataFrame({"new name": ["x", "y", "z"], "age": [1, 2, 3]})
+            ),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
 
     target = page.Table(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_cell_to_be_visible(["name", "a", "b", "c"])
 
-    data.value = pd.DataFrame({"new name": ["x", "y", "z"], "age": [1, 2, 3]})
+    btn.click()
 
     target.expect_cell_not_to_be_visible(["name", "a", "b", "c"])
 

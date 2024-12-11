@@ -5,10 +5,9 @@ from .screen import BrowserManager
 
 
 def test_display(browser: BrowserManager, page_path: str):
-    r_color = to_ref("red")
-
     @ui.page(page_path)
     def _():
+        r_color = to_ref("red")
         rxui.color_picker(r_color).classes("target")
         rxui.label(r_color).classes("label")
 

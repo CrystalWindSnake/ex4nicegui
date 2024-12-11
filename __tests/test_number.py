@@ -17,21 +17,24 @@ def test_const(browser: BrowserManager, page_path: str):
 
 
 def test_ref(browser: BrowserManager, page_path: str):
-    r_value = to_ref(1.0)
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(1.0)
         rxui.number(value=r_value).classes("target")
         rxui.label(text=r_value).classes("label")
+        ui.button(
+            "change",
+            on_click=lambda: r_value.set_value(3.11),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
-
+    btn = page.Button(".btn-change")
     target = page.Number(".target")
     label = page.Label(".label")
 
     target.expect_to_have_text("1")
 
-    r_value.value = 3.11
+    btn.click()
     target.expect_to_have_text("3.11")
 
     # type input number
@@ -81,18 +84,21 @@ def test_with_format(browser: BrowserManager, page_path: str):
 
 
 def test_precision(browser: BrowserManager, page_path: str):
-    value = to_ref(3.14159265359)
-    precision = to_ref(5)
-
     @ui.page(page_path)
     def _():
+        value = to_ref(3.14159265359)
+        precision = to_ref(5)
         rxui.number(value=value, precision=precision).classes("target")
+        rxui.button("change", on_click=lambda: precision.set_value(2)).classes(
+            "btn-change"
+        )
 
     page = browser.open(page_path)
 
     target = page.Number(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_to_have_text("3.14159265359")
 
-    precision.value = 2
+    btn.click()
     target.expect_to_have_text("3.14")

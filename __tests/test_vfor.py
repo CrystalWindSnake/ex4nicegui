@@ -283,10 +283,9 @@ class TestBase:
         page.should_contain("abc")
 
     def test_deep_ref(self, browser: BrowserManager, page_path: str):
-        data = deep_ref([1, 2, 3, 4])
-
         @ui.page(page_path)
         def _():
+            data = deep_ref([1, 2, 3, 4])
             with ui.column().classes("for_box"):
 
                 @rxui.vfor(data)

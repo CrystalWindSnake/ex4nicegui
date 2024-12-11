@@ -5,11 +5,10 @@ from .screen import BrowserManager
 
 
 def test_display(browser: BrowserManager, page_path: str):
-    r_str = to_ref("ref label")
-    r_bool = to_ref("init")
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref("ref label")
+        r_bool = to_ref("init")
         rxui.label("test label").classes("target")
         rxui.label(r_str).classes("ref-target")
 
@@ -29,33 +28,41 @@ def test_display(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str_change_value(browser: BrowserManager, page_path: str):
-    r_str = to_ref("old")
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref("old")
         rxui.label(r_str).classes("target")
+        ui.button(
+            "change",
+            on_click=lambda: r_str.set_value("new"),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
-
+    btn = page.Button(".btn-change")
     target = page.Label(".target")
     target.expect_to_have_text("old")
 
-    r_str.value = "new"
+    btn.click()
 
     target.expect_to_have_text("new")
 
 
 def test_bind_color(browser: BrowserManager, page_path: str):
-    r_color = to_ref("red")
 
     @ui.page(page_path)
     def _():
+        r_color = to_ref("red")
         rxui.label("label").classes("target").bind_color(r_color)
+        ui.button(
+            "change",
+            on_click=lambda: r_color.set_value("green"),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
     target = page.Label(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_to_have_style("color", "rgb(255, 0, 0)")
 
-    r_color.value = "green"
+    btn.click()
     target.expect_to_have_style("color", "rgb(0, 128, 0)")

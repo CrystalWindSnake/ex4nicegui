@@ -5,10 +5,9 @@ from .screen import BrowserManager
 
 
 def test_base(browser: BrowserManager, page_path: str):
-    value = to_ref(0.3)
-
     @ui.page(page_path)
     def _():
+        value = to_ref(0.3)
         knob = rxui.knob(value, show_value=True, size="200px").classes("knob")
         rxui.label(value).classes("label")
         ui.button("change value", on_click=lambda: knob.element.set_value(0.9)).classes(
