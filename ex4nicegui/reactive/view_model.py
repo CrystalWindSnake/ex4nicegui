@@ -68,8 +68,9 @@ class ViewModel(NoProxy):
 
     def __init__(self):
         for name, value in self.__class__.__dict__.items():
-            if hasattr(value, _VAR_FLAG):
-                setattr(self, name, _create_from_var(value))
+            if is_ref(value) or hasattr(value, _VAR_FLAG):
+                setattr(self, name, _create_from_var(to_value(value)))
+                continue
             if callable(value) and hasattr(value, _CACHED_VARS_FLAG):
                 setattr(self, name, computed(partial(value, self)))
 
@@ -256,8 +257,10 @@ def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Va
 
 
     """
-    setattr(value, _VAR_FLAG, None)
-    return value  # type: ignore
+    if callable(value):
+        setattr(value, _VAR_FLAG, None)
+        return value  # type: ignore
+    return deep_ref(value)
 
 
 def list_var(factory: Callable[[], List[_T_Var_Value]]) -> List[_T_Var_Value]:
