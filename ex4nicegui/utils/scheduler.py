@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from collections import deque
 import signe
-from typing import TypeVar, Callable, Literal
+from typing import ClassVar, Dict, TypeVar, Callable, Literal
 from functools import lru_cache
-
+from nicegui import ui
 
 T = TypeVar("T")
 
@@ -11,6 +13,8 @@ T_JOB_TYPE = Literal["pre", "post"]
 
 
 class UiScheduler(signe.ExecutionScheduler):
+    instances: ClassVar[Dict[str, UiScheduler]] = {}
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -55,9 +59,21 @@ class UiScheduler(signe.ExecutionScheduler):
             self._next_tick_deque.pop()()
 
 
-@lru_cache(maxsize=1)
 def get_uiScheduler():
-    return UiScheduler()
+    client = ui.context.client
+    client_id = client.id
+
+    if client_id in UiScheduler.instances:
+        return UiScheduler.instances[client_id]
+
+    scheduler = UiScheduler()
+    UiScheduler.instances[client_id] = scheduler
+
+    @client.on_disconnect
+    def on_disconnect():
+        del UiScheduler.instances[client_id]
+
+    return scheduler
 
 
 def next_tick(job: T_JOB_FN):
