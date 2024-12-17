@@ -1774,13 +1774,13 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "signe"
-version = "0.4.21"
+version = "0.4.22"
 description = "A responsive system implemented in python with reference to the core mechanisms of S.js and vue reactivity."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "signe-0.4.21-py3-none-any.whl", hash = "sha256:82e48dd1a061ddb279a3539d4f0e8c33821803d52b7d996fbb1b5fba31d0377b"},
-    {file = "signe-0.4.21.tar.gz", hash = "sha256:a7ce1ea544de1c11578079f00060af096c478450d082055b3ea297f460a87d5d"},
+    {file = "signe-0.4.22-py3-none-any.whl", hash = "sha256:4206c52c427f3209e9a3887da44380edc761c4eabcd14b8b42259431d936d186"},
+    {file = "signe-0.4.22.tar.gz", hash = "sha256:745af49c0d7362bc1e08726d645eae2adbbff9e36d08e4dd2a96d93abc70ee9d"},
 ]
 
 [package.dependencies]
