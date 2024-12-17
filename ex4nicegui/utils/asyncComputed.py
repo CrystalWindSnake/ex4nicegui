@@ -21,6 +21,7 @@ def async_computed(
     *,
     init: Optional[_T] = None,
     evaluating: Optional[TRef[bool]] = None,
+    onchanges=True,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
 ):
@@ -34,12 +35,14 @@ def async_computed(
         refs (Union[TGetterOrReadonlyRef, Sequence[TGetterOrReadonlyRef]]): _description_
         init (Optional[_T], optional): The initial state, used until the first evaluation finishes. Defaults to None.
         evaluating (Optional[TRef[bool]], optional): Ref passed to receive the updated of async evaluation. Defaults to None.
+        onchanges (bool, optional): If set to `False`, it will trigger an immediate computation. Defaults to True.
 
     """
     return signe.async_computed(
         refs,
         init=init,
         evaluating=evaluating,
+        onchanges=onchanges,
         debug_name=debug_name,
         debug_trigger=debug_trigger,
         scope=_CLIENT_SCOPE_MANAGER.get_current_scope(),
