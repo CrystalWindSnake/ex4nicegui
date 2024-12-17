@@ -46,7 +46,6 @@ class DictProxy(dict, Generic[_KT, _VT]):
         return self._ref.value.__len__()
 
     def __getitem__(self, key: _KT, /):
-        print("getitem")
         value = self._ref.value.__getitem__(key)
 
         if isinstance(value, str):
