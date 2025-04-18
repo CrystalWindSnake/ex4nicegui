@@ -1,6 +1,13 @@
 import 'echarts'
 import { convertDynamicProperties } from "../../static/utils/dynamic_properties.js";
 
+const registerThemeTask = Promise.all(
+  echarts._ex4ng_themes.map(async ({ name, url }) => {
+    const data = await fetch(url).then(response => response.json());
+    echarts.registerTheme(name, data);
+  })
+);
+
 function collectMapRegisterTask() {
   const tasks = new Map();
 
@@ -56,6 +63,8 @@ export default {
   template: "<div></div>",
   async mounted() {
     await new Promise((resolve) => setTimeout(resolve, 0)); // wait for Tailwind classes to be applied
+
+    await registerThemeTask;
 
     this.chart = echarts.init(this.$el, this.theme, this.initOptions);
     this.resizeObs = new ResizeObserver(this.chart.resize)

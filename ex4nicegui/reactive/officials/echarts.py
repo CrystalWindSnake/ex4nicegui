@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Union, cast, Optional, Literal
+from typing import Any, Callable, Dict, List, Union, cast, Optional, Literal, ClassVar
 from ex4nicegui.reactive.services.reactive_service import ParameterClassifier
 from ex4nicegui.utils.signals import (
     TGetterOrReadonlyRef,
@@ -21,6 +21,7 @@ import orjson as json
 
 class EChartsBindableUi(BindableUi[echarts]):
     EChartsMouseEventArguments = EChartsMouseEventArguments
+    _CURRENT_THEME: ClassVar[Optional[str]] = None
 
     def __init__(
         self,
@@ -28,6 +29,8 @@ class EChartsBindableUi(BindableUi[echarts]):
         not_merge: TMaybeRef[Union[bool, None]] = None,
         code: Optional[str] = None,
         init_options: Optional[Dict] = None,
+        *,
+        theme: Optional[str] = None,
     ) -> None:
         """Create a new ECharts instance.
 
@@ -43,10 +46,11 @@ class EChartsBindableUi(BindableUi[echarts]):
         pc = ParameterClassifier(
             locals(),
             maybeRefs=["options", "code", "init_options"],
-            exclude=["not_merge"],
+            exclude=["not_merge", "theme"],
         )
 
         value_kws = pc.get_values_kws()
+        value_kws["theme"] = theme or self._CURRENT_THEME
 
         element = echarts(**value_kws).classes("nicegui-echart")
 
@@ -58,6 +62,41 @@ class EChartsBindableUi(BindableUi[echarts]):
 
         for key, value in pc.get_bindings().items():
             self.bind_prop(key, value)  # type: ignore
+
+    @classmethod
+    def register_theme(cls, name: str, theme: Path):
+        """register a new theme to echarts.
+
+        Args:
+            name (str): Theme name.
+            theme (Path): Theme file path.
+
+        ## Examples
+        .. code-block:: python
+
+            @ui.page('/)
+            def index():
+                rxui.echarts.register_theme("my_theme", Path("path/to/my_theme.json"))
+                rxui.echarts(opts)
+
+        """
+
+        url = app.add_static_file(local_file=theme)
+
+        ui.add_body_html(
+            rf"""
+    <script type="module">
+        import "echarts";
+        echarts._ex4ng_themes = echarts._ex4ng_themes || [];
+        echarts._ex4ng_themes.push({{
+            name: "{name}",
+            url: "{url}"
+        }});
+    </script>
+        """
+        )
+        cls._CURRENT_THEME = name
+        return cls
 
     @classmethod
     def register_map(
