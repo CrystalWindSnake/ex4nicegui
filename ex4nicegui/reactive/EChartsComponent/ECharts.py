@@ -28,6 +28,7 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
         options: Optional[dict] = None,
         code: Optional[str] = None,
         init_options: Optional[dict] = None,
+        theme: Optional[str] = None,
     ) -> None:
         super().__init__()
 
@@ -46,6 +47,9 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
         self._props["code"] = code
         self._props["initOptions"] = init_options
         self._props["eventTasks"] = {}
+
+        if theme:
+            self._props["theme"] = theme
 
     def update_chart(
         self,
