@@ -70,6 +70,9 @@ class EChartsBindableUi(BindableUi[echarts]):
     def register_theme(cls, name: str, theme: Path):
         """register a new theme to echarts.
 
+        @see - https://github.com/CrystalWindSnake/ex4nicegui/blob/main/README.en.md#rxuiechartsregister_theme
+        @中文文档 - https://gitee.com/carson_add/ex4nicegui/tree/main/#rxuiechartsregister_theme
+
         Args:
             name (str): Theme name.
             theme (Path): Theme file path.
