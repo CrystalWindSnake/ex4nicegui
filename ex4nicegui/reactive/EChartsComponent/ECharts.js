@@ -2,7 +2,7 @@ import 'echarts'
 import { convertDynamicProperties } from "../../static/utils/dynamic_properties.js";
 
 const registerThemeTask = Promise.all(
-  echarts._ex4ng_themes.map(async ({ name, url }) => {
+  (echarts._ex4ng_themes || []).map(async ({ name, url }) => {
     const data = await fetch(url).then(response => response.json());
     echarts.registerTheme(name, data);
   })
