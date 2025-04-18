@@ -17,11 +17,14 @@ from ex4nicegui.reactive.EChartsComponent.events import EChartsMouseEventArgumen
 from nicegui.awaitable_response import AwaitableResponse
 from nicegui import ui, app
 import orjson as json
+from contextvars import ContextVar
 
 
 class EChartsBindableUi(BindableUi[echarts]):
     EChartsMouseEventArguments = EChartsMouseEventArguments
-    _CURRENT_THEME: ClassVar[Optional[str]] = None
+    _CURRENT_THEME: ClassVar[ContextVar[Optional[str]]] = ContextVar(
+        "CURRENT_THEME", default=None
+    )
 
     def __init__(
         self,
@@ -50,7 +53,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         )
 
         value_kws = pc.get_values_kws()
-        value_kws["theme"] = theme or self._CURRENT_THEME
+        value_kws["theme"] = theme or self._CURRENT_THEME.get()
 
         element = echarts(**value_kws).classes("nicegui-echart")
 
@@ -95,7 +98,7 @@ class EChartsBindableUi(BindableUi[echarts]):
     </script>
         """
         )
-        cls._CURRENT_THEME = name
+        cls._CURRENT_THEME.set(name)
         return cls
 
     @classmethod
