@@ -422,6 +422,7 @@ class MyApp(rxui.ViewModel):
         - [echarts mouse events](#echarts-mouse-events)
         - [rxui.echarts.from\_javascript](#rxuiechartsfrom_javascript)
         - [rxui.echarts.register\_map](#rxuiechartsregister_map)
+        - [rxui.echarts.register\_theme](#rxuiechartsregister_theme)
     - [tab\_panels](#tab_panels)
     - [lazy\_tab\_panels](#lazy_tab_panels)
     - [scoped\_style](#scoped_style)
@@ -1302,6 +1303,34 @@ rxui.echarts.register_map(
 ```
 
 ---
+
+##### rxui.echarts.register_theme
+Register a theme.
+
+```python
+@ui.page("/")  
+def page():  
+    # Within the scope of this page, the default theme for all rxui.echarts will be "walden" (the last registered theme)  
+    rxui.echarts.register_theme(  
+        "my_theme", Path(__file__).parent / "echarts_theme.json"  
+    ).register_theme("walden", Path(__file__).parent / "echarts_walden.json")  
+
+    opts = {  
+        "xAxis": {"data": ["Shirts", "Cardigans"]},  
+        "yAxis": {},  
+        "series": [{"type": "bar", "data": [5, 20]}],  
+    }  
+
+    # Theme is "walden"  
+    rxui.echarts(opts)  
+
+    # Theme is "my_theme"  
+    rxui.echarts(  
+        opts,  
+        theme="my_theme",  
+    )  
+
+```
 
 ---
 

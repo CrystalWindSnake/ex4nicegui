@@ -435,6 +435,7 @@ class MyApp(rxui.ViewModel):
         - [echarts 图表鼠标事件](#echarts-图表鼠标事件)
         - [rxui.echarts.from\_javascript](#rxuiechartsfrom_javascript)
         - [rxui.echarts.register\_map](#rxuiechartsregister_map)
+        - [rxui.echarts.register\_theme](#rxuiechartsregister_theme)
       - [tab\_panels](#tab_panels)
       - [lazy\_tab\_panels](#lazy_tab_panels)
       - [scoped\_style](#scoped_style)
@@ -1321,6 +1322,35 @@ from pathlib import Path
 rxui.echarts.register_map(
     "china", Path("map-data.json")
 )
+```
+
+---
+##### rxui.echarts.register_theme
+注册主题.
+
+```python
+@ui.page("/")
+def page():
+    # 本页范围，所有 rxui.echarts 默认主题均为 walden(最后注册的主题)
+    rxui.echarts.register_theme(
+        "my_theme", Path(__file__).parent / "echarts_theme.json"
+    ).register_theme("walden", Path(__file__).parent / "echarts_walden.json")
+
+    opts = {
+        "xAxis": {"data": ["Shirts", "Cardigans"]},
+        "yAxis": {},
+        "series": [{"type": "bar", "data": [5, 20]}],
+    }
+
+    # 主题为 walden
+    rxui.echarts(opts)
+
+    # 主题为 my_theme
+    rxui.echarts(
+        opts,
+        theme="my_theme",
+    )
+
 ```
 
 ---
