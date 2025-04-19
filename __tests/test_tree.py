@@ -2,7 +2,6 @@ from ex4nicegui.reactive import rxui
 from nicegui import ui
 from ex4nicegui import to_ref
 from .screen import BrowserManager
-from playwright.sync_api import expect
 
 
 def test_nodes(browser: BrowserManager, page_path: str):

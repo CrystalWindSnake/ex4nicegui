@@ -14,7 +14,7 @@ from typing import (
 )
 from nicegui import ui
 from .effect import effect
-from .scheduler import get_uiScheduler
+from .scheduler import get_uiScheduler, UiScheduler
 from .types import (
     _TMaybeRef,
     TGetterOrReadonlyRef,
@@ -30,6 +30,7 @@ from ex4nicegui.utils.proxy import (
     to_ref_if_base_type_proxy,
     to_value_if_base_type_proxy,
 )
+
 
 T = TypeVar("T")
 
@@ -278,3 +279,11 @@ def event_batch(event_fn: Callable[..., None]):
         signe.batch(real_event_fn, scheduler=get_uiScheduler())
 
     return wrap
+
+
+def check_cross_client_binding(scheduler: UiScheduler, *refs: Any):
+    for ref_obj in refs:
+        if is_ref(ref_obj) and hasattr(ref_obj, "scheduler"):
+            assert (
+                ref_obj.scheduler is scheduler  # type: ignore
+            ), "cross client binding detected"

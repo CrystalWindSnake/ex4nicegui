@@ -5,10 +5,9 @@ from .screen import BrowserManager
 
 
 def test_base(browser: BrowserManager, page_path: str):
-    r_value = to_ref(0)
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(0)
         rxui.slider(min=0, max=100, value=r_value).classes("target")
         rxui.label(r_value).classes("label")
 

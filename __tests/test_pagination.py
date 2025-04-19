@@ -5,19 +5,36 @@ from .screen import BrowserManager
 
 
 def test_base(browser: BrowserManager, page_path: str):
-    min = to_ref(1)
-    max = to_ref(5)
-    page_value = to_ref(2)
-    direction_links = to_ref(True)
-
     @ui.page(page_path)
     def _():
+        min = to_ref(1)
+        max = to_ref(5)
+        page_value = to_ref(2)
+        direction_links = to_ref(True)
         rxui.pagination(
             min, max, direction_links=direction_links, value=page_value
         ).classes("pagination")
         rxui.label(page_value).classes("label")
 
+        ui.button(
+            "change-min",
+            on_click=lambda: min.set_value(2),
+        ).classes("change-min")
+
+        ui.button(
+            "change-max",
+            on_click=lambda: max.set_value(4),
+        ).classes("change-max")
+
+        ui.button(
+            "change-direction_links",
+            on_click=lambda: direction_links.set_value(False),
+        ).classes("change-direction_links")
+
     page = browser.open(page_path)
+    change_direction_links = page.Button(".change-direction_links")
+    change_min = page.Button(".change-min")
+    change_max = page.Button(".change-max")
 
     pagination = page.Base(".pagination")
     label_value = page.Label(".label")
@@ -28,11 +45,11 @@ def test_base(browser: BrowserManager, page_path: str):
     pagination.target_locator.get_by_role("button").filter(has_text="4").click()
     label_value.expect_contain_text("4")
 
-    min.value = 2
+    change_min.click()
     pagination.expect.to_contain_text("keyboard_arrow_left2345keyboard_arrow_right")
 
-    max.value = 4
+    change_max.click()
     pagination.expect.to_contain_text("keyboard_arrow_left234keyboard_arrow_right")
 
-    direction_links.value = False
+    change_direction_links.click()
     pagination.expect.to_contain_text("234")

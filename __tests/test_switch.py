@@ -23,10 +23,9 @@ def test_const_value(browser: BrowserManager, page_path: str):
 
 
 def test_ref_value(browser: BrowserManager, page_path: str):
-    r_on = to_ref(False)
-
     @ui.page(page_path)
     def _():
+        r_on = to_ref(False)
         rxui.switch(value=r_on).classes("target")
         rxui.label(text=r_on).classes("label")
 
@@ -44,18 +43,22 @@ def test_ref_value(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str_change_value(browser: BrowserManager, page_path: str):
-    r_on = to_ref(False)
-
     @ui.page(page_path)
     def _():
+        r_on = to_ref(False)
         rxui.switch(value=r_on).classes("target")
+        ui.button(
+            "change",
+            on_click=lambda: r_on.set_value(True),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
     target = page.Switch(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_to_be_visible()
     target.expect_not_checked()
 
-    r_on.value = True
+    btn.click()
 
     target.expect_checked()

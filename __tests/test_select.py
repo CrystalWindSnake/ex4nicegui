@@ -18,34 +18,39 @@ def test_const_str(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str(browser: BrowserManager, page_path: str):
-    r_str: Ref[Optional[str]] = to_ref(None)
+    values = iter(["a", "b", ""])
 
     @ui.page(page_path)
     def _():
+        r_str: Ref[Optional[str]] = to_ref(None)
         rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch] target")
+        ui.button(
+            "change",
+            on_click=lambda: r_str.set_value(next(values)),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
     target = page.Select(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_not_to_have_value("a")
     target.expect_not_to_have_value("b")
 
-    r_str.value = "a"
+    btn.click()
     target.expect_to_have_value("a")
 
-    r_str.value = "b"
+    btn.click()
     target.expect_to_have_value("b")
 
-    r_str.value = ""
+    btn.click()
     target.expect_not_to_have_value("a")
     target.expect_not_to_have_value("b")
 
 
 def test_clearable(browser: BrowserManager, page_path: str):
-    r_str = to_ref("a")
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref("a")
         rxui.select(["a", "b"], value=r_str).classes("min-w-[20ch] target").props(
             "clearable"
         )
@@ -60,21 +65,19 @@ def test_clearable(browser: BrowserManager, page_path: str):
     target.expect_not_to_have_value("a")
     target.expect_not_to_have_value("b")
 
-    assert r_str.value is None
-
 
 def test_option_change(browser: BrowserManager, page_path: str):
-    r_str = to_ref(None)
-    r_has_data = to_ref(False)
-
-    @ref_computed
-    def cp_data():
-        if r_has_data.value:
-            return ["a", "b"]
-        return []
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref(None)
+        r_has_data = to_ref(False)
+
+        @ref_computed
+        def cp_data():
+            if r_has_data.value:
+                return ["a", "b"]
+            return []
+
         rxui.switch("has data", value=r_has_data).classes("switch")
         rxui.select(cp_data, value=r_str).classes("min-w-[20ch] target")
         rxui.label(r_str).classes("label-str")
@@ -92,10 +95,9 @@ def test_option_change(browser: BrowserManager, page_path: str):
 
 
 def test_multiple_list_opts(browser: BrowserManager, page_path: str):
-    r_value = to_ref(["a", "b"])
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(["a", "b"])
         rxui.select(["a", "b", "c", "d"], value=r_value, multiple=True).classes(
             "target"
         )
@@ -115,10 +117,9 @@ def test_multiple_list_opts(browser: BrowserManager, page_path: str):
 
 
 def test_multiple_dict_opts(browser: BrowserManager, page_path: str):
-    r_value = to_ref([1, 2])
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref([1, 2])
         rxui.select(
             {1: "a", 2: "b", 3: "c", 4: "d"}, value=r_value, multiple=True
         ).classes("min-w-[20ch] target")
@@ -139,11 +140,10 @@ def test_multiple_dict_opts(browser: BrowserManager, page_path: str):
 
 @pytest.mark.skip(reason="not implemented yet")
 def test_new_value_mode(browser: BrowserManager, page_path: str):
-    r_str = to_ref(None)
-    r_opts = to_ref([])
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref(None)
+        r_opts = to_ref([])
         rxui.select(
             r_opts, clearable=True, value=r_str, new_value_mode="add-unique"
         ).classes("min-w-[20ch] target")
@@ -177,11 +177,11 @@ def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
         "opts2": list("mnxy"),
     }
 
-    value1 = to_ref("opts1")
-    value2 = to_ref("")
-
     @ui.page(page_path)
     def _():
+        value1 = to_ref("opts1")
+        value2 = to_ref("")
+
         @ref_computed
         def opts2():
             return data[value1.value]

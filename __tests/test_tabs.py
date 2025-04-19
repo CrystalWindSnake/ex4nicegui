@@ -5,10 +5,9 @@ from .screen import BrowserManager
 
 
 def test_base(browser: BrowserManager, page_path: str):
-    current = to_ref("a")
-
     @ui.page(page_path)
     def _():
+        current = to_ref("a")
         rxui.label(current).classes("label")
         with rxui.tabs(current).classes("tabs"):
             rxui.tab("a", "a tab")
@@ -24,11 +23,10 @@ def test_base(browser: BrowserManager, page_path: str):
 
 
 def test_should_tab_label_change(browser: BrowserManager, page_path: str):
-    current = to_ref("a")
-    b_tab_label = to_ref("b tab")
-
     @ui.page(page_path)
     def _():
+        current = to_ref("a")
+        b_tab_label = to_ref("b tab")
         rxui.input(value=b_tab_label).classes("input")
         with rxui.tabs(current).classes("tabs"):
             rxui.tab("a", "a tab")

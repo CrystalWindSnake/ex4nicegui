@@ -5,10 +5,9 @@ from .screen import BrowserManager
 
 
 def test_base(browser: BrowserManager, page_path: str):
-    wrap = to_ref(True)
-
     @ui.page(page_path)
     def _():
+        wrap = to_ref(True)
         rxui.checkbox(value=wrap).classes("checkbox")
 
         with rxui.row(wrap=wrap).classes("target"):

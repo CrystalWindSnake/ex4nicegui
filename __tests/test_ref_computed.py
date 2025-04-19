@@ -80,10 +80,9 @@ def test_should_work_with_private_page(browser: BrowserManager, page_path: str):
         def color(self):
             return "green" if self.count.value % 2 == 0 else "red"
 
-    state = MyState()
-
     @ui.page(page_path)
     def _():
+        state = MyState()
         rxui.label(state.color)
         ui.button("reload", on_click=ui.navigate.reload).classes("button")
 
