@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, List, Optional, Union, Type, TypeVar, overload
+from typing import Any, Callable, Dict, List, Optional, Union, Type, TypeVar, overload
 from ex4nicegui.utils.signals import (
     deep_ref,
     is_ref,
@@ -23,6 +23,7 @@ from ex4nicegui.utils.proxy.descriptor import ProxyDescriptor
 
 _CACHED_VARS_FLAG = "__vm_cached__"
 _LIST_VAR_FLAG = "__vm_list_var__"
+_DICT_VAR_FLAG = "__vm_dict_var__"
 
 _T = TypeVar("_T")
 
@@ -80,7 +81,7 @@ class ViewModel(NoProxy):
         )
 
         for name, value in need_vars:
-            class_var_setter(cls, name, value, _LIST_VAR_FLAG)
+            class_var_setter(cls, name, value, _LIST_VAR_FLAG, _DICT_VAR_FLAG)
 
     @overload
     @staticmethod
@@ -277,6 +278,34 @@ def list_var(factory: Callable[[], List[_T_Var_Value]]) -> List[_T_Var_Value]:
     """
     assert callable(factory), "factory must be a callable"
     setattr(factory, _LIST_VAR_FLAG, None)
+    return factory  # type: ignore
+
+
+def dict_var(factory: Callable[[], Dict]) -> Dict:
+    """Create implicitly proxied reactive variables for dictionaries. Use them just like ordinary dictionaries while maintaining reactivity. Only use within rxui.ViewModel.
+
+    Args:
+        factory (Callable[[], Dict]): A factory function that returns a new dictionary.
+
+    Example:
+    .. code-block:: python
+        from ex4nicegui import rxui
+        class State(rxui.ViewModel):
+            data = rxui.dict_var(lambda: {"a": 1, "b": 2, "c": 3})
+
+            def update_data(self):
+                self.data["d"] = len(self.data) + 1
+
+            def display_data(self):
+                return ",".join(f"{k}:{v}" for k, v in self.data.items())
+
+        state = State()
+        ui.button("Update", on_click=state.update_data)
+        rxui.label(state.display_data)
+
+    """
+    assert callable(factory), "factory must be a callable"
+    setattr(factory, _DICT_VAR_FLAG, None)
     return factory  # type: ignore
 
 

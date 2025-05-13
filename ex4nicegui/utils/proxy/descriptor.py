@@ -8,6 +8,7 @@ from .float import FloatProxy
 from .bool import BoolProxy
 from .date import DateProxy
 from .dict import DictProxy
+from ex4nicegui.utils.signals import deep_ref
 import datetime
 import warnings
 from . import to_value_if_base_type_proxy
@@ -61,9 +62,34 @@ class ListDescriptor(ProxyDescriptor[Callable[[], List]]):
         super().__init__(name, value, lambda x: ListProxy(x() if callable(x) else x))
 
 
-class DictDescriptor(ProxyDescriptor[Dict]):
-    def __init__(self, name: str, value: Dict) -> None:
-        super().__init__(name, value, DictProxy)
+class DictDescriptor:
+    def __init__(
+        self,
+        name: str,
+        factory: Callable[[], Dict],
+    ) -> None:
+        self.name = name
+        self._ref_builder = lambda: deep_ref(factory())
+
+    def __get__(self, instance: object, owner: Any):
+        if instance is None:
+            return self
+
+        proxy = instance.__dict__.get(self.name, None)
+        if proxy is None:
+            proxy = self._ref_builder()
+            instance.__dict__[self.name] = proxy
+
+        return proxy.value
+
+    def __set__(self, instance: object, value: T) -> None:
+        value = to_value_if_base_type_proxy(value)
+        proxy = instance.__dict__.get(self.name, None)
+        if proxy is None:
+            proxy = self._ref_builder()
+            instance.__dict__[self.name] = proxy
+
+        proxy.value = value  # type: ignore
 
 
 class StringDescriptor(ProxyDescriptor[str]):
@@ -91,7 +117,9 @@ class DateDescriptor(ProxyDescriptor[datetime.date]):
         super().__init__(name, value, lambda x: DateProxy(x.year, x.month, x.day))
 
 
-def class_var_setter(cls: Type, name: str, value, list_var_flat: str) -> None:
+def class_var_setter(
+    cls: Type, name: str, value, list_var_flat: str, dict_var_flat: str
+) -> None:
     if value is None or isinstance(value, str):
         setattr(cls, name, StringDescriptor(name, value))
     elif isinstance(value, bool):
@@ -111,9 +139,8 @@ def class_var_setter(cls: Type, name: str, value, list_var_flat: str) -> None:
                 )
         setattr(cls, name, ListDescriptor(name, lambda: []))
 
-    elif isinstance(value, dict):
-        pass  # TODO
-        # setattr(cls, name, DictDescriptor(name, value))
+    elif callable(value) and hasattr(value, dict_var_flat):
+        setattr(cls, name, DictDescriptor(name, value))
     elif isinstance(value, float):
         setattr(cls, name, FloatDescriptor(name, value))
     elif isinstance(value, datetime.date):

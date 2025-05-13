@@ -412,6 +412,43 @@ class TestWithImplicit:
         btn_reversed.click()
         label_numbers.expect_equal_text("3,2,1")
 
+    def test_use_dict_var(self, browser: BrowserManager, page_path: str):
+        class Vm(rxui.ViewModel):
+            data = rxui.dict_var(lambda: {"a": 1, "b": 1})
+
+            def plus_to_b(self):
+                self.data["b"] += 1
+
+            def add_item(self):
+                self.data["c"] = 66
+
+            def display(self):
+                return ",".join(f"{k}:{v}" for k, v in self.data.items())
+
+        @ui.page(page_path)
+        def _():
+            vm = Vm()
+            ui.button("plus_to_b", on_click=vm.plus_to_b).classes("btn-plus_to_b")
+            ui.button("add_item", on_click=vm.add_item).classes("btn-add_item")
+
+            rxui.label(vm.display).classes("label-display")
+
+        page = browser.open(page_path)
+        btn_plus_to_b = page.Button(".btn-plus_to_b")
+        btn_add_item = page.Button(".btn-add_item")
+        label_display = page.Label(".label-display")
+
+        # test initial value
+        label_display.expect_equal_text("a:1,b:1")
+
+        # test plus_to_b
+        btn_plus_to_b.click()
+        label_display.expect_equal_text("a:1,b:2")
+
+        # test add_item
+        btn_add_item.click()
+        label_display.expect_equal_text("a:1,b:2,c:66")
+
     def test_use_list_independent(self, browser: BrowserManager, page_path: str):
         class Numbers(rxui.ViewModel):
             numbers = []
