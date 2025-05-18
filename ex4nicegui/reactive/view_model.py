@@ -73,7 +73,8 @@ class ViewModel(NoProxy):
             if callable(value) and hasattr(value, _CACHED_VARS_FLAG):
                 setattr(self, name, computed(partial(value, self)))
 
-    def __init_subclass__(cls) -> None:
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
         need_vars = (
             (name, value)
             for name, value in vars(cls).items()

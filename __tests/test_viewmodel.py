@@ -1,4 +1,9 @@
-from typing import List, Union, Dict, Literal
+import abc
+from abc import abstractmethod
+from typing import List, Union, Dict, Literal, Generic
+
+from typing_extensions import TypeVar
+
 from ex4nicegui import rxui, on, Ref, ref, effect_refreshable
 from nicegui import ui
 from .screen import BrowserManager
@@ -570,6 +575,102 @@ class TestWithImplicit:
         label_gt.expect_equal_text("a > 0: False")
         label_eq.expect_equal_text("a == 0: False")
         label_ne.expect_equal_text("a!= 0: True")
+
+    def test_generic_viewmodel(self, browser: BrowserManager, page_path: str):
+        class ViewModel(rxui.ViewModel, abc.ABC):
+            def __init__(self):
+                super().__init__()
+
+            @abstractmethod
+            def render(self): ...
+
+        ItemViewModel = TypeVar('ItemViewModel', bound=ViewModel)
+
+        class ListViewModel(ViewModel, Generic[ItemViewModel]):
+            labels: List[ItemViewModel] = []
+
+            def __init__(self):
+                super().__init__()
+
+            def add_item(self, label: str):
+                self.labels.append(self.item_factory(label))
+
+            @abstractmethod
+            def item_factory(self, label: str) -> ItemViewModel: ...
+
+        class I18nLabelViewModel(ViewModel):
+            label: str = ""
+            lang: str = ""
+
+            def __init__(self, label: str, lang: str):
+                super().__init__()
+                self.label = label
+                self.lang = lang
+
+            @rxui.cached_var
+            def get_text(self):
+                i18n = {
+                    'hello': {
+                        'en': 'Hello',
+                        'zh': '你好',
+                    },
+                    'contact': {
+                        'en': 'Contact Us',
+                        'zh': '联系我们'
+                    }
+                }
+
+                return i18n.get(self.label).get(self.lang)
+
+            def render(self):
+                rxui.label(self.get_text).classes(f'label-{self.label}')
+
+        class I18nListViewModel(ListViewModel[I18nLabelViewModel]):
+
+            def __init__(self, labels, lang):
+                super().__init__()
+                self.lang = lang
+
+                for label in labels:
+                    self.add_item(label)
+
+            def item_factory(self, label: str) -> I18nLabelViewModel:
+                return I18nLabelViewModel(label, self.lang)
+
+            def set_lang(self, lang: str):
+                self.lang = lang
+                for label in self.labels:
+                    label.lang = lang
+
+            def toggle(self):
+                if self.lang == 'en':
+                    self.set_lang('zh')
+                elif self.lang == 'zh':
+                    self.set_lang('en')
+
+            def render(self):
+                with ui.column():
+                    @effect_refreshable.on(self.labels)
+                    def _():
+                        for label in self.labels:
+                            label.render()
+
+        @ui.page(page_path)
+        def _():
+            lst = I18nListViewModel(['hello', 'contact'], 'en')
+            lst.render()
+            ui.button('Toggle Language').on_click(lst.toggle).classes('btn-toggle-language')
+
+        page = browser.open(page_path)
+        label_hello = page.Label('.label-hello')
+        label_contact = page.Label('.label-contact')
+        btn_toggle_lang = page.Button('.btn-toggle-language')
+
+        label_hello.expect_equal_text("Hello")
+        label_contact.expect_equal_text("Contact Us")
+        btn_toggle_lang.click()
+        label_hello.expect_equal_text("你好")
+        label_contact.expect_equal_text("联系我们")
 
 
 class TestWithImplicitEnd2End:
