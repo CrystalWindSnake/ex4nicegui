@@ -1,6 +1,8 @@
 import abc
 from abc import abstractmethod
-from typing import List, Union, Dict, Literal
+from typing import List, Union, Dict, Literal, Generic
+
+from typing_extensions import TypeVar
 
 from ex4nicegui import rxui, on, Ref, ref, effect_refreshable
 from nicegui import ui
@@ -582,7 +584,9 @@ class TestWithImplicit:
             @abstractmethod
             def render(self): ...
 
-        class ListViewModel[ItemViewModel: ViewModel](ViewModel):
+        ItemViewModel = TypeVar('ItemViewModel', bound=ViewModel)
+
+        class ListViewModel(ViewModel, Generic[ItemViewModel]):
             labels: List[ItemViewModel] = []
 
             def __init__(self):
