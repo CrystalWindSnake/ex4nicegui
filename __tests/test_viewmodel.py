@@ -582,10 +582,6 @@ class TestWithImplicit:
             @abstractmethod
             def render(self): ...
 
-        # class ListItemViewModel(rxui.ViewModel, abc.ABC):
-        #     @abstractmethod
-        #     def set_label(self, label: str): ...
-
         class ListViewModel[ItemViewModel: ViewModel](ViewModel):
             labels: List[ItemViewModel] = []
 
