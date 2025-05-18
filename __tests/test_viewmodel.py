@@ -1,4 +1,9 @@
+import abc
+from abc import abstractmethod
 from typing import List, Union, Dict, Literal
+
+from nicegui.html import button
+
 from ex4nicegui import rxui, on, Ref, ref, effect_refreshable
 from nicegui import ui
 from .screen import BrowserManager
@@ -571,14 +576,112 @@ class TestWithImplicit:
         label_eq.expect_equal_text("a == 0: False")
         label_ne.expect_equal_text("a!= 0: True")
 
+    def test_generic_viewmodel(self, browser: BrowserManager, page_path: str):
+        class ViewModel(rxui.ViewModel, abc.ABC):
+            def __init__(self):
+                super().__init__()
+
+            @abstractmethod
+            def render(self): ...
+
+        # class ListItemViewModel(rxui.ViewModel, abc.ABC):
+        #     @abstractmethod
+        #     def set_label(self, label: str): ...
+
+        class ListViewModel[ItemViewModel: ViewModel](ViewModel):
+            labels: List[ItemViewModel] = []
+
+            def __init__(self):
+                super().__init__()
+
+            def add_item(self, label: str):
+                self.labels.append(self.item_factory(label))
+
+            @abstractmethod
+            def item_factory(self, label: str) -> ItemViewModel: ...
+
+        class I18nLabelViewModel(ViewModel):
+            label: str = ""
+            lang: str = ""
+
+            def __init__(self, label: str, lang: str):
+                super().__init__()
+                self.label = label
+                self.lang = lang
+
+            @rxui.cached_var
+            def get_text(self):
+                i18n = {
+                    'hello': {
+                        'en': 'Hello',
+                        'zh': '你好',
+                    },
+                    'contact': {
+                        'en': 'Contact Us',
+                        'zh': '联系我们'
+                    }
+                }
+
+                return i18n.get(self.label).get(self.lang)
+
+            def render(self):
+                rxui.label(self.get_text).classes(f'label-{self.label}')
+
+        class I18nListViewModel(ListViewModel[I18nLabelViewModel]):
+
+            def __init__(self, labels, lang):
+                super().__init__()
+                self.lang = lang
+
+                for label in labels:
+                    self.add_item(label)
+
+            def item_factory(self, label: str) -> I18nLabelViewModel:
+                return I18nLabelViewModel(label, self.lang)
+
+            def set_lang(self, lang: str):
+                self.lang = lang
+                for label in self.labels:
+                    label.lang = lang
+
+            def toggle(self):
+                if self.lang == 'en':
+                    self.set_lang('zh')
+                elif self.lang == 'zh':
+                    self.set_lang('en')
+
+            def render(self):
+                with ui.column():
+                    @effect_refreshable.on(self.labels)
+                    def _():
+                        for label in self.labels:
+                            label.render()
+
+        @ui.page(page_path)
+        def _():
+            lst = I18nListViewModel(['hello', 'contact'], 'en')
+            lst.render()
+            ui.button('Toggle Language').on_click(lst.toggle).classes('btn-toggle-language')
+
+        page = browser.open(page_path)
+        label_hello = page.Label('.label-hello')
+        label_contact = page.Label('.label-contact')
+        btn_toggle_lang = page.Button('.btn-toggle-language')
+
+        label_hello.expect_equal_text("Hello")
+        label_contact.expect_equal_text("Contact Us")
+        btn_toggle_lang.click()
+        label_hello.expect_equal_text("你好")
+        label_contact.expect_equal_text("联系我们")
+
 
 class TestWithImplicitEnd2End:
     @pytest.mark.parametrize("fot_type", ["vfor", "refreshable"])
     def test_person_cards_with_vfor(
-        self,
-        browser: BrowserManager,
-        page_path: str,
-        fot_type: Literal["vfor", "refreshable"],
+            self,
+            browser: BrowserManager,
+            page_path: str,
+            fot_type: Literal["vfor", "refreshable"],
     ):
         from itertools import count
 
@@ -631,9 +734,9 @@ class TestWithImplicitEnd2End:
             # components
             def create_person_card(home: Home, person: Person, index: int):
                 with rxui.card().classes("outline").bind_classes(
-                    {
-                        "outline-red-500": lambda: person.age > home.avg_age(),
-                    }
+                        {
+                            "outline-red-500": lambda: person.age > home.avg_age(),
+                        }
                 ).classes(f"person-card-{index}"):
                     rxui.input(value=person.name, placeholder="名字").classes(
                         f"input-name-{index}"
