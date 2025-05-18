@@ -2,8 +2,6 @@ import abc
 from abc import abstractmethod
 from typing import List, Union, Dict, Literal
 
-from nicegui.html import button
-
 from ex4nicegui import rxui, on, Ref, ref, effect_refreshable
 from nicegui import ui
 from .screen import BrowserManager
@@ -678,10 +676,10 @@ class TestWithImplicit:
 class TestWithImplicitEnd2End:
     @pytest.mark.parametrize("fot_type", ["vfor", "refreshable"])
     def test_person_cards_with_vfor(
-            self,
-            browser: BrowserManager,
-            page_path: str,
-            fot_type: Literal["vfor", "refreshable"],
+        self,
+        browser: BrowserManager,
+        page_path: str,
+        fot_type: Literal["vfor", "refreshable"],
     ):
         from itertools import count
 
@@ -734,9 +732,9 @@ class TestWithImplicitEnd2End:
             # components
             def create_person_card(home: Home, person: Person, index: int):
                 with rxui.card().classes("outline").bind_classes(
-                        {
-                            "outline-red-500": lambda: person.age > home.avg_age(),
-                        }
+                    {
+                        "outline-red-500": lambda: person.age > home.avg_age(),
+                    }
                 ).classes(f"person-card-{index}"):
                     rxui.input(value=person.name, placeholder="名字").classes(
                         f"input-name-{index}"
