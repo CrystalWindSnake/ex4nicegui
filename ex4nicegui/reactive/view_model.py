@@ -21,6 +21,7 @@ from ex4nicegui.utils.proxy.base import Proxy
 from ex4nicegui.utils.proxy import to_value_if_base_type_proxy
 from ex4nicegui.utils.proxy.descriptor import ProxyDescriptor
 
+_VAR_FLAG = "__vm_var__"
 _CACHED_VARS_FLAG = "__vm_cached__"
 _LIST_VAR_FLAG = "__vm_list_var__"
 _DICT_VAR_FLAG = "__vm_dict_var__"
@@ -68,8 +69,9 @@ class ViewModel(NoProxy):
 
     def __init__(self):
         for name, value in self.__class__.__dict__.items():
-            if is_ref(value):
-                setattr(self, name, deep_ref(to_value(value)))
+            if is_ref(value) or hasattr(value, _VAR_FLAG):
+                setattr(self, name, _create_from_var(to_value(value)))
+                continue
             if callable(value) and hasattr(value, _CACHED_VARS_FLAG):
                 setattr(self, name, computed(partial(value, self)))
 
@@ -231,6 +233,14 @@ def _recursive_to_refs(model):
     return result
 
 
+def _create_from_var(
+    value: Union[_T_Var_Value, Callable[[], _T_Var_Value]],
+) -> Ref[_T_Var_Value]:
+    if callable(value):
+        return deep_ref(value())  # type: ignore
+    return deep_ref(value)
+
+
 _T_Var_Value = TypeVar("_T_Var_Value")
 
 
@@ -250,7 +260,8 @@ def var(value: Union[_T_Var_Value, Callable[[], _T_Var_Value]]) -> Ref[_T_Var_Va
 
     """
     if callable(value):
-        return deep_ref(value())
+        setattr(value, _VAR_FLAG, None)
+        return value  # type: ignore
     return deep_ref(value)
 
 

@@ -30,22 +30,27 @@ def test_source(browser: BrowserManager, page_path: str):
         "ZiyWIKEo+KJL9F6b4tFfx1jeINMMLcQYWIjijyU2JfpG/tMvsokSSSkAYVytJ5eB/hIoKQxBUdWiHsSy"
         "cHLlz0gP6T8lepD+xTQjvKnT/mXKlCmzAX8Dl7JCqRHaepQAAAAASUVORK5CYII="
     )
-    img_source = to_ref(image_file)
 
     @ui.page(page_path)
     def _():
+        img_source = to_ref(image_file)
         rxui.image(img_source).props("fit=contain").classes(
             "w-[20rem] h-[20rem] target"
         )
+        ui.button(
+            "change",
+            on_click=lambda: img_source.set_value(img_bs64),  # type: ignore
+        ).classes("btn-change")
 
     page = browser.open(page_path)
 
     target = page.Image(".target")
+    btn_change = page.Button(".btn-change")
 
     target.expect_find_by_class("q-img__image")
     target.expect_load_image()
 
-    img_source.value = img_bs64  # type: ignore
+    btn_change.click()
     page._page.wait_for_timeout(1000)
     target.expect_load_image()
 

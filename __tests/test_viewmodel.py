@@ -162,11 +162,11 @@ def test_dict_type(browser: BrowserManager, page_path: str):
 
 
 def test_class_var(browser: BrowserManager, page_path: str):
-    class Person(rxui.ViewModel):
-        name = rxui.var("")
-
     @ui.page(page_path)
     def _():
+        class Person(rxui.ViewModel):
+            name = rxui.var("")
+
         rxui.label(lambda: f"Hello, {Person.name.value}!").classes("label-name")
         rxui.input(value=Person.name).classes("input-name")
 

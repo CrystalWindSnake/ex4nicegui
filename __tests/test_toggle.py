@@ -17,34 +17,39 @@ def test_const_str(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str(browser: BrowserManager, page_path: str):
-    r_str: Ref[Optional[str]] = to_ref(None)
+    values = iter(["a", "b", None])
 
     @ui.page(page_path)
     def _():
+        r_str: Ref[Optional[str]] = to_ref(None)
         rxui.toggle(["a", "b"], value=r_str).classes("min-w-[20ch] target")
+        ui.button(
+            "change",
+            on_click=lambda: r_str.set_value(next(values)),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
     target = page.Toggle(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_not_selected("a")
     target.expect_not_selected("b")
 
-    r_str.value = "a"
+    btn.click()
     target.expect_selected("a")
 
-    r_str.value = "b"
+    btn.click()
     target.expect_selected("b")
 
-    r_str.value = None
+    btn.click()
     target.expect_not_selected("a")
     target.expect_not_selected("b")
 
 
 def test_clearable(browser: BrowserManager, page_path: str):
-    r_str = to_ref("a")
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref("a")
         rxui.toggle(["a", "b"], value=r_str, clearable=True).classes(
             "min-w-[20ch] target"
         )
@@ -65,17 +70,17 @@ def test_clearable(browser: BrowserManager, page_path: str):
 
 
 def test_option_change(browser: BrowserManager, page_path: str):
-    r_value = to_ref(None)
-    r_has_data = to_ref(False)
-
-    @ref_computed
-    def cp_data():
-        if r_has_data.value:
-            return ["a", "b"]
-        return []
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(None)
+        r_has_data = to_ref(False)
+
+        @ref_computed
+        def cp_data():
+            if r_has_data.value:
+                return ["a", "b"]
+            return []
+
         rxui.switch("has data", value=r_has_data).classes("switch")
         rxui.toggle(cp_data, value=r_value).classes("min-w-[20ch] target")
         rxui.label(r_value).classes("label-str")
@@ -98,11 +103,11 @@ def test_opts_value_change_same_time(browser: BrowserManager, page_path: str):
         "opts2": list("mnxy"),
     }
 
-    value1 = to_ref("opts1")
-    value2 = to_ref("")
-
     @ui.page(page_path)
     def _():
+        value1 = to_ref("opts1")
+        value2 = to_ref("")
+
         @ref_computed
         def opts2():
             return data[value1.value]

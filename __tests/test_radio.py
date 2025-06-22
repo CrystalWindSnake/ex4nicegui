@@ -30,10 +30,9 @@ def test_display(browser: BrowserManager, page_path: str):
 
 
 def test_ref_value(browser: BrowserManager, page_path: str):
-    r_value = to_ref(None)
-
     @ui.page(page_path)
     def _():
+        r_value = to_ref(None)
         rxui.radio(["a", "b"], value=r_value).classes("target")
         rxui.label(r_value).classes("label")
 
@@ -46,8 +45,6 @@ def test_ref_value(browser: BrowserManager, page_path: str):
 
     target.expect_not_to_be_checked("a")
     target.expect_not_to_be_checked("b")
-
-    assert r_value.value is None
 
     target.check_by_label("a")
 
@@ -63,33 +60,38 @@ def test_ref_value(browser: BrowserManager, page_path: str):
 
 
 def test_ref_str_change_value(browser: BrowserManager, page_path: str):
-    r_value: Ref[Optional[str]] = to_ref(None)
+    data = iter(["a", "b"])
 
     @ui.page(page_path)
     def _():
+        r_value: Ref[Optional[str]] = to_ref(None)
         rxui.radio(["a", "b"], value=r_value).classes("target")
+        ui.button(
+            "change",
+            on_click=lambda: r_value.set_value(next(data)),
+        ).classes("btn-change")
 
     page = browser.open(page_path)
 
     target = page.Radio(".target")
+    btn = page.Button(".btn-change")
 
     target.expect_to_be_visible()
 
-    r_value.value = "a"
+    btn.click()
 
     target.expect_to_be_checked("a")
     target.expect_not_to_be_checked("b")
 
-    r_value.value = "b"
+    btn.click()
     target.expect_not_to_be_checked("a")
     target.expect_to_be_checked("b")
 
 
 def test_ref_value_dict_options(browser: BrowserManager, page_path: str):
-    r_value: Ref[Optional[str]] = to_ref(None)
-
     @ui.page(page_path)
     def _():
+        r_value: Ref[Optional[str]] = to_ref(None)
         opts = {
             "a": "a value",
             "b": "b value",
