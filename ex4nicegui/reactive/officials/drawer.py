@@ -11,7 +11,7 @@ from ex4nicegui.utils.signals import (
     _TMaybeRef as TMaybeRef,
 )
 from nicegui import ui
-from nicegui.page_layout import Drawer
+from nicegui.elements.drawer import Drawer
 from .base import BindableUi
 
 _TDrawerSide = Literal["left", "right"]
