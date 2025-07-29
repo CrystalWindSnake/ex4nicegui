@@ -1,3 +1,4 @@
+import asyncio
 from nicegui import ui
 from ex4nicegui import to_ref, effect_refreshable, rxui
 from .screen import BrowserManager
@@ -116,3 +117,33 @@ def test_on_method_diff_type(browser: BrowserManager, page_path: str):
     label4.expect_contain_text("v4+new1")
 
     label4_step.expect_contain_text("v4+new1")
+
+
+def test_async_on(browser: BrowserManager, page_path: str):
+    @ui.page(page_path)
+    def _():
+        count = rxui.var(0)
+
+        def plus_one():
+            count.value += 1
+
+        async def long_running_zone(count: int):
+            await asyncio.sleep(0.5)
+            ui.label(f"count: {count}").classes("label-count")
+
+        # ui
+        ui.button(text="click me", on_click=plus_one).classes("btn-plus")
+
+        @effect_refreshable.on(count)
+        async def _():
+            await long_running_zone(int(count.value))
+
+    page = browser.open(page_path)
+    button = page.Button(".btn-plus")
+    label = page.Label(".label-count")
+
+    label.expect_equal_text("count: 0")
+    button.click()
+    label.expect_contain_text("count: 1")
+    button.click()
+    label.expect_contain_text("count: 2")
