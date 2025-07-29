@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import inspect
 import signe
 from signe.core.scope import Scope
 from .clientScope import _CLIENT_SCOPE_MANAGER
@@ -13,6 +14,7 @@ from typing import (
     Sequence,
 )
 from nicegui import ui
+from nicegui.functions.refreshable import RefreshableContainer
 from .effect import effect
 from .scheduler import get_uiScheduler
 from .types import (
@@ -168,6 +170,9 @@ class effect_refreshable:
         def warp(
             fn: Callable,
         ):
+            if inspect.iscoroutinefunction(fn):
+                return async_effect_refreshable(refs)(fn)
+
             return effect_refreshable(fn, refs)
 
         return warp
@@ -192,6 +197,27 @@ class effect_refreshable:
             runner = on(self._refs)(runner)  # type: ignore
 
         return runner
+
+
+def async_effect_refreshable(source: _T_effect_refreshable_refs):
+    def wrapper(fn: Callable[[], Any]):
+        @on(source, onchanges=False)
+        async def on_source_changed():
+            with temp_box:
+                await fn()
+
+            container.clear()
+
+            for child in list(temp_box):
+                child.move(container)
+
+            temp_box.clear()
+
+        # 临时容器做中转，避免异步等待时，页面内容空白的问题
+        temp_box = RefreshableContainer()
+        container = RefreshableContainer()
+
+    return wrapper
 
 
 def on(
