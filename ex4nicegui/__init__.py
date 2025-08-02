@@ -25,6 +25,7 @@ from ex4nicegui.utils.signals import (
 )
 from ex4nicegui.utils.asyncComputed import async_computed
 from ex4nicegui.utils.clientScope import new_scope
+from ex4nicegui.reactive.EChartsComponent.ECharts import reset_echarts_dependencies
 from .version import __version__
 
 __all__ = [
@@ -51,5 +52,6 @@ __all__ = [
     "is_setter_ref",
     "new_scope",
     "next_tick",
+    "reset_echarts_dependencies",
     "__version__",
 ]
