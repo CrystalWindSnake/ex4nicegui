@@ -136,3 +136,24 @@ class echarts(Element, component="ECharts.js", dependencies=libraries):  # type:
             *args,
             timeout=timeout,
         )
+
+
+def reset_echarts_dependencies(echarts_js_file: Union[str, Path]):
+    """
+    Reset the echarts dependencies to use a custom echarts.min.js file.
+
+    :param echarts_js_file: path to the custom echarts.min.js file
+
+    Usage:
+    .. code-block:: python
+
+        from ex4nicegui import reset_echarts_dependencies
+        reset_echarts_dependencies("path/to/echarts.min.js")
+    """
+
+    global echarts
+
+    class _Echarts(echarts, component="ECharts.js", dependencies=[echarts_js_file]):
+        pass
+
+    echarts = _Echarts
