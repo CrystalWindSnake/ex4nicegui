@@ -12,7 +12,7 @@ def test_should_dict_sync(browser: BrowserManager, page_path: str):
         data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
 
         rxui.label(data).classes("label")
-        rxui.input(value=rxui.vmodel(data.value["a"])).classes("input")
+        rxui.input(value=rxui.vmodel(data, "a")).classes("input")
 
     page = browser.open(page_path)
 
@@ -33,7 +33,7 @@ def test_should_dict_sync_deep_value(browser: BrowserManager, page_path: str):
         data = deep_ref({"a": 1, "b": [1, 2, 3, 4]})
 
         rxui.label(data).classes("label")
-        rxui.input(value=rxui.vmodel(data.value["b"][0])).classes("input")
+        rxui.input(value=rxui.vmodel(data, "b", 0)).classes("input")
 
     page = browser.open(page_path)
 
@@ -73,10 +73,9 @@ def test_should_sync_reactive_object_var(browser: BrowserManager, page_path: str
     @ui.page(page_path)
     def _():
         data = deep_ref({"a": 1})
-        item = data.value
 
         rxui.label(data).classes("label")
-        rxui.input(value=rxui.vmodel(item["a"])).classes("input")
+        rxui.input(value=rxui.vmodel(data, "a")).classes("input")
 
     page = browser.open(page_path)
 
@@ -95,10 +94,9 @@ def test_should_warning_when_no_key_expr(browser: BrowserManager, page_path: str
     @ui.page(page_path)
     def _():
         data = deep_ref(1)
-        item = data.value
 
         with warnings.catch_warnings(record=True) as w:
-            rxui.input(value=rxui.vmodel(item)).classes("input")
+            rxui.input(value=rxui.vmodel(data)).classes("input")
 
             assert len(w) == 1
 

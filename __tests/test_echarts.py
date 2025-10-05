@@ -101,7 +101,7 @@ def test_chart_deep_ref(browser: BrowserManager, page_path: str):
             }
         )
 
-        rxui.number(value=rxui.vmodel(r_opts.value["series"][0]["data"][0])).classes(  # type: ignore
+        rxui.number(value=rxui.vmodel(r_opts, "series", 0, "data", 0)).classes(  # type: ignore
             "number_input"
         )
 

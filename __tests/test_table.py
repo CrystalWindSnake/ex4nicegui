@@ -25,8 +25,8 @@ def test_base(browser: BrowserManager, page_path: str):
             ]
         )
         rxui.table(columns, rows).classes("table")
-        rxui.input(value=rxui.vmodel(rows.value[1]["a"])).classes("input_row2")
-        rxui.input(value=rxui.vmodel(columns.value[0]["label"])).classes("col1_label")
+        rxui.input(value=rxui.vmodel(rows, 1, "a")).classes("input_row2")
+        rxui.input(value=rxui.vmodel(columns, 0, "label")).classes("col1_label")
 
         def onclick():
             rows.value.append(

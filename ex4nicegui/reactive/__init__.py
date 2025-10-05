@@ -73,7 +73,7 @@ from .fileWatcher import FilesWatcher
 from .mermaid.mermaid import Mermaid as mermaid
 from .officials.dialog import DialogBindableUi as dialog
 from .vfor import vfor, VforStore
-from .vmodel import vmodel
+from ._vmodel import vmodel
 from .view_model import ViewModel, var, cached_var, list_var, dict_var
 
 pagination = q_pagination

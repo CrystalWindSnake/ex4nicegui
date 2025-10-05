@@ -3,6 +3,7 @@ import inspect
 import signe
 from signe.core.scope import Scope
 from .clientScope import _CLIENT_SCOPE_MANAGER
+from typing_extensions import TypeIs
 from typing import (
     Any,
     Dict,
@@ -48,7 +49,7 @@ def is_setter_ref(obj):
     return isinstance(obj, (signe.Signal, RefWrapper))
 
 
-def is_ref(obj: Any):
+def is_ref(obj: Any) -> TypeIs[Ref[T]]:
     """Checks if a value is a ref object."""
     return signe.is_signal(obj) or isinstance(obj, (RefWrapper))
 

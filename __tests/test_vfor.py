@@ -185,10 +185,10 @@ class TestBase:
 
             @rxui.vfor(items, key="id")
             def _(store: rxui.VforStore[Dict]):
-                item = store.get_item()
+                item = store.get()
                 with ui.card().classes("row-card"):
                     rxui.checkbox(
-                        text=item["message"],
+                        text=item.value["message"],
                         value=rxui.vmodel(item, "done"),
                     )
 
