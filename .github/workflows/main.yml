@@ -37,5 +37,5 @@ jobs:
       - name: run
         timeout-minutes: 1
         run: |
-          python -c "import ex4nicegui;from ex4nicegui.reactive import rxui;from ex4nicegui import bi"
+          uv run python -c "import ex4nicegui;from ex4nicegui.reactive import rxui;from ex4nicegui import bi"
     
