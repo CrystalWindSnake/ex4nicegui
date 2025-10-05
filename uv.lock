@@ -374,7 +374,7 @@ lint = [
 [package.metadata]
 requires-dist = [
     { name = "executing", specifier = "~=2.0.1" },
-    { name = "nicegui", specifier = "~=2.21.1" },
+    { name = "nicegui", specifier = "~=3.0.0" },
     { name = "signe", specifier = "~=0.4.22" },
 ]
 
@@ -971,7 +971,7 @@ wheels = [
 
 [[package]]
 name = "nicegui"
-version = "2.21.1"
+version = "3.0.2"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -996,9 +996,9 @@ dependencies = [
     { name = "vbuild" },
     { name = "watchfiles" },
 ]
-sdist = { url = "https://mirrors.aliyun.com/pypi/packages/dd/01/54a2fa0e8348daa1b8ec9366cbb030d9e29e4838aff4b309f88f9b37ac87/nicegui-2.21.1.tar.gz", hash = "sha256:1063ea5f6ba696a8240835ff635157a8af11470c7e12dd34bfb7620d0355a2bd" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/6d/19/41ebaa1f2c06a589559fe6d3a054f3fb43b0f85b4f348b546ec1a49bba53/nicegui-3.0.2.tar.gz", hash = "sha256:9bdd7f200d4f6f37f51da2b955dae936405cfd5c866a9eb99fbe26b5ab552c75" }
 wheels = [
-    { url = "https://mirrors.aliyun.com/pypi/packages/3d/85/359241bbdc5d3c90a481d9db55f780e42757b4e92248e37a659d1b42e94f/nicegui-2.21.1-py3-none-any.whl", hash = "sha256:3c26b628b6384f859e2f6044fbc398b2b0c7fd0feb50a51ce72a233157f77d34" },
+    { url = "https://mirrors.aliyun.com/pypi/packages/41/e8/1319bb56a63ba52a5a980a5c0b01f2b9db5a4a03b64b1a9648d1f25846c7/nicegui-3.0.2-py3-none-any.whl", hash = "sha256:bc2978775d9ee60d44d841c1332cf9f90bb8eef90ce6a62442cb64d417f0cc99" },
 ]
 
 [[package]]

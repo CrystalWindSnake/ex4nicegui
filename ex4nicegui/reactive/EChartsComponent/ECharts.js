@@ -1,4 +1,4 @@
-import 'echarts'
+import { echarts } from "nicegui-echart";
 import { convertDynamicProperties } from "../../static/utils/dynamic_properties.js";
 
 const registerThemeTask = Promise.all(

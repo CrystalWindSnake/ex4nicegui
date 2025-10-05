@@ -25,7 +25,7 @@ from ex4nicegui.utils.signals import (
 )
 from ex4nicegui.utils.clientScope import new_scope
 from ex4nicegui.utils.types import _TMaybeRef as TMaybeRef
-from nicegui import Tailwind, ui
+from nicegui import ui
 from nicegui.elements.mixins.text_element import TextElement
 from nicegui.elements.mixins.value_element import ValueElement
 from ex4nicegui.reactive.services.reactive_service import inject_handle_delete
@@ -58,7 +58,6 @@ class BindableUi(Generic[TWidget]):
     def __init__(self, element: TWidget) -> None:
         self._element = element
         inject_handle_delete(self.element, self._on_element_delete)
-        self.tailwind = Tailwind(cast(ui.element, self._element))
         self._effect_scope = new_scope()
         self.__used_scope_style = False
 
@@ -185,7 +184,7 @@ class BindableUi(Generic[TWidget]):
 
             def props_str():
                 props_dict = (
-                    f"""{name if isinstance(raw_value,bool) else f"{name}='{raw_value}'"}"""
+                    f"""{name if isinstance(raw_value, bool) else f"{name}='{raw_value}'"}"""
                     for name, value in props.items()
                     if (raw_value := to_value(value))
                 )

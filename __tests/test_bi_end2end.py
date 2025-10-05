@@ -143,13 +143,13 @@ def test_reload_source(browser: BrowserManager, page_path: str):
         ds1.ui_radio(
             "name",
             hide_filtered=True,
-            custom_options_map={"": "null", "c1": "类别1"},
+            custom_options_map={"": "null", "c1": "cf1"},
         ).classes("name-radio")
 
         ds1.ui_radio(
             "cls",
             hide_filtered=False,
-            custom_options_map={"": "null", "c1": "类别1", "cls1": "new 类别1"},
+            custom_options_map={"": "null", "c1": "cf1", "cls1": "new cf1"},
         ).classes("cls-radio")
 
         ds1.ui_aggrid().classes("table1")
@@ -167,21 +167,21 @@ def test_reload_source(browser: BrowserManager, page_path: str):
 
     name_select.click_and_select("a")
 
-    except_data = [
+    expect_data = [
         ["a", "c1", "0"],
         ["a", "c2", "1"],
     ]
 
-    table1.expect_table_values(except_data)
-    table2.expect_table_values(except_data)
+    table1.expect_table_values(expect_data)
+    table2.expect_table_values(expect_data)
 
     assert name_radio.get_all_labels() == ["a"]
-    assert cls_radio.get_all_labels() == ["类别1", "c2"]
+    assert cls_radio.get_all_labels() == ["cf1", "c2"]
 
     # reload
     reload_btn.click()
 
-    except_all_data = [
+    expect_all_data = [
         ["x", "cls1", "0", "100"],
         ["x", "cls2", "1", "101"],
         ["m", "cls1", "2", "102"],
@@ -189,22 +189,22 @@ def test_reload_source(browser: BrowserManager, page_path: str):
         ["y", "cls2", "4", "104"],
     ]
 
-    table1.expect_table_values(except_all_data)
-    table2.expect_table_values(except_all_data[:3])
+    table1.expect_table_values(expect_all_data)
+    table2.expect_table_values(expect_all_data[:3])
 
     assert name_radio.get_all_labels() == ["x", "m", "n", "y"]
-    assert cls_radio.get_all_labels() == ["new 类别1", "cls2"]
+    assert cls_radio.get_all_labels() == ["new cf1", "cls2"]
 
     #
     name_select.click_and_select("x")
 
-    except_data = [
+    expect_data = [
         ["x", "cls1", "0", "100"],
         ["x", "cls2", "1", "101"],
     ]
 
-    table1.expect_table_values(except_data)
-    table2.expect_table_values(except_data)
+    table1.expect_table_values(expect_data)
+    table2.expect_table_values(expect_data)
 
     assert name_radio.get_all_labels() == ["x"]
-    assert cls_radio.get_all_labels() == ["new 类别1", "cls2"]
+    assert cls_radio.get_all_labels() == ["new cf1", "cls2"]

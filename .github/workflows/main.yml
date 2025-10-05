@@ -11,41 +11,31 @@ jobs:
   run-all-test:
     runs-on: ubuntu-latest
     needs: [import-correct]
+    strategy:
+      matrix:
+        python-version: ['3.9']
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
-      - name: set up Poetry
-        uses: abatilo/actions-poetry@v2.0.0
-        with:
-          poetry-version: "1.6.1"
-      - name: install dependencies
-        run: |
-          set -x
-          poetry config virtualenvs.create false
-          poetry install --all-extras
-          python -m playwright install 
-      - run: pytest __tests/
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-env
+
+      - name: run test
+        timeout-minutes: 4
+        run: uv run pytest __tests/
+        shell: bash
+
+
   import-correct:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9']
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
-      - name: set up Poetry
-        uses: abatilo/actions-poetry@v2.0.0
-        with:
-          poetry-version: "1.6.1"
-      - name: install dependencies
-        run: |
-          set -x
-          poetry config virtualenvs.create false
-          poetry install --all-extras
-      - run: poetry build
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-env
+
       - name: run
+        timeout-minutes: 1
         run: |
-          poetry install
-          python -c "import ex4nicegui;from ex4nicegui.reactive import rxui;from ex4nicegui import bi"
+          uv run python -c "import ex4nicegui;from ex4nicegui.reactive import rxui;from ex4nicegui import bi"
     

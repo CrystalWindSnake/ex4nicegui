@@ -1,19 +1,14 @@
 from typing import Callable, List, Optional
 from nicegui.elements.mixins.content_element import ContentElement
 from pathlib import Path
-import nicegui
 from dataclasses import dataclass
 from nicegui.events import UiEventArguments
 from nicegui.dataclasses import KWONLY_SLOTS
 
-NG_ROOT = Path(nicegui.__file__).parent / "elements"
-
 EX4_LIBS_ROOT = Path(__file__).parent.parent.parent / "libs"
 
 dependencies = [
-    NG_ROOT / "lib/mermaid/mermaid.esm.min.mjs",
     EX4_LIBS_ROOT / "d3/*.js",
-    NG_ROOT / "lib/mermaid/*.js",
 ]
 
 

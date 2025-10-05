@@ -64,17 +64,17 @@ def test_clearable(browser: BrowserManager, page_path: str):
 
 
 def test_option_change(browser: BrowserManager, page_path: str):
-    r_str = to_ref(None)
-    r_has_data = to_ref(False)
-
-    @ref_computed
-    def cp_data():
-        if r_has_data.value:
-            return ["a", "b"]
-        return []
-
     @ui.page(page_path)
     def _():
+        r_str = to_ref(None)
+        r_has_data = to_ref(False)
+
+        @ref_computed
+        def cp_data():
+            if r_has_data.value:
+                return ["a", "b"]
+            return []
+
         rxui.switch("has data", value=r_has_data).classes("switch")
         rxui.select(cp_data, value=r_str).classes("min-w-[20ch] target")
         rxui.label(r_str).classes("label-str")

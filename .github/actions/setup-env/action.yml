@@ -1,0 +1,41 @@
+name: "Setup environment"
+description: "Common setup for all jobs"
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ matrix.python-version }}-1.48.0
+        restore-keys: |
+          playwright-${{ runner.os }}-${{ matrix.python-version }}-1.48.0-
+
+    # Prevent "man-db" trigger updates during apt installs, which can take a long time
+    - name: Remove man-db
+      run: sudo apt-get purge -y man-db
+      shell: bash
+
+    - name: Install Playwright
+      run: |
+        # Install playwright dependencies if not cached
+        if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
+          uv run playwright install chromium --with-deps
+        fi
+      shell: bash
+
+    - name: Create uv virtual environment
+      run: uv python pin ${{ matrix.python-version }}
+      shell: bash
+
+    - name: Project deps
+      run: uv sync --dev --no-sources
+      shell: bash

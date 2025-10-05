@@ -53,7 +53,6 @@ class rx_column(ui.column, rx_flex_box):
         vertical: TColumn_Vertical = "top",
     ) -> None:
         super().__init__()
-        self.tailwind.align_items
         self.horizontal(horizontal)
         self.vertical(vertical)
 

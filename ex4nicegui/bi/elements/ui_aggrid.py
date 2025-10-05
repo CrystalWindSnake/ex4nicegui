@@ -57,8 +57,7 @@ def ui_aggrid(
         data = self._dataSource.get_filtered_data(cp)
         new_opts = self._dataSource._idataSource.get_aggrid_options(data)
         options = _merge_options(fixed_options, new_opts)
-        cp._props["options"] = options
-        cp.update()
+        cp.options = {**options, "theme": kwargs.get("theme", "quartz")}
 
     self._dataSource._register_component(cp.id, on_source_update)
 
