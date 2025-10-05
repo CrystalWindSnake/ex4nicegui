@@ -20,9 +20,8 @@ runs:
           playwright-${{ runner.os }}-${{ matrix.python-version }}-1.48.0-
 
     # Prevent "man-db" trigger updates during apt installs, which can take a long time
-    - name: Disable man-db triggers
-      run: sudo rm -f /var/lib/dpkg/triggers/man-db
-      shell: bash
+    - name: Remove man-db
+      run: sudo apt-get purge -y man-db
 
     - name: Install Playwright
       run: |
