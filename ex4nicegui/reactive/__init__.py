@@ -63,7 +63,7 @@ from .officials.range import LazyRangeBindableUi as lazy_range
 from .officials.tree import TreeBindableUi as tree
 from .officials.spinner import SpinnerBindableUi as spinner
 
-from .local_file_picker import local_file_picker
+
 from .UseDraggable.UseDraggable import use_draggable
 from .useMouse.UseMouse import use_mouse
 
@@ -89,7 +89,6 @@ __all__ = [
     "circular_progress",
     "knob",
     "UploadResult",
-    "local_file_picker",
     "use_draggable",
     "use_mouse",
     "use_pagination",
