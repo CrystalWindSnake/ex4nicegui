@@ -15,11 +15,8 @@ class DeferredTask:
                 task()
 
             # Avoid events becoming ineffective due to page refresh when sharing the client.
-            if not client.shared:
-                # In a shared page, execution is required with every refresh.
-                # note:https://github.com/CrystalWindSnake/ex4nicegui/issues/227
-                self._tasks.clear()
-                client.connect_handlers.remove(on_client_connect)  # type: ignore
+            self._tasks.clear()
+            client.connect_handlers.remove(on_client_connect)  # type: ignore
 
         ui.context.client.on_connect(on_client_connect)
 

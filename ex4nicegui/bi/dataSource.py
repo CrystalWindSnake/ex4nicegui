@@ -182,8 +182,7 @@ class DataSource:
 
             @ng_client.on_disconnect
             def _(e: Client):
-                if not e.shared:
-                    self._component_map.remove_client(e.id)
+                self._component_map.remove_client(e.id)
 
         info = ComponentInfo(
             ComponentInfoKey(client_id, element_id), update_callback, uiResult=ui_result

@@ -34,14 +34,11 @@ class NgClientScopeManager:
         if client.id not in self._client_scope_map:
             self._client_scope_map[client.id] = NgScopeSuite()
 
-            # shared clients always not dispose their scope
-            if not client.shared:
-
-                @client.on_disconnect
-                def _(e: Client):
-                    if e.id in self._client_scope_map:
-                        self._client_scope_map[e.id]._top_scope.dispose()  # type: ignore
-                        del self._client_scope_map[e.id]
+            @client.on_disconnect
+            def _(e: Client):
+                if e.id in self._client_scope_map:
+                    self._client_scope_map[e.id]._top_scope.dispose()  # type: ignore
+                    del self._client_scope_map[e.id]
 
         return self._client_scope_map[client.id]
 
