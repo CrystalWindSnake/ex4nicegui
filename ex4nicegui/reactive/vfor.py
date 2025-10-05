@@ -68,6 +68,7 @@ def wrapper_getter_setter(ref: Ref, index: Ref[int], *keys: Union[str, int]):
 
         if len(keys) == 0:
             proxy[index.value] = value
+            return
 
         if len(keys) == 1:
             item[keys[0]] = value

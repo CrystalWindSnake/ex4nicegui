@@ -77,7 +77,7 @@ class TestExample:
                         rxui.label(lambda: item.title).classes("row-title")
                         rxui.checkbox(
                             "done",
-                            value=rxui.vmodel(item.done),
+                            value=item.done,
                             on_change=lambda e: change_done(item, e.value),
                         )
                         rxui.button(
@@ -348,7 +348,7 @@ class TestBase:
             def _(s):
                 row_num = s.row_index.value + 1
                 rxui.label(s.get())
-                rxui.input(value=rxui.vmodel(s.get())).classes(f"vfor-input-{row_num}")
+                rxui.input(value=s.get()).classes(f"vfor-input-{row_num}")
 
         page = browser.open(page_path)
 
