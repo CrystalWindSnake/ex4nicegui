@@ -21,7 +21,7 @@ jobs:
 
       - name: run test
         timeout-minutes: 4
-        run: pytest __tests/
+        run: uv run pytest __tests/
         shell: bash
 
 
