@@ -118,52 +118,52 @@ def test_chart_deep_ref(browser: BrowserManager, page_path: str):
 
 
 def test_js_function_opt(browser: BrowserManager, page_path: str):
-    r_unit = to_ref("kg")
-
-    yAxis_formatter = ref_computed(
-        lambda: f"""function (value, index) {{
-        return value + '{r_unit.value}';
-    }}
-    """
-    )
-
-    opts = ref_computed(
-        lambda: {
-            "xAxis": {
-                "type": "category",
-                "data": [
-                    "Mon",
-                    "Tue",
-                    "Wed",
-                    "Thu",
-                    "Fri",
-                    "Sat",
-                    "Sun",
-                ],
-            },
-            "yAxis": {
-                "type": "value",
-                "axisLabel": {":formatter": yAxis_formatter.value},
-            },
-            "series": [
-                {
-                    "data": [
-                        120,
-                        200,
-                        150,
-                        80,
-                        70,
-                        110,
-                        130,
-                    ],
-                    "type": "bar",
-                }
-            ],
-        }
-    )
-
     @ui.page(page_path)
     def _():
+        r_unit = to_ref("kg")
+
+        yAxis_formatter = ref_computed(
+            lambda: f"""function (value, index) {{
+            return value + '{r_unit.value}';
+        }}
+        """
+        )
+
+        opts = ref_computed(
+            lambda: {
+                "xAxis": {
+                    "type": "category",
+                    "data": [
+                        "Mon",
+                        "Tue",
+                        "Wed",
+                        "Thu",
+                        "Fri",
+                        "Sat",
+                        "Sun",
+                    ],
+                },
+                "yAxis": {
+                    "type": "value",
+                    "axisLabel": {":formatter": yAxis_formatter.value},
+                },
+                "series": [
+                    {
+                        "data": [
+                            120,
+                            200,
+                            150,
+                            80,
+                            70,
+                            110,
+                            130,
+                        ],
+                        "type": "bar",
+                    }
+                ],
+            }
+        )
+
         rxui.echarts(opts).classes("target")
 
     page = browser.open(page_path)

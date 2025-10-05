@@ -11,18 +11,14 @@ from nicegui.events import handle_event, UiEventArguments, GenericEventArguments
 from nicegui.element import Element
 from nicegui.awaitable_response import AwaitableResponse
 from pathlib import Path
-import nicegui
 
 from .types import (
     _T_event_name,
 )
 from .utils import get_bound_event_args, create_event_handler_args
 
-NG_ROOT = Path(nicegui.__file__).parent / "elements"
-libraries = [NG_ROOT / "lib/echarts/echarts.min.js"]
 
-
-class echarts(Element, component="ECharts.js", dependencies=libraries):  # type: ignore
+class echarts(Element, component="ECharts.js"):
     def __init__(
         self,
         options: Optional[dict] = None,

@@ -228,7 +228,7 @@ class EChartsUtils(BaseUiUtils):
 
     def get_options(self):
         opts = self.target_locator.evaluate(
-            "node => echarts.getInstanceByDom(node).getOption()"
+            r"async node => {const {echarts} = await import('nicegui-echart');return echarts.getInstanceByDom(node).getOption()}"
         )
 
         return opts
@@ -298,7 +298,7 @@ class EChartsUtils(BaseUiUtils):
             finder = f"{{ seriesName: {tran_str(color)} }}"
 
         pos_x, pos_y = chartIns_box.evaluate(
-            f"node => echarts.getInstanceByDom(node).convertToPixel({finder}, [{tran_str(x_value)}, {tran_str(y_value)}])"
+            rf"async node => {{const {{echarts}} = await import('nicegui-echart'); return echarts.getInstanceByDom(node).convertToPixel({finder}, [{tran_str(x_value)}, {tran_str(y_value)}]) }}"
         )
 
         box = chartIns_box.bounding_box()

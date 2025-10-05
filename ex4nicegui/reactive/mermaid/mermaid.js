@@ -1,4 +1,4 @@
-import mermaid from "mermaid";
+import { mermaid } from "nicegui-mermaid";
 import { select as d3Select } from "d3-selection";
 import { zoom as d3Zoom, zoomIdentity } from "d3-zoom";
 
