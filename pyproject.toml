@@ -1,37 +1,49 @@
-[tool.poetry]
+[project]
 name = "ex4nicegui"
 version = "0.8.10"
-description = "Extension library based on nicegui, providing data responsive,BI functionality modules"
-authors = ["CrystalWindSnake <568166495@qq.com>"]
+description = "Extension library based on nicegui, providing data responsive,BI functionality modules."
+keywords = ["ui", "gui", "web","nicegui", "ex4nicegui", "webui"]
+Repository = "https://github.com/CrystalWindSnake/ex4nicegui"
+Issues = "https://github.com/CrystalWindSnake/ex4nicegui/issues"
+authors = [
+    {name = "CrystalWindSnake",email = "568166495@qq.com"}
+]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/CrystalWindSnake/ex4nicegui"
-keywords = ["nicegui", "ex4nicegui", "webui"]
+requires-python = ">=3.9"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-nicegui = "^2.21.1"
-signe = "^0.4.22"
-executing = "^2.0.1"
-
-
-[tool.poetry.group.dev.dependencies]
-nicegui = "*"
-pytest = "^8.3.3"
-pandas = [
-    {version = "^1.0.0", python = "~3.8"},
-    {version = "^2.0.0", python = ">=3.9,<3.13"}
+dependencies = [
+    "nicegui~=2.21.1",
+    "signe~=0.4.22",
+    "executing~=2.0.1",
 ]
-numpy = [
-    {version = "^1.24.0", python = "~3.8"},
-    {version = "^1.26.0", python = ">=3.9,<3.13"}
+
+
+[dependency-groups]
+dev = [
+    "pytest~=8.3.3",
+    "playwright==1.48.0",
+    "pytest~=8.3.5",
+    "pytest-asyncio~=0.24.0",
+    "pytest-playwright~=0.7.1",
+    "pandas>=2.3.3",
+    "pyecharts>=2.0.8",
 ]
-pyecharts = "^2.0.5"
-pytest-playwright = "<0.7.0"
-playwright = "<1.52.0"
-pytest-asyncio = "^0.24.0"
-pywebview = ">=5.4"
+git = [
+    "pre-commit>=3.5.0",
+]
+lint = [
+    "ruff==0.12.2",
+]
+
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.hatch.build.targets.sdist]
+only-include = ["ex4nicegui"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["ex4nicegui"]
