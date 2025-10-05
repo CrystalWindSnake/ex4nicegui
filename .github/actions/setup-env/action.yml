@@ -22,6 +22,7 @@ runs:
     # Prevent "man-db" trigger updates during apt installs, which can take a long time
     - name: Remove man-db
       run: sudo apt-get purge -y man-db
+      shell: bash
 
     - name: Install Playwright
       run: |
