@@ -2,14 +2,22 @@ version: '3'
 
 tasks:
   test:
-    - cls
-    - pytest -v __tests 
+    - uv run --frozen pytest -v __tests --html=temp/pytest-report.html
 
+  build-npm:
+    dir: vue_components/
+    cmds: 
+      - pnpm run build
+    
   dist: 
-    - poetry build
+    deps:
+      - build-npm
+    cmds: 
+      - cmd /C del /f /q dist
+      - uv build -o ./dist
 
   rel: 
     - task: dist
-    - poetry publish
+    - uv publish
 
-  dev-ins: poetry install
+  mypy: mypy ex4nicegui/
