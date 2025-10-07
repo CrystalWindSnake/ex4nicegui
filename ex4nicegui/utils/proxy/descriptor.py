@@ -7,7 +7,6 @@ from .string import StringProxy
 from .float import FloatProxy
 from .bool import BoolProxy
 from .date import DateProxy
-from .dict import DictProxy
 from ex4nicegui.utils.signals import deep_ref
 import datetime
 import warnings
