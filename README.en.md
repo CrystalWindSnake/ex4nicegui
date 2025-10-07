@@ -426,6 +426,7 @@ class MyApp(rxui.ViewModel):
     - [tab\_panels](#tab_panels)
     - [lazy\_tab\_panels](#lazy_tab_panels)
     - [scoped\_style](#scoped_style)
+    - [PageState](#pagestate)
     - [BI Module](#bi-module)
       - [`bi.data_source`](#bidata_source)
       - [ui\_select](#ui_select)
@@ -1435,6 +1436,56 @@ with rxui.row().scoped_style(":hover *", "outline: 1px solid red;") as row:
 with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
     ui.label("Hello")
     ui.label("World")
+```
+
+---
+
+### PageState
+For complex pages, it may be necessary to pass state between functions in different modules.
+The PageState class makes it easier to manage shared state across the entire page.
+
+Define the page state in `state.py`
+```python
+from ex4nicegui import PageState, to_ref, on
+
+class CounterState(PageState):
+
+    def __init__(self):
+        self.count = to_ref(0)
+
+        @on(self.a)
+        def on_a_change(a):
+            print(f"a changed to {a}")
+
+```
+
+Encapsulate various views in `view.py`
+```python
+from ex4nicegui import rxui
+from state import CounterState
+
+def view1():
+    state = CounterState.get()  # The state here is shared with the one in view2 
+    ui.label(f"count: {state.count.value} in view1")
+
+def view2():
+    state = CounterState()
+    ui.label(f"count: {state.count.value} in view2")
+
+```
+
+Use it in `main.py`
+
+```python
+from ex4nicegui import ui
+from view import view1, view2
+
+@ui.page("/")
+def index():
+    view1()
+    view2()
+
+ui.run()
 ```
 
 ---

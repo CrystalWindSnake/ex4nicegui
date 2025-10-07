@@ -439,6 +439,7 @@ class MyApp(rxui.ViewModel):
       - [tab\_panels](#tab_panels)
       - [lazy\_tab\_panels](#lazy_tab_panels)
       - [scoped\_style](#scoped_style)
+      - [PageState](#pagestate)
     - [BI 模块](#bi-模块)
       - [`bi.data_source`](#bidata_source)
       - [ui\_select](#ui_select)
@@ -1458,6 +1459,56 @@ with rxui.row().scoped_style(":hover *", "outline: 1px solid red;") as row:
 with rxui.row().scoped_style(":self:hover *", "outline: 1px solid red;") as row:
     ui.label("Hello")
     ui.label("World")
+```
+
+---
+
+#### PageState
+
+复杂的页面，可能需要在不同模块的函数中传递状态。`PageState` 类可以更方便管理页面范围的共享状态。
+
+在 state.py 中定义页面状态
+```python
+from ex4nicegui import PageState, to_ref, on
+
+class CounterState(PageState):
+
+    def __init__(self):
+        self.count = to_ref(0)
+
+        @on(self.a)
+        def on_a_change(a):
+            print(f"a changed to {a}")
+
+```
+
+在 view.py 中封装各种视图
+```python
+from ex4nicegui import rxui
+from state import CounterState
+
+def view1():
+    state = CounterState.get()  # 与 view2 函数的状态是共享的 
+    ui.label(f"count: {state.count.value} in view1")
+
+def view2():
+    state = CounterState()
+    ui.label(f"count: {state.count.value} in view2")
+
+```
+
+在 `main.py` 中正常导入并调用视图函数即可
+```python
+from ex4nicegui import ui
+from view import view1, view2
+
+@ui.page("/")
+def index():
+    view1()
+    view2()
+
+ui.run()
+
 ```
 
 
