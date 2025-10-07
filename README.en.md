@@ -1469,7 +1469,7 @@ def view1():
     ui.label(f"count: {state.count.value} in view1")
 
 def view2():
-    state = CounterState()
+    state = CounterState.get()
     ui.label(f"count: {state.count.value} in view2")
 
 ```
