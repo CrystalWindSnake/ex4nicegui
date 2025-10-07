@@ -347,7 +347,7 @@ wheels = [
 
 [[package]]
 name = "ex4nicegui"
-version = "0.8.10"
+version = "0.9.0"
 source = { editable = "." }
 dependencies = [
     { name = "executing" },
