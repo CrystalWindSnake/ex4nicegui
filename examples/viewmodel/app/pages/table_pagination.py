@@ -28,12 +28,14 @@ class PaginationTable(rxui.ViewModel):
         return self.pagination.current_source
 
     def create(self):
-        with rxui.table(self.columns, self.data).props("hide-pagination").add_slot(
-            "top"
+        with (
+            rxui.table(self.columns, self.data).props("hide-pagination").add_slot("top")
         ):
             with ui.row().classes("flex-center"):
                 rxui.select(
-                    [10, 15, 20, 30], label="每页数量", value=self.page_size
+                    [10, 15, 20, 30],
+                    label="number of rows per page",
+                    value=self.page_size,
                 ).classes("min-w-[8em]").props("dense outlined")
                 self.pagination.create_q_pagination().props(
                     ' outline  color="orange" active-design="unelevated"  active-color="brown"  active-text-color="orange"'

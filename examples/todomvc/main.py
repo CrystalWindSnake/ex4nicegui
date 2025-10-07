@@ -5,6 +5,22 @@ from ex4nicegui.layout import grid_box
 from examples.todomvc.viewModel import State, TodoItem
 
 
+def root():
+    state = State()
+    page_init()
+
+    with (
+        ui.card()
+        .classes("w-[50vw] self-center  overflow-hidden")
+        .style("height:calc(100vh - calc(var(--nicegui-default-padding) * 2));")
+    ):
+        ui.label("todo list").classes("text-h3 self-center bg-primary px-6 text-white")
+        rxui.linear_progress(state.completion_ratio)
+        job_panel(state)
+
+        todo_list_panel(state)
+
+
 # ui
 def page_init():
     ui.query("body").classes("bg-[#f5f5f5]")
@@ -19,16 +35,10 @@ def page_init():
     ui.button.default_classes("w-fit")
 
 
-page_init()
-
-
-# main ui
-state = State()
-
-
-def job_panel():
-    with ui.element("div").classes(" w-full job-panel"), ui.card().classes(
-        "flex-center py-10"
+def job_panel(state: State):
+    with (
+        ui.element("div").classes(" w-full job-panel"),
+        ui.card().classes("flex-center py-10"),
     ):
         input_content = to_ref("")
 
@@ -48,10 +58,11 @@ def job_panel():
             ).props("square").bind_enabled(lambda: len(input_content.value) > 0)
 
 
-def todo_list_panel():
-    with ui.element("div").classes(
-        " w-full grow overflow-hidden"
-    ) as outter, ui.card().tight().classes(" py-4 h-full overflow-hidden"):
+def todo_list_panel(state: State):
+    with (
+        ui.element("div").classes(" w-full grow overflow-hidden") as outter,
+        ui.card().tight().classes(" py-4 h-full overflow-hidden"),
+    ):
         # header
         with ui.row():
             with ui.element("q-chip").props(
@@ -76,9 +87,9 @@ def todo_list_panel():
         with grid_box(template_columns="5fr 1fr auto", vertical="center").classes(
             "px-10 overflow-y-auto"
         ):
-            ui.label("List").classes("pl-2").on("dblclick", state.all_unchecks).tooltip(
-                "double click all uncheck"
-            ).tailwind.cursor("pointer").user_select("none")
+            ui.label("List").classes("pl-2 user-select-none cursor-pointer").on(
+                "dblclick", state.all_unchecks
+            ).tooltip("double click all uncheck")
             ui.label("Status").classes("place-self-center px-20")
             ui.label("Close").classes("place-self-center  px-10")
 
@@ -88,9 +99,11 @@ def todo_list_panel():
 
                 rxui.checkbox(lambda: todo.title.value, value=todo.completed)
 
-                with ui.element("q-chip").classes("w-fit place-self-center").props(
-                    "square clickable color=primary text-color=white"
-                ) as chip:
+                with (
+                    ui.element("q-chip")
+                    .classes("w-fit place-self-center")
+                    .props("square clickable color=primary text-color=white") as chip
+                ):
                     rxui.label(
                         lambda: "completed" if todo.completed.value else "pending"
                     )
@@ -108,14 +121,4 @@ def todo_list_panel():
     return outter
 
 
-with ui.card().classes("w-[50vw] self-center  overflow-hidden").style(
-    "height:calc(100vh - calc(var(--nicegui-default-padding) * 2));"
-):
-    ui.label("todo list").classes("text-h3 self-center bg-primary px-6 text-white")
-    rxui.linear_progress(state.completion_ratio)
-    job_panel()
-
-    todo_list_panel()
-
-
-ui.run()
+ui.run(root)
