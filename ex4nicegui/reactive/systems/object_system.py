@@ -8,14 +8,12 @@ from typing import (
 
 @runtime_checkable
 class GetItemProtocol(Protocol):
-    def __getitem__(self, key):
-        ...
+    def __getitem__(self, key): ...
 
 
 @runtime_checkable
 class SetItemProtocol(Protocol):
-    def __setitem__(self, key, value):
-        ...
+    def __setitem__(self, key, value): ...
 
 
 def get_attribute(obj: Union[object, GetItemProtocol], name: Union[str, int]) -> Any:

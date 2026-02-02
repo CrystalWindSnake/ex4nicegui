@@ -17,11 +17,9 @@ def _clamp(value, min_v, max_v) -> int:
 
 
 class _SourceProtocol(Protocol):
-    def __len__(self) -> int:
-        ...
+    def __len__(self) -> int: ...
 
-    def __getitem__(self, __idx: slice) -> Any:
-        ...
+    def __getitem__(self, __idx: slice) -> Any: ...
 
 
 class PaginationRef:

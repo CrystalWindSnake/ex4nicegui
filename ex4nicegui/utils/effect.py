@@ -47,8 +47,7 @@ def effect(
     priority_level=1,
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
-) -> signe.Effect[None]:
-    ...
+) -> signe.Effect[None]: ...
 
 
 def effect(

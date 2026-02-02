@@ -19,7 +19,7 @@ class NodeClickEventArguments(UiEventArguments):
 
 class Mermaid(  # type: ignore
     ContentElement,
-    component="mermaid.js",
+    component="ex4ng_mermaid.js",
     dependencies=dependencies,  # type: ignore
 ):
     CONTENT_PROP = "content"

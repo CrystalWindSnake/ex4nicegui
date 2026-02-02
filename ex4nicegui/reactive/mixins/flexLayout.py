@@ -13,11 +13,9 @@ class FlexWrapMixin(Protocol):
     _ui_signal_on: Callable[[Callable[..., Any]], signe.Effect[None]]
 
     @property
-    def element(self) -> ui.element:
-        ...
+    def element(self) -> ui.element: ...
 
-    def bind_style(self, classes) -> Self:
-        ...
+    def bind_style(self, classes) -> Self: ...
 
     def bind_wrap(self, value: TMaybeRef[bool]) -> Self:
         return self.bind_style(
@@ -35,11 +33,9 @@ class FlexAlignItemsMixin(Protocol):
     _ui_signal_on: Callable[[Callable[..., Any]], signe.Effect[None]]
 
     @property
-    def element(self) -> ui.element:
-        ...
+    def element(self) -> ui.element: ...
 
-    def bind_classes(self, classes) -> Self:
-        ...
+    def bind_classes(self, classes) -> Self: ...
 
     def bind_align_items(self, value: TMaybeRef[str]):
         return self.bind_classes(lambda: f"items-{to_value(value)}")
