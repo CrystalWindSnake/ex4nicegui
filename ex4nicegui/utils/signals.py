@@ -1,5 +1,4 @@
 from datetime import date, datetime
-import inspect
 import signe
 from signe.core.scope import Scope
 from .clientScope import _CLIENT_SCOPE_MANAGER
@@ -14,19 +13,18 @@ from typing import (
     Union,
     Sequence,
 )
-from nicegui import ui
-from nicegui.functions.refreshable import RefreshableContainer
-from .effect import effect
 from .scheduler import get_uiScheduler
+from .effect import effect  # noqa: F401
 from .types import (
     _TMaybeRef,
     TGetterOrReadonlyRef,
-    Ref,
+    Ref,  # noqa: F401
     TReadonlyRef,  # noqa: F401
     TRef,  # noqa: F401
     DescReadonlyRef,  # noqa: F401
     _TMaybeRef as TMaybeRef,  # noqa: F401
 )
+
 from .refWrapper import RefWrapper, to_ref_wrapper  # noqa: F401
 from .refComputed import ref_computed  # noqa: F401
 from ex4nicegui.utils.proxy import (
@@ -137,88 +135,6 @@ def deep_ref(value: T) -> Ref[T]:
 
     """
     return to_ref(value, is_deep=True)
-
-
-_T_effect_refreshable_refs = Union[
-    TGetterOrReadonlyRef,
-    RefWrapper,
-    Sequence[TGetterOrReadonlyRef],
-    _TMaybeRef,
-    Sequence[_TMaybeRef],
-]
-
-
-class effect_refreshable:
-    def __init__(self, fn: Callable, refs: _T_effect_refreshable_refs = []) -> None:
-        self._fn = fn
-
-        refs = to_ref_if_base_type_proxy(refs)
-
-        if isinstance(refs, Sequence):
-            ref_arg = [ref for ref in refs if self._is_valid_ref(ref)]
-        else:
-            ref_arg = [refs] if self._is_valid_ref(refs) else []
-
-        self._refs = ref_arg
-        self()
-
-    @classmethod
-    def _is_valid_ref(cls, ref):
-        return is_ref(ref) or isinstance(ref, Callable)
-
-    @staticmethod
-    def on(refs: _T_effect_refreshable_refs):
-        def warp(
-            fn: Callable,
-        ):
-            if inspect.iscoroutinefunction(fn):
-                return async_effect_refreshable(refs)(fn)
-
-            return effect_refreshable(fn, refs)
-
-        return warp
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        re_func = ui.refreshable(self._fn)
-
-        first = True
-
-        def runner():
-            nonlocal first
-            if first:
-                re_func()
-                first = False
-                return
-
-            re_func.refresh()
-
-        if len(self._refs) == 0:
-            runner = effect(runner)
-        else:
-            runner = on(self._refs)(runner)  # type: ignore
-
-        return runner
-
-
-def async_effect_refreshable(source: _T_effect_refreshable_refs):
-    def wrapper(fn: Callable[[], Any]):
-        @on(source, onchanges=False)
-        async def on_source_changed():
-            with temp_box:
-                await fn()
-
-            container.clear()
-
-            for child in list(temp_box):
-                child.move(container)
-
-            temp_box.clear()
-
-        # 临时容器做中转，避免异步等待时，页面内容空白的问题
-        temp_box = RefreshableContainer()
-        container = RefreshableContainer()
-
-    return wrapper
 
 
 def on(

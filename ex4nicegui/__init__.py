@@ -8,8 +8,6 @@ from ex4nicegui.utils.types import (
 )
 from ex4nicegui.utils.scheduler import next_tick
 from ex4nicegui.utils.signals import (
-    effect,
-    effect_refreshable,
     to_raw,
     is_ref,
     to_ref,
@@ -23,6 +21,7 @@ from ex4nicegui.utils.signals import (
     batch,
     is_reactive,
 )
+from ex4nicegui.utils.refreshable import effect, effect_refreshable
 from ex4nicegui.utils.asyncComputed import async_computed
 from ex4nicegui.utils.clientScope import new_scope
 from ex4nicegui.reactive.EChartsComponent.ECharts import reset_echarts_dependencies
