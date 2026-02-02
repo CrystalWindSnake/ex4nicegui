@@ -6,7 +6,7 @@ import threading
 from typing import Union
 from playwright.sync_api import Browser, Page, Locator, expect
 from nicegui import ui, app
-from nicegui.testing.general_fixtures import prepare_simulation
+from nicegui.testing.general import prepare_simulation
 from nicegui.server import Server
 from . import utils
 from . import common
