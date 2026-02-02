@@ -2,23 +2,16 @@ import pytest
 from playwright.sync_api import Playwright
 from .screen import ServerManager
 import os
-from nicegui import Client, app, core
+from nicegui.testing import general
 
 HEADLESS = "GITHUB_ACTION" in os.environ
 
 
-@pytest.fixture(autouse=True)
-def reset_globals(request: pytest.FixtureRequest):
-    if "noautofixt" in request.keywords:
-        return
-
-    app.openapi_schema = None
-    app.middleware_stack = None
-    app.user_middleware.clear()
-    app.urls.clear()
-    core.air = None
-    Client.instances.clear()
-    Client.page_routes.clear()
+@pytest.fixture
+def nicegui_reset_globals():
+    """Reset the global state of the NiceGUI package."""
+    with general.nicegui_reset_globals():
+        yield
 
 
 @pytest.fixture(scope="session")
