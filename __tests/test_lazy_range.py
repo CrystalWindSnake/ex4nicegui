@@ -82,7 +82,6 @@ def test_on_change_event(browser: BrowserManager, page_path: str):
     label.expect_equal_text("{'min': 8, 'max': 100}")
 
 
-
 def test_on_update_event(browser: BrowserManager, page_path: str):
     r_value = to_ref(
         {

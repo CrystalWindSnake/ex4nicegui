@@ -479,9 +479,11 @@ class TestScopedStyle:
             style1 = r"background-color: blue;"
             style2 = r"border: 1px solid red;"
 
-            with rxui.row().scoped_style(":hover > *", style1).scoped_style(
-                ".target", style2
-            ) as row:
+            with (
+                rxui.row()
+                .scoped_style(":hover > *", style1)
+                .scoped_style(".target", style2) as row
+            ):
                 ui.label("Hello").classes("target")
 
             result = ui.label("").classes("result")

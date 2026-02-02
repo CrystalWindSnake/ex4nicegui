@@ -52,8 +52,7 @@ def ui_effect(
     debug_trigger: Optional[Callable] = None,
     debug_name: Optional[str] = None,
     scope: Optional[Scope] = None,
-) -> signe.Effect[None]:
-    ...
+) -> signe.Effect[None]: ...
 
 
 def ui_effect(

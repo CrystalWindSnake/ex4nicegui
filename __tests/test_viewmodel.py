@@ -584,7 +584,7 @@ class TestWithImplicit:
             @abstractmethod
             def render(self): ...
 
-        ItemViewModel = TypeVar('ItemViewModel', bound=ViewModel)
+        ItemViewModel = TypeVar("ItemViewModel", bound=ViewModel)
 
         class ListViewModel(ViewModel, Generic[ItemViewModel]):
             labels: List[ItemViewModel] = []
@@ -610,23 +610,19 @@ class TestWithImplicit:
             @rxui.cached_var
             def get_text(self):
                 i18n = {
-                    'hello': {
-                        'en': 'Hello',
-                        'zh': '你好',
+                    "hello": {
+                        "en": "Hello",
+                        "zh": "你好",
                     },
-                    'contact': {
-                        'en': 'Contact Us',
-                        'zh': '联系我们'
-                    }
+                    "contact": {"en": "Contact Us", "zh": "联系我们"},
                 }
 
                 return i18n.get(self.label).get(self.lang)
 
             def render(self):
-                rxui.label(self.get_text).classes(f'label-{self.label}')
+                rxui.label(self.get_text).classes(f"label-{self.label}")
 
         class I18nListViewModel(ListViewModel[I18nLabelViewModel]):
-
             def __init__(self, labels, lang):
                 super().__init__()
                 self.lang = lang
@@ -643,13 +639,14 @@ class TestWithImplicit:
                     label.lang = lang
 
             def toggle(self):
-                if self.lang == 'en':
-                    self.set_lang('zh')
-                elif self.lang == 'zh':
-                    self.set_lang('en')
+                if self.lang == "en":
+                    self.set_lang("zh")
+                elif self.lang == "zh":
+                    self.set_lang("en")
 
             def render(self):
                 with ui.column():
+
                     @effect_refreshable.on(self.labels)
                     def _():
                         for label in self.labels:
@@ -657,14 +654,16 @@ class TestWithImplicit:
 
         @ui.page(page_path)
         def _():
-            lst = I18nListViewModel(['hello', 'contact'], 'en')
+            lst = I18nListViewModel(["hello", "contact"], "en")
             lst.render()
-            ui.button('Toggle Language').on_click(lst.toggle).classes('btn-toggle-language')
+            ui.button("Toggle Language").on_click(lst.toggle).classes(
+                "btn-toggle-language"
+            )
 
         page = browser.open(page_path)
-        label_hello = page.Label('.label-hello')
-        label_contact = page.Label('.label-contact')
-        btn_toggle_lang = page.Button('.btn-toggle-language')
+        label_hello = page.Label(".label-hello")
+        label_contact = page.Label(".label-contact")
+        btn_toggle_lang = page.Button(".btn-toggle-language")
 
         label_hello.expect_equal_text("Hello")
         label_contact.expect_equal_text("Contact Us")
@@ -731,11 +730,16 @@ class TestWithImplicitEnd2End:
         def _():
             # components
             def create_person_card(home: Home, person: Person, index: int):
-                with rxui.card().classes("outline").bind_classes(
-                    {
-                        "outline-red-500": lambda: person.age > home.avg_age(),
-                    }
-                ).classes(f"person-card-{index}"):
+                with (
+                    rxui.card()
+                    .classes("outline")
+                    .bind_classes(
+                        {
+                            "outline-red-500": lambda: person.age > home.avg_age(),
+                        }
+                    )
+                    .classes(f"person-card-{index}")
+                ):
                     rxui.input(value=person.name, placeholder="名字").classes(
                         f"input-name-{index}"
                     )

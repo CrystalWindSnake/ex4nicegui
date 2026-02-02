@@ -10,8 +10,7 @@ class ValueElementMixin(Protocol, Generic[T]):
     _ui_signal_on: Callable[[Callable[..., Any]], signe.Effect[None]]
 
     @property
-    def element(self) -> ValueElement:
-        ...
+    def element(self) -> ValueElement: ...
 
     def bind_value(self, value: TMaybeRef[T]):
         @self._ui_signal_on(value)  # type: ignore

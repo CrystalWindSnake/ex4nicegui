@@ -140,7 +140,7 @@ class EChartsBindableUi(BindableUi[echarts]):
         const value = {{
             src: '{src}',
             type: '{type}',
-            specialAreas: {json.dumps(special_areas).decode('utf-8')}
+            specialAreas: {json.dumps(special_areas).decode("utf-8")}
         }}
 
         window.ex4ngEchartsMapTasks.set('{map_name}', value);

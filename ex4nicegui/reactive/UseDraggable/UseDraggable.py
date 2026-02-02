@@ -125,9 +125,9 @@ class UseDraggable(Element, component="UseDraggable.js"):
         self.on("update", inner_handler, args=_Update_Args)
 
     def apply(self, target: Element):
-        assert (
-            self.__target_id is None
-        ), "draggable can only be applied to one current element"
+        assert self.__target_id is None, (
+            "draggable can only be applied to one current element"
+        )
         self.__target_id = target.id
         self._props["elementId"] = self.__target_id
         # self.run_method("applyTargetId", str(self.__target_id))

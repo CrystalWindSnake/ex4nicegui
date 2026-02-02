@@ -64,8 +64,7 @@ def ref_computed(
     debug_trigger: Optional[Callable[..., None]] = None,
     priority_level: int = 1,
     debug_name: Optional[str] = None,
-) -> Callable[[Callable[..., T]], ReadonlyRef[T]]:
-    ...
+) -> Callable[[Callable[..., T]], ReadonlyRef[T]]: ...
 
 
 def ref_computed(

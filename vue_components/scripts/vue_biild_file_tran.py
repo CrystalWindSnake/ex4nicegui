@@ -9,7 +9,7 @@ FILE_MAPPING = {
     "UseMouse": "reactive/UseMouse/UseMouse.js",
     "DropZone": "reactive/DropZone/DropZone.js",
     "GridFlex": "layout/gridFlex/GridFlex.js",
-    'VueUse': 'toolbox/core/VueUse.js',
+    "VueUse": "toolbox/core/VueUse.js",
 }
 
 EX_REACTIVE_DIR_ROOT = Path(__file__).parent.parent.parent / "ex4nicegui"
@@ -18,6 +18,7 @@ DIST_ROOT = Path(__file__).parent.parent / "dist"
 
 
 RE_import_stm = re.compile(r"""import(.+)from\s+["|']vue["|']""")
+
 
 def tran_vue_imports(js_file_name_without_ex: str):
     """把vite生成的js组件文件中的 improt {getCurrentScope as kL,..} from 'vue'
@@ -68,6 +69,7 @@ def extract_vue_imports(lines: List[str]):
             return i, const_stms
 
     return None, None
+
 
 def copy2styls(src, to_file):
     src = Path(src)
