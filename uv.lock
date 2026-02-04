@@ -356,7 +356,7 @@ wheels = [
 
 [[package]]
 name = "ex4nicegui"
-version = "0.9.1"
+version = "0.9.2"
 source = { editable = "." }
 dependencies = [
     { name = "executing" },
@@ -383,7 +383,7 @@ lint = [
 [package.metadata]
 requires-dist = [
     { name = "executing", specifier = "~=2.0.1" },
-    { name = "nicegui", specifier = "~=3.5.0" },
+    { name = "nicegui", specifier = "~=3.5" },
     { name = "signe", specifier = "~=0.4.22" },
 ]
 

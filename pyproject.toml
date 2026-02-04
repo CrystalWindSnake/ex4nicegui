@@ -1,6 +1,6 @@
 [project]
 name = "ex4nicegui"
-version = "0.9.1"
+version = "0.9.2"
 description = "Extension library based on nicegui, providing data responsive,BI functionality modules."
 keywords = ["ui", "gui", "web","nicegui", "ex4nicegui", "webui"]
 Repository = "https://github.com/CrystalWindSnake/ex4nicegui"
@@ -13,7 +13,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 
 dependencies = [
-    "nicegui~=3.5.0",
+    "nicegui~=3.5",
     "signe~=0.4.22",
     "executing~=2.0.1",
 ]
