@@ -1,6 +1,6 @@
 [project]
 name = "ex4nicegui"
-version = "0.9.2"
+version = "0.9.3"
 description = "Extension library based on nicegui, providing data responsive,BI functionality modules."
 keywords = ["ui", "gui", "web","nicegui", "ex4nicegui", "webui"]
 Repository = "https://github.com/CrystalWindSnake/ex4nicegui"
