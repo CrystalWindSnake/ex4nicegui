@@ -37,5 +37,5 @@ runs:
       shell: bash
 
     - name: Project deps
-      run: uv sync --dev --no-sources
+      run: uv sync --dev --no-sources --upgrade-package nicegui
       shell: bash
